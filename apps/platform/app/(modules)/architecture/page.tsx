@@ -24,7 +24,6 @@ import { Icons } from "@/components/icons";
 import { getArchitectureCourses } from "@/lib/data/get-architecture-courses";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
-import { getInternalArchitectureCourses } from "@/lib/data/get-internal-architecture-courses";
 
 type Course = {
   title: string;
@@ -41,7 +40,6 @@ type Course = {
 
 export default function ArchitecturePage() {
   const architectureCourses = getArchitectureCourses();
-  const internalArchitectureCourses = getInternalArchitectureCourses();
   const [selectedFramework, setSelectedFramework] = useState<string>("All");
   const [selectedProject, setSelectedProject] = useState<string>("All");
 
@@ -133,20 +131,6 @@ export default function ArchitecturePage() {
           <Item courses={architectureCourses} />
         </div>
         <Separator />
-        <div>
-          <h1
-            className="text-lg font-bold leading-tight tracking-tighter md:text-xl lg:leading-[1.1]"
-          >
-            Our Internal Codebase Architecture
-          </h1>
-          <p>We use these internal codebase architecture guides to provide client services with quality and speed and also use these best practices in building our internal products to streamline our business.</p>
-        </div>
-        <div 
-          id="internal-codebase-architecture"
-          className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 lg:grid-cols-3">
-          
-            <Item courses={internalArchitectureCourses} />
-        </div>
       </div>
     </div>
   );

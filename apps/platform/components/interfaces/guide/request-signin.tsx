@@ -11,7 +11,7 @@ export default function RequestSignin() {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          By logging in, you'll be able to:
+          By logging in, you&apos;ll be able to:
         </p>
         <ul className="list-disc list-inside text-sm text-muted-foreground mt-2">
           <li>Start your learning journey</li>

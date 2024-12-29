@@ -4,23 +4,23 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { Globe } from 'lucide-react'
 import Link from "next/link"
+import { siteConfig } from "@/config/site"
 
 export default function ServicesPromo() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        {/* <Globe className="w-12 h-12 mx-auto mb-4 text-primary" /> */}
-        <CardTitle className="text-2xl font-bold">Learn the large codebase architecture</CardTitle>
-        <CardDescription>Our courses are inspired by Open Source projects</CardDescription>
+        <CardTitle className="text-2xl font-bold">Learn from Open Source projects</CardTitle>
+        <CardDescription>Best practices used in open-source are explained, compared among multiple projects.</CardDescription>
       </CardHeader>
       <CardContent className="text-center">
         <p className="text-muted-foreground">
-          We provide critical review of features in multiple Open Source projects so you can learn different techniques and practices.
+          Study the codebase architecture and level up your skills.
         </p>
       </CardContent>
       <CardFooter className="flex justify-center">
-        <Button className="w-full max-w-xs">
-          <Link href={"/best-practices"}>Start learning for free</Link>
+        <Button className="w-full max-w-xs" >
+          <Link href={siteConfig.links.learningPlatform} target="_blank">Get Started For Free</Link>
         </Button>
       </CardFooter>
     </Card>

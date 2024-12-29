@@ -11,10 +11,6 @@ const architecture = [
   {
     name: "Open Source Projects",
     href: "#open-source-projects"
-  },
-  {
-    name: "Internal Codebase Architecture",
-    href: "#internal-codebase-architecture"
   }
 ];
 

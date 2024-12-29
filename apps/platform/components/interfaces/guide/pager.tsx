@@ -47,9 +47,7 @@ export function getPagerForDoc(doc: Doc, pathname: string) {
   // since this is used in Page.tsx which is a server component, params are without "guide" prefix
   // hence "guide" prefix is needed, Need to make sure to update "guides" in the future releases.
   const nav = getSidenavConfig("/guide/"+pathname)
-  console.log("nav", nav, "pathname", pathname);
   const flattenedLinks = [null, ...flatten(nav), null]
-  console.log("flattenedLinks", flattenedLinks, "doc.slug", doc.slug);
   const activeIndex = flattenedLinks.findIndex(
     (link) => doc.slug === link?.href
   )
