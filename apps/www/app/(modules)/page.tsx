@@ -13,93 +13,26 @@ export default function RootPage() {
   return (
     <div className="container relative">
       <PageHeader>
-        <PageHeaderHeading>Design. Build. Ship.</PageHeaderHeading>
+        <PageHeaderHeading>Learn from Open Source projects</PageHeaderHeading>
         <PageHeaderDescription>
-          We are experts at Next.js, React and Node.js. Whether you are starting from scratch and want to test your idea or 
-          need a bespoke web system for your business, we bring experience and best practices to ship digital products with quality and speed.   
+          Hey, my name is <a href="https://ramunarasinga.com" className="underline">Ramu Narasinga</a>. 
+          I study large open-source projects and provide a detailed codebase architecture of Shadcn/ui, LobeChat. I created this learning platform to compare the feature implementation in 
+          OSS projects against documentation and share the best practices found in OSS so you can learn advanced 
+          techniques and unique coding patterns.
         </PageHeaderDescription>
-        <PageHeaderDescription>
-          We analyse large open-source projects and provide free codebase architecture and are committed to open-source and innovation.
-        </PageHeaderDescription>
+        
         <PageActions>
           <Button asChild size="sm">
             <Link
               target="_blank"
               rel="noreferrer"
-              href={siteConfig.links.consultation}
+              href={siteConfig.links.learningPlatform}
             >
-              Book a meeting
+              Get Started For Free
             </Link>
           </Button>
         </PageActions>
       </PageHeader>
-
-      <div className="bg-white py-2">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <h2 className="text-center text-lg font-semibold leading-8 text-gray-900 pb-6 lg:pb-8">
-            Our Tech Stack
-          </h2>
-          <div className="relative pb-6 lg:pb-8">
-            <div
-              dir="ltr"
-              className="relative overflow-hidden max-w-[600px] lg:max-w-none"
-            >
-              <div
-                data-radix-scroll-area-viewport=""
-                className="h-full w-full rounded-[inherit]"
-                style={{"overflow": "scroll;"}}
-              >
-                <div style={{"minWidth": "100%", "display": "table"}}>
-                  <div className="mb-4 flex gap-4 items-center justify-center">
-                    <a
-                      className="flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors hover:text-primary bg-muted font-medium text-primary"
-                      href="/"
-                    >
-                      Next.js
-                    </a>
-                    <a
-                      className="flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors hover:text-primary bg-muted font-medium text-primary"
-                      href="/examples/cards"
-                    >
-                      React
-                    </a>
-                    <a
-                      className="flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors hover:text-primary bg-muted font-medium text-primary"
-                      href="/examples/cards"
-                    >
-                      Node.js
-                    </a>
-                    <a
-                      className="flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors hover:text-primary bg-muted font-medium text-primary"
-                      href="/examples/cards"
-                    >
-                      Drizzle
-                    </a>
-                    <a
-                      className="flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors hover:text-primary bg-muted font-medium text-primary"
-                      href="/examples/cards"
-                    >
-                      Supabase
-                    </a>
-                    <a
-                      className="flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors hover:text-primary bg-muted font-medium text-primary"
-                      href="/examples/cards"
-                    >
-                      Tailwind CSS
-                    </a>
-                    <a
-                      className="flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors hover:text-primary bg-muted font-medium text-primary"
-                      href="/examples/cards"
-                    >
-                      Shadcn/ui
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div className="ring-gray-900/10 ring-inset custom-ring p-2 bg-gray-900/5 rounded-lg -m-2">
         <Link href="https://app.thinkthroo.com/architecture" target="_blank">
@@ -113,59 +46,8 @@ export default function RootPage() {
         </Link>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 md:pb-10 lg:py-14 lg:pb-10 mt-24">
-        {/* <div className="lg:grid-cols-5 lg:max-w-none lg:mx-0 sm:row-gap-14 sm:gap-x-10 sm:grid-cols-6 sm:max-w-3xl gap-y-12 gap-x-8 items-center grid-cols-4 max-w-lg grid mx-auto">
-          <Image
-            alt="Transistor"
-            src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-            width="158"
-            height="48"
-            className="object-contain w-full max-h-12 col-span-2 lg:col-span-1"
-          />
-          <Image
-            alt="Reform"
-            src="https://tailwindui.com/img/logos/158x48/reform-logo-gray-900.svg"
-            width="158"
-            height="48"
-            className="object-contain w-full max-h-12 col-span-2 lg:col-span-1"
-          />
-          <Image
-            alt="Tuple"
-            src="https://tailwindui.com/img/logos/158x48/tuple-logo-gray-900.svg"
-            width="158"
-            height="48"
-            className="object-contain w-full max-h-12 col-span-2 lg:col-span-1"
-          />
-          <Image
-            alt="SavvyCal"
-            src="https://tailwindui.com/img/logos/158x48/savvycal-logo-gray-900.svg"
-            width="158"
-            height="48"
-            className="object-contain w-full max-h-12 col-span-2 lg:col-span-1"
-          />
-          <Image
-            alt="Statamic"
-            src="https://tailwindui.com/img/logos/158x48/statamic-logo-gray-900.svg"
-            width="158"
-            height="48"
-            className="object-contain w-full max-h-12 col-span-2 lg:col-span-1"
-          />
-        </div> */}
-        <div className="justify-center flex mt-16">
-          <div className="ring-1 ring-gray-900/10 ring-inset shadow-sm text-gray-600 leading-6 text-sm leading-5 py-1.5 px-4 rounded-full relative">
-            <span className="hidden md:inline">
-              We improved our code quality referencing open-source.
-            </span>
-            <a href="#" className="text-black font-semibold">
-              <span aria-hidden="true" className="absolute inset-0"></span> Read
-              our case study <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
       <div className="lg:px-8 px-6 max-w-7xl mt-24 mx-auto">
-        <div className="max-w-xl mx-auto">
+        <div className="mx-auto">
           <h2 className="text-black font-semibold text-base leading-6">
             Build a maintainable codebase
           </h2>
@@ -177,7 +59,7 @@ export default function RootPage() {
             follow the best practices.
           </p>
         </div>
-        <div className="mt-16 max-w-xl mt-16 mx-auto">
+        <div className="mt-16 mt-16 mx-auto">
           <dl className="grid gap-10 sm:gap-10 sm:col-gap-8 max-w-lg md:grid-cols-2 md:max-w-none">
             <Link
               href="https://app.thinkthroo.com/architecture"

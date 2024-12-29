@@ -42,7 +42,8 @@ export function MainNav() {
           Components
         </Link>
         <Link
-          href="/codebase-architecture"
+          href="https://app.thinkthroo.com/architecture"
+          target="_blank"
           className={cn(
             "transition-colors hover:text-foreground/80",
             pathname?.startsWith("/architecture")
@@ -53,10 +54,10 @@ export function MainNav() {
           Codebase Architecture
         </Link>
         <Link
-          href="/codebase-architecture"
+          href="/open-source"
           className={cn(
             "transition-colors hover:text-foreground/80",
-            pathname?.startsWith("/architecture")
+            pathname?.startsWith("/open-source")
               ? "text-foreground"
               : "text-foreground/60"
           )}
@@ -71,81 +72,17 @@ export function MainNav() {
                   "transition-colors hover:text-foreground/80 text-foreground/60 font-normal bg-transparent"
                 )}
               >
-                Services
-              </NavigationMenuTrigger>
-              <NavigationMenuContent className="px-4 py-2 ">
-                <Link href="/web-development" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Next.js Development
-                  </NavigationMenuLink>
-                </Link>
-                <Link href="/technical-writing" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    React Development
-                  </NavigationMenuLink>
-                </Link>
-                <Link href="/technical-writing" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Node.js Development
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger
-                className={cn(
-                  "transition-colors hover:text-foreground/80 text-foreground/60 font-normal bg-transparent"
-                )}
-              >
                 Products
               </NavigationMenuTrigger>
               <NavigationMenuContent className="px-4 py-2 ">
-                <Link href="/web-development" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    Invoice
-                  </NavigationMenuLink>
-                </Link>
-                <Link href="/web-development" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    CRM
-                  </NavigationMenuLink>
-                </Link>
-                <Link href="/web-development" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    Next Post
-                  </NavigationMenuLink>
-                </Link>
-                <Link href="/web-development" legacyBehavior passHref>
+                <Link href="https://github.com/ramu-narasinga/animate-code" target="_blank">
                   <NavigationMenuLink
                     className={navigationMenuTriggerStyle()}
                   >
                     Animate Code
                   </NavigationMenuLink>
                 </Link>
-                <Link href="/web-development" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    Digital Signature
-                  </NavigationMenuLink>
-                </Link>
-                <Link href="/web-development" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    Email Builder
-                  </NavigationMenuLink>
-                </Link>
+                
               </NavigationMenuContent>
             </NavigationMenuItem>
           </NavigationMenuList>

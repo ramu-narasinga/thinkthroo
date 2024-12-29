@@ -21,17 +21,6 @@ export default function Page() {
         <PageHeaderDescription>
           Copy and paste these reusable components into your project.
         </PageHeaderDescription>
-        <PageActions>
-          <Button asChild size="sm">
-            <Link
-              target="_blank"
-              rel="noreferrer"
-              href={siteConfig.links.consultation}
-            >
-              Book a meeting
-            </Link>
-          </Button>
-        </PageActions>
       </PageHeader>
       <div className="grid gap-4">
         <div className="gap-6 md:flex md:flex-row-reverse md:items-start">
