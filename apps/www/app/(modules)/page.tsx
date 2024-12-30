@@ -13,7 +13,7 @@ export default function RootPage() {
   return (
     <div className="container relative">
       <PageHeader>
-        <PageHeaderHeading>Learn from Open Source projects</PageHeaderHeading>
+        <PageHeaderHeading>Insights from Open Source projects</PageHeaderHeading>
         <PageHeaderDescription>
           Hey, my name is <a href="https://ramunarasinga.com" className="underline">Ramu Narasinga</a>. 
           I study large open-source projects and provide a detailed codebase architecture of Shadcn/ui, LobeChat. I created this learning platform to compare the feature implementation in 

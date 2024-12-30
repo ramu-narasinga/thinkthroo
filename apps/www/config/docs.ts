@@ -41,6 +41,11 @@ export const docsConfig: DocsConfig = {
       title: "December, 2024",
       items: [
         {
+          title: "Custom schema specific Supabase Server...",
+          href: "/blog/grida-custom-schema-server-client",
+          items: []
+        },
+        {
           title: "Here's how next-runtime- ...",
           href: "/blog/next-runtime-env-regex-test",
           items: []

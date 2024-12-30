@@ -1,0 +1,213 @@
+---
+title: Custom schema specific Supabase Server Component clients in Grida Form workspace
+toc: true
+---
+
+In this article, we review the code in [server.ts](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L17) in Grida. Well, what’s so special about this file? let’s find out.
+
+![](https://miro.medium.com/v2/resize:fit:875/1*XZ1SgtGtKbE0wQ2lfxILWA.png)
+
+# **Server Component Client**
+
+Before we look at [Grida Forms server.ts](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L17), Let’s first understand what a Server Component Client means.
+
+In the [Supabase Auth guides](https://supabase.com/docs/guides/auth/server-side/nextjs?queryGroups=router&router=app), at step 3, you will find the information about Server Component Client and it has the below code.
+
+```javascript
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function createClient() {
+  const cookieStore = await cookies()
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  )
+}
+```
+
+> *Server Component client — To access Supabase from Server Components, Server Actions, and Route Handlers, which run only on the server.*
+
+So far, I have reviewed Supabase Server Component Client in Nextjs-Subscription-Payments example and Midday.ai but I have never seen multiple Server components clients defined in the same file like in [Grida Form server.ts](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L17)
+
+# **Grida Form server.ts**
+
+[Grida Form server.ts](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L17) has multiple Server Component clients defined.
+
+## **workspace client**
+
+At [line 7](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L7C1-L15C3), you will find the below code:
+
+```javascript
+export const workspaceclient = createClient<Database, "public">(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!,
+  {
+    db: {
+      schema: "public",
+    },
+  }
+);
+```
+
+## **Grida Forms Client**
+
+At [line 17](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L17C1-L25C3), you will find the below code:
+
+```javascript
+export const grida_forms_client = createClient<Database, "grida_forms">(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!,
+  {
+    db: {
+      schema: "grida_forms",
+    },
+  }
+);
+```
+
+## **Grida Sites Client**
+
+At [line 27](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L27C1-L35C3), you will find this below code:
+
+```javascript
+export const grida_sites_client = createClient<Database, "grida_sites">(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!,
+  {
+    db: {
+      schema: "grida_sites",
+    },
+  }
+);
+```
+
+## **Grida Commerce Client**
+
+At [line 37](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L37C1-L46C1), you will find the below code:
+
+```javascript
+export const grida_commerce_client = createClient<Database, "grida_commerce">(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!,
+  {
+    db: {
+      schema: "grida_commerce",
+    },
+  }
+);
+```
+
+## **Grida XSupabase Client**
+
+At [line 47](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L47C1-L54C4), you will find the below code:
+
+```javascript
+export const grida_xsupabase_client = createClient<
+  Database,
+  "grida_x_supabase"
+>(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!, {
+  db: {
+    schema: "grida_x_supabase",
+  },
+});
+```
+
+All these clients are located in a single file — [grida/apps/forms/lib/supabase/server.ts](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L47C1-L54C4)
+
+# **createClient imported**
+
+At [line 4 in server.ts](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L4), you will find the below import
+
+```javascript
+import { createClient } from "@supabase/supabase-js";
+```
+
+But is this same as what is provided in the Supabase Auth Documentation? Nope. You will find the below import in Supabase Auth Docs.
+
+```javascript
+import { createServerClient } from '@supabase/ssr'
+```
+
+Wait, so Supabase Auth Docs tells us to use [`@supabase/ssr`](http://twitter.com/supabase/ssr) and Grida Forms workspace uses [`@supabase/supabase-js`](http://twitter.com/supabase/supabase-js). Do you know why?
+
+In order to configure your Supabase client with a custom schema, you will have to use [@supabase/supabase-js](http://twitter.com/supabase/supabase-js). [Using Custom Schema Guide](https://supabase.com/docs/guides/api/using-custom-schemas) has the following example code snippet provided:
+
+```javascript
+// Initialize the JS client
+import { createClient } from '@supabase/supabase-js'
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: 'myschema' } })
+// Make a request
+const { data: todos, error } = await supabase.from('todos').select('*')
+// You can also change the target schema on a per-query basis
+const { data: todos, error } = await supabase.schema('myschema').from('todos').select('*')
+```
+
+You will find the clients in Grida Form server.ts have the same syntax for defining the db schema.
+
+# **About me:**
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **About me:**
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L17](https://github.com/gridaco/grida/blob/main/apps/forms/lib/supabase/server.ts#L17)
+    
+2. [https://supabase.com/docs/guides/auth/server-side/nextjs?queryGroups=router&router=app](https://supabase.com/docs/guides/auth/server-side/nextjs?queryGroups=router&router=app)
+    
+3. [https://supabase.com/docs/guides/api/using-custom-schemas](https://supabase.com/docs/guides/api/using-custom-schemas)
