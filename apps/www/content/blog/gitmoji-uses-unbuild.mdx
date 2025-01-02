@@ -1,0 +1,159 @@
+---
+title: Gitmoji uses unbuild to bundle its package
+toc: true
+---
+
+In this article, we review how Gitmoji uses unbuild to bundle its package. The following concepts are discussed:
+
+* What is Gitmoji?
+    
+* How I came across Gitmoji?
+    
+* What is unbuild?
+    
+* unbuild configuration in Gitmoji package
+    
+
+### What is Gitmoji?
+
+Gitmoji is an emoji guide for GitHub commit messages. Aims to be a standarization cheatsheet - guide for using emojis on GitHub’s commit messages.
+
+Using emojis on commit messages provides an easy way of identifying the purpose or intention of a commit with only looking at the emojis used.
+
+Read more about [Gitmoji](https://gitmoji.dev/about).
+
+### How I came across Gitmoji?
+
+I read open-source code a lot and share the insights via this articles. I saw emojis in [Lobechat commit history](https://github.com/lobehub/lobe-chat).
+
+![](https://cdn-images-1.medium.com/max/1600/1*mdbm3Qp2yNOAMmm5u_YQMw.png)
+
+It got me thinking why is there an emoji in a commit message? for example, the following are commit messages copied from [Lobechat](https://github.com/lobehub/lobe-chat).
+
+```js
+🐛 fix: remove orphan chunks if there is no related file
+✨ feat: support TTS & STT
+📝 docs: update docs
+```
+
+And then I recalled a [mention of Gitmoji in the Lobechat contribution](https://github.com/lobehub/lobe-chat/blob/0533150f586e0c0c00b61dcb2f1cc4df9860993f/contributing/Basic/Intro.md?plain=1#L89)
+
+### What is unbuild?
+
+[unbuild](https://github.com/unjs/unbuild) is a unified JavaScript build system. Features include
+
+* [Optimized bundler](https://github.com/unjs/unbuild?tab=readme-ov-file#-optimized-bundler)
+    
+* [Automated config](https://github.com/unjs/unbuild?tab=readme-ov-file#-automated-config)
+    
+* [Bundleless build](https://github.com/unjs/unbuild?tab=readme-ov-file#-automated-config)
+    
+* [Passive watcher](https://github.com/unjs/unbuild?tab=readme-ov-file#-passive-watcher)
+    
+* [Untype Generator](https://github.com/unjs/unbuild?tab=readme-ov-file#-untype-generator)
+    
+* [Secure builds](https://github.com/unjs/unbuild?tab=readme-ov-file#%EF%B8%8F-secure-builds)
+    
+
+Read more about [unbuild](https://github.com/unjs/unbuild).
+
+#### Usage
+
+Unbuild usage is quite straightforward. You create your files inside src/index.ts. The below code is picked from [docs](https://github.com/unjs/unbuild?tab=readme-ov-file#usage).
+
+```js
+// inside src/index.ts
+export const log = (…args) => {
+ console.log(…args);
+};
+```
+
+Next step is to update package.json as shown below:
+
+```js
+{
+ "type": "module",
+ "scripts": {
+ "build": "unbuild",
+ "prepack": "unbuild"
+ },
+ "exports": {
+ ".": {
+ "import": "./dist/index.mjs",
+ "require": "./dist/index.cjs"
+ }
+ },
+ "main": "./dist/index.cjs",
+ "types": "./dist/index.d.ts",
+ "files": ["dist"]
+}
+```
+
+You can configure unbuild to meet your needs. Read more about [configuration](https://github.com/unjs/unbuild?tab=readme-ov-file#configuration).
+
+### unbuild configuration in Gitmoji package
+
+Based on the usage described above, Gitmoji has the same unbuild setup, the below is the [Gitmoji package.json](https://github.com/carloscuesta/gitmoji/blob/master/packages/gitmojis/package.json)
+
+```js
+{
+  "name": "gitmojis",
+  "type": "module",
+  "version": "3.14.0",
+  "description": "An emoji guide for your commit messages.",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "nodemon --exec 'pnpm run build' --watch ./src",
+    "build": "unbuild",
+    "lint:json": "ajv --spec=draft2020 validate -s ./src/schema.json -d ./src/gitmojis.json",
+    "lint": "pnpm run lint:json && prettier --check ./src/**/*.{js,json,ts}",
+    "publishPackage": "npm publish"
+  },
+...
+```
+
+There is no build.config.ts found in [Gitmoji package](https://github.com/carloscuesta/gitmoji/tree/master/packages/gitmojis).
+
+To build this package, you just have to run `npm run build`.
+
+### About me:
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/carloscuesta/gitmoji/blob/master/packages/gitmojis/package.json#L19](https://github.com/carloscuesta/gitmoji/blob/master/packages/gitmojis/package.json#L19)
+    
+2. [https://www.npmjs.com/package/unbuild](https://www.npmjs.com/package/unbuild)
+    
+3. [https://gitmoji.dev/about](https://gitmoji.dev/about)
+    
+4. [https://github.com/lobehub/lobe-chat](https://github.com/lobehub/lobe-chat)
+    
+5. [https://github.com/lobehub/lobe-chat/blob/0533150f586e0c0c00b61dcb2f1cc4df9860993f/contributing/Basic/Intro.md?plain=1#L89](https://github.com/lobehub/lobe-chat/blob/0533150f586e0c0c00b61dcb2f1cc4df9860993f/contributing/Basic/Intro.md?plain=1#L89)

@@ -38,8 +38,33 @@ export const docsConfig: DocsConfig = {
   ],
   sidebarNav: [
     {
+      title: "January, 2025",
+      items: [
+        {
+          title: "renovate.json file in Lobechat ...",
+          href: "/blog/renovate-in-lobechat",
+          items: []
+        },
+        {
+          title: "Gitmoji uses unbuild ...",
+          href: "/blog/gitmoji-uses-unbuild",
+          items: []
+        },
+        {
+          title: "Maintenance mode check in ...",
+          href: "/blog/maintenance-mode-in-nextjs",
+          items: []
+        },
+      ]
+    },
+    {
       title: "December, 2024",
       items: [
+        {
+          title: "Custom schema specific Supabase Client...",
+          href: "/blog/grida-custom-schema-supabase-client",
+          items: []
+        },
         {
           title: "Custom schema specific Supabase Server...",
           href: "/blog/grida-custom-schema-server-client",
