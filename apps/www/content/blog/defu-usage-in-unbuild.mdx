@@ -1,0 +1,161 @@
+---
+title: Defu usage in unbuild source code.
+toc: true
+---
+
+For this week, I have been reading [unbuild](https://github.com/unjs/unbuild) source code and found few packages that I have never seen before or used. I wanted to share some interesting packages that are used in these OSS projects so we can learn a thing or two ;)
+
+The following are discussed in this article:
+
+1. What is Defu?
+    
+2. Defu’s usage in unbuild
+    
+
+### What is Defu?
+
+Defu is a package built by [authors at Unjs](https://github.com/unjs). Unjs provides JS tools, libraries and has about 63 npm packages and [421m downloads per month](https://unjs.io/packages?q=&order=1&orderBy=title). Sheesh, that’s a lot.
+
+![](https://cdn-images-1.medium.com/max/1600/1*AmoWOAIoUQj1n4jby_uhRg.png)
+
+[Defu repository](https://github.com/unjs/defu#readme) has this description “Assign default properties recursively”.
+
+This package is straightforward to use:
+
+#### Install
+
+```js
+# yarn
+yarn add defu
+# npm
+npm install defu
+# pnpm
+pnpm install defu
+```
+
+#### Usage
+
+```js
+import { defu } from "defu";
+
+console.log(defu({ a: { b: 2 } }, { a: { b: 1, c: 3 } }));
+// => { a: { b: 2, c: 3 } }
+```
+
+Leftmost arguments have more priority when assigning defaults.
+
+Defu is used to merge objects and the leftmost arguments have precedence as shown in the above example, picked from [Readme](https://github.com/unjs/defu?tab=readme-ov-file#usage).
+
+### Defu’s usage in unbuild
+
+[At line 93 in build.ts](https://github.com/unjs/unbuild/blob/main/src/build.ts#L93), you will find this below code snippet:
+
+```js
+// Merge options
+  const options = defu(
+    buildConfig,
+    pkg.unbuild || pkg.build,
+    inputConfig,
+    preset,
+    <BuildOptions>{
+      name: (pkg?.name || "").split("/").pop() || "default",
+      rootDir,
+      entries: [],
+      clean: true,
+      declaration: undefined,
+      outDir: "dist",
+      stub: _stubMode,
+      stubOptions: {
+        /**
+         * See https://github.com/unjs/jiti#%EF%B8%8F-options
+         */
+        jiti: {
+          interopDefault: true,
+          alias: {},
+        },
+      },
+      watch: _watchMode,
+      watchOptions: _watchMode
+        ? {
+            exclude: "node_modules/**",
+            include: "src/**",
+          }
+        : undefined,
+      externals: [
+        ...Module.builtinModules,
+        ...Module.builtinModules.map((m) => "node:" + m),
+      ],
+      dependencies: [],
+      devDependencies: [],
+      peerDependencies: [],
+      alias: {},
+      replace: {},
+      failOnWarn: true,
+      sourcemap: false,
+      rollup: {
+        emitCJS: false,
+        watch: false,
+        cjsBridge: false,
+        inlineDependencies: false,
+        preserveDynamicImports: true,
+        output: {
+          // https://v8.dev/features/import-attributes
+          importAttributesKey: "with",
+        },
+        // Plugins
+        replace: {
+          preventAssignment: true,
+        },
+        alias: {},
+        resolve: {
+          preferBuiltins: true,
+        },
+        json: {
+          preferConst: true,
+        },
+        commonjs: {
+          ignoreTryCatch: true,
+        },
+        esbuild: { target: "esnext" },
+        dts: {
+          // https://github.com/Swatinem/rollup-plugin-dts/issues/143
+          compilerOptions: { preserveSymlinks: false },
+          respectExternal: true,
+        },
+      },
+      parallel: false,
+    },
+  ) as BuildOptions;
+```
+
+this `options` object is large and following the Defu’s definition, all these objects are merged recursively with leftmost arguments taking precedence.
+
+I wonder how this package is different from [lodash.\_merge](https://lodash.com/docs/#merge). Something to explore, I guess.
+
+### About me:
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References
+
+1. [https://github.com/unjs/unbuild/blob/main/src/build.ts#L93](https://github.com/unjs/unbuild/blob/main/src/build.ts#L93)
+    
+2. [https://github.com/unjs/unbuild/blob/main/src/build.ts#L8](https://github.com/unjs/unbuild/blob/main/src/build.ts#L8)
+    
+3. [https://www.npmjs.com/package/defu](https://www.npmjs.com/package/defu)

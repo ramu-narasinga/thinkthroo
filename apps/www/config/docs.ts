@@ -41,6 +41,31 @@ export const docsConfig: DocsConfig = {
       title: "January, 2025",
       items: [
         {
+          title: "pretty-bytes usage in unbuild...",
+          href: "/blog/pretty-bytes-in-unbuild",
+          items: []
+        },
+        {
+          title: "Hookable package in unbuild...",
+          href: "/blog/hookable-package-in-unbuild",
+          items: []
+        },
+        {
+          title: "Defu usage in unbuild...",
+          href: "/blog/defu-usage-in-unbuild",
+          items: []
+        },
+        {
+          title: "Jiti usage in Docusaurus...",
+          href: "/blog/jiti-in-docusaurus",
+          items: []
+        },
+        {
+          title: ".gitkeep file in Shadcn/ui...",
+          href: "/blog/gitkeep-in-shadcn",
+          items: []
+        },
+        {
           title: "renovate.json file in Lobechat ...",
           href: "/blog/renovate-in-lobechat",
           items: []
