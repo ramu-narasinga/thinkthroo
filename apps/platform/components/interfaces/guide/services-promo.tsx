@@ -10,7 +10,7 @@ export default function ServicesPromo() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Learn from Open Source projects</CardTitle>
+        <CardTitle className="text-2xl font-bold">Insights from Open Source projects</CardTitle>
         <CardDescription>Best practices used in open-source are explained, compared among multiple projects.</CardDescription>
       </CardHeader>
       <CardContent className="text-center">
