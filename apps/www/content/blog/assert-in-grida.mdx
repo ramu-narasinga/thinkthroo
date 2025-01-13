@@ -1,0 +1,67 @@
+---
+title: assert in Nodejs and its usage in Grida source code
+toc: true
+---
+
+In this article, we will review the [assert](https://nodejs.org/api/assert.html#assertvalue-message) usage in Grida source code and I ran some experiments in a codesandbox repo to see this in action. Let’s get started.
+
+### Assert in Nodejs
+
+[assert](https://nodejs.org/api/assert.html#assertvalue-message) is an alias of [assert.ok()](https://nodejs.org/api/assert.html#assertokvalue-message). Use this to test if `value` is truthy. It is equivalent to `assert.equal(!!value, true, message)`.
+
+> If `value` is not truthy, an [`AssertionError`](https://nodejs.org/api/assert.html#class-assertassertionerror) is thrown with a `message` property set equal to the value of the `message` parameter. If the `message` parameter is `undefined`, a default error message is assigned. If the `message` parameter is an instance of an [`Error`](https://nodejs.org/api/errors.html#class-error) then it will be thrown instead of the `AssertionError`. If no arguments are passed in at all `message` will be set to the string: `'No value argument passed to assert.ok()'`.
+
+[Read more about assert](https://nodejs.org/api/assert.html#assertvalue-message).
+
+### Assert in Grida source code
+
+I [searched for assert across grida repository](https://github.com/search?q=repo%3Agridaco%2Fgrida+assert&type=code&p=1), and found 94 hits.
+
+![](https://cdn-images-1.medium.com/max/1600/1*Zx-d2MruFi_lUQ0WHDlKwQ.png)
+
+I chose this code snippet from [grida-react-canvas](https://github.com/gridaco/grida/blob/c46c184aba6c021ecd798caa708374b7f8938ccd/apps/forms/grida-react-canvas/nodes/node.tsx#L93).
+
+> I study large open-source projects and provide insights, give [my repository a star](https://github.com/ramu-narasinga/thinkthroo).
+
+```js
+assert(
+    !(children && USER_CHILDREN),
+    "NodeElement: children should not be provided when node has children"
+);
+```
+
+If the condition here is not met, AssertionError is thrown in your console, but at this point I wanted to find out if this would stop the execution. For that reason, I setup a simple example on codesandbox and ran some experiments.
+
+![](https://cdn-images-1.medium.com/max/1600/1*wY9-DMHX9-sH6AFI1r_UOg.png)
+
+assert is going to stop your execution, this lets you add defensive mechanisms in place with a clear error message as to why the error has occured. Obviously you would set this error message yourself. Link to Codesandbox — [https://codesandbox.io/p/devbox/kwz5ps](https://codesandbox.io/p/devbox/kwz5ps)
+
+### About me:
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/search?q=repo%3Agridaco%2Fgrida+assert&type=code&p=1](https://github.com/search?q=repo%3Agridaco%2Fgrida+assert&type=code&p=1)
+    
+2. [https://nodejs.org/api/assert.html#assertvalue-message](https://nodejs.org/api/assert.html#assertvalue-message)
+    
+3. [https://nodejs.org/api/assert.html#assertokvalue-message](https://nodejs.org/api/assert.html#assertokvalue-message)
+    
+4. [https://nodejs.org/api/assert.html#class-assertassertionerror](https://nodejs.org/api/assert.html#class-assertassertionerror)

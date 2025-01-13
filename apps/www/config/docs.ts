@@ -41,6 +41,31 @@ export const docsConfig: DocsConfig = {
       title: "January, 2025",
       items: [
         {
+          title: "Citty, an elegant CLI ...",
+          href: "/blog/citty-cli-builder",
+          items: []
+        },
+        {
+          title: "List filenames recursively ...",
+          href: "/blog/list-filesnames-recursively",
+          items: []
+        },
+        {
+          title: "assert in Nodejs and ...",
+          href: "/blog/assert-in-grida",
+          items: []
+        },
+        {
+          title: "Have you ever used `git submodules`",
+          href: "/blog/have-you-used-git-submodules",
+          items: []
+        },
+        {
+          title: "lodash._merge vs Defu",
+          href: "/blog/lodash-merge-vs-defu",
+          items: []
+        },
+        {
           title: "pretty-bytes usage in unbuild...",
           href: "/blog/pretty-bytes-in-unbuild",
           items: []
