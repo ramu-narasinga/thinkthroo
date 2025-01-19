@@ -41,6 +41,31 @@ export const docsConfig: DocsConfig = {
       title: "January, 2025",
       items: [
         {
+          title: "__useInternal() in Grida codebase ...",
+          href: "/blog/useinternal-in-grida",
+          items: []
+        },
+        {
+          title: "toolbar_value_to_cursormode function ...",
+          href: "/blog/toolbar-value-to-cursor-mode",
+          items: []
+        },
+        {
+          title: "Toolbar's setCursorMode in Grida ...",
+          href: "/blog/setcursormode-in-grida",
+          items: []
+        },
+        {
+          title: "Locating the toolbar code ...",
+          href: "/blog/locating-toolbar-in-grida",
+          items: []
+        },
+        {
+          title: "Locating the canvas route ...",
+          href: "/blog/canvas-route-in-grida",
+          items: []
+        },
+        {
           title: "Citty, an elegant CLI ...",
           href: "/blog/citty-cli-builder",
           items: []

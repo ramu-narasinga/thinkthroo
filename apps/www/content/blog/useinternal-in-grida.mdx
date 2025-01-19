@@ -1,0 +1,194 @@
+---
+title: __useInternal() in Grida codebase.
+toc: true
+---
+
+In this article, we will review the [\_\_useInternal() function in Grida codebase](https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/provider.tsx#L133).
+
+```js
+function __useInternal() {
+  const state = useContext(DocumentContext);
+  if (!state) {
+    throw new Error(
+      "useDocument must be used within a StandaloneDocumentEditor"
+    );
+  }
+
+  const dispatch = __useDispatch();
+
+  return useMemo(() => [state, dispatch] as const, [state, dispatch]);
+}
+```
+
+How did I come across this function? In the previous articles, I wrote Toolbar component and a function called setCursorMode. 
+
+![](https://cdn-images-1.medium.com/max/1600/1*bdohzvRBjI6wxGkvgj2L4g.png)
+
+In the [useEventTarget function](https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/provider.tsx#L2087), state and dispatch are destructured from this function, \_\_useInternal().
+
+```js
+export function useEventTarget() {
+  const [state, dispatch] = __useInternal();
+```
+
+#### DocumentContext
+
+DocumentContext is created at [line number 41 in provider.tsx](https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/provider.tsx#L41).
+
+```js
+const DocumentContext = createContext<IDocumentEditorState | null>(null);
+```
+
+#### DocumentContext.Provider
+
+You will find DocumentContext.Provider in StandaloneDocumentEditor [component at line 102](https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/provider.tsx#L102).
+
+```js
+return (
+    <DocumentContext.Provider value={state}>
+      <DocumentDispatcherContext.Provider value={__dispatch}>
+        <ProgramDataContextHost>
+          <DataProvider data={{ props: shallowRootProps }}>
+            <EditorGoogleFontsManager>
+              {/*  */}
+              {children}
+            </EditorGoogleFontsManager>
+          </DataProvider>
+        </ProgramDataContextHost>
+      </DocumentDispatcherContext.Provider>
+    </DocumentContext.Provider>
+  );
+```
+
+This is where value is initialised to state.
+
+#### state
+
+The below code is picked from [line 71 in provider.tsx](https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/provider.tsx#L71C2-L74C5)
+
+```js
+const state = useMemo(
+  () => initDocumentEditorState({ ...initial, editable, debug }),
+  [initial, editable, debug]
+);
+```
+
+Let’s just follow along the code as this is about state that used in the canvas. I would find out how initDocumentEditorState looks like.
+
+#### initDocumentEditorState
+
+This function is defined in [grida-react-canvas/state.ts at line 600](https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/state.ts#L600)
+
+```js
+export function initDocumentEditorState({
+  debug,
+  ...init
+}: Omit<IDocumentEditorInit, "debug"> & {
+  debug?: boolean;
+}): IDocumentEditorState {
+  const s = new document.DocumentState(init.document);
+
+  // console.log("i", init["transform"]);
+
+  return {
+    transform: cmath.transform.identity,
+    debug: debug ?? false,
+    selection: [],
+    hovered_node_id: null,
+    hovered_vertex_idx: null,
+    pointer: {
+      position: cmath.vector2.zero,
+    },
+    history: {
+      future: [],
+      past: [],
+    },
+    gesture: { type: "idle" },
+    gesture_modifiers: {
+      translate_with_hierarchy_change: "on",
+      translate_with_clone: "off",
+      tarnslate_with_axis_lock: "off",
+      transform_with_center_origin: "off",
+      transform_with_preserve_aspect_ratio: "off",
+      rotate_with_quantize: "off",
+    },
+    document_ctx: document.Context.from(init.document).snapshot(),
+    // history: initialHistoryState(init),
+    surface_raycast_targeting: DEFAULT_RAY_TARGETING,
+    surface_measurement_targeting: "off",
+    surface_measurement_targeting_locked: false,
+    surface_raycast_detected_node_ids: [],
+    googlefonts: s.fonts().map((family) => ({ family })),
+    cursor_mode: { type: "cursor" },
+    ...init,
+  };
+}
+```
+
+This function is used in playground.tsx
+
+#### playground.tsx
+
+```js
+const [state, dispatch] = useReducer(
+    standaloneDocumentReducer,
+    initDocumentEditorState({
+      editable: true,
+      debug: pref.debug,
+      document: {
+        nodes: {
+          root: {
+            id: "root",
+            name: "root",
+            active: true,
+            locked: false,
+            type: "container",
+            children: [],
+            width: 800,
+            height: 600,
+            position: "relative",
+            style: {},
+            opacity: 1,
+            zIndex: 0,
+            rotation: 0,
+            expanded: false,
+            cornerRadius: 0,
+            padding: 0,
+            layout: "flow",
+            direction: "horizontal",
+            mainAxisAlignment: "start",
+            crossAxisAlignment: "start",
+            mainAxisGap: 0,
+            crossAxisGap: 0,
+          },
+        },
+        root_id: "root",
+      },
+    })
+```
+
+### About me:
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/provider.tsx#L2087](https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/provider.tsx#L2087)
+    
+2. [https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/provider.tsx#L133C1-L144C2](https://github.com/gridaco/grida/blob/main/apps/forms/grida-react-canvas/provider.tsx#L133C1-L144C2)

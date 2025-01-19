@@ -1,0 +1,86 @@
+---
+title: Locating the canvas route in the Grida codebase.
+toc: true
+---
+
+I am contributing to an open source project, [Grida](https://github.com/gridaco/grida). Grida provides forms for developers and has a canvas that can be used to design, like Figma. In this article, I wanted to share how I located the [/canvas](https://app.grida.co/canvas) route in the large Grida codebase.
+
+![](https://cdn-images-1.medium.com/max/1600/1*KY24qCkautaIDXaYQL3jog.png)
+
+Grida codebase has a lot of folders. It can be challenging to navigate this codebase to find the feature you want to work on when you are just getting started. Let’s first locate the route — /canvas.
+
+### /canvas route
+
+![](https://cdn-images-1.medium.com/max/1600/1*37hr7eUJAauTqI-QQKJNxw.png)
+
+This project manages workspaces using pnpm. You can confirm this by looking at [pnpm-workspace.yaml](https://github.com/gridaco/grida/blob/main/pnpm-workspace.yaml)
+
+![](https://cdn-images-1.medium.com/max/1600/1*uqHAZcTXDdDrhtnjIzCffg.png)
+
+It took me a while to find out where the /canvas route is located because in the [apps](https://github.com/gridaco/grida/tree/main/apps) folder, you have about 5 projects. Question was, which workspace has it? I tried my luck with [forms project](https://github.com/gridaco/grida/tree/main/apps/forms).
+
+[forms](https://github.com/gridaco/grida/tree/main/apps/forms) is a Next.js app router based application. Since this uses app router, to locate /canvas, you should be looking for a folder named canvas in the app. But it was not that obvious because again [app folder](https://github.com/gridaco/grida/tree/main/apps/forms/app) has a lot of route groups as seen below:
+
+![](https://cdn-images-1.medium.com/max/1600/1*emwH35BSw8WSHtAdDEll1Q.png)
+
+I found that canvas folder is located in [(dev) route group](https://github.com/gridaco/grida/tree/main/apps/forms/app/%28dev%29) and the canvas/page.tsx has the below code:
+
+```js
+// import CanvasPlayground from "@/scaffolds/playground-canvas/playground";
+import dynamic from "next/dynamic";
+import { Metadata } from "next";
+
+const PlaygroundCanvas = dynamic(
+  () => import("@/scaffolds/playground-canvas/playground"),
+  {
+    ssr: false,
+  }
+);
+
+export const metadata: Metadata = {
+  title: "Canvas Playground",
+  description: "Grida Canvas SDK Playground",
+};
+
+export default function CanvasPlaygroundPage() {
+  return <PlaygroundCanvas />;
+}
+```
+
+PlaygroundCanvas is a component imported dynamically from [@/scaffolds/playground-canvas/playground](https://github.com/gridaco/grida/blob/main/apps/forms/scaffolds/playground-canvas/playground.tsx). 
+
+playground.tsx file has about 877 lines of code at the time of writing this article. This is you starting point to understand how canvas works. I did some study and found that this canvas feature is mathematical, fun to work on and can feel complicated.
+
+I will write more articles explaining the features used in canvas, for example, how the rectangle gets populated on to the board with a click on the toolbar item and how the drag increases the rectangle size. This is just one example, there is more elements and lot of a mathematical concepts are applied behind the scenes.
+
+The reason I am writing these articles is because I am determined to contribute to Grida as much as possible and this canvas feature seems like a proper brain teaser.
+
+### About me:
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/gridaco/grida/tree/main](https://github.com/gridaco/grida/tree/main)
+    
+2. [https://app.grida.co/canvas](https://app.grida.co/canvas)
+    
+3. [https://github.com/gridaco/grida/tree/main/apps/forms](https://github.com/gridaco/grida/tree/main/apps/forms)
+    
+4. [https://github.com/gridaco/grida/blob/main/apps/forms/scaffolds/playground-canvas/playground.tsx](https://github.com/gridaco/grida/blob/main/apps/forms/scaffolds/playground-canvas/playground.tsx)
