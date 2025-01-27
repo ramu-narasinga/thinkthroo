@@ -1,0 +1,76 @@
+---
+title: How to check if a component is a class component in React?
+toc: true
+---
+
+In this article, we will review a code snippet from [TipTap source code](https://github.com/ueberdosis/tiptap/blob/develop/packages/react/src/ReactRenderer.tsx#L8).
+
+```js
+/**
+ * Check if a component is a class component.
+ * @param Component
+ * @returns {boolean}
+ */
+function isClassComponent(Component: any) {
+  return !!(
+    typeof Component === 'function'
+    && Component.prototype
+    && Component.prototype.isReactComponent
+  )
+}
+```
+
+The beauty lies in the comment explaining what this function does. `isClassComponent` function name is pretty self-explanatory. It checks if a `Component` is a class component.
+
+![](https://cdn-images-1.medium.com/max/1600/1*j9UVR_srq9Zu8KrhWw2IXw.png)
+
+You would write a class component in React using this below syntax:
+
+```js
+import { Component } from "react";
+
+class Editor extends Component {...}
+```
+
+So what are these checks?
+
+#### Checking component typeof
+
+```js
+typeof Component === 'function'
+```
+
+### isReactComponent
+
+```js
+&& Component.prototype
+&& Component.prototype.isReactComponent
+```
+
+`isReactComponent` decides if a component is a class component.
+
+It is a common practice to use `!!` to return boolean value.
+
+### About me:
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/ueberdosis/tiptap/blob/develop/packages/react/src/ReactRenderer.tsx#L8](https://github.com/ueberdosis/tiptap/blob/develop/packages/react/src/ReactRenderer.tsx#L8)

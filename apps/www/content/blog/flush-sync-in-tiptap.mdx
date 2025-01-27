@@ -1,0 +1,157 @@
+---
+title: flushSync in TipTap source code
+toc: true
+---
+
+In this article, we will review a [code snippet from TipTap source code](https://github.com/ueberdosis/tiptap/blob/develop/packages/react/src/ReactRenderer.tsx#L116).
+
+![](https://cdn-images-1.medium.com/max/1600/1*Ynx2myANUp__cT1xZbafHg.png)
+
+As I was reading through the file, [ReactRenderer.tsx](https://github.com/ueberdosis/tiptap/blob/develop/packages/react/src/ReactRenderer.tsx#L116), I saw a function named `flushSync` in the constructor. This below code snippet is written inside constructor.
+
+```js
+if (this.editor.isInitialized) {
+  // On first render, we need to flush the render synchronously
+  // Renders afterwards can be async, but this fixes a cursor positioning issue
+  flushSync(() => {
+    this.render()
+  })
+} else {
+  this.render()
+}
+```
+
+### constructor
+
+```js
+  /**
+   * Immediately creates element and renders the provided React component.
+   */
+  constructor(component: ComponentType<R, P>, {
+    editor,
+    props = {},
+    as = 'div',
+    className = '',
+  }: ReactRendererOptions) {
+```
+
+This constructor, as the comment indicates, creates element and renders the provided React component.
+
+#### Creating element
+
+[At line 106](https://github.com/ueberdosis/tiptap/blob/develop/packages/react/src/ReactRenderer.tsx#L106), `document.createElement` method is used to create the element.
+
+```js
+this.id = Math.floor(Math.random() * 0xFFFFFFFF).toString()
+this.component = component
+this.editor = editor as EditorWithContentComponent
+this.props = props as P
+this.element = document.createElement(as)
+this.element.classList.add('react-renderer')
+
+if (className) {
+  this.element.classList.add(...className.split(' '))
+}
+```
+
+#### Rendering component
+
+```js
+if (this.editor.isInitialized) {
+  // On first render, we need to flush the render synchronously
+  // Renders afterwards can be async, but this fixes a cursor 
+  // positioning issue
+  flushSync(() => {
+    this.render()
+  })
+} else {
+  this.render()
+}
+```
+
+The comment here explains why the flushSync API is used. It is to fix a cursor positioning issue, but what is flushSync?
+
+### flushSync
+
+`flushSync` lets you force React to flush any updates inside the provided callback synchronously. This ensures that the DOM is updated immediately.
+
+Read more about [flushSync](https://react.dev/reference/react-dom/flushSync).
+
+> Using `flushSync` is uncommon and can hurt the performance of your app.
+
+The below example is picked from [React documentation](https://react.dev/reference/react-dom/flushSync#flushing-updates-for-third-party-integrations).
+
+#### Example
+
+The browser `onbeforeprint` API allows you to change the page immediately before the print dialog opens. This is useful for applying custom print styles that allow the document to display better for printing. In the example below, you use `flushSync` inside of the `onbeforeprint` callback to immediately “flush” the React state to the DOM. Then, by the time the print dialog opens, `isPrinting` displays “yes”: — [Source](https://react.dev/reference/react-dom/flushSync#flushing-updates-for-third-party-integrations)
+
+```js
+import { useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
+
+export default function PrintApp() {
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  useEffect(() => {
+    function handleBeforePrint() {
+      flushSync(() => {
+        setIsPrinting(true);
+      })
+    }
+
+    function handleAfterPrint() {
+      setIsPrinting(false);
+    }
+
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    }
+  }, []);
+
+  return (
+    <>
+      <h1>isPrinting: {isPrinting ? 'yes' : 'no'}</h1>
+      <button onClick={() => window.print()}>
+        Print
+      </button>
+    </>
+  );
+}
+```
+
+Without `flushSync`, the print dialog will display `isPrinting` as “no”. This is because React batches the updates asynchronously and the print dialog is displayed before the state is updated. — [Source](https://react.dev/reference/react-dom/flushSync#flushing-updates-for-third-party-integrations)
+
+I tried commenting the flushSync and tested the print example. To my surprise, `isPrinting` is to set to `yes` when the flushSync is commented. I am not sure how flushSync makes a difference at this point.
+
+![](https://cdn-images-1.medium.com/max/1600/1*AjJ5gH7JAdBfwbE-gs3MCw.png)
+
+![](https://cdn-images-1.medium.com/max/1200/1*3fQjMvpeCglkVpumSZboYQ.png)
+
+### About me:
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/ueberdosis/tiptap/blob/develop/packages/react/src/ReactRenderer.tsx#L116](https://github.com/ueberdosis/tiptap/blob/develop/packages/react/src/ReactRenderer.tsx#L116)
+    
+2. [https://react.dev/reference/react-dom/flushSync](https://react.dev/reference/react-dom/flushSync)

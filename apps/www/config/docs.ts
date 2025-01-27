@@ -41,6 +41,31 @@ export const docsConfig: DocsConfig = {
       title: "January, 2025",
       items: [
         {
+          title: "useSyncExternalStore usage ...",
+          href: "/blog/usesyncexternalstore-in-tiptap",
+          items: []
+        },
+        {
+          title: "How to check if a component ...",
+          href: "/blog/check-component-is-froward-ref",
+          items: []
+        },
+        {
+          title: "flushSync in TipTap ...",
+          href: "/blog/flush-sync-in-tiptap",
+          items: []
+        },
+        {
+          title: "Check if component is class ...",
+          href: "/blog/check-if-class-component",
+          items: []
+        },
+        {
+          title: "ReactPortal type in ...",
+          href: "/blog/reactportal-type-in-tiptap",
+          items: []
+        },
+        {
           title: "__useInternal() in Grida codebase ...",
           href: "/blog/useinternal-in-grida",
           items: []
