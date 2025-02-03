@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/ramu-narasinga/thinkthroo/issues"
   },
-  "homepage": "https://github.com/ramu-narasinga/thinkthroo#readme"
+  "homepage": "https://github.com/ramu-narasinga/thinkthroo#readme",
+  "devDependencies": {
+    "@repo/typescript-config": "*"
+  }
 }
