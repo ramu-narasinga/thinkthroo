@@ -272,7 +272,40 @@ There isn't much changed in the API, you would access the store as if it were wi
 
 Read more about [slices pattern in Zustand](https://zustand.docs.pmnd.rs/guides/slices-pattern).
 
-Now that we understand the basics of slices in Zustand, let's review the  
+Now that we understand the basics of slices in Zustand, let's review the  Session Slice.
+
+Since in this chapter, we are focusing on the state management in "Adding a new assistant". As explained in 
+[introduction](link to introduction), let's find out where createSession is defined in the session slice folder
+
+```
+const [createSession] = useSessionStore((s) => [s.createSession]);
+```
+
+createSession is defined in [action.ts](https://github.com/lobehub/lobe-chat/blob/main/src/store/session/slices/session/action.ts#L103).
+
+```
+createSession: async (agent, isSwitchSession = true) => {
+  const { switchSession, refreshSessions } = get();
+
+  // merge the defaultAgent in settings
+  const defaultAgent = merge(
+    DEFAULT_AGENT_LOBE_SESSION,
+    settingsSelectors.defaultAgent(useUserStore.getState()),
+  );
+
+  const newSession: LobeAgentSession = merge(defaultAgent, agent);
+
+  const id = await sessionService.createSession(LobeSessionType.Agent, newSession);
+  await refreshSessions();
+
+  // Whether to goto  to the new session after creation, the default is to switch to
+  if (isSwitchSession) switchSession(id);
+
+  return id;
+},
+```
+
+Notice how there is a service function used to create session. So you fire state action and this action calls a service function.
 
 References:
 1. https://github.com/lobehub/lobe-chat/blob/7d1e5c46aecc582308483d329b6007a8f8c76b70/src/app/(main)/chat/%40session/_layout/Desktop/SessionHeader.tsx#L36
