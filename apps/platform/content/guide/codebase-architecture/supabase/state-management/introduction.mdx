@@ -14,7 +14,7 @@ The way we approach is we pick a route in the Supabase studio and then find the 
 that route (Supabase at the time of writing this article uses Page Router). We have to take a closer look
 at actions such as:
 
-1. /dashboard/projects
+### 1. /dashboard/projects
 
 In this route, we are interested in finding out how the projects and organzations are rendered. 
 Once the data is fetched, is there any state set based on this API response? or is there any other way 
@@ -24,115 +24,18 @@ These actions are specific to Supabase, these actions vary based on an applicati
 In cal.com, to understand how how state is managed, you would look at operations such as bookings list, 
 event-types etc., 
 
-[C: State management in /dashboard/projects]
+### 2. Create a project
 
-At the time of writing this article, Supabase uses Pages router. We want to find out which page is responsible
-to load the /dashboard/projects page. Pages router uses file-based routing and the route in consideraion here
-ends with /projects, so we want to find a file named projects.tsx in [Supabase studio](https://github.com/supabase/supabase/blob/master/apps/studio/pages/projects.tsx#L26) 
+In this action, we analyse how the state is managed when you add a new project in Supabase dashboard. 
 
-Supabase is open-source and uses a monorepo. [Studio](https://github.com/supabase/supabase/tree/master/apps/www) 
-is the dashboard you would see when you visit https://supabase.com/dashboard/projects, but when you visit https://supabase.com/
-[www](https://github.com/supabase/supabase/tree/master/apps/www) is used. Here `studio`, `www` are workspaces.
+[Insert a screenshot of Create project page]
 
-# projects.tsx
+### 3. Create a table
 
-You will find that [projects.tsx](https://github.com/supabase/supabase/blob/master/apps/studio/pages/projects.tsx#L26)
-is in studio's [pages folder](https://github.com/supabase/supabase/tree/master/apps/studio/pages).
+In this action, we analyse how the state is managed when you add a new table. When you click on new table inside
+a table editor, you will see a dialog positioned to the right of the screen.
 
-You have to ask the right questions here. What data do I see when I visit projects? There's projects and 
-organizations data that are fetched via an API. 
+[Insert a screenshot of this create table dialog.]
 
-[Insert a screenshot of /projects route]
-
-So how's this fetched? At [line 23](https://github.com/supabase/supabase/blob/master/apps/studio/pages/projects.tsx#L23)
-, you will find this below code snippet:
-
-```
-const { data: organizations, isError, isSuccess } = useOrganizationsQuery()
-```
-
-You need to check out the Supabase's API layer to understand `useOrganizationQuery` shown above. In this guide, 
-we are intrested in state management. At this point, next question would be what sort of rendering mechanism is 
-applied here? You want to read about [Rendering in Next.js Pages Router docs](https://nextjs.org/docs/pages/building-your-application/rendering)
-
-Rendering strategy used in projects.tsx is client-side rendering because useOrganizationsQuery uses 
-@tanstack/react-query found in [lib/fetch/organizations.ts](https://github.com/supabase/supabase/blob/master/apps/docs/lib/fetch/organizations.ts#L1)
-It is mentioned in the [Client-side rendering documentation](https://nextjs.org/docs/pages/building-your-application/rendering/client-side-rendering)
-that using a data fetching library like SWR or TanStack Query to fetch data on the client is recommended and this
-way you implement client side rendering.
-
-[Insert a screenshot of https://github.com/supabase/supabase/blob/master/apps/studio/pages/projects.tsx#L72-L77]
-
-These organizations fetched are passed down as props to a component named `HomePageActions`. 
-
-## HomePageActions
-
-[HomePageActions](https://github.com/supabase/supabase/blob/master/apps/studio/components/interfaces/HomePageActions.tsx#L33) 
-renders `New Project` button, `New Organization` button, `Search` input and the `Filter` button.
-
-Why would the organizations be passed down to these actions? clicking on a New Project shows you these list of
-organizations.
-
-[Insert screenshot of clicking new project to show list of organizations] 
-
-Organizations fetched are also used to show list of organizations in the Sidebar
-
-[Insert screenshot of supabase dashboard sidebar with list of organizations]
-
-## Organizations in Sidebar
-
-It is a common standard to place the Sidebar in the Layout. [At Line 93](https://github.com/supabase/supabase/blob/master/apps/studio/pages/projects.tsx#L93)
-you will find this below code snippet:
-
-```
-ProjectsPage.getLayout = (page) => (
-  <AccountLayout
-    title="Dashboard"
-    breadcrumbs={[
-      {
-        key: `supabase-projects`,
-        label: 'Projects',
-      },
-    ]}
-  >
-    {page}
-  </AccountLayout>
-)
-``` 
-
-In the AccountLayout, Organizations are fetched using the query, but this time the results are from the cache, 
-this is one of the advantages of using Tanstack query, you can also confirm this by inspecting the network call 
-to fetch organizations, this gets called only once.
-
-[Insert screenshot of - https://github.com/supabase/supabase/blob/master/apps/studio/components/layouts/AccountLayout/AccountLayout.tsx#L27]
-
-[AccountLayout](https://github.com/supabase/supabase/blob/master/apps/studio/components/layouts/AccountLayout/AccountLayout.tsx#L25)
-renders the sidebar and children as shown below:
-
-```
-<div className="h-screen min-h-[0px] basis-0 flex-1">
-  <WithSidebar
-    hideSidebar={navLayoutV2}
-    title={title}
-    breadcrumbs={breadcrumbs}
-    sections={sectionsWithHeaders}
-  >
-    {children}
-  </WithSidebar>
-</div>
-```
-
-`sectionsWithHeaders` uses this organizations array to render list of organizations 
-
-```
-const organizationsLinks = (organizations ?? [])
-    .map((organization) => ({
-      isActive:
-        router.pathname.startsWith('/org/') && selectedOrganization?.slug === organization.slug,
-      label: organization.name,
-      href: `/org/${organization.slug}/general`,
-      key: organization.slug,
-      icon: <PartnerIcon organization={organization} />,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label))
-```
+We provide an explanation as to what happens when you click on "Save" by reviewing the code. It would be
+interesting to find out how the list of tables gets refreshed after you create a table.

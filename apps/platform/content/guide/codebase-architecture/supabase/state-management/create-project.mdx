@@ -1,0 +1,134 @@
+---
+title: State management in Supabase
+toc: true
+---
+
+[C: State management in creating a new project in Supabase]
+
+In this guide, we analyse how adding a new project in your Supabase dashboard is handled. We 
+review the code behind this action and find out how the state is managed once a new project 
+is added.
+
+# Where is the Create Project button?
+
+Locating where the "Create Project" button in the Supabase codebase is a good start. On the UI, you
+will find this button at the route `/dashboard/projects`.
+
+[Insert screenshot of - Create Project button]
+
+In the [projects.tsx, at line 171](https://github.com/supabase/supabase/blob/master/apps/studio/pages/projects.tsx#L71),
+you will find this below code:
+
+```js
+{!navLayoutV2 && (
+  <div className="p-5">
+    {IS_PLATFORM && projectCreationEnabled && isSuccess && (
+      <HomePageActions
+        search={search}
+        filterStatus={filterStatus}
+        setSearch={setSearch}
+        setFilterStatus={setFilterStatus}
+        organizations={organizations}
+      />
+    )}
+  </div>
+}
+```
+
+[HomePageActions.tsx](https://github.com/supabase/supabase/blob/master/apps/studio/components/interfaces/HomePageActions.tsx#L33)
+renders this below shown elements.
+
+[Insert screenshot of list of actions above projects]
+
+It is time to locate the code for to "New Project" button. In the [HomePageActions.tsx](https://github.com/supabase/supabase/blob/master/apps/studio/components/interfaces/HomePageActions.tsx#L47),
+you will find this below code snippet - 
+
+```
+<DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button type="primary">
+        <span>New project</span>
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent side="bottom" align="center">
+      <>
+        <DropdownMenuLabel>Choose organization</DropdownMenuLabel>
+        {organizations
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((x) => (
+            <DropdownMenuItem key={x.slug} onClick={() => router.push(`/new/${x.slug}`)}>
+              {x.name}
+            </DropdownMenuItem>
+          ))}
+      </>
+    </DropdownMenuContent>
+</DropdownMenu>
+```
+
+When you click on New Project, what you see is a dropdown asking to choose the organization to which you will add
+a project. At this point, there is no state management in place. A simple redirect to `/new/x.slug` occurs, here 
+x.slug belongs to a organization's slug.
+
+We still haven't learnt what happens after you add a new project, so far we found out that a redirect to 
+`/new/{x.slug}` occurs. We now need to find the page.tsx based on this route.
+
+# new/[slug].tsx
+
+Following along the redirect to `/new/[slug].tsx`, we need to find the source code for this page. In the 
+[pages/new/[slug].tsx](https://github.com/supabase/supabase/blob/master/apps/studio/pages/new/%5Bslug%5D.tsx), you
+will find the code that renders this route.
+
+This page shows a form and onSubmit, it redirects you to `/project/${res.ref}/building`. This below code snippet
+is picked from [/new/[slug].tsx](https://github.com/supabase/supabase/blob/master/apps/studio/pages/new/%5Bslug%5D.tsx#L371)
+
+```
+ return (
+    <Form_Shadcn_ {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Panel
+          loading={!isOrganizationsSuccess || isLoadingFreeProjectLimitCheck}
+          title={
+            <div key="panel-title">
+              <h3>Create a new project</h3>
+```
+
+[handleSubmit function](https://github.com/supabase/supabase/blob/master/apps/studio/pages/new/%5Bslug%5D.tsx#L327) 
+calls a method named createProject at the end of the function.
+
+```
+function onSubmit() {
+  // ...
+  if (postgresVersion) {
+      if (!postgresVersion.match(/1[2-9]\..*/)) {
+        toast.error(
+          `Invalid Postgres version, should start with a number between 12-19, a dot and additional characters, i.e. 15.2 or 15.2.0-3`
+        )
+      }
+
+      data['customSupabaseRequest'] = {
+        ami: { search_tags: { 'tag:postgresVersion': postgresVersion } },
+      }
+    }
+
+    createProject(data)
+}
+```
+
+[createProject function](https://github.com/supabase/supabase/blob/master/apps/studio/pages/new/%5Bslug%5D.tsx#L180) 
+is a mutate function returned by `useProjectCreateMutation` hook. Check out the API layer to learn more about 
+these hooks.
+
+```
+const {
+  mutate: createProject,
+  isLoading: isCreatingNewProject,
+  isSuccess: isSuccessNewProject,
+} = useProjectCreateMutation({
+  onSuccess: (res) => {
+    router.push(`/project/${res.ref}/building`)
+  },
+})
+```
+
+You add project information such as name etc., and on sumit, you are redirected to a different page. There isn't much 
+hassle and no complicated state management.

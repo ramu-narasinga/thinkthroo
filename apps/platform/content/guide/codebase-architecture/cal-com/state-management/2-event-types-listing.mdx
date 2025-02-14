@@ -1,0 +1,158 @@
+---
+title: state-management in cal.com
+toc: true
+---
+
+[State management in Event types listing]
+
+In this guide, we will review the state management mechanism in Event Types listing page. For better 
+understanding, this guide has been structure this way:
+
+1. Locating the event-types page
+2. Error status handling
+3. Pending status handling
+4. Success status handling
+
+[Insert screenshot of https://app.cal.com/event-types]
+
+# Locating the event-types page
+
+You will find the [events-types folder](https://github.com/calcom/cal.com/blob/main/apps/web/app/event-types/page.tsx)
+in app folder. event-types/page.tsx has the below code:
+
+```
+import { withAppDirSsr } from "app/WithAppDirSsr";
+import { _generateMetadata } from "app/_utils";
+import { WithLayout } from "app/layoutHOC";
+
+import { getServerSideProps } from "@lib/event-types/getServerSideProps";
+
+import EventTypes from "~/event-types/views/event-types-listing-view";
+
+export const generateMetadata = async () =>
+  await _generateMetadata(
+    (t) => t("event_types_page_title"),
+    (t) => t("event_types_page_subtitle")
+  );
+
+const getData = withAppDirSsr(getServerSideProps);
+
+export default WithLayout({ getLayout: null, getData, Page: EventTypes })<"P">;
+```
+ 
+The most important import here is the EventTypes imported from `~/event-types/views/event-types-listing-view`
+"~"(tilda) is not helping us much in telling us where to look for this file, in this case, you should look
+at tsconfig.json to understand the default imports set.
+
+In [web/tsconfig.json](https://github.com/calcom/cal.com/blob/main/apps/web/tsconfig.json#L6), you will find
+the below configuration for default imports:
+
+```
+{
+  "extends": "@calcom/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["modules/*"],
+      "@components/*": ["components/*"],
+```
+
+~ is an alias for modules folder, so the import translates to `modules/event-types/views/event-types-listing-view`
+[event-types-listing-view.tsx](https://github.com/calcom/cal.com/blob/main/apps/web/modules/event-types/views/event-types-listing-view.tsx#L886)
+renders the event types listing page. This is where we should look closely to understand how the state is 
+managed in this component.
+
+[Insert screenshot of https://github.com/calcom/cal.com/blob/main/apps/web/modules/event-types/views/event-types-listing-view.tsx#L886]
+
+# Error status handling
+
+In the [EventsTypePage component](https://github.com/calcom/cal.com/blob/main/apps/web/modules/event-types/views/event-types-listing-view.tsx#L945), 
+there was no specific code handling error status.
+
+```
+const EventTypesPage: React.FC = () => {
+  
+  ...
+
+  // TODO: Maybe useSuspenseQuery to focus on success case only? Remember that it would crash the page when there is an error in query. Also, it won't support skeleton
+  const {
+    data: getUserEventGroupsData,
+    status: getUserEventGroupsStatus,
+    error: getUserEventGroupsStatusError,
+  } = trpc.viewer.eventTypes.getUserEventGroups.useQuery(filters && { filters }, {
+    refetchOnWindowFocus: false,
+    gcTime: 1 * 60 * 60 * 1000,
+    staleTime: 1 * 60 * 60 * 1000,
+  });
+
+  ...
+
+  return (
+    <Shell
+      ...
+      <InfiniteScrollMain
+        profiles={getUserEventGroupsData?.profiles}
+        eventTypeGroups={getUserEventGroupsData?.eventTypeGroups}
+        status={getUserEventGroupsStatus}
+        errorMessage={getUserEventGroupsStatusError?.message}
+      />
+    </Shell>
+  );
+};
+```
+
+Instead in [InfiniteScrollMain component](https://github.com/calcom/cal.com/blob/main/apps/web/modules/event-types/views/event-types-listing-view.tsx#L886),
+you have the error status handler as shown below:
+
+```
+const InfiniteScrollMain = ({
+  status,
+  errorMessage,
+  eventTypeGroups,
+  profiles,
+}: {
+  status: string;
+  errorMessage?: string;
+  eventTypeGroups: GetUserEventGroupsResponse["eventTypeGroups"] | undefined;
+  profiles: GetUserEventGroupsResponse["profiles"] | undefined;
+}) => {
+  ...
+   if (status === "error") {
+    return <Alert severity="error" title="Something went wrong" message={errorMessage} />;
+   }
+  ...
+}
+```
+
+# Pending status handling
+
+Just below the error status handler, you will find the pending status related code:
+
+```
+if (!eventTypeGroups || !profiles || status === "pending") {
+    return <InfiniteSkeletonLoader />;
+}
+```
+
+What this means is, when the status is pending, `InfiniteSkeletonLoader` is displayed.
+
+# Success status handling
+
+Depending on `eventTypeGroups` length, either `CreateFirstEventTypeView` (length = 0) or 
+`InfiniteTeamsTab` (length >= 1) gets displayed.
+
+```
+{eventTypeGroups.length >= 1 && (
+  <>
+    <HorizontalTabs tabs={tabs} />
+    <InfiniteTeamsTab activeEventTypeGroup={activeEventTypeGroup[0]} />
+  </>
+)}
+{eventTypeGroups.length === 0 && <CreateFirstEventTypeView slug={profiles[0].slug ?? ""} />}
+```
+
+
+
+References:
+1. https://github.com/calcom/cal.com/blob/main/apps/web/modules/event-types/views/event-types-listing-view.tsx#L886
+2. https://github.com/calcom/cal.com/blob/main/apps/web/app/event-types/page.tsx

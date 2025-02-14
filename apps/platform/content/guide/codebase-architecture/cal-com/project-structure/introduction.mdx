@@ -1,0 +1,66 @@
+---
+title: project-structure in cal.com
+toc: true
+---
+
+[C: Lobechat]
+[L: Discover Page]
+
+Discover page has a lot of sub-routes, we will select some routes as shown in the following and discuss 
+the components structure used.
+
+1. Root level file structure
+2. Discover/(list) route group file structure
+  a. Home sub-route
+  b. Assistants sub-route
+  c. Models sub-route
+3. Chat 
+
+
+# Root level file structure:
+
+In the [discover folder](https://github.com/lobehub/lobe-chat/tree/main/src/app/(main)/discover), we find the below 
+files and folder:
+
+```
+discover/
+├── (detail)/            Route group
+├── (list)/              Route group
+├── _layout/             Layout folder
+├── components/          Commonly used components across Discover list and detail pages
+|                        For example, CardBanner in [discover/components/CardBanner.ts](https://github.com/lobehub/lobe-chat/blob/main/src/app/(main)/discover/components/CardBanner.tsx)
+|                        are found to be used in [detail page and list page](https://github.com/search?q=repo%3Alobehub%2Flobe-chat%20CardBanner&type=code).
+├── features/            features components are found to be in Layout
+|                        Example 1: [CreateButton.tsx](https://github.com/lobehub/lobe-chat/blob/main/src/app/(main)/discover/features/CreateButton/index.tsx) 
+|                        usage in Layout.ts in this [search results](https://github.com/search?q=repo%3Alobehub%2Flobe-chat%20CreateButton%20&type=code)
+|                        Example 2: [useNav.tsx](https://github.com/lobehub/lobe-chat/blob/main/src/app/(main)/discover/features/useNav.tsx)
+|                        usage shown in this [search results](https://github.com/search?q=repo%3Alobehub%2Flobe-chat%20useNav&type=code) 
+|                        From this example, you will notice that components or hooks in features are only used in layout
+|                        and other features folders found in route group.
+|                        Example 3: [StoreSearchBar.tsx](https://github.com/lobehub/lobe-chat/blob/main/src/app/(main)/discover/features/StoreSearchBar.tsx)
+|                        usage is shown in this [search results](https://github.com/search?q=repo%3Alobehub%2Flobe-chat%20StoreSearchBar&type=code)
+|                        This example demonstrates feature usage in Layout only, you can also conclude that features
+|                        cannot be used in components but components can be used in features. This observation is made
+├── search/              a search page
+├── error.tsx            Error page for Discover layout. Read more about [error handling](https://nextjs.org/docs/app/building-your-application/routing/error-handling#uncaught-exceptions)
+├── layout.tsx           Discover layout. Read more about [layout](https://nextjs.org/docs/app/api-reference/file-conventions/layout)
+├── loading.tsx          Loading page for Discover route. Read more about [loading](https://nextjs.org/docs/app/api-reference/file-conventions/loading)
+└── not-found.tsx        Not found page for Discover route. Read more about [not found page](https://nextjs.org/docs/app/api-reference/file-conventions/not-found)
+```
+
+# (list) route group
+Next, let's look at (list) route group. Below is the file structure.
+
+```
+discover/(list)/
+├── (home)/              Home route group, that shows the page when you visit https://lobechat.com/discover
+├── _layout/             contains Desktop, Mobile folders that are used in layout.tsx
+├── assistants/          Assistants page that you see when you visit https://lobechat.com/discover/assistants.
+├── models/              Models page that you see when you visit https://lobechat.com/discover/models. 
+├── plugins/             Plugins page that you see when you visit https://lobechat.com/discover/plugins.
+├── providers/           Providers page that you see when you visit https://lobechat.com/discover/providers
+├── error.tsx            Error page for discover/(list) layout. Read more about [error handling](https://nextjs.org/docs/app/building-your-application/routing/error-handling#uncaught-exceptions)
+├── layout.tsx           discover/(list) layout. Read more about [layout](https://nextjs.org/docs/app/api-reference/file-conventions/layout)
+├── loading.tsx          Loading page for discover/(list) route. Read more about [loading](https://nextjs.org/docs/app/api-reference/file-conventions/loading)
+└── not-found.tsx        Not found page for discover/(list) route. Read more about [not found page](https://nextjs.org/docs/app/api-reference/file-conventions/not-found)
+```

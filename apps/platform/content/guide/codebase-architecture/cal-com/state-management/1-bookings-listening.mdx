@@ -1,0 +1,242 @@
+---
+title: state-management in cal.com
+toc: true
+---
+
+[C: Bookings listing page]
+
+[Insert screenshot of bookings page]
+
+Cal.com uses Next.js pages router, there a folder named bookings inside [pages folder](https://github.com/calcom/cal.com/tree/main/apps/web/pages/bookings)
+and in the [status.tsx](https://github.com/calcom/cal.com/blob/main/apps/web/pages/bookings/%5Bstatus%5D.tsx)
+, you will find the below code:
+
+```
+import type { GetStaticPaths } from "next";
+
+import PageWrapper from "@components/PageWrapper";
+
+import { validStatuses } from "~/bookings/lib/validStatuses";
+import BookingsListingView from "~/bookings/views/bookings-listing-view";
+
+export { getStaticProps } from "~/bookings/views/bookings-listing-view.getStaticProps";
+
+const BookingsListingPage = new Proxy<{
+  (): JSX.Element;
+  PageWrapper?: typeof PageWrapper;
+}>(BookingsListingView, {});
+
+BookingsListingPage.PageWrapper = PageWrapper;
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: validStatuses.map((status) => ({
+      params: { status },
+      locale: "en",
+    })),
+    fallback: "blocking",
+  };
+};
+
+export default BookingsListingPage;
+```
+
+Pay attention to the imports at the top of this code snippet. Listing view component is imported from
+`/bookings/views/bookings-listing-view`
+
+There's a dedicated components structure chapter in this guide to help you understand more about 
+cal.com's component structures.
+
+# Bookings-listinig-view
+
+You will find Bookings listing view component in [modules folder](https://github.com/calcom/cal.com/blob/main/apps/web/modules/bookings/views/bookings-listing-view.tsx)
+
+[Insert a screenshot of - https://github.com/calcom/cal.com/blob/main/apps/web/modules/bookings/views/bookings-listing-view.tsx]
+
+At this point, it is important to ask yourself the right questions.
+
+1. How is the data fetched?
+2. Is there any state updated based on fetch response?
+3. Does the rendered JSX have any conditions inside the html code? if so, what are those conditions?
+
+## 1. How is the data fetched?
+
+The below code is responsible to fetch the data. cal.com uses tRPC to fetch the data. There's a 
+dedicated chapter about API layer in this guide, let's focus on the state management.
+
+```
+ const query = trpc.viewer.bookings.get.useInfiniteQuery(
+    {
+      limit: 10,
+      filters: {
+        ...filterQuery,
+        status: filterQuery.status ?? status,
+      },
+    },
+    {
+      enabled: true,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
+``` 
+## 2. Is there any state updated based on fetch response?
+
+There are no state variables updated based on the query but the query response is processed differently.
+
+### Example 1:
+At [Line 130 in bookings-listing-view](https://github.com/calcom/cal.com/blob/main/apps/web/modules/bookings/views/bookings-listing-view.tsx#L130C3-L142C16)
+you will find the below code:
+
+```
+const bookingsToday =
+  query.data?.pages.map((page) =>
+    page.bookings.filter((booking: BookingOutput) => {
+      recurringInfoToday = page.recurringInfo.find(
+        (info) => info.recurringEventId === booking.recurringEventId
+      );
+
+      return (
+        dayjs(booking.startTime).tz(user?.timeZone).format("YYYY-MM-DD") ===
+        dayjs().tz(user?.timeZone).format("YYYY-MM-DD")
+      );
+    })
+)[0] || [];
+```
+
+`bookingsToday` here is updated based on `query.data`.
+
+### Example 2:
+
+Similarly, `isEmpty` is computed based on `query.data`. Below code is picked from [line 103](https://github.com/calcom/cal.com/blob/main/apps/web/modules/bookings/views/bookings-listing-view.tsx#L103C3-L103C58)
+
+```
+const isEmpty = !query.data?.pages[0]?.bookings.length;
+```
+
+You could make a tRPC call and process the response further to update variables with required response values,
+without using any `setState` methods. We can also observe that this component is on client side as it has 
+"use client" at the top of the file. tRPC call did not happen inside a useEffect with an empty array dependency.
+
+## Does the rendered JSX have any conditions inside the html code? if so, what are those conditions?
+In the [bookings-listing-view.tsx](https://github.com/calcom/cal.com/blob/main/apps/web/modules/bookings/views/bookings-listing-view.tsx#L159),
+based on the query status, certain components are rendered. 
+
+Query status can be:
+- error
+- pending
+- success  
+
+### Error condition
+Below code is picked from [bookings-listing-view.tsx](https://github.com/calcom/cal.com/blob/main/apps/web/modules/bookings/views/bookings-listing-view.tsx#L151C11-L153C13)
+
+```
+{query.status === "error" && (
+  <Alert severity="error" title={t("something_went_wrong")} message={query.error.message} />
+)}
+```
+
+### Pending condition
+Below code can be found at line 151.
+
+```
+{(query.status === "pending" || query.isPaused) && <SkeletonLoader />}
+```
+
+### Success condition
+If the query status is successful, this condition is associated with `isEmpty` variable. If there's no bookings
+available, the below code handles success + isEmpty condition, picked from [line 227](https://github.com/calcom/cal.com/blob/main/apps/web/modules/bookings/views/bookings-listing-view.tsx#L227C11-L238C13):
+
+```
+{query.status === "success" && isEmpty && (
+  <div className="flex items-center justify-center pt-2 xl:pt-0">
+    <EmptyScreen
+      Icon="calendar"
+      headline={t("no_status_bookings_yet", { status: t(status).toLowerCase() })}
+      description={t("no_status_bookings_yet_description", {
+        status: t(status).toLowerCase(),
+        description: t(descriptionByStatus[status]),
+      })}
+    />
+  </div>
+)}
+```
+
+If there's bookings available, the below code handles success + !isEmpty condition, picked from [line 155](https://github.com/calcom/cal.com/blob/main/apps/web/modules/bookings/views/bookings-listing-view.tsx#L155C11-L226C13):
+
+```
+{query.status === "success" && !isEmpty && (
+<>
+    {!!bookingsToday.length && status === "upcoming" && (
+      <div className="mb-6 pt-2 xl:pt-0">
+        <WipeMyCalActionButton bookingStatus={status} bookingsEmpty={isEmpty} />
+        <p className="text-subtle mb-2 text-xs font-medium uppercase leading-4">{t("today")}</p>
+        <div className="border-subtle overflow-hidden rounded-md border">
+          <table className="w-full max-w-full table-fixed">
+            <tbody className="bg-default divide-subtle divide-y" data-testid="today-bookings">
+              <Fragment>
+                {bookingsToday.map((booking: BookingOutput) => (
+                  <BookingListItem
+                    key={booking.id}
+                    loggedInUser={{
+                      userId: user?.id,
+                      userTimeZone: user?.timeZone,
+                      userTimeFormat: user?.timeFormat,
+                      userEmail: user?.email,
+                    }}
+                    listingStatus={status}
+                    recurringInfo={recurringInfoToday}
+                    {...booking}
+                  />
+                ))}
+              </Fragment>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )}
+    <div className="pt-2 xl:pt-0">
+      <div className="border-subtle overflow-hidden rounded-md border">
+        <table data-testid={`${status}-bookings`} className="w-full max-w-full table-fixed">
+          <tbody className="bg-default divide-subtle divide-y" data-testid="bookings">
+            {query.data.pages.map((page, index) => (
+              <Fragment key={index}>
+                {page.bookings.filter(filterBookings).map((booking: BookingOutput) => {
+                  const recurringInfo = page.recurringInfo.find(
+                    (info) => info.recurringEventId === booking.recurringEventId
+                  );
+                  return (
+                    <BookingListItem
+                      key={booking.id}
+                      loggedInUser={{
+                        userId: user?.id,
+                        userTimeZone: user?.timeZone,
+                        userTimeFormat: user?.timeFormat,
+                        userEmail: user?.email,
+                      }}
+                      listingStatus={status}
+                      recurringInfo={recurringInfo}
+                      {...booking}
+                    />
+                  );
+                })}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="text-default p-4 text-center" ref={buttonInView.ref}>
+        <Button
+          color="minimal"
+          loading={query.isFetchingNextPage}
+          disabled={!query.hasNextPage}
+          onClick={() => query.fetchNextPage()}>
+          {query.hasNextPage ? t("load_more_results") : t("no_more_results")}
+        </Button>
+      </div>
+    </div>
+  </>
+)}
+```
+
+# References:
+1. https://github.com/calcom/cal.com/tree/main/apps/web/pages/bookings

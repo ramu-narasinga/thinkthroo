@@ -2,7 +2,6 @@
 title: Supabase Project Structure
 toc: true
 ---
-
 [Architecture: Supabase Project Structure]
 [L: Introduction]
 
@@ -38,41 +37,3 @@ these are analyzed and documented in Supabase tooling.
 1. https://turbo.build/repo/docs
 2. https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md
 3. https://github.com/supabase/supabase
-
-[L: Root level structure]
-Let's look at an overview of the project structure of [Supabase at root level](https://github.com/supabase/supabase).
-
-```sh
-apps                   # `apps` folder contains applications/systems. [Read more](link-to-guide)
-|
-docker                 # `docker` folder contains docker related code for self hosting purposes. [Read more](link-to-guide)
-|
-examples               # `examples` folder contains Supabase usage examples. [Read more](link-to-guide)
-|
-i18n                   # `i18n` folder contains README.md in mutiple languages. [Read more](link-to-guide)
-|
-packages               # `packages` folder contains shareable internal packages used across the monorepo. [Read more](link-to-guide) 
-|
-playwright-tests       # `playwright-tests` contains tests that test features commonly used in local studio [Read more](link-to-guide)
-|
-scripts                # `scripts` is an internal-use only folder [Read more](link-to-guide)
-|
-supabase
-|
-tests
-|
-vale/styles
-+-- app               # application layer containing:
-|   |                 # this folder might differ based on the meta framework used
-|   +-- routes        # application routes / can also be pages
-|   +-- app.tsx       # main application component
-|   +-- provider.tsx  # application provider that wraps the entire application with different global providers - this might also differ based on meta framework used
-|   +-- router.tsx    # application router configuration
-+-- assets            # assets folder can contain all the static files such as images, fonts, etc.
-|
-+-- components        # shared components used across the entire application
-```
-
-# References:
-1. https://github.com/supabase/supabase
-2. https://turbo.build/repo/docs/crafting-your-repository

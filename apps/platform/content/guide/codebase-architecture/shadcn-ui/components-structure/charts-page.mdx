@@ -4,14 +4,17 @@ description: Components Structure In Charts Page.
 toc: true
 ---
 
+[C: shadcn-ui/ui]
+[L: Charts Page]
+
 In this lesson, we are only focusing on the folder structure, 
 file naming conventions used in [Charts page](https://ui.shadcn.com/charts)
 
-## Charts Page
+# Charts Page
 
 This Charts Page source code is found at [www/app/(app)/charts/page.tsx](https://github.com/shadcn-ui/ui/blob/main/apps/www/app/(app)/charts/page.tsx).
 
-### Components imported
+## Components imported
 
 The following components are imported in the charts page, found at [www/app/(app)/charts/page.tsx](https://github.com/shadcn-ui/ui/blob/main/apps/www/app/(app)/charts/page.tsx).
 
@@ -35,10 +38,11 @@ You could place the components such as ChartDisplay, ChartsNav in a folder named
 that could be created in `app/(app)/charts` for colocating purposes. 
 
 - charts components:
+[www/app/(app)/charts/charts.tsx](https://github.com/shadcn-ui/ui/blob/main/apps/www/app/(app)/charts/charts.tsx) contains a
+lot of chart components imported from `@/registry/new-york/block/chart-area-default`
 
 
-
-## Conclusion:
+# Conclusion:
 You make the best judgement based on what works for you. Across the shadcn-ui/ui, components used in pages are located in
 components folder at the root level so they can be imported using `@/components`.
 

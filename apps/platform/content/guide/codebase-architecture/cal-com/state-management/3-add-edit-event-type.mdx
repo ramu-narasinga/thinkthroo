@@ -1,0 +1,769 @@
+---
+title: state-management in cal.com
+toc: true
+---
+
+[State management in add/edit event type]
+
+In this guide, we will review the state management in the following actions in Event Types page:
+1. Add new event type
+2. Edit existing event type
+
+# Add new event type
+
+In the [event types page](https://app.cal.com/event-types), when you click on "+ New" button in the top right,
+
+[Insert screenshot of New button]
+
+you will see this below dialog
+
+[Insert screenshot of dialog]
+
+Let's find out how the code behind this works.
+
+## New button
+
+I had to open dev tools and find a unique identifier that helped me locate this button in the cal.com codebase.
+
+```
+<div class="pwa:bottom-[max(7rem,_calc(5rem_+_env(safe-area-inset-bottom)))] fixed bottom-20 z-40 ltr:right-4 rtl:left-4 md:z-auto md:ltr:right-0 md:rtl:left-0 flex-shrink-0 [-webkit-app-region:no-drag] md:relative md:bottom-auto md:right-auto">
+  <button data-testid="new-event-type" type="button" class="whitespace-nowrap inline-flex items-center text-sm font-medium relative transition disabled:cursor-not-allowed rounded-full justify-center md:rounded-md radix-state-open:rotate-45 md:radix-state-open:rotate-0 radix-state-open:shadown-none radix-state-open:ring-0 !shadow-none bg-brand-default hover:bg-brand-emphasis focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-default text-brand disabled:bg-brand-subtle disabled:text-brand-subtle disabled:opacity-40 disabled:hover:bg-brand-subtle disabled:hover:text-brand-default disabled:hover:opacity-40 px-4 py-2.5 h-14 md:h-9 md:w-auto md:px-4 md:py-2.5"><svg height="16" width="16" class="fill-transparent hidden h-4 w-4 stroke-[1.5px] ltr:-ml-1 ltr:mr-2 rtl:-mr-1 rtl:ml-2 md:inline-flex" aria-hidden="true"><use href="#plus"></use></svg><svg height="16" width="16" class="fill-transparent inline h-6 w-6 md:hidden" data-testid="plus" aria-hidden="true"><use href="#plus"></use></svg><span class="hidden md:inline">New</span></button></div>
+``` 
+
+I searched for `pwa:bottom-[max` in the cal.com codebase and found it in [Shell.tsx](https://github.com/calcom/cal.com/blob/bfeafaa21f7dc70e02cbd26ab6670459678b4bcc/packages/features/shell/Shell.tsx#L192)
+at line 187 in ShellMain component.
+
+```
+{props.CTA && (
+  <div
+    className={classNames(
+      props.backPath
+        ? "relative"
+        : "pwa:bottom-[max(7rem,_calc(5rem_+_env(safe-area-inset-bottom)))] fixed bottom-20 z-40 ltr:right-4 rtl:left-4 md:z-auto md:ltr:right-0 md:rtl:left-0",
+      "flex-shrink-0 [-webkit-app-region:no-drag] md:relative md:bottom-auto md:right-auto"
+    )}>
+    {isLocaleReady && props.CTA}
+  </div>
+)}
+```
+
+In [event-types-listing-view.tsx](https://github.com/calcom/cal.com/blob/main/apps/web/modules/event-types/views/event-types-listing-view.tsx),
+Shell component is used as shown below:
+
+```
+return (
+    <Shell
+      withoutMain={false}
+      title={t("event_types_page_title")}
+      description={t("event_types_page_subtitle")}
+      withoutSeo
+      heading={t("event_types_page_title")}
+      hideHeadingOnMobile
+      subtitle={t("event_types_page_subtitle")}
+      CTA={<CTA profileOptions={profileOptions} isOrganization={!!user?.organizationId} />}>
+``` 
+
+But when we searched for this New button in the cal.com codebase, we found it in ShellMain component. So how's Shell and ShellMain
+related?
+
+## Shell
+
+Below code is picked from [Shell.tsx at line 120](https://github.com/calcom/cal.com/blob/main/packages/features/shell/Shell.tsx#L120).
+
+```
+export default function Shell(props: LayoutProps) {
+  // if a page is unauthed and isPublic is true, the redirect does not happen.
+  useRedirectToLoginIfUnauthenticated(props.isPublic);
+  useRedirectToOnboardingIfNeeded();
+  useAppTheme();
+
+  return !props.isPublic ? (
+    <KBarWrapper withKBar>
+      <Layout {...props} />
+    </KBarWrapper>
+  ) : (
+    <PublicShell {...props} />
+  );
+}
+```
+
+To understand how Shell and ShellMain are related, we need to follow the Layout component. Below is the Layout code picked from
+[line 25 in Shell.tsx](https://github.com/calcom/cal.com/blob/main/packages/features/shell/Shell.tsx#L25).
+
+```
+const Layout = (props: LayoutProps) => {
+  const { banners, bannersHeight } = useBanners();
+  const pathname = usePathname();
+  const isFullPageWithoutSidebar = pathname?.startsWith("/apps/routing-forms/reporting/");
+  const pageTitle = typeof props.heading === "string" && !props.title ? props.heading : props.title;
+  const withoutSeo = props.withoutSeo ?? props.withoutMain ?? false;
+
+  useFormbricks();
+
+  return (
+    <>
+      {!withoutSeo && (
+        <HeadSeo
+          title={pageTitle ?? APP_NAME}
+          description={props.description ?? props.subtitle?.toString() ?? ""}
+        />
+      )}
+      <div>
+        <Toaster position="bottom-right" />
+      </div>
+
+      <TimezoneChangeDialog />
+
+      <div className="flex min-h-screen flex-col">
+        {banners && !props.isPlatformUser && !isFullPageWithoutSidebar && (
+          <BannerContainer banners={banners} />
+        )}
+
+        <div className="flex flex-1" data-testid="dashboard-shell">
+          {props.SidebarContainer ? (
+            cloneElement(props.SidebarContainer, { bannersHeight })
+          ) : (
+            <SideBarContainer isPlatformUser={props.isPlatformUser} bannersHeight={bannersHeight} />
+          )}
+          <div className="flex w-0 flex-1 flex-col">
+            <MainContainer {...props} />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+```
+
+## MainContainer
+
+MainContainer component above has the below code picked from Shell.tsx
+
+```
+function MainContainer({
+  isPlatformUser,
+  MobileNavigationContainer: MobileNavigationContainerProp = (
+    <MobileNavigationContainer isPlatformNavigation={isPlatformUser} />
+  ),
+  TopNavContainer: TopNavContainerProp = <TopNavContainer />,
+  ...props
+}: LayoutProps) {
+  return (
+    <main className="bg-default relative z-0 flex-1 focus:outline-none">
+      {/* show top navigation for md and smaller (tablet and phones) */}
+      {TopNavContainerProp}
+      <div className="max-w-full px-2 py-4 lg:px-6">
+        <ErrorBoundary>
+          {!props.withoutMain ? <ShellMain {...props}>{props.children}</ShellMain> : props.children}
+        </ErrorBoundary>
+        {/* show bottom navigation for md and smaller (tablet and phones) on pages where back button doesn't exist */}
+        {!props.backPath ? MobileNavigationContainerProp : null}
+      </div>
+    </main>
+  );
+}
+```
+
+## CTA component
+
+`MainContainer` component has the `ShellMain` component. So far, we have only looked at Shell and ShellMain, we still need to 
+understand this code snippet below.
+
+```
+{props.CTA && (
+  <div
+    className={classNames(
+      props.backPath
+        ? "relative"
+        : "pwa:bottom-[max(7rem,_calc(5rem_+_env(safe-area-inset-bottom)))] fixed bottom-20 z-40 ltr:right-4 rtl:left-4 md:z-auto md:ltr:right-0 md:rtl:left-0",
+      "flex-shrink-0 [-webkit-app-region:no-drag] md:relative md:bottom-auto md:right-auto"
+    )}>
+    {isLocaleReady && props.CTA}
+  </div>
+)}
+```
+
+New button is passed down as `props.CTA` to the ShellMain component, let's check the [event-types-listing-view.tsx](https://github.com/calcom/cal.com/blob/main/apps/web/modules/event-types/views/event-types-listing-view.tsx#L1006)
+
+```
+ <Shell
+  ...
+  CTA={<CTA profileOptions={profileOptions} isOrganization={!!user?.organizationId} />}>
+  <InfiniteScrollMain
+    ...
+  />
+</Shell>
+```
+
+This CTA is defined with in the [event-types-listing-view.tsx file](https://github.com/calcom/cal.com/blob/main/apps/web/modules/event-types/views/event-types-listing-view.tsx#L840)
+
+```
+const CTA = ({
+  profileOptions,
+  isOrganization,
+}: {
+  profileOptions: {
+    teamId: number | null | undefined;
+    label: string | null;
+    image: string;
+    membershipRole: MembershipRole | null | undefined;
+    slug: string | null;
+  }[];
+  isOrganization: boolean;
+}) => {
+  const { t } = useLocale();
+
+  if (!profileOptions.length) return null;
+
+  return (
+    <CreateButton
+      data-testid="new-event-type"
+      subtitle={t("create_event_on").toUpperCase()}
+      options={profileOptions}
+      createDialog={() => <CreateEventTypeDialog profileOptions={profileOptions} />}
+    />
+  );
+};
+```
+
+## CreateButton
+
+CreateButton is a generic component imported from `@calcom/ui`. It has a prop called `createDialog`. This is
+where you would pass your `CreateEventTypeDialog`. This dialog component shows you the event type 
+form in a dialog.
+
+The below code is picked from [ui/components/createButton/CreateButton.tsx](https://github.com/calcom/cal.com/blob/main/packages/ui/components/createButton/CreateButton.tsx#L40)
+
+```
+import { usePathname, useRouter } from "next/navigation";
+
+import { useCompatSearchParams } from "@calcom/lib/hooks/useCompatSearchParams";
+import { useLocale } from "@calcom/lib/hooks/useLocale";
+import type { ButtonColor } from "@calcom/ui";
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@calcom/ui";
+
+export interface Option {
+  platform?: boolean;
+  teamId: number | null | undefined; // if undefined, then it's a profile
+  label: string | null;
+  image: string | null;
+  slug: string | null;
+}
+
+export type CreateBtnProps = {
+  options: Option[];
+  createDialog?: () => JSX.Element;
+  createFunction?: (teamId?: number, platform?: boolean) => void;
+  subtitle?: string;
+  buttonText?: string;
+  isPending?: boolean;
+  disableMobileButton?: boolean;
+  "data-testid"?: string;
+  color?: ButtonColor;
+};
+
+/**
+ * @deprecated use CreateButtonWithTeamsList instead
+ */
+export function CreateButton(props: CreateBtnProps) {
+  const { t } = useLocale();
+  const router = useRouter();
+  const searchParams = useCompatSearchParams();
+  const pathname = usePathname();
+
+  const {
+    createDialog,
+    options,
+    isPending,
+    createFunction,
+    buttonText,
+    disableMobileButton,
+    subtitle,
+    ...restProps
+  } = props;
+  const CreateDialog = createDialog ? createDialog() : null;
+
+  const hasTeams = !!options.find((option) => option.teamId);
+  const platform = !!options.find((option) => option.platform);
+
+  // inject selection data into url for correct router history
+  const openModal = (option: Option) => {
+  };
+
+  return (
+    <>
+      {!hasTeams && !platform ? (
+        <Button
+          onClick={() =>
+            !!CreateDialog
+              ? openModal(options[0])
+              : createFunction
+              ? createFunction(options[0].teamId || undefined)
+              : null
+          }
+          data-testid="create-button"
+          StartIcon="plus"
+          loading={isPending}
+          variant={disableMobileButton ? "button" : "fab"}
+          {...restProps}>
+          {buttonText ? buttonText : t("new")}
+        </Button>
+      ) : (
+        <Dropdown>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant={disableMobileButton ? "button" : "fab"}
+              StartIcon="plus"
+              data-testid="create-button-dropdown"
+              loading={isPending}
+              {...restProps}>
+              {buttonText ? buttonText : t("new")}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent sideOffset={14} align="end">
+            <DropdownMenuLabel>
+              <div className="w-48 text-left text-xs">{subtitle}</div>
+            </DropdownMenuLabel>
+            {options.map((option, idx) => (
+              <DropdownMenuItem key={option.label}>
+                <DropdownItem
+                  type="button"
+                  data-testid={`option${option.teamId ? "-team" : ""}-${idx}`}
+                  CustomStartIcon={<Avatar alt={option.label || ""} imageSrc={option.image} size="sm" />}
+                  onClick={() =>
+                    !!CreateDialog
+                      ? openModal(option)
+                      : createFunction
+                      ? createFunction(option.teamId || undefined, option.platform)
+                      : null
+                  }>
+                  {" "}
+                  {/*improve this code */}
+                  <span>{option.label}</span>
+                </DropdownItem>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </Dropdown>
+      )}
+      {searchParams?.get("dialog") === "new" && CreateDialog}
+    </>
+  );
+}
+```
+
+We now need to go to the `CreateEventTypeDialog` component, we are just following along the code to learn how
+the Create Event Type form dialog state is managed.
+
+## CreateEventTypeDialog.tsx
+
+The below code is picked from [features/eventtypes/components/CreateEventTypeDialog.tsx](https://github.com/calcom/cal.com/blob/main/packages/features/eventtypes/components/CreateEventTypeDialog.tsx#L53)
+
+```
+import type { EventType } from "@prisma/client";
+import { isValidPhoneNumber } from "libphonenumber-js";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
+
+import { useOrgBranding } from "@calcom/features/ee/organizations/context/provider";
+import { TeamEventTypeForm } from "@calcom/features/ee/teams/components/TeamEventTypeForm";
+import { useCreateEventType } from "@calcom/lib/hooks/useCreateEventType";
+import { useLocale } from "@calcom/lib/hooks/useLocale";
+import { useTypedQuery } from "@calcom/lib/hooks/useTypedQuery";
+import { MembershipRole, SchedulingType } from "@calcom/prisma/enums";
+import { trpc } from "@calcom/trpc/react";
+import { Button, Dialog, DialogClose, DialogContent, DialogFooter, showToast } from "@calcom/ui";
+
+import CreateEventTypeForm from "./CreateEventTypeForm";
+
+// this describes the uniform data needed to create a new event type on Profile or Team
+export interface EventTypeParent {
+  teamId: number | null | undefined; // if undefined, then it's a profile
+  membershipRole?: MembershipRole | null;
+  name?: string | null;
+  slug?: string | null;
+  image?: string | null;
+}
+
+const locationFormSchema = z.array(
+  z.object({
+    locationType: z.string(),
+    locationAddress: z.string().optional(),
+    displayLocationPublicly: z.boolean().optional(),
+    locationPhoneNumber: z
+      .string()
+      .refine((val) => isValidPhoneNumber(val))
+      .optional(),
+    locationLink: z.string().url().optional(), // URL validates as new URL() - which requires HTTPS:// In the input field
+  })
+);
+
+const querySchema = z.object({
+  eventPage: z.string().optional(),
+  teamId: z.union([z.string().transform((val) => +val), z.number()]).optional(),
+  title: z.string().optional(),
+  slug: z.string().optional(),
+  length: z.union([z.string().transform((val) => +val), z.number()]).optional(),
+  description: z.string().optional(),
+  schedulingType: z.nativeEnum(SchedulingType).optional(),
+  locations: z
+    .string()
+    .transform((jsonString) => locationFormSchema.parse(JSON.parse(jsonString)))
+    .optional(),
+});
+
+export default function CreateEventTypeDialog({
+  profileOptions,
+}: {
+  profileOptions: {
+    teamId: number | null | undefined;
+    label: string | null;
+    image: string | undefined;
+    membershipRole: MembershipRole | null | undefined;
+  }[];
+}) {
+  const { t } = useLocale();
+  const router = useRouter();
+  const orgBranding = useOrgBranding();
+
+  const {
+    data: { teamId, eventPage: pageSlug },
+  } = useTypedQuery(querySchema);
+
+  const teamProfile = profileOptions.find((profile) => profile.teamId === teamId);
+
+  const isTeamAdminOrOwner =
+    teamId !== undefined &&
+    (teamProfile?.membershipRole === MembershipRole.OWNER ||
+      teamProfile?.membershipRole === MembershipRole.ADMIN);
+
+  const onSuccessMutation = (eventType: EventType) => {
+    router.replace(`/event-types/${eventType.id}${teamId ? "?tabName=team" : ""}`);
+    showToast(
+      t("event_type_created_successfully", {
+        eventTypeTitle: eventType.title,
+      }),
+      "success"
+    );
+  };
+
+  const onErrorMutation = (err: string) => {
+    showToast(err, "error");
+  };
+
+  const SubmitButton = (isPending: boolean) => {
+    return (
+      <DialogFooter showDivider>
+        <DialogClose />
+        <Button type="submit" loading={isPending}>
+          {t("continue")}
+        </Button>
+      </DialogFooter>
+    );
+  };
+
+  const { form, createMutation, isManagedEventType } = useCreateEventType(onSuccessMutation, onErrorMutation);
+
+  const urlPrefix = orgBranding?.fullDomain ?? process.env.NEXT_PUBLIC_WEBSITE_URL;
+
+  const { data: team } = trpc.viewer.teams.get.useQuery(
+    { teamId: teamId ?? -1, isOrg: false },
+    { enabled: !!teamId }
+  );
+
+  return (
+    <Dialog
+      name="new"
+      clearQueryParamsOnClose={["eventPage", "type", "description", "title", "length", "slug", "locations"]}>
+      <DialogContent
+        type="creation"
+        enableOverflow
+        title={teamId ? t("add_new_team_event_type") : t("add_new_event_type")}
+        description={t("new_event_type_to_book_description")}>
+        {teamId ? (
+          <TeamEventTypeForm
+            teamSlug={team?.slug}
+            teamId={teamId}
+            isTeamAdminOrOwner={isTeamAdminOrOwner}
+            urlPrefix={urlPrefix}
+            isPending={createMutation.isPending}
+            form={form}
+            isManagedEventType={isManagedEventType}
+            handleSubmit={(values) => {
+              createMutation.mutate(values);
+            }}
+            SubmitButton={SubmitButton}
+          />
+        ) : (
+          <CreateEventTypeForm
+            urlPrefix={urlPrefix}
+            isPending={createMutation.isPending}
+            form={form}
+            isManagedEventType={isManagedEventType}
+            handleSubmit={(values) => {
+              createMutation.mutate(values);
+            }}
+            SubmitButton={SubmitButton}
+            pageSlug={pageSlug}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+In the DialogContent, there's two kinds of forms:
+- TeamEventTypeForm
+- CreateEventTypeForm
+
+Let's review the `CreateEventTypeForm`.
+
+## CreateEventTypeForm
+
+The below code snippet shows the props sent to `CreateEventTypeForm`:
+
+```
+<CreateEventTypeForm
+  urlPrefix={urlPrefix}
+  isPending={createMutation.isPending}
+  form={form}
+  isManagedEventType={isManagedEventType}
+  handleSubmit={(values) => {
+    createMutation.mutate(values);
+  }}
+  SubmitButton={SubmitButton}
+  pageSlug={pageSlug}
+/>
+```
+### props
+
+`handleSubmit` prop calls a mutation function:
+
+```
+createMutation.mutate(values);
+```
+
+At [line 103](https://github.com/calcom/cal.com/blob/main/packages/features/eventtypes/components/CreateEventTypeDialog.tsx#L103), 
+you will find createMutation is imported from `useCreateEventType`.
+
+```
+const { form, createMutation, isManagedEventType } = useCreateEventType(onSuccessMutation, onErrorMutation);
+```
+
+You can learn more about these mutations in API layer.
+
+## useCreateEventType
+
+This below code is picked from [useCreateEventType](https://github.com/calcom/cal.com/blob/main/packages/lib/hooks/useCreateEventType.ts#L17)
+
+```
+import { useForm } from "react-hook-form";
+
+export const useCreateEventTypeForm = () => {
+  const form = useForm<CreateEventTypeFormValues>({
+    defaultValues: {
+      length: 15,
+    },
+    resolver: zodResolver(createEventTypeInput),
+  });
+  ...
+  return { form, isManagedEventType };
+};
+
+export const useCreateEventType = (
+  onSuccessMutation: (eventType: EventType) => void,
+  onErrorMutation: (message: string) => void
+) => {
+  ...
+  const { form, isManagedEventType } = useCreateEventTypeForm();
+  ...
+}
+```
+
+Okay, now it is clear that CreateEventType uses [react-hook-form](https://react-hook-form.com/) to manage
+the form state and on submitting the form, 
+
+```
+handleSubmit={(values) => {
+  createMutation.mutate(values);
+}}
+```
+
+# Edit existing event type 
+
+In the event types listing page, when you click on options as shown below:
+
+[Insert screenshot of options and dropdown in https://app.cal.com/event-types]
+
+You will see `Edit`. When you click on this `Edit` button, you will be navigated to https://app.cal.com/event-types/{id}
+
+[Insert screenshot of - https://app.cal.com/event-types/989456?tabName=setup]
+
+`/event-types` is located at [apps/web/app/(use-page-wrapper)/(main-nav)/event-types/page.tsx](https://github.com/calcom/cal.com/blob/main/apps/web/app/(use-page-wrapper)/(main-nav)/event-types/page.tsx) 
+at the time of writing this guide and returns the below shown component
+
+```
+const Page = async ({ params, searchParams }: PageProps) => {
+  const context = buildLegacyCtx(headers(), cookies(), params, searchParams);
+  const session = await getServerSession({ req: context.req });
+
+  if (!session?.user?.id) {
+    redirect("/auth/login");
+  }
+
+  await ssrInit(context);
+  const t = await getTranslate();
+
+  return (
+    <ShellMainAppDir
+      heading={t("event_types_page_title")}
+      subtitle={t("event_types_page_subtitle")}
+      CTA={<EventTypesCTA />}>
+      <EventTypes />
+    </ShellMainAppDir>
+  );
+};
+```
+
+## EventTypes component
+
+```
+import EventTypes, { EventTypesCTA } from "~/event-types/views/event-types-listing-view";
+```
+
+`~/` is alias for [modules folder](https://github.com/calcom/cal.com/tree/main/apps/web/modules) that you can
+find in [tsconfig.json](https://github.com/calcom/cal.com/blob/main/apps/web/tsconfig.json#L1C1-L6C28).
+
+```
+{
+  "extends": "@calcom/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["modules/*"],
+```
+
+[event-types-listing-view.tsx](https://github.com/calcom/cal.com/blob/9608669f98bb0952137ecec374ac7125717fc9db/apps/web/modules/event-types/views/event-types-listing-view.tsx#L611)
+is a large file containing 1020 lines at the writing this guide. You will find the "Edit" button at [line 611](https://github.com/calcom/cal.com/blob/9608669f98bb0952137ecec374ac7125717fc9db/apps/web/modules/event-types/views/event-types-listing-view.tsx#L611)
+
+```
+<DropdownMenuContent>
+  {!readOnly && (
+    <DropdownMenuItem>
+      <DropdownItem
+        type="button"
+        data-testid={`event-type-edit-${type.id}`}
+        StartIcon="pencil"
+        onClick={() => router.push(`/event-types/${type.id}`)}>
+        {t("edit")}
+      </DropdownItem>
+    </DropdownMenuItem>
+  )}
+```
+
+On clicking "Edit", you are redirected to `/event-types/${some-id}`.
+
+[Insert screenshot of - https://app.cal.com/event-types/989456?tabName=setup]
+
+By default, tabName is set to "setup" when you visit `event-types/{id}` as a query param so the url becomes `event-types/{id}?tabName=setup`
+
+## Finding the route
+
+We need to find where this `event-types/{id}` dynamic route is in the cal.com codebase. This page is found at 
+[web/app/(use-page-wrapper)/event-types/[type]/page.tsx](https://github.com/calcom/cal.com/blob/9608669f98bb0952137ecec374ac7125717fc9db/apps/web/app/(use-page-wrapper)/event-types/%5Btype%5D/page.tsx) 
+
+The below code snippet is picked from [event-types/[type]/page.tsx]()
+
+```
+...
+import EventTypePageWrapper from "~/event-types/views/event-types-single-view";
+...
+const ServerPage = async ({ params, searchParams }: _PageProps) => {
+  const legacyCtx = buildLegacyCtx(headers(), cookies(), params, searchParams);
+  const props = await getData(legacyCtx);
+
+  return <EventTypePageWrapper {...props} />;
+};
+
+export default ServerPage;
+```
+
+This page just returns a wrapper, EventTypePageWrapper, imported from `~/event-types/views/event-types-single-view`
+We know where to look for, i.e., in the modules folder 
+
+## EventTypePageWrapper
+
+The below code is picked from [apps/web/modules/event-types/views/event-types-single-view.tsx](https://github.com/calcom/cal.com/blob/main/apps/web/modules/event-types/views/event-types-single-view.tsx#L7)
+
+```
+"use client";
+
+import { EventType } from "@calcom/atoms/monorepo";
+
+import type { PageProps } from "@lib/event-types/[type]/getServerSideProps";
+
+const EventTypePageWrapper = ({ type, ...rest }: PageProps) => {
+  return <EventType {...rest} id={type} />;
+};
+
+export default EventTypePageWrapper;
+```
+
+Since `event-types/{id}` has multiple tabs, the code displaying these tabs is organized differently.
+Let's follow along the code and see how EventType looks like.
+
+## EventType
+
+`EventType` is imported from `@calcom/atoms/monorepo`. `@calcom/atoms` here is a package name.
+To find this package, we need to search for `@calcom/atoms` in the `cal.com` codebase.
+
+You will find the below search results for ["package.json @calcom/atoms" in cal.com codebase](https://github.com/search?q=repo%3Acalcom%2Fcal.com+package.json+%40calcom%2Fatoms&type=code) 
+
+[Insert screenshot of - https://github.com/search?q=repo%3Acalcom%2Fcal.com+package.json+%40calcom%2Fatoms&type=code]
+
+[Line 16 in platform/atoms/monorepo](https://github.com/calcom/cal.com/blob/962f692e298c2498260baceb8659b0cc55452fe5/packages/platform/atoms/monorepo.ts#L16)
+exports `EventTypeWebWrapper as EventType`.
+
+Cal.com uses hashmap for the tabs found at [line 177](https://github.com/calcom/cal.com/blob/962f692e298c2498260baceb8659b0cc55452fe5/packages/platform/atoms/event-types/wrappers/EventTypeWebWrapper.tsx#L177)
+
+[EventTypeWebWrapper](https://github.com/calcom/cal.com/blob/962f692e298c2498260baceb8659b0cc55452fe5/packages/platform/atoms/event-types/wrappers/EventTypeWebWrapper.tsx#L177)
+has 370 lines at the time of writing, since this guide is about state management, let's review the state 
+management in setup tab. 
+
+## State management in EventSetupTab
+
+You will find the below code at [line 59](https://github.com/calcom/cal.com/blob/main/packages/features/eventtypes/components/tabs/setup/EventSetupTab.tsx#L59),
+
+```
+const formMethods = useFormContext<FormValues>();
+```
+
+it tells us few things:
+
+- useFormContext
+useFormContext is imported from "react-hook-form", found at [line 2](https://github.com/calcom/cal.com/blob/main/packages/features/eventtypes/components/tabs/setup/EventSetupTab.tsx#L2C1-L2C62) 
+as shown below:
+
+```
+import { Controller, useFormContext } from "react-hook-form";
+```
+
+Read more about [useFormContext](https://react-hook-form.com/docs/useformcontext)
+
+- FormValues
+
+Follow along these below:
+- https://github.com/calcom/cal.com/blob/962f692e298c2498260baceb8659b0cc55452fe5/packages/platform/atoms/event-types/wrappers/EventTypeWebWrapper.tsx#L330
+- https://github.com/calcom/cal.com/blob/main/packages/features/eventtypes/components/tabs/setup/EventSetupTab.tsx#L2C1-L2C62
+- https://github.com/calcom/cal.com/blob/962f692e298c2498260baceb8659b0cc55452fe5/packages/features/eventtypes/components/EventType.tsx
+- https://github.com/calcom/cal.com/blob/main/packages/features/eventtypes/components/EventTypeLayout.tsx#L53

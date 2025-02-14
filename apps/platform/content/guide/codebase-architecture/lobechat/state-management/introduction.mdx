@@ -3,6 +3,8 @@ title: State management in Lobechat
 toc: true
 ---
 
+# State management in Lobechat
+
 State management is intertwined with the way you manage API layer. 
 In this guide, we will analyze how the state is managed in Lobechat.
 
@@ -25,8 +27,7 @@ Search again across the codebase for "newAgent" and you will find it in this
 [file](https://github.com/lobehub/lobe-chat/blob/7d1e5c46aecc582308483d329b6007a8f8c76b70/src/app/(main)/chat/%40session/_layout/Desktop/SessionHeader.tsx#L36)
 
 How is newAgent variable used?
-
-```js
+```
 <ActionIcon
   icon={MessageSquarePlus}
   loading={isValidating}
@@ -36,11 +37,10 @@ How is newAgent variable used?
   title={t('newAgent')}
 />
 ```
-
 In the above code, newAgent is used as title which is a prop in ActionIcon. This is it, this is our 
 entry point that leads us to the state management. onClick calls a function named `mutate`.
 
-```js
+```
 const { mutate, isValidating } = useActionSWR('session.createSession', () => createSession());
 ```
 Our focus is only on state management, checkout API Layer in LobeChat to learn more about useActionSWR,
@@ -48,17 +48,16 @@ mutate.
 
 Where is `createSession` coming from?
 
-```js
+```
 const [createSession] = useSessionStore((s) => [s.createSession]);
 ```
 
 This path is now leading us to discover where `useSessionStore` is imported from.
 
-```js
+```
 import { useSessionStore } from '@/store/session';
 ```
 useSessionStore is imported from [store/session.ts](https://github.com/lobehub/lobe-chat/tree/7d1e5c46aecc582308483d329b6007a8f8c76b70/src/store/session)
-
 
 [C:Session store]
 [L: file structure]
@@ -108,20 +107,15 @@ It looks it follows consistent file structure across these store folders. a stor
 below file structure:
 
 ## Store folder - Root level 
-```sh
 +-- slices
 +-- helpers.ts
 +-- index.ts
 +-- initialState.ts
 +-- selectors.ts or selectors being a folder
 +-- reducers 
-```
 
 ## slicers folder structure
-
-```sh
 +-- {slice-name} folder             # Here slice-name can be a store slice, for example, user store has auth, settings etc., 
-```
 
 Each slice folder then follow the same file structure convention found at the root level, except there is one
 additional files called reducers.ts and action.ts
@@ -132,11 +126,10 @@ to understand how it all comes together and being used in a page/UI. Let's begin
 
 ## index.ts
 
-```js
+```
 export type { SessionStore } from './store';
 export { useSessionStore } from './store';
 ```
-
 `index.ts` simply exports type and a hook named `useSessionStore`. This practice allows you to import 
 `useSessionStore` by writing - `@/store/session` instead of `@/store/session/store` as `useSessionStore`
 is in `store` file.
@@ -144,12 +137,11 @@ is in `store` file.
 ## store.ts
 
 [store.ts](https://github.com/lobehub/lobe-chat/blob/main/src/store/session/store.ts) has some advanced 
-Zustand API. This store.ts is a perfect demonstration of how an experienced senior dev would manage 
-Zustand store.
+Zustand API. This store.ts is a perfect demonstration of quality.
 
 Let's first analyze how the store is created.
 
-```js
+```
 const createStore: StateCreator<SessionStore, [['zustand/devtools', never]]> = (...parameters) => ({
   ...initialState,
   ...createSessionSlice(...parameters),
@@ -173,7 +165,7 @@ you how you can leverage advanced API such as devTools, createWithEqualityFn, su
 
 We start off with the below code snippet:
 
-```js
+```
 const createStore: StateCreator<SessionStore, [['zustand/devtools', never]]> = (...parameters) => ({
   ...initialState,
   ...createSessionSlice(...parameters),
@@ -194,7 +186,7 @@ createSessionGroupSlice is imported from [sessionGroup/action.ts](https://github
 
 Let's now examine the devtools middleware
 
-```js
+```
 const devtools = createDevtools('session');
 ```
 [devtools](https://zustand.docs.pmnd.rs/middlewares/devtools#devtools) middleware lets you use Redux DevTools Extension 
@@ -202,7 +194,7 @@ without Redux. Read more about the benefits of using [Redux DevTools for debuggi
 
 In the code snippet below, you will find how the devTools and createStore are used to create `useSessionStore`.
 
-```js
+```
 export const useSessionStore = createWithEqualityFn<SessionStore>()(
   subscribeWithSelector(
     devtools(createStore, {
@@ -222,11 +214,65 @@ This allows for more granular control over when components re-render, improving 
 
 [subscribeWithSelector](https://zustand.docs.pmnd.rs/middlewares/subscribe-with-selector)
 
+[L: Sessions slice]
 
+In this guide, we discuss Sessions slice in Zustand. You would need to understand slice in Zustand before 
+we study state management in Lobechat.
 
-[L: Slices in zustand]
-In this guide, we discuss [slices pattern in Zustand](https://zustand.docs.pmnd.rs/guides/slices-pattern)
-You would need to understand slice in Zustand before we study state management in Lobechat
+Let's review a simple slice example from Zustand.
+
+```
+// In a file named store/fishSlice.ts
+export const createFishSlice = (set) => ({
+  fishes: 0,
+  addFish: () => set((state) => ({ fishes: state.fishes + 1 })),
+})
+
+// In a file named store/bearSlice.ts
+export const createBearSlice = (set) => ({
+  bears: 0,
+  addBear: () => set((state) => ({ bears: state.bears + 1 })),
+  eatFish: () => set((state) => ({ fishes: state.fishes - 1 })),
+})
+
+// In a file named store/index.ts
+import { create } from 'zustand'
+import { createBearSlice } from './bearSlice'
+import { createFishSlice } from './fishSlice'
+
+export const useBoundStore = create((...a) => ({
+  ...createBearSlice(...a),
+  ...createFishSlice(...a),
+}))
+
+```
+
+With the above configuration, let's look at how to access the store in a React component.
+
+```
+import { useBoundStore } from './stores/useBoundStore'
+
+function App() {
+  const bears = useBoundStore((state) => state.bears)
+  const fishes = useBoundStore((state) => state.fishes)
+  const addBear = useBoundStore((state) => state.addBear)
+  return (
+    <div>
+      <h2>Number of bears: {bears}</h2>
+      <h2>Number of fishes: {fishes}</h2>
+      <button onClick={() => addBear()}>Add a bear</button>
+    </div>
+  )
+}
+
+export default App
+```
+
+There isn't much changed in the API, you would access the store as if it were without slices.
+
+Read more about [slices pattern in Zustand](https://zustand.docs.pmnd.rs/guides/slices-pattern).
+
+Now that we understand the basics of slices in Zustand, let's review the  
 
 References:
 1. https://github.com/lobehub/lobe-chat/blob/7d1e5c46aecc582308483d329b6007a8f8c76b70/src/app/(main)/chat/%40session/_layout/Desktop/SessionHeader.tsx#L36

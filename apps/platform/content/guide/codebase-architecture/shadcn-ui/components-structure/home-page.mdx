@@ -3,17 +3,19 @@ title: Home Page
 description: Components Structure In Home Page.
 toc: true
 ---
+[C: shadcn-ui/ui]
+[L: Home Page]
 
 Shadcn-ui/ui provides beautifully designed components that you can copy and paste into your apps.
 
 In this lesson, we are only focusing on the folder structure, file naming conventions and how the page is built.
 To begin with, we picked https://ui.shadcn.com/, that is, the home page.
 
-## Home Page
+# Home Page
 
 This home page source code is found at [app/(app)/page.tsx](https://github.com/shadcn-ui/ui/blob/main/apps/www/app/(app)/page.tsx).
 
-### Components imported
+## Components imported
 
 The following components are imported in the home page, found at [app/(app)/page.tsx](https://github.com/shadcn-ui/ui/blob/main/apps/www/app/(app)/page.tsx)
 
@@ -81,7 +83,7 @@ use case because this imports the whole MailPage.
 What does this tell us? it means, you can use a page as a component, 
 that is MailPage in this case, by importing in another page. 
 
-## Conclusion:
+# Conclusion:
 
 You will find this common pattern across the entire shadcn-ui/ui pages using the app router. Components used are either imported 
 from components folder or imported registry/new-york/ui folder which is the exact folder that shadcn-ui/ui creates for you
