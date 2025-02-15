@@ -1,4 +1,4 @@
-thinkthroo-cli is a micro generator that adds commonly used engineering capabilities to projects via , such as:
+thinkthroo-cli is a micro generator that adds commonly used engineering capabilities to projects via CLI, such as:
 1. Supabase authentication
 2. S3 upload
 3. Confgure husky
