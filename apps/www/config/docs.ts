@@ -38,6 +38,16 @@ export const docsConfig: DocsConfig = {
   ],
   sidebarNav: [
     {
+      title: "February, 2025",
+      items: [
+        {
+          title: "father, an npm development tool",
+          href: "/blog/father-npm-tool",
+          items: []
+        }
+      ]
+    },
+    {
       title: "January, 2025",
       items: [
         {
