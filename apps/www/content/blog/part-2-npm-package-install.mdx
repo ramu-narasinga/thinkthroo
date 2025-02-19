@@ -1,0 +1,207 @@
+---
+title: Part 2-How to install npm packages programmatically?
+toc: true
+---
+In the [previous article](https://medium.com/@thinkthroo/part-1-how-to-install-npm-packages-programmatically-b35f1a2c0142), we reviewed some code in [Father, an NPM package development tool](https://github.com/umijs/father/tree/a95a4ead36ecb4788728348fcb45a83507a0fb17), related to installing npm packages programmatically and this led us to discover two functions in the [installDeps](https://github.com/umijs/father/blob/master/src/commands/generators/utils.ts#L41C3-L48C4).
+
+```javascript
+installDeps() {
+  const { api } = this;
+  const npmClient = getNpmClient({ cwd: api.cwd });
+  installWithNpmClient({
+    npmClient,
+  });
+  logger.quietExpect.info(`Install dependencies with ${npmClient}`);
+}
+```
+
+We will review the two functions listed below:
+
+* getNpmClient
+    
+* installWithNpmClient
+    
+
+# **getNpmClient**
+
+getNpmClient is imported as shown below
+
+```javascript
+import { getNpmClient, installWithNpmClient, prompts } from '@umijs/utils';
+```
+
+I did search for [utils repo in the umijs organisation](https://github.com/orgs/umijs/repositories?q=utils).
+
+![](https://miro.medium.com/v2/resize:fit:875/1*uLMDR1SSkl62dUgSxJjChg.png)
+
+Since Father codebase is a not a monorepo, @umijs/utils has to be an [npm package.](https://www.npmjs.com/package/@umijs/utils) You will find this [utils package in umi repository](https://github.com/umijs/umi/tree/master/packages/utils).
+
+![](https://miro.medium.com/v2/resize:fit:875/1*xn7AfjyAJkgn7KkRNBWmVQ.png)
+
+Finally, getNpmClient code can be found in [utils/npmClient.ts](https://github.com/umijs/umi/blob/master/packages/utils/src/npmClient.ts#L13)
+
+```javascript
+export const getNpmClient = (opts: { cwd: string }): NpmClient => {
+  const tnpmRegistries = ['.alibaba-inc.', '.antgroup-inc.'];
+  const tcnpmLockPath = join(opts.cwd, 'node_modules', '.package-lock.json');
+  const chokidarPkg = require('chokidar/package.json');
+
+  // detect tnpm/cnpm client
+  // all situations:
+  //   - npminstall mode + native fs => generate _resolved field in package.json
+  //   - npminstall mode + rapid fs => generate .package-lock.json in node_modules
+  //   - npm mode + native fs => generate .package-lock.json in node_modules
+  //   - npm mode + rapid fs => generate .package-lock.json in node_modules
+  // all conditions:
+  //   - has _resolved field or .package-lock.json means tnpm/cnpm
+  //   - _resolved field or .package-lock.json contains tnpm registry means tnpm
+  if (chokidarPkg._resolved) {
+    return tnpmRegistries.some((r) => chokidarPkg._resolved.includes(r))
+      ? 'tnpm'
+      : 'cnpm';
+  } else if (existsSync(tcnpmLockPath)) {
+    const tcnpmLock = readFileSync(tcnpmLockPath, 'utf-8');
+
+    return tnpmRegistries.some((r) => tcnpmLock.includes(r)) ? 'tnpm' : 'cnpm';
+  }
+
+  const chokidarPath = require.resolve('chokidar');
+  if (
+    chokidarPath.includes('.pnpm') ||
+    existsSync(join(opts.cwd, 'node_modules', '.pnpm'))
+  ) {
+    return 'pnpm';
+  }
+  if (
+    existsSync(join(opts.cwd, 'yarn.lock')) ||
+    existsSync(join(opts.cwd, 'node_modules', '.yarn-integrity'))
+  ) {
+    return 'yarn';
+  }
+  return 'npm';
+};
+```
+
+## **Detect tnpm/cnpm client**
+
+> *has \_resolved field or .package-loc.json means tnpm/cnpm*
+
+This comment explains what this below if block is about
+
+```javascript
+if (chokidarPkg._resolved) {
+    return tnpmRegistries.some((r) => chokidarPkg._resolved.includes(r))
+      ? 'tnpm'
+      : 'cnpm';
+}
+```
+
+> *\- \_resolved field or .package-lock.json contains tnpm registry means tnpm*
+
+This comment above explains the else if block below
+
+```javascript
+else if (existsSync(tcnpmLockPath)) {
+  const tcnpmLock = readFileSync(tcnpmLockPath, 'utf-8');
+
+  return tnpmRegistries.some((r) => tcnpmLock.includes(r)) ? 'tnpm' : 'cnpm';
+}
+```
+
+This is the first time I am learning about tnpm or cnpm. I will write an article about these.
+
+## **Detect pnpm client**
+
+```javascript
+const chokidarPath = require.resolve('chokidar');
+  if (
+    chokidarPath.includes('.pnpm') ||
+    existsSync(join(opts.cwd, 'node_modules', '.pnpm'))
+  ) {
+    return 'pnpm';
+  }
+```
+
+## **Detect yarn client**
+
+```javascript
+if (
+    existsSync(join(opts.cwd, 'yarn.lock')) ||
+    existsSync(join(opts.cwd, 'node_modules', '.yarn-integrity'))
+  ) {
+    return 'yarn';
+  }
+```
+
+if none of the above conditions are met, this function defaults to “npm”.
+
+# **installWithNpmClient**
+
+In the same [packages/utils/npmClient.ts fiile](https://github.com/umijs/umi/blob/master/packages/utils/src/npmClient.ts#L53), you will find the installWithNpmClient.
+
+```javascript
+export const installWithNpmClient = ({
+  npmClient,
+  cwd,
+}: {
+  npmClient: NpmClient;
+  cwd?: string;
+}): void => {
+  const { sync } = require('../compiled/cross-spawn');
+  // pnpm install will not install devDependencies when NODE_ENV === 'production'
+  // we should remove NODE_ENV to make sure devDependencies can be installed
+  const { NODE_ENV: _, ...env } = process.env;
+  const npm = sync(npmClient, [npmClient === 'yarn' ? '' : 'install'], {
+    stdio: 'inherit',
+    cwd,
+    env,
+  });
+  if (npm.error) {
+    throw npm.error;
+  }
+};
+```
+
+We need to learn more about sync function. sync is required from [compiled/cross-spawn](https://github.com/umijs/umi/blob/master/packages/utils/compiled/cross-spawn/package.json). Uncompiled cross-spawn can be found at [node-cross-spawn](https://github.com/moxystudio/node-cross-spawn/blob/master/index.js). How do I know? both of these have the common name mentioned — André Cruz in [utils/compiled/cross-spawn/package.json](https://github.com/umijs/umi/blob/master/packages/utils/compiled/cross-spawn/package.json) and in [node-cross-spawn package.json](https://github.com/moxystudio/node-cross-spawn/blob/master/package.json#L15).
+
+Seeing this “compiled” rings a bell for me. I have seen similar [compiled folder in Next.js source code](https://github.com/vercel/next.js/tree/canary/packages/next/src/compiled).
+
+# **About me:**
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [src/commands/generators/jest.ts#L97](https://github.com/umijs/father/blob/a95a4ead36ecb4788728348fcb45a83507a0fb17/src/commands/generators/jest.ts#L97)
+    
+2. [src/commands/generators/utils.ts#L1](https://github.com/umijs/father/blob/master/src/commands/generators/utils.ts#L1)
+    
+3. [/search?q=repo%3Aumijs%2Ffather%20%40umijs%2Futils&type=code](https://github.com/search?q=repo%3Aumijs%2Ffather+%40umijs%2Futils&type=code)
+    
+4. [https://github.com/orgs/umijs/repositories?q=utils](https://github.com/orgs/umijs/repositories?q=utils)
+    
+5. [https://www.npmjs.com/package/@umijs/utils](https://www.npmjs.com/package/@umijs/utils)
+    
+6. [https://github.com/umijs/umi/blob/master/package.json#L82](https://github.com/umijs/umi/blob/master/package.json#L82)
+    
+7. [https://github.com/umijs/umi/tree/master/packages/utils](https://github.com/umijs/umi/tree/master/packages/utils)
+    
+8. [/packages/utils/src/npmClient.ts#L13](https://github.com/umijs/umi/blob/9c3194d0617276fbecd09d19a8cff606fcaac82d/packages/utils/src/npmClient.ts#L13)
+    
+9. [/packages/utils/compiled](https://github.com/umijs/umi/tree/9c3194d0617276fbecd09d19a8cff606fcaac82d/packages/utils/compiled)

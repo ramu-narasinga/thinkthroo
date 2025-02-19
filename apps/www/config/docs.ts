@@ -41,6 +41,16 @@ export const docsConfig: DocsConfig = {
       title: "February, 2025",
       items: [
         {
+          title: "Part 2-How to install npm...",
+          href: "/blog/part-2-npm-package-install",
+          items: []
+        },
+        {
+          title: "Part 1-How to install npm...",
+          href: "/blog/part-1-npm-package-install",
+          items: []
+        },
+        {
           title: "father, an npm development tool",
           href: "/blog/father-npm-tool",
           items: []
