@@ -41,6 +41,16 @@ export const docsConfig: DocsConfig = {
       title: "February, 2025",
       items: [
         {
+          title: "How to check node...",
+          href: "/blog/how-to-check-nodeversion",
+          items: []
+        },
+        {
+          title: "You are familiar with npm...",
+          href: "/blog/what-is-tnpm-cnpm",
+          items: []
+        },
+        {
           title: "Part 2-How to install npm...",
           href: "/blog/part-2-npm-package-install",
           items: []
