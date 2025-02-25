@@ -1,0 +1,191 @@
+---
+title: Bippy, a toolkit to hack into react internals.
+toc: true
+---
+I found an import from “bippy” in react-scan source code. I wanted to find out what this is about. In this article, you will understand the below concepts
+
+1. What is react-scan?
+    
+2. What is Bippy?
+    
+3. How did I find this package?
+    
+
+# **What is react-scan?**
+
+[react-scan](https://github.com/aidenybai/react-scan) helps you scan for React performance issues and eliminate slow renders in your app.
+
+## **Installation**
+
+You can run the below command to install react-scan
+
+```javascript
+npm i react-scan
+```
+
+Read more about [installation](https://github.com/aidenybai/react-scan?tab=readme-ov-file#install).
+
+## **Usage**
+
+react-scan provides usage documentation.
+
+Read more about [usage](https://github.com/aidenybai/react-scan?tab=readme-ov-file#usage).
+
+# **What is Bippy?**
+
+I copied the below description from [Bippy’s readme](https://www.npmjs.com/package/bippy).
+
+[bippy](https://www.npmjs.com/package/bippy) is a toolkit to **hack into react internals**
+
+by default, you cannot access react internals. bippy bypasses this by “pretending” to be react devtools, giving you access to the fiber tree and other internals.
+
+* works outside of react — no react code modification needed
+    
+* utility functions that work across modern react (v17–19)
+    
+* no prior react source code knowledge required
+    
+
+```javascript
+import { onCommitFiberRoot, traverseFiber } from 'bippy';
+
+onCommitFiberRoot((root) => {
+  traverseFiber(root.current, (fiber) => {
+    // prints every fiber in the current React tree
+    console.log('fiber:', fiber);
+  });
+});
+```
+
+> *\[!WARNING\] ⚠️⚠️⚠️* ***this project may break production apps and cause unexpected behavior*** *⚠️⚠️⚠️*
+> 
+> *this project uses react internals, which can change at any time. it is not recommended to depend on internals unless you really, really have to. by proceeding, you acknowledge the risk of breaking your own code or apps that use your code.*
+
+bippy allows you to **access** and **use** react fibers **outside** of react components.
+
+a react fiber is a “unit of execution.” this means react will do something based on the data in a fiber. each fiber either represents a composite (function/class component) or a host (dom element)
+
+fibers are useful because they contain information about the react app (component props, state, contexts, etc.). a simplified version of a fiber looks roughly like this:
+
+```javascript
+interface Fiber {
+  // component type (function/class)
+  type: any;
+
+  child: Fiber | null;
+  sibling: Fiber | null;
+
+  // stateNode is the host fiber (e.g. DOM element)
+  stateNode: Node | null;
+
+  // parent fiber
+  return: Fiber | null;
+
+  // the previous or current version of the fiber
+  alternate: Fiber | null;
+
+  // saved props input
+  memoizedProps: any;
+
+  // state (useState, useReducer, useSES, etc.)
+  memoizedState: any;
+
+  // contexts (useContext)
+  dependencies: Dependencies | null;
+
+  // effects (useEffect, useLayoutEffect, etc.)
+  updateQueue: any;
+}
+```
+
+Now that we understand the basics, let me tell you how I ended up finding this bippy package.
+
+# **How did I find Bippy?**
+
+react-scan has the below packages folder.
+
+![](https://miro.medium.com/v2/resize:fit:875/1*wk1QbU03w2lUAFjDLpTjdA.png align="left")
+
+## **scan/src/index.ts**
+
+scan is where I should be looking to understand react-scan internal source code. This below code is picked from [packages/scan/src/index.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/index.ts#L3).
+
+```javascript
+import { init } from './install-hook'; // Initialize RDT hook
+
+init();
+
+export * from './core/index';
+```
+
+init is imported from another file, [install-hook.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/install-hook.ts#L1)
+
+## **install-hook.ts**
+
+```javascript
+import { installRDTHook } from 'bippy';
+
+// Initialize React DevTools hook
+const init = () => {
+  installRDTHook();
+};
+
+init();
+
+export { init };
+```
+
+The above code is picked from [install-hook.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/install-hook.ts#L1). Now init calls another function `installRDTHook()` that is imported from ‘bippy’. This is where I have found bippy and wanted to find out more about this package.
+
+Bippy is written by the same author, [Aiden Bai](https://github.com/aidenybai), who also wrote react-scan.
+
+## **installRDTHook**
+
+There is no mention of installRDT in the react-scan documentation
+
+![](https://miro.medium.com/v2/resize:fit:875/1*JVUagbvh6AZIatOpZtGVow.png align="left")
+
+And yet it is found to be used in [install-hook.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/install-hook.ts#L1) as shown below
+
+```javascript
+import { installRDTHook } from 'bippy';
+
+// Initialize React DevTools hook
+const init = () => {
+  installRDTHook();
+};
+
+init();
+
+export { init };
+```
+
+# **About me:**
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com/). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://www.npmjs.com/package/bippy](https://www.npmjs.com/package/bippy)
+    
+2. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/install-hook.ts#L1](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/install-hook.ts#L1)
+    
+3. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/index.ts#L3](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/index.ts#L3)
+    
+4. [https://github.com/aidenybai/bippy/blob/e1a570110a74fc0efc7c5acd80a7b0af7f488de0/packages/bippy/src/rdt-hook.ts#L46](https://github.com/aidenybai/bippy/blob/e1a570110a74fc0efc7c5acd80a7b0af7f488de0/packages/bippy/src/rdt-hook.ts#L46)
