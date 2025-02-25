@@ -1,6 +1,5 @@
 ---
 title: Bippy, a toolkit to hack into react internals.
-toc: true
 ---
 I found an import from “bippy” in react-scan source code. I wanted to find out what this is about. In this article, you will understand the below concepts
 
