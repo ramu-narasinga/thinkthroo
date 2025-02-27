@@ -1,0 +1,145 @@
+---
+title: Here’s how the options are validated in react-scan source code.
+---
+
+In this article, we analyze how the options you pass into scan function are validated.
+
+![](https://miro.medium.com/v2/resize:fit:875/1*lQyYHoMNNxmuEZvCvsQiyw.png)
+
+# **Options**
+
+In the example provided in react-scan repository, you will find this below code in [aidenybai/react-scan/examples/sierpinski/src/index.jsx](https://github.com/aidenybai/react-scan/blob/main/examples/sierpinski/src/index.jsx).
+
+```javascript
+...
+import { scan } from 'react-scan';
+...
+scan({
+  enabled: true,
+  // report: true,
+  // log: true,
+  // clearLog: true,
+  // playSound: true,
+  // renderCountThreshold: 100,
+  alwaysShowLabels: true,
+  runInProduction: true,
+});
+```
+
+The object passed as a parameter to the scan function is what we analyze to understand how its validated.
+
+Read more about [Options in react-scan](https://github.com/aidenybai/react-scan/tree/main?tab=readme-ov-file#api-reference).
+
+# **validateOptions**
+
+validateOptions has almost 100 lines of code at the time of writing this article.
+
+Let’s review the main concepts.
+
+```javascript
+const validateOptions = (options: Partial<Options>): Partial<Options> => {
+  const errors: Array<string> = [];
+  const validOptions: Partial<Options> = {};
+```
+
+This is how the function is defined and errors is an array of string.
+
+```javascript
+ for (const key in options) {
+    if (!isOptionKey(key)) continue;
+
+    const value = options[key];
+    switch (key) {
+```
+
+key in options is looped through and there is a switch case used to validate options.
+
+## **Boolean validation**
+
+```javascript
+ case 'enabled':
+// case 'includeChildren':
+case 'log':
+case 'showToolbar':
+// case 'report':
+// case 'alwaysShowLabels':
+case 'dangerouslyForceRunInProduction':
+  if (typeof value !== 'boolean') {
+    errors.push(`- ${key} must be a boolean. Got "${value}"`);
+  } else {
+    validOptions[key] = value;
+  }
+  break;
+```
+
+errors array is pushed with some error message specific to boolean check.
+
+## **Function validation**
+
+```javascript
+case 'onCommitStart':
+  if (typeof value !== 'function') {
+    errors.push(`- ${key} must be a function. Got "${value}"`);
+  } else {
+    validOptions.onCommitStart = value as () => void;
+  }
+  break;
+case 'onCommitFinish':
+  if (typeof value !== 'function') {
+    errors.push(`- ${key} must be a function. Got "${value}"`);
+  } else {
+    validOptions.onCommitFinish = value as () => void;
+  }
+  break;
+case 'onRender':
+  if (typeof value !== 'function') {
+    errors.push(`- ${key} must be a function. Got "${value}"`);
+  } else {
+    validOptions.onRender = value as (
+      fiber: Fiber,
+      renders: Array<Render>,
+    ) => void;
+  }
+  break;
+```
+
+These checks validate that options such as onCommitStart, onCommitFinish, onRender are functions otherwise, respective errors are pushed into the array.
+
+## **Default case**
+
+```javascript
+default:
+        errors.push(`- Unknown option "${key}"`);
+```
+
+By default, if you pass an option that react-scan does not support, you will see this error in your CLI
+
+# **About me:**
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com/). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/aidenybai/react-scan/blob/main/examples/sierpinski/src/index.jsx](https://github.com/aidenybai/react-scan/blob/main/examples/sierpinski/src/index.jsx)
+    
+2. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L399](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L399)
+    
+3. [https://github.com/aidenybai/react-scan?tab=readme-ov-file#api-reference](https://github.com/aidenybai/react-scan?tab=readme-ov-file#api-reference)
+    
+4. [https://github.com/aidenybai/react-scan/tree/main?tab=readme-ov-file#api-reference](https://github.com/aidenybai/react-scan/tree/main?tab=readme-ov-file#api-reference)

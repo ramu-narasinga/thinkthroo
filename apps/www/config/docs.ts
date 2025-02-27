@@ -41,6 +41,21 @@ export const docsConfig: DocsConfig = {
       title: "February, 2025",
       items: [
         {
+          title: "Preact in react-scan...",
+          href: "/blog/preact-in-react-scan",
+          items: []
+        },
+        {
+          title: "Here’s how the options...",
+          href: "/blog/react-scan-options-validate",
+          items: []
+        },
+        {
+          title: "DOMParser() usage...",
+          href: "/blog/react-scan-source-code",
+          items: []
+        },
+        {
           title: "Bippy, a toolkit....",
           href: "/blog/bippy-into-react-internals",
           items: []

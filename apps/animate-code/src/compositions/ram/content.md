@@ -1,80 +1,83 @@
-!videoTitle Checking Node.js Version Programmatically
+!videoTitle State Management in React-Scan
 
 ## !!steps
 
 !duration 220
 
-!title 1. Overview of checkNodeVersion
+!title 1. Overview of State Management in React-Scan
 
-```ts ! father/src/cli/cli.ts
-// Function call inside CLI run method
-// !callout[/async function/] Ensures the Node.js version meets the required criteria before proceeding with CLI execution.
-export async function run(_opts?: IOpts) {
-  checkNodeVersion();
-}
-```
-
-## !!steps
-
-!duration 220
-
-!title 2. Definition of checkVersion
-
-```ts ! father/src/cli/node.ts
-// checkVersion implementation
-// !callout[/function/] Retrieves the Node.js version as a string, removing the 'v' prefix.
-export function checkVersion() {
-  const v = parseInt(process.version.slice(1));
-}
+```ts ! scan/core/src/index.ts
+// Store definition in React-Scan
+// !callout[/Store/] The central state management object in React-Scan.
+export const Store: StoreType = {
+  wasDetailsOpen: signal(true),
+  isInIframe: signal(
+    typeof window !== 'undefined' && window.self !== window.top,
+  ),
+  inspectState: signal<States>({ kind: 'uninitialized' }),
+  monitor: signal<Monitor | null>(null),
+};
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 3. Node Version Validation Logic
+!title 2. Understanding signal in React-Scan
 
-```ts ! father/src/cli/node.ts
-// Version check logic
-// !callout[/MIN_NODE_VERSION/] Defines the minimum required Node.js version.
-if (v < MIN_NODE_VERSION || v === 15 || v === 17) {
-  logger.error(`Your node version ${v} is not supported.`);
-}
+```ts ! preact/signals.ts
+// Importing signal from Preact
+// !callout[/signal/] A reactive primitive from Preact used for automatic state updates.
+import { type Signal, signal } from '@preact/signals';
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 4. Handling Unsupported Versions
+!title 3. Using signal for State Management
 
-```ts ! father/src/cli/node.ts
-// Error logging and process exit
-// !callout[/logger.error/] Logs an error if the version is not supported.
-// !callout[/process.exit/] Exits the process if the version does not meet requirements.
-logger.error(`Please upgrade to ${MIN_NODE_VERSION} or above.`);
-process.exit(1);
+```ts ! scan/core/monitor/performance.ts
+// Example usage of signal-based state
+// !callout[/monitor.value/] Retrieves the current monitoring state.
+const monitor = Store.monitor.value;
+if (!monitor) return;
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 5. Summary of checkNodeVersion
+!title 4. Signals in Component State
 
-```ts ! father/src/cli/node.ts
-// Summary of version validation
-// !callout[/checkVersion/] Ensures the CLI runs only on supported Node.js versions.
-export function checkVersion() {
-  const v = parseInt(process.version.slice(1));
-  if (v < MIN_NODE_VERSION || v === 15 || v === 17) {
-    logger.error(`Your node version ${v} is not supported.`);
-    process.exit(1);
-  }
-}
+```ts ! scan/web/views/index.tsx
+// Usage of signal inside a React component
+// !callout[/useComputed/] Derives state reactively using signals.
+const isInspecting = useComputed(
+  () => Store.inspectState.value.kind === 'inspecting',
+);
 ```
 
-!title Checking Node.js Version Programmatically  
-!description The `checkNodeVersion` function ensures that the CLI runs only on supported Node.js versions. It retrieves the version using `process.version.slice(1)`, validates it against a minimum requirement, and exits the process if unsupported. This prevents issues due to deprecated or unstable Node.js versions.  
-!tags Node.js, CLI, Version Check, process.version, Open Source
+## !!steps
+
+!duration 220
+
+!title 5. Signals in UI Logic
+
+```ts ! scan/src/web/widget/resize-handle.tsx
+// Managing UI visibility using signals
+// !callout[/updateVisibility/] Tracks component focus state.
+const updateVisibility = () => {
+  const isFocused = Store.inspectState.value.kind === 'focused';
+  return isFocused;
+};
 ```
+
+## Title: Understanding State Management in React-Scan
+
+## Description:
+In this video, we explore how state is managed in the React-Scan codebase. We break down the `Store` object, analyze the role of `signal` from Preact, and examine how it simplifies state management across components. Learn how React-Scan efficiently tracks state changes and updates UI reactively using signals.
+
+## Tags:
+#React #StateManagement #OpenSource #Preact #Signals #WebDevelopment
+
