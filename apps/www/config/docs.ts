@@ -527,7 +527,7 @@ export const docsConfig: DocsConfig = {
         },
         {
           title: "TypeDoc usage in @vercel/edge",
-          href: "/blog/TypeDoc-usage-in-vercel-edge",
+          href: "/blog/typedoc-usage-in-vercel-edge",
           items: [],
         },
         {
