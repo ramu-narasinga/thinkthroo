@@ -1,6 +1,7 @@
 ---
 title: Bippy, a toolkit to hack into react internals.
 ---
+
 I found an import from “bippy” in react-scan source code. I wanted to find out what this is about. In this article, you will understand the below concepts
 
 1. What is react-scan?
@@ -103,7 +104,7 @@ Now that we understand the basics, let me tell you how I ended up finding this b
 
 react-scan has the below packages folder.
 
-![](https://miro.medium.com/v2/resize:fit:875/1*wk1QbU03w2lUAFjDLpTjdA.png align="left")
+![](https://miro.medium.com/v2/resize:fit:875/1*wk1QbU03w2lUAFjDLpTjdA.png)
 
 ## **scan/src/index.ts**
 
@@ -142,7 +143,7 @@ Bippy is written by the same author, [Aiden Bai](https://github.com/aidenybai), 
 
 There is no mention of installRDT in the react-scan documentation
 
-![](https://miro.medium.com/v2/resize:fit:875/1*JVUagbvh6AZIatOpZtGVow.png align="left")
+![](https://miro.medium.com/v2/resize:fit:875/1*JVUagbvh6AZIatOpZtGVow.png)
 
 And yet it is found to be used in [install-hook.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/install-hook.ts#L1) as shown below
 

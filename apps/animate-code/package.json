@@ -10,6 +10,7 @@
   "repository": {},
   "license": "UNLICENSED",
   "dependencies": {
+    "@babel/parser": "^7.26.9",
     "@mdx-js/loader": "",
     "@mdx-js/react": "",
     "@remotion/cli": "^4.0.258",

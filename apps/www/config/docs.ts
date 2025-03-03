@@ -38,6 +38,36 @@ export const docsConfig: DocsConfig = {
   ],
   sidebarNav: [
     {
+      title: "March, 2025",
+      items: [
+        {
+          title: "sizereport.config.js in Preact...",
+          href: "/blog/sizereport-Preact-source-code",
+          items: []
+        },
+        {
+          title: "mangle json in Preact...",
+          href: "/blog/mangle-json-in-Preact",
+          items: []
+        },
+        {
+          title: "oxlint json in Preact...",
+          href: "/blog/oxlint-json-in-Preact",
+          items: []
+        },
+        {
+          title: "How to destroy Preact...",
+          href: "/blog/How-to-destroy-Preact",
+          items: []
+        },
+        {
+          title: "Build an offscreen DOM...",
+          href: "/blog/Build-an-offscreen-DOM",
+          items: []
+        }
+      ]
+    },
+    {
       title: "February, 2025",
       items: [
         {
@@ -46,7 +76,17 @@ export const docsConfig: DocsConfig = {
           items: []
         },
         {
-          title: "DOMParser() usage in react-scan...",
+          title: "Preact in react-scan...",
+          href: "/blog/preact-in-react-scan",
+          items: []
+        },
+        {
+          title: "Here’s how the options...",
+          href: "/blog/react-scan-options-validate",
+          items: []
+        },
+        {
+          title: "DOMParser() usage...",
           href: "/blog/react-scan-source-code",
           items: []
         },
