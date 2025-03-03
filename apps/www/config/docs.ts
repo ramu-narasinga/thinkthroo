@@ -41,6 +41,21 @@ export const docsConfig: DocsConfig = {
       title: "February, 2025",
       items: [
         {
+          title: "State management in react...",
+          href: "/blog/State-management-in-react",
+          items: []
+        },
+        {
+          title: "DOMParser() usage in react-scan...",
+          href: "/blog/react-scan-source-code",
+          items: []
+        },
+        {
+          title: "Bippy, a toolkit....",
+          href: "/blog/bippy-into-react-internals",
+          items: []
+        },
+        {
           title: "How to check node...",
           href: "/blog/how-to-check-nodeversion",
           items: []

@@ -37,7 +37,8 @@
         "react-dom": "^18",
         "react-wrap-balancer": "^0.4.1",
         "tailwind-merge": "^2.5.2",
-        "tailwindcss-animate": "^1.0.7"
+        "tailwindcss-animate": "^1.0.7",
+        "www": "file:"
     },
     "devDependencies": {
         "@shikijs/compat": "^1.1.7",

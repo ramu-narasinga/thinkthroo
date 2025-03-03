@@ -1,0 +1,116 @@
+---
+title: State management in react-scan codebase.
+---
+
+In this article, we review how the store is managed in react-scan source code. The below code is picked from [packages/scan/core/src/index.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L260).
+
+```plaintext
+export const Store: StoreType = {
+  wasDetailsOpen: signal(true),
+  isInIframe: signal(
+    typeof window !== 'undefined' && window.self !== window.top,
+  ),
+  inspectState: signal<States>({
+    kind: 'uninitialized',
+  }),
+  monitor: signal<Monitor | null>(null),
+  fiberRoots: new Set<Fiber>(),
+  reportData: new Map<number, RenderData>(),
+  legacyReportData: new Map<string, RenderData>(),
+  lastReportTime: signal(0),
+};
+```
+
+You will find Set, Map but I don’t know what signal here is. Let’s find out.
+
+signal is imported from preact as shown below
+
+```plaintext
+import { type Signal, signal } from '@preact/signals';
+```
+
+### Signals in Preact
+
+Signals are reactive primitives for managing application state.
+
+What makes Signals unique is that state changes automatically update components and UI in the most efficient way possible. Automatic state binding and dependency tracking allows Signals to provide excellent ergonomics and productivity while eliminating the most common state management footguns.
+
+Signals are effective in applications of any size, with ergonomics that speed up the development of small apps, and performance characteristics that ensure apps of any size are fast by default.
+
+Read more about [Signals](https://preactjs.com/guide/v10/signals/).
+
+### How this state is used in react-scan?
+
+I [searched for signals](https://github.com/search?q=repo%3Aaidenybai%2Freact-scan%20Store&type=code) and found that it is used in 30 files.
+
+![](https://cdn-images-1.medium.com/max/1200/1*AfCQH8COP5KAQwFMps8PyQ.png align="left")
+
+I have picked some instances where this state is used.
+
+#### [core/monitor/performance.ts](https://github.com/aidenybai/react-scan/blob/244f7c4741083944268753f299115703005f47e6/packages/scan/src/core/monitor/performance.ts#L177)
+
+```plaintext
+// todo: update monitoring api to expose filters for component names
+export function initPerformanceMonitoring(options?: Partial<PathFilters>) {
+  const filters = { ...DEFAULT_FILTERS, ...options };
+  const monitor = Store.monitor.value;
+  if (!monitor) return;
+```
+
+#### [scan/web/views/index.tsx](https://github.com/aidenybai/react-scan/blob/244f7c4741083944268753f299115703005f47e6/packages/scan/src/web/views/index.tsx#L13)
+
+```plaintext
+export const Content = () => {
+  const isInspecting = useComputed(
+    () => Store.inspectState.value.kind === 'inspecting',
+  );
+
+  return }
+    <div
+```
+
+#### [scan/src/web/widget/resize-handle.tsx](https://github.com/aidenybai/react-scan/blob/244f7c4741083944268753f299115703005f47e6/packages/scan/src/web/widget/resize-handle.tsx#L54)
+
+```plaintext
+ const updateVisibility = () => {
+      const isFocused = Store.inspectState.value.kind === 'focused';
+      const shouldShow = signalWidgetViews.value.view !== 'none';
+      const isVisible =
+        (isFocused || shouldShow) &&
+        getHandleVisibility(
+          position,
+          signalWidget.value.corner,
+          signalWidget.value.dimensions.isFullWidth,
+          signalWidget.value.dimensions.isFullHeight,
+        );
+```
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L260](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L260)
+    
+2. [https://github.com/search?q=repo%3Aaidenybai%2Freact-scan%20Store&type=code](https://github.com/search?q=repo%3Aaidenybai%2Freact-scan%20Store&type=code)
+    
+3. [https://github.com/aidenybai/react-scan?tab=readme-ov-file#api-reference](https://github.com/aidenybai/react-scan?tab=readme-ov-file#api-reference)
+    
+4. [https://preactjs.com/guide/v10/signals/](https://preactjs.com/guide/v10/signals/)
