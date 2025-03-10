@@ -1,41 +1,19 @@
-!videoTitle Understanding sizereport.config.js in Preact
+!videoTitle WeakMap in react-scan vs next-mdx
 
 ## !!steps
 
 !duration 220
 
-!title 1. Overview of sizereport.config.js
+!title 1. WeakMap Usage in react-scan
 
-```ts ! preact/sizereport.config.js
-// sizereport.config.js defines size tracking for Preact
-// !callout[/exports/] Defines which files should be included in the report.
-module.exports = {
- // !callout[/repo/] Specifies the repository where the size report applies.
- repo: 'preactjs/preact',
- path: ['./{compat,debug,hooks,}/dist/**/!(*.map)'],
- branch: 'main'
-};
-```
+```ts ! react-scan/src/instrumentation.ts
+// Cache initialization in react-scan
+// !callout[/WeakMap/] WeakMap stores object references without preventing garbage collection.
+const cache = new WeakMap<object, string>();
 
-## !!steps
-
-!duration 210
-
-!title 2. Searching for Usage of sizereport.config.js
-
-```ts ! .github/size.ts
-// size.yml GitHub Action config
-// !callout[/on/] Defines when the workflow runs.
-on:{
-  workflow_call:
-}
-// !callout[/jobs/] Specifies the job configuration for size reporting.
-jobs:{
-  build:{
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-  }
+export function fastSerialize(value: unknown, depth = 0): string {
+  if (value === null) return 'null';
+  if (cache.has(value)) return cache.get(value) ?? '';
 }
 ```
 
@@ -43,54 +21,71 @@ jobs:{
 
 !duration 220
 
-!title 3. Integration with Compressed Size Action
+!title 2. WeakMap Usage in next-mdx
 
-```ts ! .github/size.ts
-// Compressed Size Action setup
-// !callout[/actions/] Prepares Node.js environment.
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: 'package.json'
-          cache: 'npm'
-// !callout[/uses/] Runs the action to check size changes.
-      - uses: preactjs/compressed-size-action@v2
-        with:
-          repo-token: '${{ secrets.GITHUB_TOKEN }}'
-```
+```ts ! next-mdx/src/loader.ts
+// Cache initialization in next-mdx
+// !callout[/WeakMap/] Used to store compiler-related data dynamically.
+const cache = new WeakMap();
 
-## !!steps
-
-!duration 200
-
-!title 4. How Compressed Size Action Works
-
-```ts ! compressed-size-action/README.ts
-// Compressed Size Action details
-// !callout[/Reports size/] Compares file sizes between PR and target branch.
-- Reports size differences on PRs
-- Uses package managers like npm, yarn, pnpm
-// !callout[/Runs builds/] Supports custom build commands for accurate reporting.
-- Runs builds and compares output
+function loader(value, bindings, callback) {
+  const compiler = this._compiler || marker;
+  let map = cache.get(compiler) ?? new Map();
+  cache.set(compiler, map);
+}
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 5. Practical Impact of Size Reporting
+!title 3. Common Pattern in Both Implementations
 
- ```ts ! preact/pull-request.ts
-// Example PR with size report
-// !callout[/pull request/] Displays file size changes directly in GitHub PRs.
-A pull request integrating size reporting shows:
-- Size increase/decrease for modified files
-- Summary of compressed file changes
-- Helps maintain optimal bundle size
+```ts ! shared/pattern.ts
+// Common caching pattern using WeakMap
+// !callout[/cache.has/] Checks if an object is already stored.
+if (cache.has(value)) {
+  return cache.get(value);
+}
+// !callout[/cache.set/] Adds an object to the cache.
+cache.set(value, computedValue);
 ```
 
----
+## !!steps
 
-**Title:** Understanding sizereport.config.js in Preact  
-**Description:** Exploring how Preact's `sizereport.config.js` integrates with GitHub Actions to track file size changes using the `compressed-size-action`. Learn how it helps optimize bundle size with automated PR checks.  
-**Tags:** #Preact #OpenSource #GitHubActions #CodeSize #WebPerformance
+!duration 220
+
+!title 4. How WeakMap Works Internally
+
+```ts ! concepts/weakmap.ts
+// Example explaining WeakMap behavior
+// !callout[/obj/] WeakMap keys are weakly referenced.
+let obj = {};
+const wm = new WeakMap();
+wm.set(obj, "data");
+obj = null; // Key-value pair gets garbage collected.
+```
+
+## !!steps
+
+!duration 220
+
+!title 5. When to Use WeakMap
+
+```ts ! concepts/usage.ts
+// Ideal use cases for WeakMap
+// !callout[/const/] Use WeakMap for private data storage or caching.
+const wm = new WeakMap();
+function storePrivateData(obj, data) {
+  wm.set(obj, data);
+}
+```
+
+## Title, Description, and Tags
+
+**Title:** WeakMap in react-scan vs next-mdx - A Code Review
+
+**Description:** A deep dive into how WeakMap is used in react-scan and next-mdx for caching. We explore common patterns and best practices in open-source codebases.
+
+**Tags:** #JavaScript #WeakMap #ReactScan #NextJS #OpenSource #WebPerformance
 

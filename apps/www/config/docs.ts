@@ -41,6 +41,31 @@ export const docsConfig: DocsConfig = {
       title: "March, 2025",
       items: [
         {
+          title: "WeakMap() in react-scan...",
+          href: "/blog/WeakMap-in-react-scan",
+          items: []
+        },
+        {
+          title: "WeakSet() in react-scan...",
+          href: "/blog/WeakSet()-in-react-scan",
+          items: []
+        },
+        {
+          title: "startTimingTracking in react...",
+          href: "/blog/startTimingTracking-in-react",
+          items: []
+        },
+        {
+          title: "createHighlightCanvas function in react...",
+          href: "/blog/createHighlightCanvas-function",
+          items: []
+        },
+        {
+          title: "attachShadow() method in react...",
+          href: "/blog/attachShadow()-method",
+          items: []
+        },
+        {
           title: "sizereport.config.js in Preact...",
           href: "/blog/sizereport-Preact-source-code",
           items: []

@@ -1,0 +1,96 @@
+---
+title: WeakMap in react-scan vs next-mdx source code.
+---
+
+In this article, we will review the below code snippet picked from [react-scan source code](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/instrumentation.ts#L125).
+
+```plaintext
+const cache = new WeakMap<object, string>();
+
+export function fastSerialize(value: unknown, depth = 0): string {
+  ...
+  if (value === null) return 'null';
+
+  if (cache.has(value)) {
+    const cached = cache.get(value);
+    if (cached !== undefined) {
+      return cached;
+    }
+  }
+```
+
+This is picked from a file, [instrumentation.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/instrumentation.ts#L125).
+
+This is the second time I am writing about WeakMap. Previously, I wrote an article about [WeakMap in JavaScript](https://medium.com/@ramu.narasinga_61050/lessons-from-opensource-weakmap-in-javascript-d7882bbf01f7) and this was a review about a code snippet from [next-mdx source code](https://github.com/vercel/next.js/blob/d01d6d9c35a8c2725b3d74c1402ab76d4779a6cf/packages/next-mdx/mdx-rs-loader.js#L21) and the code looks like below:
+
+```plaintext
+const cache = new WeakMap()
+
+/**
+ * A webpack loader for mdx-rs. This is largely based on existing @mdx-js/loader,
+ * replaces internal compilation logic to use mdx-rs instead.
+ */
+function loader(value, bindings, callback) {
+  ...
+  const compiler = this._compiler || marker
+
+  let map = cache.get(compiler)
+
+  if (!map) {
+    map = new Map()
+    cache.set(compiler, map)
+  }
+...
+```
+
+What’s one thing that’s common here? cache….
+
+Below is how cache is initialized in react-scan source code:
+
+```plaintext
+const cache = new WeakMap<object, string>();
+```
+
+Below is how cache is initialized in next-mdx source code
+
+```plaintext
+const cache = new WeakMap()
+```
+
+Well, there is types in the react-scan source code.
+
+![](https://cdn-images-1.medium.com/max/1000/1*lV-WiaxBu7Z5gevwBnEBtg.png)
+
+### WeakMap
+
+A `WeakMap` is a collection of key/value pairs whose keys must be objects or [non-registered symbols](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol#shared_symbols_in_the_global_symbol_registry), with values of any arbitrary [JavaScript type](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Data_structures), and which does not create strong references to its keys. That is, an object's presence as a key in a `WeakMap` does not prevent the object from being garbage collected. Once an object used as a key has been collected, its corresponding values in any `WeakMap` become candidates for garbage collection as well — as long as they aren't strongly referred to elsewhere. The only primitive type that can be used as a `WeakMap` key is symbol — more specifically, [non-registered symbols](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol#shared_symbols_in_the_global_symbol_registry) — because non-registered symbols are guaranteed to be unique and cannot be re-created.
+
+Read more about [WeakMap](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap).
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/instrumentation.ts#L125](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/instrumentation.ts#L125)
+    
+2. [https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/WeakMap](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap)
+    
+3. [https://medium.com/@ramu.narasinga\_61050/lessons-from-opensource-weakmap-in-javascript-d7882bbf01f7](https://medium.com/@ramu.narasinga_61050/lessons-from-opensource-weakmap-in-javascript-d7882bbf01f7)
