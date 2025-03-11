@@ -1,0 +1,21 @@
+{
+  "published": false,
+  "featured": false,
+  "component": false,
+  "toc": true,
+  "body": {
+    "raw": "",
+    "code": ""
+  },
+  "_id": "blog/hack-into-react-internals.mdx",
+  "_raw": {
+    "sourceFilePath": "blog/hack-into-react-internals.mdx",
+    "sourceFileName": "hack-into-react-internals.mdx",
+    "sourceFileDir": "blog",
+    "contentType": "mdx",
+    "flattenedPath": "blog/hack-into-react-internals"
+  },
+  "type": "Doc",
+  "slug": "/blog/hack-into-react-internals",
+  "slugAsParams": "hack-into-react-internals"
+}

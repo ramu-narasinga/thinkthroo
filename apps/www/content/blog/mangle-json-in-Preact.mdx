@@ -1,0 +1,125 @@
+---
+title: mangle json in Preact source code.
+--- 
+
+I found a file named [mangle.json in Preact source code](https://github.com/preactjs/preact/blob/main/mangle.json). I wanted to learn more about what this file is about. In this article, we review
+
+1. [developit/microbundle/wiki/mangle.json](https://github.com/developit/microbundle/wiki/mangle.json)
+    
+2. [preactjs/preact/main/mangle.json](https://github.com/preactjs/preact/blob/main/mangle.json)
+    
+![](https://cdn-images-1.medium.com/max/1000/1*yB4DLr6Tvsdu34Nz4BXTXw.png)
+
+### developit/microbundle/wiki/mangle.json
+
+In this [developit/microbundle/wiki/mangle.json](https://github.com/developit/microbundle/wiki/mangle.json), you will find the mangle.json definition. 
+
+> It’s standard practice for minifiers to compress function and variable names, since doing so is mostly assumed to be transparent to the developer. Microbundle makes it easy to extend this approach to property names as well, which can have a large impact on size for projects containing many objects or classes. This process is referred to as “property mangling” and is implemented using Terser, just like standard variable mangling.
+
+This definition is tailored to [microbundle](https://github.com/developit/microbundle/wiki/mangle.json) but the tldr is property names can have large impact on size .
+
+### How to enable property mangling?
+
+To enable property mangling, you must specify a regular expression pattern that dictates which properties should be compressed to shorter names. This can be done in a `mangle.json` configuration file, or in a `"mangle"` key in your `package.json.`
+
+Read more [property mangling](https://github.com/developit/microbundle/wiki/mangle.json#enabling-property-mangling).
+
+Below is an example picked from [custom property mangling in microbundle](https://github.com/developit/microbundle/wiki/mangle.json#custom-property-name-mappings).
+
+```plaintext
+{
+  "mangle": {
+    "regex": "^_"
+  },
+  "props": {
+    "props": {
+      "$_somePrivateProperty": "__p",
+      "$_backingInstance": "__b"
+    }
+  }
+}
+```
+
+Keep this in mind, we are now going to review the [preact mangle.json](https://github.com/preactjs/preact/blob/main/mangle.json)
+
+### preactjs/preact/main/mangle.json
+
+#### [help](https://github.com/preactjs/preact/blob/main/mangle.json#L2C3-L6C1)
+
+The help object clearly describes what this file is about.
+
+```plaintext
+"help": {
+    "what is this file?": "It controls protected/private property mangling so that minified builds have consistent property names.",
+    "why are there duplicate minified properties?": "Most properties are only used on one type of objects, so they can have the same name since they will never collide. Doing this reduces size."
+},
+```
+
+#### minify
+
+```plaintext
+"minify": {
+    "mangle": {
+      "properties": {
+        "regex": "^_[^_]",
+        "reserved": [
+          "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED",
+          "__REACT_DEVTOOLS_GLOBAL_HOOK__",
+          "__PREACT_DEVTOOLS__",
+          "_renderers",
+          "__source",
+          "__self"
+        ]
+      }
+    },
+```
+
+In the above code snippet, we are instructing bundler to shorten any properties matching the pattern `^_`, which would be any property beginning with an underscore. This is the most common usage, as underscore-prefixed properties are often used to emulate "private" properties in JavaScript.
+
+#### props
+
+```plaintext
+"props": {
+    "cname": 6,
+    "props": {
+      "$_hasScuFromHooks": "__f",
+      "$_listeners": "l",
+      "$_cleanup": "__c",
+      "$__hooks": "__H",
+      "$_hydrationMismatch": "__m",
+      "$_list": "__",
+      "$_pendingEffects": "__h",
+      "$_value": "__",
+```
+
+Mangled property names become single-character names by default, however these can be overridden in the mangle configuration. The property name mappings are stored in `mangle.json` alongside the configuration for which names should be mangled. This way every build shortens the name to the same property named defined in this props object.
+
+Some of the information presented in this article is picked from [Microbundle wiki](https://github.com/developit/microbundle/wiki/mangle.json#custom-property-name-mappings).
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/preactjs/signals/blob/main/mangle.json](https://github.com/preactjs/signals/blob/main/mangle.json)
+    
+2. [https://github.com/preactjs/preact/blob/main/mangle.json](https://github.com/preactjs/preact/blob/main/mangle.json)
+    
+3. [https://github.com/developit/microbundle/wiki/mangle.json](https://github.com/developit/microbundle/wiki/mangle.json)

@@ -1,0 +1,87 @@
+---
+title: Build an offscreen DOM tree using this method.
+---
+
+I found the below code snippet in [packages/scan/core/index.ts in react-scan source code](https://github.com/aidenybai/react-scan/blob/fe4e17de6911970f50386fb12a62a0556ca55579/packages/scan/src/core/index.ts#L49).
+
+```javascript
+const fragment = document.createDocumentFragment();
+```
+
+In this article, you will learn
+
+1. What is DocumentFragment?
+    
+2. How is DocumentFragment used in react-scan?
+    
+3. createDocumentFragment method.
+    
+
+# **What is DocumentFragment**
+
+The below information is picked from [MDN docs](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment).
+
+## **Definition**
+
+> *The* `DocumentFragment` interface represents a minimal document object that has no parent.
+> 
+> *It is used as a lightweight version of* [`Document`](https://developer.mozilla.org/en-US/docs/Web/API/Document) that stores a segment of a document structure comprised of nodes just like a standard document. The key difference is due to the fact that the document fragment isn't part of the active document tree structure. Changes made to the fragment don't affect the document.
+
+## **Usage**
+
+> *A common use for* `DocumentFragment` is to create one, assemble a DOM subtree within it, then append or insert the fragment into the DOM using [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) interface methods such as [`appendChild()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild), [`append()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/append), or [`insertBefore()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore). Doing this moves the fragment's nodes into the DOM, leaving behind an empty `DocumentFragment`.
+> 
+> *This interface is also of great use with Web components:* [`<template>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) elements contain a `DocumentFragment` in their [`HTMLTemplateElement.content`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTemplateElement/content) property.
+> 
+> *An empty* `DocumentFragment` can be created using the [`document.createDocumentFragment()`](https://developer.mozilla.org/en-US/docs/Web/API/Document/createDocumentFragment) method or the constructor.
+
+Read more about [DocumentFragment](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment).
+
+# **How is DocumentFragment used in react-scan?**
+
+I [searched for DocumentFragment in the react-scan codebase](https://github.com/search?q=repo%3Aaidenybai%2Freact-scan+DocumentFragment&type=code) and found the below shown results.
+
+![](https://miro.medium.com/v2/resize:fit:875/1*CsJZ2XzVMAJEqEBxcc3zYA.png)
+
+createDocumentFragment is used in two files:
+
+1. [react-is-not-available.ts](https://github.com/aidenybai/react-scan/blob/cd12e388f46a40293e6a276cd46dc3c6455246d7/packages/extension/src/inject/react-is-not-available.ts#L42)
+    
+2. [packages/scan/src/core/index.ts](https://github.com/aidenybai/react-scan/blob/cd12e388f46a40293e6a276cd46dc3c6455246d7/packages/scan/src/core/index.ts#L49)
+    
+
+# **createDocumentFragment method**
+
+Creates a new empty [`DocumentFragment`](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment) into which DOM nodes can be added to build an offscreen DOM tree. Read more about [createDocumentFragment](https://developer.mozilla.org/en-US/docs/Web/API/Document/createDocumentFragment).
+
+# **About me:**
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com/). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/search?q=repo%3Aaidenybai%2Freact-scan%20DocumentFragment&type=code](https://github.com/search?q=repo%3Aaidenybai%2Freact-scan+DocumentFragment&type=code)
+    
+2. [https://github.com/aidenybai/react-scan/blob/cd12e388f46a40293e6a276cd46dc3c6455246d7/packages/extension/src/inject/react-is-not-available.ts#L42](https://github.com/aidenybai/react-scan/blob/cd12e388f46a40293e6a276cd46dc3c6455246d7/packages/extension/src/inject/react-is-not-available.ts#L42)
+    
+3. [https://github.com/aidenybai/react-scan/blob/cd12e388f46a40293e6a276cd46dc3c6455246d7/packages/scan/src/core/index.ts#L49](https://github.com/aidenybai/react-scan/blob/cd12e388f46a40293e6a276cd46dc3c6455246d7/packages/scan/src/core/index.ts#L49)
+    
+4. [https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment)
+    
+

@@ -1,83 +1,91 @@
-!videoTitle State Management in React-Scan
+!videoTitle WeakMap in react-scan vs next-mdx
 
 ## !!steps
 
 !duration 220
 
-!title 1. Overview of State Management in React-Scan
+!title 1. WeakMap Usage in react-scan
 
-```ts ! scan/core/src/index.ts
-// Store definition in React-Scan
-// !callout[/Store/] The central state management object in React-Scan.
-export const Store: StoreType = {
-  wasDetailsOpen: signal(true),
-  isInIframe: signal(
-    typeof window !== 'undefined' && window.self !== window.top,
-  ),
-  inspectState: signal<States>({ kind: 'uninitialized' }),
-  monitor: signal<Monitor | null>(null),
-};
+```ts ! react-scan/src/instrumentation.ts
+// Cache initialization in react-scan
+// !callout[/WeakMap/] WeakMap stores object references without preventing garbage collection.
+const cache = new WeakMap<object, string>();
+
+export function fastSerialize(value: unknown, depth = 0): string {
+  if (value === null) return 'null';
+  if (cache.has(value)) return cache.get(value) ?? '';
+}
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 2. Understanding signal in React-Scan
+!title 2. WeakMap Usage in next-mdx
 
-```ts ! preact/signals.ts
-// Importing signal from Preact
-// !callout[/signal/] A reactive primitive from Preact used for automatic state updates.
-import { type Signal, signal } from '@preact/signals';
+```ts ! next-mdx/src/loader.ts
+// Cache initialization in next-mdx
+// !callout[/WeakMap/] Used to store compiler-related data dynamically.
+const cache = new WeakMap();
+
+function loader(value, bindings, callback) {
+  const compiler = this._compiler || marker;
+  let map = cache.get(compiler) ?? new Map();
+  cache.set(compiler, map);
+}
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 3. Using signal for State Management
+!title 3. Common Pattern in Both Implementations
 
-```ts ! scan/core/monitor/performance.ts
-// Example usage of signal-based state
-// !callout[/monitor.value/] Retrieves the current monitoring state.
-const monitor = Store.monitor.value;
-if (!monitor) return;
+```ts ! shared/pattern.ts
+// Common caching pattern using WeakMap
+// !callout[/cache.has/] Checks if an object is already stored.
+if (cache.has(value)) {
+  return cache.get(value);
+}
+// !callout[/cache.set/] Adds an object to the cache.
+cache.set(value, computedValue);
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 4. Signals in Component State
+!title 4. How WeakMap Works Internally
 
-```ts ! scan/web/views/index.tsx
-// Usage of signal inside a React component
-// !callout[/useComputed/] Derives state reactively using signals.
-const isInspecting = useComputed(
-  () => Store.inspectState.value.kind === 'inspecting',
-);
+```ts ! concepts/weakmap.ts
+// Example explaining WeakMap behavior
+// !callout[/obj/] WeakMap keys are weakly referenced.
+let obj = {};
+const wm = new WeakMap();
+wm.set(obj, "data");
+obj = null; // Key-value pair gets garbage collected.
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 5. Signals in UI Logic
+!title 5. When to Use WeakMap
 
-```ts ! scan/src/web/widget/resize-handle.tsx
-// Managing UI visibility using signals
-// !callout[/updateVisibility/] Tracks component focus state.
-const updateVisibility = () => {
-  const isFocused = Store.inspectState.value.kind === 'focused';
-  return isFocused;
-};
+```ts ! concepts/usage.ts
+// Ideal use cases for WeakMap
+// !callout[/const/] Use WeakMap for private data storage or caching.
+const wm = new WeakMap();
+function storePrivateData(obj, data) {
+  wm.set(obj, data);
+}
 ```
 
-## Title: Understanding State Management in React-Scan
+## Title, Description, and Tags
 
-## Description:
-In this video, we explore how state is managed in the React-Scan codebase. We break down the `Store` object, analyze the role of `signal` from Preact, and examine how it simplifies state management across components. Learn how React-Scan efficiently tracks state changes and updates UI reactively using signals.
+**Title:** WeakMap in react-scan vs next-mdx - A Code Review
 
-## Tags:
-#React #StateManagement #OpenSource #Preact #Signals #WebDevelopment
+**Description:** A deep dive into how WeakMap is used in react-scan and next-mdx for caching. We explore common patterns and best practices in open-source codebases.
+
+**Tags:** #JavaScript #WeakMap #ReactScan #NextJS #OpenSource #WebPerformance
 

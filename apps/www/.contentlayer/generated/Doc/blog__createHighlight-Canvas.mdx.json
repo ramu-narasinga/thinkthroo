@@ -1,0 +1,22 @@
+{
+  "title": "attachShadow() method in react-scan source code.\r",
+  "published": false,
+  "featured": false,
+  "component": false,
+  "toc": true,
+  "body": {
+    "raw": "",
+    "code": "var Component=(()=>{var d=Object.create;var a=Object.defineProperty;var f=Object.getOwnPropertyDescriptor;var _=Object.getOwnPropertyNames;var h=Object.getPrototypeOf,j=Object.prototype.hasOwnProperty;var l=(t,e)=>()=>(e||t((e={exports:{}}).exports,e),e.exports),p=(t,e)=>{for(var n in e)a(t,n,{get:e[n],enumerable:!0})},s=(t,e,n,c)=>{if(e&&typeof e==\"object\"||typeof e==\"function\")for(let o of _(e))!j.call(t,o)&&o!==n&&a(t,o,{get:()=>e[o],enumerable:!(c=f(e,o))||c.enumerable});return t};var M=(t,e,n)=>(n=t!=null?d(h(t)):{},s(e||!t||!t.__esModule?a(n,\"default\",{value:t,enumerable:!0}):n,t)),g=t=>s(a({},\"__esModule\",{value:!0}),t);var u=l((F,m)=>{m.exports=_jsx_runtime});var C={};p(C,{default:()=>x,frontmatter:()=>w});var r=M(u()),w={title:\"attachShadow() method in react-scan source code.\"};function i(t){return(0,r.jsx)(r.Fragment,{})}function x(t={}){let{wrapper:e}=t.components||{};return e?(0,r.jsx)(e,{...t,children:(0,r.jsx)(i,{...t})}):i(t)}return g(C);})();\n;return Component;"
+  },
+  "_id": "blog/createHighlight-Canvas.mdx",
+  "_raw": {
+    "sourceFilePath": "blog/createHighlight-Canvas.mdx",
+    "sourceFileName": "createHighlight-Canvas.mdx",
+    "sourceFileDir": "blog",
+    "contentType": "mdx",
+    "flattenedPath": "blog/createHighlight-Canvas"
+  },
+  "type": "Doc",
+  "slug": "/blog/createHighlight-Canvas",
+  "slugAsParams": "createHighlight-Canvas"
+}

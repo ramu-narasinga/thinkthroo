@@ -38,8 +38,68 @@ export const docsConfig: DocsConfig = {
   ],
   sidebarNav: [
     {
+      title: "March, 2025",
+      items: [
+        {
+          title: "WeakMap() in react-scan...",
+          href: "/blog/WeakMap-in-react-scan",
+          items: []
+        },
+        {
+          title: "WeakSet() in react-scan...",
+          href: "/blog/WeakSet()-in-react-scan",
+          items: []
+        },
+        {
+          title: "startTimingTracking in react...",
+          href: "/blog/startTimingTracking-in-react",
+          items: []
+        },
+        {
+          title: "createHighlightCanvas function in react...",
+          href: "/blog/createHighlightCanvas-function",
+          items: []
+        },
+        {
+          title: "attachShadow() method in react...",
+          href: "/blog/attachShadow()-method",
+          items: []
+        },
+        {
+          title: "sizereport.config.js in Preact...",
+          href: "/blog/sizereport-Preact-source-code",
+          items: []
+        },
+        {
+          title: "mangle json in Preact...",
+          href: "/blog/mangle-json-in-Preact",
+          items: []
+        },
+        {
+          title: "oxlint json in Preact...",
+          href: "/blog/oxlint-json-in-Preact",
+          items: []
+        },
+        {
+          title: "How to destroy Preact...",
+          href: "/blog/How-to-destroy-Preact",
+          items: []
+        },
+        {
+          title: "Build an offscreen DOM...",
+          href: "/blog/Build-an-offscreen-DOM",
+          items: []
+        }
+      ]
+    },
+    {
       title: "February, 2025",
       items: [
+        {
+          title: "State management in react...",
+          href: "/blog/State-management-in-react",
+          items: []
+        },
         {
           title: "Preact in react-scan...",
           href: "/blog/preact-in-react-scan",
@@ -492,7 +552,7 @@ export const docsConfig: DocsConfig = {
         },
         {
           title: "TypeDoc usage in @vercel/edge",
-          href: "/blog/TypeDoc-usage-in-vercel-edge",
+          href: "/blog/typedoc-usage-in-vercel-edge",
           items: [],
         },
         {
