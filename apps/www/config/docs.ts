@@ -735,6 +735,47 @@ export const docsConfig: DocsConfig = {
           href: "/blog/organize-your-components",
           items: [],
         },
+        {
+          title: "Use degit to download a template in your CLI tool",
+          href: "/blog/degit-to-download-CLI",
+          items: [],
+        },
+        {
+          title: "Supabase uses Valtio for its state management",
+          href: "/blog/Supabase-uses-Valtio",
+          items: [],
+        },
+        {
+          title: "Comparing the copyToClipboard implementations in Shadcn-ui/ui and Codehike",
+          href: "/blog/Comparing-the-copyToClipboard",
+          items: [],
+        },
+        {
+          title: "Shimmer effect in Card when you load Supabase dashboard.",
+          href: "/blog/Shimmer-effect-in-Card",
+          items: [],
+        },
+        {
+          title: "Function overload in TypeScript",
+          href: "/blog/Function-overload-in-TypeScript",
+          items: [],
+        },
+        {
+          title: "Convert a string to camelCase using this function in Javascript.",
+          href: "/blog/Convert-string-to-camelCase",
+          items: [],
+        },
+      ],
+    },
+    {
+      title: "July, 2024",
+      items: [
+        {
+          title: "Comparison of file and component structures among Shadcn-ui, Plane.so and Gitroom.",
+          href: "/blog/Comparison-of-file",
+          items: [],
+        },
+        
       ],
     },
     

@@ -1,0 +1,107 @@
+---
+title: Comparison of file and component structures among Shadcn-ui, Plane.so and Gitroom.
+---
+
+In this article, we will look at folder structures in Shadcn-ui, Plane.so and Gitroom used to organise a Next.js project.
+
+# **Shadcn-ui file and component structures:**
+
+![](https://miro.medium.com/v2/resize:fit:875/1*pCqjxDyfuMNk-GmBPj-t4g.png)
+
+## **File structure**
+
+[Shadcn-ui/ui](https://github.com/shadcn-ui/ui/blob/main/apps/www/app/\(app\)/examples/dashboard/page.tsx) uses app router and has a [Router group named (app)](https://github.com/shadcn-ui/ui/tree/main/apps/www/app/\(app\)).
+
+In the (app) folder, you will find a folder with page.tsx and/or layout.tsx in some routes such as [colors](https://github.com/shadcn-ui/ui/tree/main/apps/www/app/\(app\)/colors), [blocks](https://github.com/shadcn-ui/ui/tree/main/apps/www/app/\(app\)/blocks), [docs](https://github.com/shadcn-ui/ui/tree/main/apps/www/app/\(app\)/docs).
+
+![](https://miro.medium.com/v2/resize:fit:770/1*cK-HH4G8egQoW9YljjvC8w.png)
+
+## **Component structure**
+
+![](https://miro.medium.com/v2/resize:fit:875/1*_Qy97sLxno32IYajJEOFog.png)
+
+In [blocks/page.tsx](https://github.com/shadcn-ui/ui/blob/main/apps/www/app/\(app\)/blocks/page.tsx), you will find that it imports components that are generic or that can be reused in other pages.
+
+But wait, there’s other kind of components.
+
+If you look at [examples route](https://github.com/shadcn-ui/ui/tree/main/apps/www/app/\(app\)/examples), each example has its own component that is specific to an example.
+
+![](https://miro.medium.com/v2/resize:fit:873/1*uxEJQYKxq_75VeduDBsacw.png)
+
+so there’s components available at [examples/card/components](https://github.com/shadcn-ui/ui/tree/main/apps/www/app/\(app\)/examples/cards/components) and then there are also [generic components](https://github.com/shadcn-ui/ui/tree/main/apps/www/components) that can be reused.
+
+# **Plane.so file and component structures:**
+
+[plane.so](https://github.com/makeplane/plane/tree/preview) has similar structure to that shadcn-ui/ui where you will find components specific to features by their names as shown below.
+
+## **File structure**
+
+![](https://miro.medium.com/v2/resize:fit:875/1*PJCDz83kmZevh91TErHNAw.png)
+
+The file structure in [plane.so](https://plane.so/) uses nested routes but it does have a header.tsx specific to a route defined in all the folders along with page.tsx or layout.tsx
+
+## **Component structure**
+
+![](https://miro.medium.com/v2/resize:fit:875/1*T_TgRfFwPFkbXYC5Wbw8Kw.png)
+
+All the components used in the app router are placed inside [core folder](https://github.com/makeplane/plane/tree/preview/web/core).
+
+So now comes the question, how come we see the imports as “@/components” in a router as shown below:
+
+![](https://miro.medium.com/v2/resize:fit:875/1*SEr4u4d9ckp2s7TuEJ9t7A.png)
+
+when there is no components folder at app folder level:
+
+![](https://miro.medium.com/v2/resize:fit:853/1*DbYeDx_b3hK6eyDYg7tSCg.png)
+
+Well, the components are inside core folder and tsconfig.json has the paths defined to locate the folders in core as base.
+
+![](https://miro.medium.com/v2/resize:fit:875/1*WtGvBiOrJOqvRg7igslhFg.png)
+
+# **Gitroom file and component structures:**
+
+Gitroom has a straight forward structure. Routes have page.tsx and each page.tsx uses components from components folder and this components folder contains files specific to features.
+
+## **File structure:**
+
+![](https://miro.medium.com/v2/resize:fit:875/1*lOM1G3JZiWbRDfsCYc0gbQ.png)
+
+As you can see, router only has one file name page.tsx and that’s it. We see in shadcn-ui where it contains components specific to a route that are scoped to that route, similarly in plane.so, it has route specific header.tsx along with page.tsx however, one commonality in all of these projects is that there is a components folder that can be reused or specific to a feature depending on the folder name.
+
+## **Component structure:**
+
+![](https://miro.medium.com/v2/resize:fit:875/1*EtGQ4CdVtOy25qsu5zluiw.png)
+
+Notice how the route/file structures has the folder names that match with some of the folders names in component structure.
+
+![](https://miro.medium.com/v2/resize:fit:875/1*47EKz3q3aUidRrzxVGAjLg.png)
+
+> [*Get free courses inspired by the best practices used in open source.*](https://app.thinkthroo.com/best-practices)
+
+# About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/shadcn-ui/ui/tree/main/apps/www/app/(app)/examples/cards/components](https://github.com/shadcn-ui/ui/tree/main/apps/www/app/\(app\)/examples/cards/components)
+    
+2. [https://github.com/makeplane/plane/tree/preview](https://github.com/makeplane/plane/tree/preview)
+    
+3. [https://github.com/gitroomhq/gitroom/blob/main/apps/frontend/src/app/(site)/launches/page.tsx](https://github.com/gitroomhq/gitroom/blob/main/apps/frontend/src/app/\(site\)/launches/page.tsx)

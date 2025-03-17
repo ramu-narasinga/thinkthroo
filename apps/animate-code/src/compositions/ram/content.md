@@ -1,19 +1,62 @@
-!videoTitle WeakMap in react-scan vs next-mdx
+!videoTitle Understanding warn-once in Refine
 
 ## !!steps
 
 !duration 220
 
-!title 1. WeakMap Usage in react-scan
+!title 1. What is warn-once?
 
-```ts ! react-scan/src/instrumentation.ts
-// Cache initialization in react-scan
-// !callout[/WeakMap/] WeakMap stores object references without preventing garbage collection.
-const cache = new WeakMap<object, string>();
+```ts ! warn-once/index.js
+// warn-once ensures a warning is logged only once during development
+// !callout[/DEV/] Prints a warning exactly once, suitable for deprecation warnings or missing setup messages.
+const DEV = process.env.NODE_ENV !== "production";
+const warnings = new Set();
+function warnOnce(condition, ...rest) {
+  if (DEV && condition) {
+    const key = rest.join(" ");
+    if (warnings.has(key)) return;
+    warnings.add(key);
+    console.warn(...rest);
+  }
+}
+module.exports = warnOnce;
+```
 
-export function fastSerialize(value: unknown, depth = 0): string {
-  if (value === null) return 'null';
-  if (cache.has(value)) return cache.get(value) ?? '';
+## !!steps
+
+!duration 220
+
+!title 2. Installing warn-once
+
+```sh ! terminal
+# Install warn-once via npm
+npm install warn-once
+```
+
+## !!steps
+
+!duration 220
+
+!title 3. Usage of warn-once
+
+```ts ! warn-once/example.js
+const warnOnce = require('warn-once');
+// !callout[/warnOnce/] Accepts a condition and a message, ensuring the message logs only once.
+warnOnce(true, 'This is a warning message');
+```
+
+## !!steps
+
+!duration 220
+
+!title 4. warn-once in Refine source code
+
+```ts ! refine/hooks/breadcrumbs/index.ts
+if (action && action !== "list") {
+  const key = `actions.${action}`;
+  if (typeof i18nProvider !== "undefined" && translate(key) === key) {
+    warnOnce(true, `[useBreadcrumb]: Missing translate key for "${action}".`);
+  }
 }
 ```
 
@@ -21,71 +64,25 @@ export function fastSerialize(value: unknown, depth = 0): string {
 
 !duration 220
 
-!title 2. WeakMap Usage in next-mdx
+!title 5. Code review of warn-once
 
-```ts ! next-mdx/src/loader.ts
-// Cache initialization in next-mdx
-// !callout[/WeakMap/] Used to store compiler-related data dynamically.
-const cache = new WeakMap();
-
-function loader(value, bindings, callback) {
-  const compiler = this._compiler || marker;
-  let map = cache.get(compiler) ?? new Map();
-  cache.set(compiler, map);
+```ts ! warn-once/index.js
+// !callout[/warnings/] Ensures a message is logged only once.
+const warnings = new Set();
+function warnOnce(condition, ...rest) {
+  if (DEV && condition) {
+    const key = rest.join(" ");
+    if (!warnings.has(key)) {
+      warnings.add(key);
+      console.warn(...rest);
+    }
+  }
 }
 ```
 
-## !!steps
+---
 
-!duration 220
-
-!title 3. Common Pattern in Both Implementations
-
-```ts ! shared/pattern.ts
-// Common caching pattern using WeakMap
-// !callout[/cache.has/] Checks if an object is already stored.
-if (cache.has(value)) {
-  return cache.get(value);
-}
-// !callout[/cache.set/] Adds an object to the cache.
-cache.set(value, computedValue);
-```
-
-## !!steps
-
-!duration 220
-
-!title 4. How WeakMap Works Internally
-
-```ts ! concepts/weakmap.ts
-// Example explaining WeakMap behavior
-// !callout[/obj/] WeakMap keys are weakly referenced.
-let obj = {};
-const wm = new WeakMap();
-wm.set(obj, "data");
-obj = null; // Key-value pair gets garbage collected.
-```
-
-## !!steps
-
-!duration 220
-
-!title 5. When to Use WeakMap
-
-```ts ! concepts/usage.ts
-// Ideal use cases for WeakMap
-// !callout[/const/] Use WeakMap for private data storage or caching.
-const wm = new WeakMap();
-function storePrivateData(obj, data) {
-  wm.set(obj, data);
-}
-```
-
-## Title, Description, and Tags
-
-**Title:** WeakMap in react-scan vs next-mdx - A Code Review
-
-**Description:** A deep dive into how WeakMap is used in react-scan and next-mdx for caching. We explore common patterns and best practices in open-source codebases.
-
-**Tags:** #JavaScript #WeakMap #ReactScan #NextJS #OpenSource #WebPerformance
+title: "Understanding warn-once in Refine"
+description: "A deep dive into the warn-once package, its usage in Refine's source code, and how it prevents duplicate warnings."
+tags: [warn-once, Refine, JavaScript, open-source, debugging]
 

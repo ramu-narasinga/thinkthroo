@@ -1,0 +1,94 @@
+---
+title: Shimmer effect in Card when you load Supabase dashboard.
+---
+
+When loading a dashboard, especially one as feature-rich as Supabase’s, it’s essential to provide visual feedback to users indicating that content is being loaded. A popular and visually appealing way to achieve this is by using a shimmer effect. This effect simulates a loading state and keeps users engaged while the actual content is being fetched.
+
+![](https://miro.medium.com/v2/resize:fit:875/1*t5qVmiFcIDkaIEnvA0tDwA.png)
+
+Let’s explore how Supabase implements a shimmer effect in their dashboard using the `animate` property and some creative CSS.
+
+# **Shimmer Effect Using the Animate Property**
+
+The [`ShimmeringCard`](https://github.com/supabase/supabase/blob/master/apps/studio/components/interfaces/Home/ProjectList/ShimmeringCard.tsx#L3) component in Supabase's source code showcases how to create a shimmering loading effect using a combination of React and CSS animations.
+
+Here’s the implementation of the `ShimmeringCard` component:
+
+```plaintext
+// Pulled from 
+// https://github.com/supabase/supabase/blob/master/apps/studio/components/interfaces/Home/ProjectList/ShimmeringCard.tsx#L3
+import CardButton from 'components/ui/CardButton'
+
+const ShimmeringCard = () => {
+  return (
+    <CardButton
+      className="h-44 !px-0 pt-5 pb-0"
+      title={
+        <div className="w-full justify-between space-y-1.5 px-5">
+          <p className="flex-shrink truncate text-sm pr-4 shimmering-loader h-5 w-20" />
+          <p className="text-sm lowercase text-foreground-light h-4 w-40 shimmering-loader" />
+        </div>
+      }
+    />
+  )
+}
+export default ShimmeringCard
+```
+
+In this component, `CardButton` is used to create the card structure, and the shimmer effect is applied to the text elements within the card using the `shimmering-loader` class.
+
+# **The** `shimmering-loader` CSS Class
+
+The [`shimmering-loader`](https://github.com/supabase/supabase/blob/ce4213956045da0c174f4881b4300b508e30978c/apps/docs/styles/main.scss#L308C1-L317C2) class is defined in the [`main.scss`](https://github.com/supabase/supabase/blob/ce4213956045da0c174f4881b4300b508e30978c/apps/docs/styles/main.scss#L308C1-L317C2) file and leverages the `animate` property to create the shimmer effect:
+
+```plaintext
+.shimmering-loader {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    to right,
+    hsl(var(--border-default)) 4%,
+    hsl(var(--background-surface-200)) 25%,
+    hsl(var(--border-default)) 36%
+  );
+  background-size: 1000px 100%;
+}
+```
+
+# **How It Works**
+
+1. **Animation Definition**: The `shimmer` keyframes animation moves the background gradient from left to right.
+    
+2. **Gradient Background**: The background is a linear gradient that creates the shimmer effect. The colors transition smoothly to give the appearance of a light moving across the surface.
+    
+3. **Animation Application**: The `shimmering-loader` class applies this animation to any element, making it shimmer.
+    
+
+![](https://miro.medium.com/v2/resize:fit:875/1*47EKz3q3aUidRrzxVGAjLg.png)
+
+> [*Get free courses inspired by the best practices used in open source.*](https://app.thinkthroo.com/best-practices)
+
+# About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/supabase/supabase/blob/master/apps/studio/components/interfaces/Home/ProjectList/ShimmeringCard.tsx#L3](https://github.com/supabase/supabase/blob/master/apps/studio/components/interfaces/Home/ProjectList/ShimmeringCard.tsx#L3)
+    
+2. [https://github.com/supabase/supabase/blob/ce4213956045da0c174f4881b4300b508e30978c/apps/docs/styles/main.scss#L308C1-L317C2](https://github.com/supabase/supabase/blob/ce4213956045da0c174f4881b4300b508e30978c/apps/docs/styles/main.scss#L308C1-L317C2)

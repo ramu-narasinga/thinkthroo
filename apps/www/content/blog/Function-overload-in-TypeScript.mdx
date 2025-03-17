@@ -1,0 +1,93 @@
+---
+title: Function overload in TypeScript
+---
+
+When working with TypeScript, you may encounter situations where a function needs to handle different types of input while maintaining type safety. This is where function overloading comes into play. Let’s look at a practical example of function overloading, inspired by a code snippet from the [Supabase source code](https://github.com/supabase/supabase/blob/master/apps/studio/hooks/misc/useIsFeatureEnabled.ts#L24).
+
+![](https://miro.medium.com/v2/resize:fit:875/1*834BLGxRg7Gwwb4YYAiPrQ.png)
+
+# **Example: useIsFeatureEnabled**
+
+The [`useIsFeatureEnabled`](https://github.com/supabase/supabase/blob/master/apps/studio/hooks/misc/useIsFeatureEnabled.ts#L24) function is a great example of function overloading. It can handle both an array of features and a single feature, returning appropriate results for each case.
+
+Here’s the overloaded function definition:
+
+```plaintext
+function useIsFeatureEnabled<T extends Feature[]>(
+  features: T
+): { [key in FeatureToCamelCase<T[number]>]: boolean }
+function useIsFeatureEnabled(features: Feature): boolean
+function useIsFeatureEnabled<T extends Feature | Feature[]>(features: T) {
+  const { profile } = useProfile()
+
+  if (Array.isArray(features)) {
+      return Object.fromEntries(
+        features.map((feature) => [
+          featureToCamelCase(feature),
+          checkFeature(feature, profile?.disabled_features),
+        ])
+      )
+  }
+  return checkFeature(features, profile?.disabled_features)
+}
+export { useIsFeatureEnabled }
+```
+
+# **How It Works**
+
+1. **Function Overloads**: The first two declarations are overload signatures. They define the different ways the function can be called. The actual implementation comes last, handling both cases.
+    
+2. **Implementation**: The function implementation checks if the input `features` is an array. If it is, it processes each feature, converts it to camelCase, and checks if it's enabled. If `features` is a single feature, it directly checks its status.
+    
+
+# **Supporting Functions and Types**
+
+To understand this better, let’s look at the supporting `checkFeature` function and the type utility `FeatureToCamelCase`.
+
+## **checkFeature Function**
+
+The `checkFeature` function determines if a given feature is enabled or not:
+
+```plaintext
+function checkFeature(feature: Feature, features?: Feature[]) {
+  return !features?.includes(feature) ?? true
+}
+```
+
+This function returns `true` if the feature is not in the disabled features list or if no disabled features are provided.
+
+> *Do watch the* [*Matt Pocock’s Youtube video explanation*](https://www.youtube.com/watch?v=Vr1BUFw6dJM) *about the function overloads in TypeScript.*
+
+# **Conclusion**
+
+Function overloading in TypeScript allows you to define multiple ways to call a function with different types of input while ensuring type safety. The `useIsFeatureEnabled` function from Supabase is an excellent example of this concept in action. It demonstrates how to handle different input types seamlessly, providing both flexibility and strong typing.
+
+![](https://miro.medium.com/v2/resize:fit:875/1*47EKz3q3aUidRrzxVGAjLg.png)
+
+> [*Get free courses inspired by the best practices used in open source.*](https://app.thinkthroo.com/best-practices)
+
+# About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/supabase/supabase/blob/master/apps/studio/hooks/misc/useIsFeatureEnabled.ts#L24](https://github.com/supabase/supabase/blob/master/apps/studio/hooks/misc/useIsFeatureEnabled.ts#L24)
+    
+2. [Matt Pocock’s Youtube video explanation.](https://www.youtube.com/watch?v=Vr1BUFw6dJM)

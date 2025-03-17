@@ -1,0 +1,207 @@
+---
+title: Use degit to download a template in your CLI tool.
+---
+
+I found a file named “degit” in the [Remotion source code](https://github.com/remotion-dev/remotion/blob/main/packages/create-video/src/degit.ts). [Remotion](https://www.remotion.dev/) helps you make videos programatically.
+
+In this article, we will look at the following concepts:
+
+1. What is Degit?
+    
+2. Build a simple degit function inspired by [Remotion’s degit file](https://github.com/remotion-dev/remotion/blob/main/packages/create-video/src/degit.ts)
+    
+
+![](https://miro.medium.com/v2/resize:fit:875/1*9HJbUD4G5M4MLeAI3WZ8rA.png)
+
+# **What is Degit?**
+
+I do remember seeing “degit” mentioned in one of the Readmes in the open source, but I could not recall which repository it was so I googled what a degit means and found this [degit npm package](https://github.com/Rich-Harris/degit).
+
+In simple terms, You can use degit to quickly make a copy of a Github repository by only downloading the latest commit  
+instead of the entire git history.
+
+Visit the official [npm package for degit](https://github.com/Rich-Harris/degit) to read more about this package.
+
+You can use this degit package to download repos from Gitlab or Bitbucket as well so its not just limited to Github repositories.
+
+```plaintext
+# download from GitLab
+degit gitlab:user/repo
+# download from BitBucket
+degit bitbucket:user/repo
+degit user/repo
+# these commands are equivalent
+degit github:user/repo
+```
+
+Here’s a sample usage in Javascript:
+
+```plaintext
+const degit = require('degit');
+const emitter = degit('user/repo', {
+    cache: true,
+    force: true,
+    verbose: true,
+});
+emitter.on('info', info => {
+    console.log(info.message);
+});
+emitter.clone('path/to/dest').then(() => {
+    console.log('done');
+});
+```
+
+# **Build a simple degit function inspired by Remotion’s degit file**
+
+To understand how to build a simple degit function, let’s break down the code from Remotion’s degit.ts file. This file implements a basic version of what the degit npm package does: fetching a GitHub repository’s latest state without downloading the full history.
+
+# **1\. Imports used**
+
+```plaintext
+import https from 'https';
+import fs from 'node:fs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import tar from 'tar';
+import {mkdirp} from './mkdirp';
+```
+
+* https: Used to make a network request to fetch the repository.
+    
+* fs: Interacts with the file system, such as writing the downloaded files.
+    
+* tmpdir: Provides the system’s temporary directory path.
+    
+* path: Handles and transforms file paths.
+    
+* tar: Extracts the contents of the tarball (compressed file).
+    
+* mkdirp: A helper function to create directories recursively, provided in a separate file.
+    
+
+# **2: Fetching the Repository**
+
+```plaintext
+export function fetch(url: string, dest: string) {
+    return new Promise<void>((resolve, reject) => {
+        https.get(url, (response) => {
+            const code = response.statusCode as number;
+            if (code >= 400) {
+                reject(
+                    new Error(
+                        `Network request to ${url} failed with code ${code} (${response.statusMessage})`,
+                    ),
+                );
+            } else if (code >= 300) {
+                fetch(response.headers.location as string, dest)
+                    .then(resolve)
+                    .catch(reject);
+            } else {
+                response
+                    .pipe(fs.createWriteStream(dest))
+                    .on('finish', () => resolve())
+                    .on('error', reject);
+            }
+        }).on('error', reject);
+    });
+}
+```
+
+* URL Handling: The function checks if the request is successful (status codes below 300). If it’s a redirect (codes between 300 and 399), it follows the new URL. If it’s an error (codes 400+), it rejects the promise.
+    
+* File Saving: The repository is downloaded and saved to the dest path using fs.createWriteStream.
+    
+
+# **3: Extracting the Repository**
+
+After downloading the repository, it’s necessary to extract the contents of the tarball:
+
+```plaintext
+function untar(file: string, dest: string) {
+    return tar.extract(
+        {
+            file,
+            strip: 1,
+            C: dest,
+        },
+        [],
+    );
+}
+```
+
+* Tar Extraction: This function extracts the contents of the .tar.gz file into the specified destination directory.
+    
+
+# **4: Putting It All Together**
+
+The main degit function ties everything together, handling directory creation, fetching, and extracting the repository:
+
+```plaintext
+export const degit = async ({
+    repoOrg,
+    repoName,
+    dest,
+}: {
+    repoOrg: string;
+    repoName: string;
+    dest: string;
+}) => {
+    const base = path.join(tmpdir(), '.degit');
+    const dir = path.join(base, repoOrg, repoName);
+    const file = `${dir}/HEAD.tar.gz`;
+    const url = `https://github.com/${repoOrg}/${repoName}/archive/HEAD.tar.gz`;
+    mkdirp(path.dirname(file));
+    await fetch(url, file);
+    mkdirp(dest);
+    await untar(file, dest);
+    fs.unlinkSync(file);
+};
+```
+
+[mkdirp](https://github.com/remotion-dev/remotion/blob/main/packages/create-video/src/mkdirp.ts) is used to create a directories recursively.
+
+# **Conclusion:**
+
+I found that remotion uses degit to download templates when you run their installation commmand:
+
+```plaintext
+npx create-video@latest
+```
+
+This command asks you to choose a template, this is where degit comes into action to download the latest commit of the selected template
+
+You can check this code from [create-video package](https://github.com/remotion-dev/remotion/blob/c535e676badd055187d1ea8007f9ac76ab0ad315/packages/create-video/src/init.ts#L109) for proof.
+
+![](https://miro.medium.com/v2/resize:fit:875/0*7vT8QgWHKCJj4eCF)
+
+> [*Get free courses inspired by the best practices used in open source.*](https://app.thinkthroo.com/best-practices)
+
+# About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/Rich-Harris/degit](https://github.com/Rich-Harris/degit)
+    
+2. [https://github.com/remotion-dev/remotion/blob/main/packages/create-video/src/degit.ts](https://github.com/remotion-dev/remotion/blob/main/packages/create-video/src/degit.ts)
+    
+3. [https://github.com/remotion-dev/remotion/blob/c535e676badd055187d1ea8007f9ac76ab0ad315/packages/create-video/src/init.ts#L109](https://github.com/remotion-dev/remotion/blob/c535e676badd055187d1ea8007f9ac76ab0ad315/packages/create-video/src/init.ts#L109)
+    
+4. [https://github.com/remotion-dev/remotion/blob/main/packages/create-video/src/mkdirp.ts](https://github.com/remotion-dev/remotion/blob/main/packages/create-video/src/mkdirp.ts)
