@@ -21,6 +21,6 @@
     "packages/*"
   ],
   "dependencies": {
-    "thinkthroo": "^1.0.0"
+    "thinkthroo": "file:"
   }
 }

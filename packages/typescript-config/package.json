@@ -1,5 +1,5 @@
 {
-  "name": "@repo/typescript-config",
+  "name": "@thinkthroo/typescript-config",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -7,6 +7,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@repo/typescript-config": "file:"
+    "@thinkthroo/typescript-config": "file:"
   }
 }
