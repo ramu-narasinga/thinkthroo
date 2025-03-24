@@ -1,62 +1,22 @@
-!videoTitle Understanding warn-once in Refine
+!videoTitle Exploring downloadInBrowser in Refine Source Code
 
 ## !!steps
 
 !duration 220
 
-!title 1. What is warn-once?
+!title 1. Overview of downloadInBrowser Function
 
-```ts ! warn-once/index.js
-// warn-once ensures a warning is logged only once during development
-// !callout[/DEV/] Prints a warning exactly once, suitable for deprecation warnings or missing setup messages.
-const DEV = process.env.NODE_ENV !== "production";
-const warnings = new Set();
-function warnOnce(condition, ...rest) {
-  if (DEV && condition) {
-    const key = rest.join(" ");
-    if (warnings.has(key)) return;
-    warnings.add(key);
-    console.warn(...rest);
-  }
-}
-module.exports = warnOnce;
-```
+```ts ! refine/src/helpers.ts
+// downloadInBrowser function definition
+// !callout[/downloadInBrowser/] Facilitates downloading a file in the browser by dynamically creating an anchor link and triggering a click event.
+export const downloadInBrowser = (
+  filename: string,
+  content: string,
+  type?: string,
+) => {
+  if (typeof window === "undefined") return;
 
-## !!steps
-
-!duration 220
-
-!title 2. Installing warn-once
-
-```sh ! terminal
-# Install warn-once via npm
-npm install warn-once
-```
-
-## !!steps
-
-!duration 220
-
-!title 3. Usage of warn-once
-
-```ts ! warn-once/example.js
-const warnOnce = require('warn-once');
-// !callout[/warnOnce/] Accepts a condition and a message, ensuring the message logs only once.
-warnOnce(true, 'This is a warning message');
-```
-
-## !!steps
-
-!duration 220
-
-!title 4. warn-once in Refine source code
-
-```ts ! refine/hooks/breadcrumbs/index.ts
-if (action && action !== "list") {
-  const key = `actions.${action}`;
-  if (typeof i18nProvider !== "undefined" && translate(key) === key) {
-    warnOnce(true, `[useBreadcrumb]: Missing translate key for "${action}".`);
-  }
+  const blob = new Blob([content], { type });
 }
 ```
 
@@ -64,25 +24,53 @@ if (action && action !== "list") {
 
 !duration 220
 
-!title 5. Code review of warn-once
+!title 2. Creating an Anchor Link
 
-```ts ! warn-once/index.js
-// !callout[/warnings/] Ensures a message is logged only once.
-const warnings = new Set();
-function warnOnce(condition, ...rest) {
-  if (DEV && condition) {
-    const key = rest.join(" ");
-    if (!warnings.has(key)) {
-      warnings.add(key);
-      console.warn(...rest);
-    }
-  }
-}
+```ts ! refine/src/helpers.ts
+// Creating an anchor link for download
+const link = document.createElement("a");
+link.setAttribute("visibility", "hidden");
+link.download = filename;
+// !callout[/blobUrl/] The blob URL is set to the link, enabling file download.
+const blobUrl = URL.createObjectURL(blob);
+link.href = blobUrl;
+```
+
+## !!steps
+
+!duration 220
+
+!title 3. Triggering Download and Cleanup
+
+```ts ! refine/src/helpers.ts
+// Appending, triggering download, and cleanup
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+// !callout[/setTimeout/] Ensures memory cleanup by revoking the blob URL.
+setTimeout(() => URL.revokeObjectURL(blobUrl), 0);
+```
+
+## !!steps
+
+!duration 220
+
+!title 4. Practical Example of downloadInBrowser
+
+```ts ! refine/src/helpers.ts
+// Using downloadInBrowser to download a JSON file
+// !callout[/downloadInBrowser/] Demonstrates a practical use case for exporting JSON data.
+downloadInBrowser(
+  "data.json",
+  JSON.stringify({ key: "value" }),
+  "application/json"
+);
+
 ```
 
 ---
 
-title: "Understanding warn-once in Refine"
-description: "A deep dive into the warn-once package, its usage in Refine's source code, and how it prevents duplicate warnings."
-tags: [warn-once, Refine, JavaScript, open-source, debugging]
-
+**Title:** Understanding the downloadInBrowser Function in Refine  
+**Description:** Discover how the downloadInBrowser function in Refine simplifies file downloads in the browser using dynamic anchor links. Learn its implementation and a practical example.  
+**Tags:** #Refine #JavaScript #TypeScript #WebDevelopment #OpenSource  
+```

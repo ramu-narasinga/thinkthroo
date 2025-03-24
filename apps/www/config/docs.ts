@@ -41,6 +41,31 @@ export const docsConfig: DocsConfig = {
       title: "March, 2025",
       items: [
         {
+          title: "downloadInBrowser function in Refine...",
+          href: "/blog/downloadInBrowser-function-in-Refine",
+          items: []
+        },
+        {
+          title: "flattenObjectKeys() function in Refine...",
+          href: "/blog/flattenObjectKeys()-function-in-Refine",
+          items: []
+        },
+        {
+          title: "asyncDebounce function in Refine...",
+          href: "/blog/asyncDebounce-function-in-Refine",
+          items: []
+        },
+        {
+          title: "git-blame-ignore-revs` file in React...",
+          href: "/blog/git-blame-ignore",
+          items: []
+        },
+        {
+          title: "cursorignore file in Refine codebase...",
+          href: "/blog/cursorignore-file-in-Refine",
+          items: []
+        },
+        {
           title: "warnOnce package in Refine source code...",
           href: "/blog/warnOnce-package-in-Refine",
           items: []
@@ -798,6 +823,11 @@ export const docsConfig: DocsConfig = {
         {
           title: "Comparison of file and component structures among Shadcn-ui, Plane.so and Gitroom.",
           href: "/blog/Comparison-of-file",
+          items: [],
+        },
+        {
+          title: "Cache your fetcher in useSWR with useCallback.",
+          href: "/blog/Cache-your-fetche",
           items: [],
         },
         

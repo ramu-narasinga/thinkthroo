@@ -1,0 +1,22 @@
+{
+  "title": "Shadcn/ui Project Structure\r",
+  "published": false,
+  "featured": false,
+  "component": false,
+  "toc": true,
+  "body": {
+    "raw": "\r\n[L: templates folder]\r\n\r\nThis [templates folder](https://github.com/shadcn-ui/ui/tree/main/templates) has the following structure:\r\n\r\n```\r\nmonorepo-next        # This is a monorepo template generated using [Turbo](https://turbo.build/repo/docs) \r\n``` ",
+    "code": "var Component=(()=>{var l=Object.create;var s=Object.defineProperty;var h=Object.getOwnPropertyDescriptor;var m=Object.getOwnPropertyNames;var x=Object.getPrototypeOf,f=Object.prototype.hasOwnProperty;var _=(t,e)=>()=>(e||t((e={exports:{}}).exports,e),e.exports),g=(t,e)=>{for(var r in e)s(t,r,{get:e[r],enumerable:!0})},a=(t,e,r,c)=>{if(e&&typeof e==\"object\"||typeof e==\"function\")for(let o of m(e))!f.call(t,o)&&o!==r&&s(t,o,{get:()=>e[o],enumerable:!(c=h(e,o))||c.enumerable});return t};var j=(t,e,r)=>(r=t!=null?l(x(t)):{},a(e||!t||!t.__esModule?s(r,\"default\",{value:t,enumerable:!0}):r,t)),b=t=>a(s({},\"__esModule\",{value:!0}),t);var d=_((C,i)=>{i.exports=_jsx_runtime});var T={};g(T,{default:()=>u,frontmatter:()=>M});var n=j(d()),M={title:\"Shadcn/ui Project Structure\"};function p(t){let e={a:\"a\",code:\"code\",p:\"p\",pre:\"pre\",...t.components};return(0,n.jsxs)(n.Fragment,{children:[(0,n.jsx)(e.p,{children:\"[L: templates folder]\"}),`\n`,(0,n.jsxs)(e.p,{children:[\"This \",(0,n.jsx)(e.a,{href:\"https://github.com/shadcn-ui/ui/tree/main/templates\",children:\"templates folder\"}),\" has the following structure:\"]}),`\n`,(0,n.jsx)(e.pre,{children:(0,n.jsx)(e.code,{children:`monorepo-next        # This is a monorepo template generated using [Turbo](https://turbo.build/repo/docs) \n`})})]})}function u(t={}){let{wrapper:e}=t.components||{};return e?(0,n.jsx)(e,{...t,children:(0,n.jsx)(p,{...t})}):p(t)}return b(T);})();\n;return Component;"
+  },
+  "_id": "guide/codebase-architecture/shadcn-ui/project-structure/templates.mdx",
+  "_raw": {
+    "sourceFilePath": "guide/codebase-architecture/shadcn-ui/project-structure/templates.mdx",
+    "sourceFileName": "templates.mdx",
+    "sourceFileDir": "guide/codebase-architecture/shadcn-ui/project-structure",
+    "contentType": "mdx",
+    "flattenedPath": "guide/codebase-architecture/shadcn-ui/project-structure/templates"
+  },
+  "type": "Doc",
+  "slug": "/guide/codebase-architecture/shadcn-ui/project-structure/templates",
+  "slugAsParams": "codebase-architecture/shadcn-ui/project-structure/templates"
+}
