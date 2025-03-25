@@ -1,19 +1,22 @@
-!videoTitle WeakMap in react-scan vs next-mdx
+!videoTitle Exploring downloadInBrowser in Refine Source Code
 
 ## !!steps
 
 !duration 220
 
-!title 1. WeakMap Usage in react-scan
+!title 1. Overview of downloadInBrowser Function
 
-```ts ! react-scan/src/instrumentation.ts
-// Cache initialization in react-scan
-// !callout[/WeakMap/] WeakMap stores object references without preventing garbage collection.
-const cache = new WeakMap<object, string>();
+```ts ! refine/src/helpers.ts
+// downloadInBrowser function definition
+// !callout[/downloadInBrowser/] Facilitates downloading a file in the browser by dynamically creating an anchor link and triggering a click event.
+export const downloadInBrowser = (
+  filename: string,
+  content: string,
+  type?: string,
+) => {
+  if (typeof window === "undefined") return;
 
-export function fastSerialize(value: unknown, depth = 0): string {
-  if (value === null) return 'null';
-  if (cache.has(value)) return cache.get(value) ?? '';
+  const blob = new Blob([content], { type });
 }
 ```
 
@@ -21,71 +24,53 @@ export function fastSerialize(value: unknown, depth = 0): string {
 
 !duration 220
 
-!title 2. WeakMap Usage in next-mdx
+!title 2. Creating an Anchor Link
 
-```ts ! next-mdx/src/loader.ts
-// Cache initialization in next-mdx
-// !callout[/WeakMap/] Used to store compiler-related data dynamically.
-const cache = new WeakMap();
-
-function loader(value, bindings, callback) {
-  const compiler = this._compiler || marker;
-  let map = cache.get(compiler) ?? new Map();
-  cache.set(compiler, map);
-}
+```ts ! refine/src/helpers.ts
+// Creating an anchor link for download
+const link = document.createElement("a");
+link.setAttribute("visibility", "hidden");
+link.download = filename;
+// !callout[/blobUrl/] The blob URL is set to the link, enabling file download.
+const blobUrl = URL.createObjectURL(blob);
+link.href = blobUrl;
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 3. Common Pattern in Both Implementations
+!title 3. Triggering Download and Cleanup
 
-```ts ! shared/pattern.ts
-// Common caching pattern using WeakMap
-// !callout[/cache.has/] Checks if an object is already stored.
-if (cache.has(value)) {
-  return cache.get(value);
-}
-// !callout[/cache.set/] Adds an object to the cache.
-cache.set(value, computedValue);
+```ts ! refine/src/helpers.ts
+// Appending, triggering download, and cleanup
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+// !callout[/setTimeout/] Ensures memory cleanup by revoking the blob URL.
+setTimeout(() => URL.revokeObjectURL(blobUrl), 0);
 ```
 
 ## !!steps
 
 !duration 220
 
-!title 4. How WeakMap Works Internally
+!title 4. Practical Example of downloadInBrowser
 
-```ts ! concepts/weakmap.ts
-// Example explaining WeakMap behavior
-// !callout[/obj/] WeakMap keys are weakly referenced.
-let obj = {};
-const wm = new WeakMap();
-wm.set(obj, "data");
-obj = null; // Key-value pair gets garbage collected.
+```ts ! refine/src/helpers.ts
+// Using downloadInBrowser to download a JSON file
+// !callout[/downloadInBrowser/] Demonstrates a practical use case for exporting JSON data.
+downloadInBrowser(
+  "data.json",
+  JSON.stringify({ key: "value" }),
+  "application/json"
+);
+
 ```
 
-## !!steps
+---
 
-!duration 220
-
-!title 5. When to Use WeakMap
-
-```ts ! concepts/usage.ts
-// Ideal use cases for WeakMap
-// !callout[/const/] Use WeakMap for private data storage or caching.
-const wm = new WeakMap();
-function storePrivateData(obj, data) {
-  wm.set(obj, data);
-}
+**Title:** Understanding the downloadInBrowser Function in Refine  
+**Description:** Discover how the downloadInBrowser function in Refine simplifies file downloads in the browser using dynamic anchor links. Learn its implementation and a practical example.  
+**Tags:** #Refine #JavaScript #TypeScript #WebDevelopment #OpenSource  
 ```
-
-## Title, Description, and Tags
-
-**Title:** WeakMap in react-scan vs next-mdx - A Code Review
-
-**Description:** A deep dive into how WeakMap is used in react-scan and next-mdx for caching. We explore common patterns and best practices in open-source codebases.
-
-**Tags:** #JavaScript #WeakMap #ReactScan #NextJS #OpenSource #WebPerformance
-

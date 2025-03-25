@@ -1,0 +1,130 @@
+---
+title: warnOnce package in Refine source code.
+---
+
+In this article, we will review a package named warn-once. You will learn
+
+1. What is warn-once?
+    
+2. Warn once usage in Refine source code
+    
+3. warn-once code review
+    
+
+![](https://cdn-images-1.medium.com/max/1000/1*ZtasVLHNhJL2qIBzxu6IOg.png)
+
+### What is warn-once?
+
+Print a warning exactly once during development. Suitable for deprecation warnings, warnings for missing setup etc.
+
+#### Installation
+
+Run the below command in your CLI to install this package
+
+```plaintext
+npm install warn-once
+```
+
+#### Usage
+
+warn-once accepts 2 parameters, one is the condition and the other one is the message that gets printed to the CLI exactly once. warn-once has some underlying checks to ensure this logs only once in the CLI.
+
+```plaintext
+const warnOnce = require('warn-once');
+
+// ...
+
+warnOnce(someCondition, 'This is a warning message');
+```
+
+> Note: This warning is only shown only when NODE\_ENV is ***not set to “production”***
+
+### Warn once usage in Refine source code
+
+So I found this package in the Refine codebase in a file named [hooks/breadcrumbs/index.ts](https://github.com/refinedev/refine/blob/main/packages/core/src/hooks/breadcrumb/index.ts#L3)
+
+```plaintext
+if (action && action !== "list") {
+    const key = `actions.${action}`;
+    const actionLabel = translate(key);
+    if (typeof i18nProvider !== "undefined" && actionLabel === key) {
+      warnOnce(
+        true,
+        `[useBreadcrumb]: Breadcrumb missing translate key for the "${action}" action. Please add "actions.${action}" key to your translation file.\nFor more information, see https://refine.dev/docs/api-reference/core/hooks/useBreadcrumb/#i18n-support`,
+      );
+      breadcrumbs.push({
+        label: translate(
+          `buttons.${action}`,
+          textTransformers.humanize(action),
+        ),
+      });
+    } else {
+      breadcrumbs.push({
+        label: translate(key, textTransformers.humanize(action)),
+      });
+    }
+  }
+```
+
+![](https://cdn-images-1.medium.com/max/1000/1*K_fNsFB8vybC5vfrZir5MA.png)
+
+As you can see there are other files too, where this warn-once is used but with different parameters.
+
+### warn-once code review
+
+index.js in the warn-once repository contains the below code
+
+```plaintext
+const DEV = process.env.NODE_ENV !== "production";
+
+const warnings = new Set();
+
+function warnOnce(condition, ...rest) {
+  if (DEV && condition) {
+    const key = rest.join(" ");
+
+    if (warnings.has(key)) {
+      return;
+    }
+
+    warnings.add(key);
+    console.warn(...rest);
+  }
+}
+
+module.exports = warnOnce;
+```
+
+I also happened to create a [Pull request](https://github.com/satya164/warn-once/pull/3) with an example demonstrating the ability to pass n number of message strings as parameters.
+
+Set is used and has check ensures the message gets logged only once.
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/satya164/warn-once/pull/3](https://github.com/satya164/warn-once/pull/3)
+    
+2. [https://github.com/refinedev/refine/blob/main/packages/core/src/hooks/breadcrumb/index.ts#L109](https://github.com/refinedev/refine/blob/main/packages/core/src/hooks/breadcrumb/index.ts#L109)
+    
+3. [https://www.npmjs.com/package/warn-once](https://www.npmjs.com/package/warn-once)
+    
+4. [https://github.com/satya164/warn-once/blob/main/index.js](https://github.com/satya164/warn-once/blob/main/index.js)

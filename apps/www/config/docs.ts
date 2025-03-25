@@ -41,6 +41,56 @@ export const docsConfig: DocsConfig = {
       title: "March, 2025",
       items: [
         {
+          title: "downloadInBrowser function in Refine...",
+          href: "/blog/downloadInBrowser-function-in-Refine",
+          items: []
+        },
+        {
+          title: "flattenObjectKeys() function in Refine...",
+          href: "/blog/flattenObjectKeys()-function-in-Refine",
+          items: []
+        },
+        {
+          title: "asyncDebounce function in Refine...",
+          href: "/blog/asyncDebounce-function-in-Refine",
+          items: []
+        },
+        {
+          title: "git-blame-ignore-revs` file in React...",
+          href: "/blog/git-blame-ignore",
+          items: []
+        },
+        {
+          title: "cursorignore file in Refine codebase...",
+          href: "/blog/cursorignore-file-in-Refine",
+          items: []
+        },
+        {
+          title: "warnOnce package in Refine source code...",
+          href: "/blog/warnOnce-package-in-Refine",
+          items: []
+        },
+        {
+          title: "deferExecution() in Refine source code...",
+          href: "/blog/deferExecution-in-Refine-source",
+          items: []
+        },
+        {
+          title: "Telemetry in Refine source code...",
+          href: "/blog/Telemetry-in-Refine-source",
+          items: []
+        },
+        {
+          title: "useDeepMemo in Refine source code...",
+          href: "/blog/use-Deep-Memo",
+          items: []
+        },
+        {
+          title: "useRouterMisuseWarning in Refine source code...",
+          href: "/blog/use-Router-Misuse-Warning",
+          items: []
+        },
+        {
           title: "WeakMap() in react-scan...",
           href: "/blog/WeakMap-in-react-scan",
           items: []
@@ -735,6 +785,52 @@ export const docsConfig: DocsConfig = {
           href: "/blog/organize-your-components",
           items: [],
         },
+        {
+          title: "Use degit to download a template in your CLI tool",
+          href: "/blog/degit-to-download-CLI",
+          items: [],
+        },
+        {
+          title: "Supabase uses Valtio for its state management",
+          href: "/blog/Supabase-uses-Valtio",
+          items: [],
+        },
+        {
+          title: "Comparing the copyToClipboard implementations in Shadcn-ui/ui and Codehike",
+          href: "/blog/Comparing-the-copyToClipboard",
+          items: [],
+        },
+        {
+          title: "Shimmer effect in Card when you load Supabase dashboard.",
+          href: "/blog/Shimmer-effect-in-Card",
+          items: [],
+        },
+        {
+          title: "Function overload in TypeScript",
+          href: "/blog/Function-overload-in-TypeScript",
+          items: [],
+        },
+        {
+          title: "Convert a string to camelCase using this function in Javascript.",
+          href: "/blog/Convert-string-to-camelCase",
+          items: [],
+        },
+      ],
+    },
+    {
+      title: "July, 2024",
+      items: [
+        {
+          title: "Comparison of file and component structures among Shadcn-ui, Plane.so and Gitroom.",
+          href: "/blog/Comparison-of-file",
+          items: [],
+        },
+        {
+          title: "Cache your fetcher in useSWR with useCallback.",
+          href: "/blog/Cache-your-fetche",
+          items: [],
+        },
+        
       ],
     },
     
