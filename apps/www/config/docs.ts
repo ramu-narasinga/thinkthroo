@@ -625,8 +625,9 @@ export const docsConfig: DocsConfig = {
           href: "/blog/organize-your-components",
           items: [],
         },
+        
       ],
     },
-    
+
   ],
 }
