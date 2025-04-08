@@ -22,15 +22,15 @@
         "@radix-ui/react-separator": "^1.1.2",
         "@radix-ui/react-slot": "^1.1.0",
         "@radix-ui/react-tabs": "^1.1.0",
-        "@supabase/ssr": "^0.1.0",
+        "@supabase/ssr": "^0.6.1",
         "@vercel/analytics": "^1.2.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
-        "contentlayer2": "^0.4.6",
+        "contentlayer2": "^0.5.4",
         "jotai": "^2.1.0",
         "lucide-react": "^0.436.0",
         "next": "14.3.0-canary.43",
-        "next-contentlayer2": "^0.4.6",
+        "next-contentlayer2": "^0.5.4",
         "platform": "file:",
         "react": "^18",
         "react-dom": "^18",
@@ -43,13 +43,13 @@
         "@types/node": "^20",
         "@types/react": "^18",
         "@types/react-dom": "^18",
-        "esbuild": "^0.17.19",
+        "esbuild": "^0.25.1",
         "eslint": "^8",
         "eslint-config-next": "14.2.7",
         "mdast-util-toc": "^6.1.1",
         "postcss": "^8",
         "rehype-autolink-headings": "^6.1.1",
-        "rehype-pretty-code": "^0.6.0",
+        "rehype-pretty-code": "^0.14.1",
         "rehype-slug": "^5.1.0",
         "remark": "^14.0.3",
         "remark-code-import": "^1.2.0",
@@ -60,6 +60,6 @@
         "unist-util-visit": "^4.1.2"
     },
     "peerDependencies": {
-        "esbuild": "^0.17.3"
+        "esbuild": "^0.25.1"
     }
 }

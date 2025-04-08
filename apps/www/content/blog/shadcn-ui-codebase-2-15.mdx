@@ -1,0 +1,135 @@
+---
+title: shadcn-ui/ui codebase analysis: How does shadcn-ui CLI work? — Part 2.15
+---
+
+I wanted to find out how shadcn-ui CLI works. In this article, I discuss the code used to build the shadcn-ui/ui CLI.
+
+In part 2.11, we looked at runInit function and how shadcn-ui/ui ensures directories provided in resolvedPaths in config exist.
+
+The following operations are performed in runInit function:
+
+![](https://miro.medium.com/v2/resize:fit:875/1*kN1j5uVPRO4-s7DCfczNqw.png align="left")
+
+1. Ensure all resolved paths directories exist.
+    
+2. Write tailwind config.
+    
+3. Write css file.
+    
+4. Write cn file.
+    
+5. Install dependencies.
+    
+
+#1, #2, #3, #4 from the above are covered in part 2.12, 2.13 and 2.14, let’s find out how “Install dependencies” operation is done.
+
+# **Install dependencies**
+
+The below code snippet is picked from [cli/src/commands/init.ts](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/init.ts#L382)
+
+```plaintext
+// Install dependencies.
+const dependenciesSpinner = ora(`Installing dependencies...`)?.start()
+const packageManager = await getPackageManager(cwd)
+
+// TODO: add support for other icon libraries.
+const deps = [
+  ...PROJECT_DEPENDENCIES,
+  config.style === "new-york" ? "@radix-ui/react-icons" : "lucide-react",
+]
+
+await execa(
+  packageManager,
+  [packageManager === "npm" ? "install" : "add", ...deps],
+  {
+    cwd,
+  }
+)
+dependenciesSpinner?.succeed()
+```
+
+[ora](https://www.npmjs.com/package/ora) is an elegant terminal spinner and is used to show the message “Installing dependencies…” when you run the `npx shadcn init` command.
+
+## **getPackageManager**
+
+getPackageManager is imported [packages/cli/src/utils/get-package-manager.ts](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/utils/get-package-manager.ts#L3)
+
+```plaintext
+import { detect } from "@antfu/ni"
+
+export async function getPackageManager(
+  targetDir: string
+): Promise<"yarn" | "pnpm" | "bun" | "npm"> {
+  const packageManager = await detect({ programmatic: true, cwd: targetDir })
+
+  if (packageManager === "yarn@berry") return "yarn"
+  if (packageManager === "pnpm@6") return "pnpm"
+  if (packageManager === "bun") return "bun"
+
+  return packageManager ?? "npm"
+}
+```
+
+Have you ever used npm in a pnpm project? I have and often times, it fails to install the package because you are using npm in a pnpm project.
+
+[@antfu/ni](https://github.com/antfu-collective/ni#readme) lets you use the right package manager and detect is a function that gives the packageManager used in a given project based on cwd.
+
+I cannot find anything mentioned about detect method in the [@antfu/ni](https://github.com/antfu-collective/ni#readme) Github readme. How would you know such a method exists unless you read it in some open source codebase?
+
+## **execa**
+
+[Execa](https://www.npmjs.com/package/execa) runs commands in your script, application or library. Unlike shells, it is [optimized](https://github.com/sindresorhus/execa/blob/HEAD/docs/bash.md) for programmatic usage. Built on top of the [`child_process`](https://nodejs.org/api/child_process.html) core module. This is built by the legend, [Sindre Sorhus](https://github.com/sindresorhus)
+
+shadcn-ui/ui CLI uses execa to install the neccessary dependencies as part of npx shadcn-ui init command.
+
+# **Conclusion**
+
+shadcn-ui CLI uses [execa](https://www.npmjs.com/package/execa), built by the legend, [Sindre Sorhu](https://github.com/sindresorhus). Execa is used to install the necessary dependencies in a script file. We all are familiar with executing installation commands but if you want to install some packages in a script programatically, execa can be used.
+
+shadcn-ui CLI detects the package manager used in your project using “detect” method from [@antfu/ni](https://github.com/antfu-collective/ni#readme).
+
+This article marks my quest to study and learn what happens under the hood when you run npx shadcn-ui init command as completed.
+
+I am moving on to study the [add command](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts).
+
+![](https://miro.medium.com/v2/resize:fit:875/1*47EKz3q3aUidRrzxVGAjLg.png align="left")
+
+> [*Get free courses inspired by the best practices used in open source.*](https://app.thinkthroo.com/best-practices)
+
+# **About me:**
+
+Hey, my name is [**Ramu Narasinga**](https://ramunarasinga.com/). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at*** [***ramu.narasinga@gmail.com***](mailto:ramu.narasinga@gmail.com)
+
+My Github — [**https://github.com/ramu-narasinga**](https://github.com/ramu-narasinga)
+
+My website — [**https://ramunarasinga.com**](https://ramunarasinga.com/)
+
+My Youtube channel — [**https://www.youtube.com/@thinkthroo**](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [**https://thinkthroo.com**](https://thinkthroo.com/)
+
+Codebase Architecture — [**https://app.thinkthroo.com/architecture**](https://app.thinkthroo.com/architecture)
+
+Best practices — [**https://app.thinkthroo.com/best-practices**](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [**https://app.thinkthroo.com/production-grade-projects**](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/init.ts#L382](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/init.ts#L382)
+    
+2. [https://www.npmjs.com/package/ora](https://www.npmjs.com/package/ora)
+    
+3. [https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/utils/get-package-manager.ts#L3](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/utils/get-package-manager.ts#L3)
+    
+4. [https://www.npmjs.com/package/@antfu/ni](https://www.npmjs.com/package/@antfu/ni)
+    
+5. [https://github.com/antfu-collective/ni#readme](https://github.com/antfu-collective/ni#readme)
+    
+6. [https://github.com/search?q=import+%7B+detect+%7D+from+%22%40antfu%2Fni%22&type=code](https://github.com/search?q=import+%7B+detect+%7D+from+%22%40antfu%2Fni%22&type=code)
+    
+7. [https://www.npmjs.com/package/execa](https://www.npmjs.com/package/execa)
+    
+8. [https://github.com/sindresorhus](https://github.com/sindresorhus)

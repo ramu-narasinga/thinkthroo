@@ -41,6 +41,21 @@ export const docsConfig: DocsConfig = {
       title: "March, 2025",
       items: [
         {
+          title: "WebRTCPeerProvider component in FilePizza codebase....",
+          href: "/blog/webrtc-peerprovider",
+          items: []
+        },
+        {
+          title: "WebRTCPeerProvider component in FilePizza codebase....",
+          href: "/blog/webrtc-peerprovider",
+          items: []
+        },
+        {
+          title: "FilePizza, a peer-to-peer file transfers in your browser....",
+          href: "/blog/FilePizza-a-peer-to-peer",
+          items: []
+        },
+        {
           title: "downloadInBrowser function in Refine...",
           href: "/blog/downloadInBrowser-function-in-Refine",
           items: []
@@ -827,9 +842,30 @@ export const docsConfig: DocsConfig = {
         },
         {
           title: "Cache your fetcher in useSWR with useCallback.",
-          href: "/blog/Cache-your-fetche",
+          href: "/blog/cache-your-fetche",
           items: [],
         },
+        {
+          title: "Using a custom backend server with Next.js in a monorepo.",
+          href: "/blog/Using-a-custom-backend",
+          items: [],
+        },
+        {
+          title: "shadcn-ui/ui codebase analysis 3.1...",
+          href: "/blog/shadcn-ui-codebase-3-1",
+          items: [],
+        },
+        {
+          title: "shadcn-ui/ui codebase analysis 3.0...",
+          href: "/blog/shadcn-ui-codebase-3-0",
+          items: [],
+        },
+        {
+          title: "shadcn-ui/ui codebase analysis 2.15...",
+          href: "/blog/shadcn-ui-codebase-2-15",
+          items: [],
+        },
+        
         
       ],
     },
