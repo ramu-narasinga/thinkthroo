@@ -1,0 +1,80 @@
+---
+title: How to destroy Preact node?
+---
+
+In this article, we review a [code snippet from react-scan codebase](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/web/toolbar.tsx#L67) shown below.
+
+```plaintext
+container.remove = () => {
+    window.__REACT_SCAN_TOOLBAR_CONTAINER__ = undefined;
+
+    if (container.hasChildNodes()) {
+      // Double render(null) is needed to fully unmount Preact components.
+      // The first call initiates unmounting, while the second ensures
+      // cleanup of internal VNode references and event listeners.
+      render(null, container);
+      render(null, container);
+    }
+
+    originalRemove();
+  };
+```
+
+This code snippet is picked from [packages/scan/src/web/toolbar.tsx](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/web/toolbar.tsx#L67). If you have noticed, render is called twice.
+
+```plaintext
+render(null, container);
+render(null, container);
+```
+
+But first, we need to know what happens when you call render with null.
+
+### Unmount Preact components
+
+You can unmount/destroy Preact node using render with null and a container.
+
+![](https://cdn-images-1.medium.com/max/1000/1*93okNIiaUs-mHtUim2EUiA.png)
+
+This image is a [Stackoverflow answer](https://stackoverflow.com/questions/50946950/how-to-destroy-root-preact-node).
+
+### Toolbar node
+
+Coming back to the code snippet shared above, Toolbar uses Preact to render its components but before doing so, previously rendered DOM nodes are removed. 
+
+```plaintext
+if (container.hasChildNodes()) {
+  // Double render(null) is needed to fully unmount Preact components.
+  // The first call initiates unmounting, while the second ensures
+  // cleanup of internal VNode references and event listeners.
+  render(null, container);
+  render(null, container);
+}
+```
+
+What’s so special about this? it is called twice and the comment above describes why render is called twice.
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/web/toolbar.tsx#L67](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/web/toolbar.tsx#L67)
+    
+2. [https://stackoverflow.com/questions/50946950/how-to-destroy-root-preact-node](https://stackoverflow.com/questions/50946950/how-to-destroy-root-preact-node)

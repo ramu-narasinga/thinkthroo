@@ -1,0 +1,113 @@
+---
+title: downloadInBrowser function in Refine source code.
+---
+
+In this article, we will review the function, downloadInBrowser, in Refine source code.
+
+```plaintext
+export const downloadInBrowser = (
+  filename: string,
+  content: string,
+  type?: string,
+) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const blob = new Blob([content], { type });
+
+  const link = document.createElement("a");
+  link.setAttribute("visibility", "hidden");
+  link.download = filename;
+  const blobUrl = URL.createObjectURL(blob);
+  link.href = blobUrl;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  // As per documentation, call URL.revokeObjectURL to remove the blob from memory.
+  setTimeout(() => {
+    URL.revokeObjectURL(blobUrl);
+  });
+};
+```
+
+### Function definition:
+
+```plaintext
+export const downloadInBrowser = (
+  filename: string,
+  content: string,
+  type?: string,
+) => {
+```
+
+This accepts 3 parameters:
+
+* filename
+    
+* content
+    
+* type
+    
+
+```plaintext
+if (typeof window === "undefined") {
+  return;
+}
+
+const blob = new Blob([content], { type });
+```
+
+If the typeof window is undefined, function returns. blob is assigned an instance of Blob with content and type.
+
+```plaintext
+const link = document.createElement("a");
+link.setAttribute("visibility", "hidden");
+link.download = filename;
+const blobUrl = URL.createObjectURL(blob);
+link.href = blobUrl;
+```
+
+`link` is created here with `createElement`. For this anchor tag, visibility is hidden, download is set to filename and blob from earlier is convert to blobUrl and href is set to blobUrl
+
+```plaintext
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+// As per documentation, call URL.revokeObjectURL to remove the blob from memory.
+setTimeout(() => {
+  URL.revokeObjectURL(blobUrl);
+});
+```
+
+Here, link is appended to the document.body and link is clicked so as to download the file. As part of cleanup, first the link is removed from the DOM and URL.revokeObjectURL is called with blobUrl
+
+> As per documentation, call URL.revokeObjectURL to remove the blob from memory.
+
+I guess, it is important to remove the blob from the memory.
+
+![](https://cdn-images-1.medium.com/max/1000/1*Rx7GbBEr4rRayphkkhRN0A.png)
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/refinedev/refine/blob/main/packages/core/src/definitions/helpers/downloadInBrowser/index.ts](https://github.com/refinedev/refine/blob/main/packages/core/src/definitions/helpers/downloadInBrowser/index.ts)

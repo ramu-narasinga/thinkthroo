@@ -1,0 +1,140 @@
+---
+title: useDeepMemo() in Refine source code.
+---
+
+In this article, we will review a function named [useDeepMemo found in Refine source code](https://github.com/refinedev/refine/blob/6729794dada71ad34402c8e66303e821193af0d9/packages/core/src/components/containers/refine/index.tsx#L73).
+
+```plaintext
+const queryClient = useDeepMemo(() => {
+    if (reactQueryWithDefaults.clientConfig instanceof QueryClient) {
+      return reactQueryWithDefaults.clientConfig;
+    }
+
+    return new QueryClient({
+      ...reactQueryWithDefaults.clientConfig,
+      defaultOptions: {
+        ...reactQueryWithDefaults.clientConfig.defaultOptions,
+        queries: {
+          refetchOnWindowFocus: false,
+          keepPreviousData: true,
+          ...reactQueryWithDefaults.clientConfig.defaultOptions?.queries,
+        },
+      },
+    });
+  }, [reactQueryWithDefaults.clientConfig]);
+```
+
+This code snippet is picked from [packages/core/src/components/containers/refine/index.tsx](https://github.com/refinedev/refine/blob/6729794dada71ad34402c8e66303e821193af0d9/packages/core/src/components/containers/refine/index.tsx#L73C3-L89C45).
+
+Where is useDeepMemo imported from?
+
+![](https://cdn-images-1.medium.com/max/1000/1*A4fLD0qibQDLJjp2Tp_H4w.png)
+
+as you can see from the above image, useDeepMemo is imported from [@hooks/deepMemo](https://github.com/refinedev/refine/blob/main/packages/core/src/hooks/deepMemo/index.tsx#L8)
+
+### useDeepMemo
+
+This below code is picked from [packages/core/src/hooks/deepMemo/index.tsx](https://github.com/refinedev/refine/blob/main/packages/core/src/hooks/deepMemo/index.tsx#L8).
+
+```plaintext
+import React, { useMemo } from "react";
+import { useMemoized } from "@hooks/memoized";
+
+/**
+ * Hook that memoizes the given dependency array and checks the consecutive calls with deep equality and returns the same value as the first call if dependencies are not changed.
+ * @internal
+ */
+export const useDeepMemo = <T,>(
+  fn: () => T,
+  dependencies: React.DependencyList,
+): T => {
+  const memoizedDependencies = useMemoized(dependencies);
+
+  const value = useMemo(fn, memoizedDependencies);
+
+  return value;
+};
+```
+
+@internal in the comment here means that this is only internal use and is not exposed in the public API and has a comment explaining what this hook is about:
+
+> Hook that memoizes the given dependency array and checks the consecutive calls with deep equality and returns the same value as the first call if dependencies are not changed.
+
+Going back to code snippet above, there is only dependency here
+
+```plaintext
+[reactQueryWithDefaults.clientConfig]
+```
+
+And the function defined returns a query client.
+
+```plaintext
+return new QueryClient({
+      ...reactQueryWithDefaults.clientConfig,
+      defaultOptions: {
+        ...reactQueryWithDefaults.clientConfig.defaultOptions,
+        queries: {
+          refetchOnWindowFocus: false,
+          keepPreviousData: true,
+          ...reactQueryWithDefaults.clientConfig.defaultOptions?.queries,
+        },
+      },
+    });
+```
+
+Not sure if you have noticed but there is another hook imported, useMemoized.
+
+```plaintext
+import { useMemoized } from "@hooks/memoized";
+```
+
+### useMemoized
+
+This above code snippet is imported from [packages/core/src/hooks/memoized/index.tsx](https://github.com/refinedev/refine/blob/main/packages/core/src/hooks/memoized/index.tsx#L8)
+
+```plaintext
+import { useRef } from "react";
+import isEqual from "lodash/isEqual";
+
+/**
+ * Hook that memoizes the given value with deep equality.
+ * @internal
+ */
+export const useMemoized = <T = unknown>(value: T): T => {
+  const ref = useRef(value);
+
+  if (!isEqual(ref.current, value)) {
+    ref.current = value;
+  }
+
+  return ref.current;
+};
+```
+
+This is also another internal function and is found to be using isEqual imported from “lodash/isEqual”.
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/refinedev/refine/blob/6729794dada71ad34402c8e66303e821193af0d9/packages/core/src/components/containers/refine/index.tsx#L73](https://github.com/refinedev/refine/blob/6729794dada71ad34402c8e66303e821193af0d9/packages/core/src/components/containers/refine/index.tsx#L73)
+    
+2. [https://github.com/refinedev/refine/blob/main/packages/core/src/hooks/deepMemo/index.tsx#L8](https://github.com/refinedev/refine/blob/main/packages/core/src/hooks/deepMemo/index.tsx#L8)

@@ -1,0 +1,114 @@
+---
+title: You are familiar with npm/pnpm but have you heard of tnpm or cnpm?
+---
+I have written an articles explaining [how to install npm packages programmatically](https://medium.com/@thinkthroo/part-1-how-to-install-npm-packages-programmatically-b35f1a2c0142). There’s a function called [getNpmClient](https://github.com/umijs/umi/blob/master/packages/utils/src/npmClient.ts#L13).
+
+![](https://miro.medium.com/v2/resize:fit:875/1*SmdHCy7BxVLFRVcAmhAlBA.png)
+
+# **Detect tnpm/cnpm client**
+
+This comment below and the code show us how you could detect tnpm/cnpm client.
+
+```javascript
+// detect tnpm/cnpm client
+  // all situations:
+  //   - npminstall mode + native fs => generate _resolved field in package.json
+  //   - npminstall mode + rapid fs => generate .package-lock.json in node_modules
+  //   - npm mode + native fs => generate .package-lock.json in node_modules
+  //   - npm mode + rapid fs => generate .package-lock.json in node_modules
+  // all conditions:
+  //   - has _resolved field or .package-lock.json means tnpm/cnpm
+  //   - _resolved field or .package-lock.json contains tnpm registry means tnpm
+  if (chokidarPkg._resolved) {
+    return tnpmRegistries.some((r) => chokidarPkg._resolved.includes(r))
+      ? 'tnpm'
+      : 'cnpm';
+  } else if (existsSync(tcnpmLockPath)) {
+    const tcnpmLock = readFileSync(tcnpmLockPath, 'utf-8');
+
+    return tnpmRegistries.some((r) => tcnpmLock.includes(r)) ? 'tnpm' : 'cnpm';
+  }
+```
+
+## **Detect tnpm client**
+
+> *has \_resolved field or .package-loc.json means tnpm/cnpm*
+
+This comment explains what this below if block is about
+
+```javascript
+if (chokidarPkg._resolved) {
+    return tnpmRegistries.some((r) => chokidarPkg._resolved.includes(r))
+      ? 'tnpm'
+      : 'cnpm';
+}
+```
+
+## **Detect tnpm client**
+
+> *\- \_resolved field or .package-lock.json contains tnpm registry means tnpm*
+
+This comment above explains the else if block below
+
+```javascript
+else if (existsSync(tcnpmLockPath)) {
+  const tcnpmLock = readFileSync(tcnpmLockPath, 'utf-8');
+```
+
+```javascript
+  return tnpmRegistries.some((r) => tcnpmLock.includes(r)) ? 'tnpm' : 'cnpm';
+}
+```
+
+This is the first time I am learning about tnpm or cnpm. I will write an article about these.
+
+But what is tnpm or cnpm client?
+
+# **tnpm Client**
+
+tnpm is an enterprise service for Alibaba and Ant Group, which is also based on cnpm, with additional enterprise-level customization.
+
+# **cnpm Client**
+
+[cnpm](https://github.com/cnpm) is an open-source implementation of npm, which supports mirror synchronization with the official npm registry and private package capabilities.
+
+There is an [in-depth of tnpm rapid mode — how tnpm managed to be 10 second faster than pnpm](https://dev.to/atian25/in-depth-of-tnpm-rapid-mode-how-could-we-fast-10s-than-pnpm-3bpp)
+
+![](https://miro.medium.com/v2/resize:fit:875/1*MPa2-prYc7-XOw3CdOBEbg.png)
+
+This article talks in depth about
+
+1. Why is npm soooo slow?
+    
+2. What are tnpm and cnpm?
+    
+3. Optimization results and much more.
+    
+
+# **About me:**
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://dev.to/atian25/in-depth-of-tnpm-rapid-mode-how-could-we-fast-10s-than-pnpm-3bpp](https://dev.to/atian25/in-depth-of-tnpm-rapid-mode-how-could-we-fast-10s-than-pnpm-3bpp)
+    
+2. [https://github.com/cnpm/cnpm](https://github.com/cnpm/cnpm)
+    
+3. [https://github.com/umijs/umi/blob/packages/utils/src/npmClient.ts#L18](https://github.com/umijs/umi/blob/9c3194d0617276fbecd09d19a8cff606fcaac82d/packages/utils/src/npmClient.ts#L18)

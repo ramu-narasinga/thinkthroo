@@ -1,0 +1,22 @@
+{
+  "title": "State management in Cal.com\r",
+  "published": false,
+  "featured": false,
+  "component": false,
+  "toc": true,
+  "body": {
+    "raw": "# State management in Cal.com\r\n\r\nIn this guide, we will analyse how the state is managed in Cal.com.\r\n\r\nWe have to take a closer look at operations such as:\r\n1. Bookings listing page\r\n2. Event types listing page\r\n3. Add/Edit a new event type\r\n4. Add/Edit availability\r\n\r\nThese operations are specific to Cal.com, these operations vary based on an application. \r\nIn Lobechat, to understand how how state is managed, you would look at operations such as add a new \r\nassistant, loading a chat etc.,\r\n\r\nAt the time of writing this guide, Cal.com used pages route and with a migration in place to use \r\napp router. Through out these guides, you will see references pointing at pages router. Be sure to check \r\nout the [future folder in cal.com source](https://github.com/calcom/cal.com/tree/main/apps/web/app/future)\r\nas this shows the migration towards app folder. ",
+    "code": "var Component=(()=>{var p=Object.create;var i=Object.defineProperty;var m=Object.getOwnPropertyDescriptor;var u=Object.getOwnPropertyNames;var g=Object.getPrototypeOf,w=Object.prototype.hasOwnProperty;var f=(t,e)=>()=>(e||t((e={exports:{}}).exports,e),e.exports),x=(t,e)=>{for(var a in e)i(t,a,{get:e[a],enumerable:!0})},s=(t,e,a,r)=>{if(e&&typeof e==\"object\"||typeof e==\"function\")for(let o of u(e))!w.call(t,o)&&o!==a&&i(t,o,{get:()=>e[o],enumerable:!(r=m(e,o))||r.enumerable});return t};var y=(t,e,a)=>(a=t!=null?p(g(t)):{},s(e||!t||!t.__esModule?i(a,\"default\",{value:t,enumerable:!0}):a,t)),C=t=>s(i({},\"__esModule\",{value:!0}),t);var c=f((k,l)=>{l.exports=_jsx_runtime});var b={};x(b,{default:()=>d,frontmatter:()=>_});var n=y(c()),_={title:\"State management in Cal.com\"};function h(t){let e={a:\"a\",h1:\"h1\",li:\"li\",ol:\"ol\",p:\"p\",...t.components};return(0,n.jsxs)(n.Fragment,{children:[(0,n.jsx)(e.h1,{id:\"state-management-in-calcom\",children:\"State management in Cal.com\"}),`\n`,(0,n.jsx)(e.p,{children:\"In this guide, we will analyse how the state is managed in Cal.com.\"}),`\n`,(0,n.jsx)(e.p,{children:\"We have to take a closer look at operations such as:\"}),`\n`,(0,n.jsxs)(e.ol,{children:[`\n`,(0,n.jsx)(e.li,{children:\"Bookings listing page\"}),`\n`,(0,n.jsx)(e.li,{children:\"Event types listing page\"}),`\n`,(0,n.jsx)(e.li,{children:\"Add/Edit a new event type\"}),`\n`,(0,n.jsx)(e.li,{children:\"Add/Edit availability\"}),`\n`]}),`\n`,(0,n.jsx)(e.p,{children:`These operations are specific to Cal.com, these operations vary based on an application.\\r\nIn Lobechat, to understand how how state is managed, you would look at operations such as add a new\\r\nassistant, loading a chat etc.,`}),`\n`,(0,n.jsxs)(e.p,{children:[`At the time of writing this guide, Cal.com used pages route and with a migration in place to use\\r\napp router. Through out these guides, you will see references pointing at pages router. Be sure to check\\r\nout the `,(0,n.jsx)(e.a,{href:\"https://github.com/calcom/cal.com/tree/main/apps/web/app/future\",children:\"future folder in cal.com source\"}),`\\r\nas this shows the migration towards app folder.`]})]})}function d(t={}){let{wrapper:e}=t.components||{};return e?(0,n.jsx)(e,{...t,children:(0,n.jsx)(h,{...t})}):h(t)}return C(b);})();\n;return Component;"
+  },
+  "_id": "guide/codebase-architecture/cal-com/state-management/introduction.mdx",
+  "_raw": {
+    "sourceFilePath": "guide/codebase-architecture/cal-com/state-management/introduction.mdx",
+    "sourceFileName": "introduction.mdx",
+    "sourceFileDir": "guide/codebase-architecture/cal-com/state-management",
+    "contentType": "mdx",
+    "flattenedPath": "guide/codebase-architecture/cal-com/state-management/introduction"
+  },
+  "type": "Doc",
+  "slug": "/guide/codebase-architecture/cal-com/state-management/introduction",
+  "slugAsParams": "codebase-architecture/cal-com/state-management/introduction"
+}

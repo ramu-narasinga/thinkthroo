@@ -1,0 +1,274 @@
+---
+title: CLI tool in Nue-Js source code.
+---
+
+In this article, we will review the how the CLI tool is written in Nue.js source code.
+
+![](https://cdn-images-1.medium.com/max/1000/1*_As7CY7ol9p_TRKnFlRvtQ.png)
+
+Nue.js CLI tool supports the below listed commands:
+
+1. Help
+    
+2. Serve
+    
+3. Build
+    
+4. Create
+    
+5. Init
+    
+
+We will review Help, Init commands to understand the underlying pattern.
+
+### Help command
+
+Let’s find out how help is printed to CLI. At line 126-133 in packages/nuejs/src/cli.js, you will find the below code:
+
+```plaintext
+// Only run main when called as real CLI
+if (esMain(import.meta)) {
+
+  const args = getArgs(process.argv.slice(2))
+
+  // help
+  if (args.help) {
+    await printHelp()
+
+    // version
+  }
+```
+
+#### printHelp()
+
+printHelp() is defined in the [same cli.js file](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L76) and has the below code:
+
+```plaintext
+async function printHelp() {
+  const { getHelp } = await import('./cli-help.js')
+  console.info(getHelp())
+}
+```
+
+Check out the [cli-help.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli-help.js) it contains the below code:
+
+```plaintext
+
+#!/usr/bin/env bun
+
+import { esMain, log, colors, version, getEngine, openUrl } from './util.js'
+
+
+// [-npe] --> [-n, -p, -e]
+export function expandArgs(args) {
+  const arr = []
+  args.forEach(arg => {
+    if (arg[0] == '-' && arg[1] != '-' && arg[2]) {
+      arg.slice(1).split('').forEach(el => arr.push('-' + el))
+    } else {
+      arr.push(arg)
+    }
+  })
+  return arr
+}
+
+// TODO: tests
+export function getArgs(argv) {
+  const commands = ['serve', 'build', 'init', 'create', 'docs']
+  const args = { paths: [], root: null }
+  let opt
+
+  expandArgs(argv).forEach((arg) => {
+    // skip
+    if (arg == '--') {
+
+      // test suite
+    } else if (arg.endsWith('.test.js')) {
+      args.test = true
+
+      // command
+    } else if (!args.cmd && commands.includes(arg)) {
+      args.cmd = arg
+
+      // options
+    } else if (!opt && arg[0] == '-') {
+
+      // booleans
+      if (['-p', '--production'].includes(arg)) args.is_prod = true
+      else if (['-v', '--version'].includes(arg) && !args.cmd) args.version = true
+      else if (['-n', '--dry-run'].includes(arg)) args.dryrun = true
+      else if (['-h', '--help'].includes(arg)) args.help = true
+      else if (['-v', '--verbose'].includes(arg)) args.verbose = true
+      else if (['-b', '--esbuild'].includes(arg)) args.esbuild = true
+      else if (['-l', '--lcss'].includes(arg)) args.lcss = true
+      else if (['-d', '--deploy'].includes(arg)) args.deploy = args.is_prod = true
+      else if (['-I', '--incremental'].includes(arg)) args.incremental = true
+      else if (['-o', '--open'].includes(arg)) args.open = true
+
+      // string values
+      else if (['-e', '--environment'].includes(arg)) opt = 'env'
+      else if (['-r', '--root'].includes(arg)) opt = 'root'
+      else if (['-P', '--port'].includes(arg)) opt = 'port'
+      else if (['-B', '--base'].includes(arg)) opt = 'base'
+
+      // bad options
+      else throw `Unknown option: "${arg}"`
+
+    } else if (arg && arg[0] != '-') {
+      if (opt) {
+        args[opt] = opt == 'port' ? Number(arg) : arg
+        // Number(alphabetic characters) is falsy. Check if port is really set:
+        if (opt != 'port' || (opt == 'port' && args.port)) opt = null
+      }
+      else args.paths.push(arg)
+    } else if (opt) throw `"${opt}" option is not set`
+  })
+
+  if (opt) throw `"${opt}" option is not set`
+
+  return args
+}
+
+async function printHelp() {
+  const { getHelp } = await import('./cli-help.js')
+  console.info(getHelp())
+}
+
+async function printVersion() {
+  log(`Nue ${version} ${colors.green('•')} ${getEngine()}`)
+}
+
+async function runCommand(args) {
+  if (args.cmd == 'docs') return openUrl('https://nuejs.org/docs/')
+
+  const { createKit } = await import('./nuekit.js')
+  const { cmd = 'serve', dryrun, deploy, root = null, port } = args
+  const init = cmd == 'init'
+
+  if (!root) args.root = '.' // ensure root is unset for create, if not set manually
+
+  console.info('')
+  await printVersion()
+  args.nuekit_version = version
+
+  // create nue
+  if (cmd == 'create') {
+    const { create } = await import('./create.js')
+    return await create({ ...args, root, port })
+  }
+
+  const nue = await createKit(args)
+  if (!nue) return
+  if (args.open) openUrl(`http://localhost:${nue.port}/`)
+
+  // deployer (private repo)
+  const { deploy: deployer } = deploy ? await import('nue-deployer') : {}
+
+  // build
+  if (init) {
+    await nue.init(true)
+    if (deploy) await deployer({ root: nue.dist, init: true })
+
+  } else if (dryrun || deploy || args.paths[0] || cmd == 'build') {
+    const paths = await nue.build(args.paths)
+    if (!dryrun && deploy && paths[0]) await deployer({ paths, root: nue.dist, init })
+
+    // serve
+  } else {
+    await nue.serve()
+  }
+}
+
+// Only run main when called as real CLI
+if (esMain(import.meta)) {
+
+  const args = getArgs(process.argv.slice(2))
+
+  // help
+  if (args.help) {
+    await printHelp()
+
+    // version
+  } else if (args.version) {
+    await printVersion()
+
+    // command
+  } else if (!args.test) {
+    try {
+      await runCommand(args)
+    } catch (e) {
+      console.info(e)
+    }
+  }
+}
+```
+
+### Init command
+
+[At line 90 in cli.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L90), there is this below check:
+
+```plaintext
+async function runCommand(args) {
+  if (args.cmd == 'docs') return openUrl('https://nuejs.org/docs/')
+
+  const { createKit } = await import('./nuekit.js')
+  const { cmd = 'serve', dryrun, deploy, root = null, port } = args
+  const init = cmd == 'init'
+```
+
+At [line 112 in the cli.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L112), you will find the below code:
+
+```plaintext
+if (init) {
+    await nue.init(true)
+    if (deploy) await deployer({ root: nue.dist, init: true })
+}
+```
+
+nue.init? where is that coming from? you will see this below code [at line 104](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L104)
+
+```plaintext
+  const nue = await createKit(args)
+```
+
+### createKit
+
+createKit is exported from [nuekit.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/nuekit.js#L23) and has 383 LOC at the time of writing this article. Since we are interested in init, I searched for “init” in this nuekit.js file and found the below code:
+
+```plaintext
+async function init(force) {
+    await initNueDir({ dist, is_dev, esbuild, force })
+}
+```
+
+initNueDir is imported from a file named init.js. Similarly I saw create.js.
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@ramu-narasinga](https://www.youtube.com/@ramu-narasinga)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js)
+    
+2. [https://github.com/nuejs/nue/blob/master/packages/nuekit/package.json#L14](https://github.com/nuejs/nue/blob/master/packages/nuekit/package.json#L14)
+    
+3. [https://nuejs.org/docs/command-line-interface.html](https://nuejs.org/docs/command-line-interface.html)
+    
+4. [https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L76](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L76)

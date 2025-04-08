@@ -1,0 +1,98 @@
+---
+title: esMain(import.meta) in Nue-js source code.
+---
+
+In this article, we will review a function, esMain(), in Nue.js source code. You will find the below code snippet at [line 127 in packages/nuekit/cli.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L127).
+
+```plaintext
+// Only run main when called as real CLI
+if (esMain(import.meta)) {
+```
+
+What caught my attention is this comment below:
+
+> // Only run main when called as real CLI
+
+I was thinking how does this check happen? To understand that we need to see the esMain function code. It is located in [packages/nuekit/src/util.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/util.js#L16).
+
+```plaintext
+export function esMain(meta) {
+  if (!meta || !process.argv[1]) return false
+  return fileURLToPath(
+    meta.resolve(process.argv[1])) === fileURLToPath(meta.url
+  )
+}
+```
+
+Let’s break this down. I would start with finding out what [import.meta](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import.meta) is.
+
+![](https://cdn-images-1.medium.com/max/1000/1*wbn68rKZuOICouiAFJEwdg.png)
+
+#### import.meta
+
+The `import.meta` meta-property exposes context-specific metadata to a JavaScript module. It contains information about the module, such as the module's URL.
+
+Read more about [import.meta](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import.meta).
+
+TLDR: import.meta is created by the host environment and the object looks something like below:
+
+```plaintext
+{
+  // In browsers, this is either the URL from which the script was obtained 
+  // (for external scripts), or the URL of the containing document 
+  // (for inline scripts). In Node.js, this is the file path (including the 
+  // file:// protocol).
+  "url": <value>, // ()
+  // Resolves a module specifier to a URL 
+  // using the current module's URL as base.
+  "resolve": 
+}
+```
+
+So if there is not meta or process.argv\[1\], this esMain function returns false.
+
+```plaintext
+if (!meta || !process.argv[1]) return false
+```
+
+otherwise, the below code is executed:
+
+```plaintext
+return fileURLToPath(
+  meta.resolve(process.argv[1])
+) === fileURLToPath(meta.url)
+```
+
+fileURLToPath is imported from “node:url” at the top of this file as shown below:
+
+```plaintext
+import { fileURLToPath, pathToFileURL } from 'node:url'
+```
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@ramu-narasinga](https://www.youtube.com/@ramu-narasinga)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L126](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L126)
+    
+2. [https://github.com/nuejs/nue/blob/master/packages/nuekit/src/util.js#L16](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/util.js#L16)
+    
+3. [https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import.meta](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import.meta)

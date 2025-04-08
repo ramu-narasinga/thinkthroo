@@ -1,0 +1,94 @@
+---
+title: sizereport.config.js in Preact source code.  
+---
+
+I found a file named [sizereport.config.js in Preact source code](https://github.com/preactjs/preact/blob/main/sizereport.config.js) and it has the below code.
+
+```plaintext
+module.exports = {
+ repo: 'preactjs/preact',
+ path: ['./{compat,debug,hooks,}/dist/**/!(*.map)'],
+ branch: 'main'
+};
+```
+
+I was trying to find where this config is used, but I couldn’t yet. Below are the [search results](https://github.com/search?q=repo%3Apreactjs%2Fpreact%20report&type=code):
+
+![](https://cdn-images-1.medium.com/max/1000/1*QmxthZjxJceSFFs6mQ9dWA.png)
+
+Instead I found something else. There is a [size.yml in the .github folder](https://github.com/preactjs/preact/blob/main/.github/workflows/size.yml)
+
+### size.yml
+
+```plaintext
+name: Compressed Size
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: preactjs/compressed-size-action@v2
+        with:
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          # Our `prepare` script already builds the app post-install,
+          # building it again would be redundant
+          build-script: 'npm run --if-present noop'
+```
+
+This size workflow action contains this above code. It uses preactjs/compressed-size-action@v2. [compressed-sized-action is another repository.](https://github.com/preactjs/compressed-size-action/tree/master)
+
+### Compressed Size Action
+
+A GitHub action that reports changes in compressed file sizes on your PRs.
+
+* Automatically uses `yarn`, `pnpm`, `bun`, or `npm ci` when lockfiles are present
+    
+* Builds your PR, then builds the target and compares between the two
+    
+* Doesn’t upload anything or rely on centralized storage
+    
+* Supports [custom build scripts](https://github.com/preactjs/compressed-size-action/tree/master#customizing-the-build) and [file patterns](https://github.com/preactjs/compressed-size-action/tree/master#customizing-the-list-of-files)
+    
+
+Read more about [compress-size-action](https://github.com/marketplace/actions/compressed-size-action).
+
+![](https://cdn-images-1.medium.com/max/1000/1*QAtoXcgYPTKpXqP84GYOUA.png)
+
+The above image shows how this Github action reports the size changes, check out this [pull request](https://github.com/preactjs/compressed-size-action/pull/53).
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/preactjs/preact/blob/main/sizereport.config.js](https://github.com/preactjs/preact/blob/main/sizereport.config.js)
+    
+2. [https://github.com/search?q=repo%3Apreactjs%2Fpreact%20report&type=code](https://github.com/search?q=repo%3Apreactjs%2Fpreact%20report&type=code)
+    
+3. [https://github.com/preactjs/compressed-size-action/tree/master](https://github.com/preactjs/compressed-size-action/tree/master)

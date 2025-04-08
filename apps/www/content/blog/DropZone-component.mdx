@@ -1,0 +1,185 @@
+---
+title: DropZone component in FilePizza codebase.
+---
+
+In this article, we will review DropZone.tsx component in FilePizza codebase.
+
+![](https://cdn-images-1.medium.com/max/1000/1*8Z8G2JnWmswFweRE3VsGZA.png)
+
+### DropZone HTML
+
+```plaintext
+<>
+  <div
+    className={`fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center text-2xl text-white transition-opacity duration-300 backdrop-blur-sm z-50 ${
+      isDragging ? 'opacity-100 visible' : 'opacity-0 invisible'
+    }`}
+  >
+    Drop to select {fileCount} file{fileCount !== 1 ? 's' : ''}
+  </div>
+  <input
+    type="file"
+    ref={fileInputRef}
+    className="hidden"
+    onChange={handleFileInputChange}
+    multiple
+  />
+  <button
+    className="block cursor-pointer relative py-3 px-6 text-base font-bold text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-800 border-2 border-stone-700 dark:border-stone-700 rounded-lg transition-all duration-300 ease-in-out outline-none hover:shadow-md active:shadow-inner focus:shadow-outline"
+    onClick={handleClick}
+  >
+    <span className="text-center text-stone-700 dark:text-stone-200">
+      Drop a file to get started
+    </span>
+  </button>
+</>
+```
+
+This is pretty standard, you hide your input and handle the file upload. On the button, you will find the handleClick button.
+
+FilePizza claims that no file reaches their servers. Let’s confirm by reviewing what they do with selected files from your local machine.
+
+### File handlers
+
+```plaintext
+const handleDragEnter = useCallback((e: DragEvent) => {
+  e.preventDefault()
+  setIsDragging(true)
+  setFileCount(e.dataTransfer?.items.length || 0)
+}, [])
+
+const handleDragLeave = useCallback((e: DragEvent) => {
+  e.preventDefault()
+
+  const currentTarget =
+    e.currentTarget === window ? window.document : e.currentTarget
+  if (
+    e.relatedTarget &&
+    currentTarget instanceof Node &&
+    currentTarget.contains(e.relatedTarget as Node)
+  ) {
+    return
+  }
+
+  setIsDragging(false)
+}, [])
+
+const handleDragOver = useCallback((e: DragEvent) => {
+  e.preventDefault()
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = 'copy'
+  }
+}, [])
+
+const handleDrop = useCallback(
+  async (e: DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+
+    if (e.dataTransfer) {
+      const files = await extractFileList(e)
+      onDrop(files)
+    }
+  },
+  [onDrop],
+)
+
+const handleClick = useCallback(() => {
+  fileInputRef.current?.click()
+}, [])
+
+const handleFileInputChange = useCallback(
+  async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files)
+      onDrop(files)
+    }
+  },
+  [onDrop],
+)
+```
+
+There is no addition API calls here, just onDrop and the extractFileList.
+
+### extractFileList
+
+```plaintext
+export const extractFileList = async (
+  e: React.DragEvent | DragEvent,
+): Promise<File[]> => {
+  if (!e.dataTransfer || !e.dataTransfer.items.length) {
+    return []
+  }
+
+  const items = e.dataTransfer.items
+  const scans: Promise<File[]>[] = []
+  const files: Promise<File>[] = []
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
+    const entry = item.webkitGetAsEntry()
+    if (entry) {
+      if (entry.isDirectory) {
+        scans.push(scanDirectoryEntry(entry))
+      } else {
+        files.push(getAsFile(entry))
+      }
+    }
+  }
+
+  const scanResults = await Promise.all(scans)
+  const fileResults = await Promise.all(files)
+
+  return scanResults.flat().concat(fileResults)
+}
+```
+
+From the looks of this function, FilePizza also supports uploading a directory.
+
+### Drag and drop listeners
+
+Finally, let’s review the listeners attached in this DropZone component.
+
+```plaintext
+useEffect(() => {
+  window.addEventListener('dragenter', handleDragEnter)
+  window.addEventListener('dragleave', handleDragLeave)
+  window.addEventListener('dragover', handleDragOver)
+  window.addEventListener('drop', handleDrop)
+
+  return () => {
+    window.removeEventListener('dragenter', handleDragEnter)
+    window.removeEventListener('dragleave', handleDragLeave)
+    window.removeEventListener('dragover', handleDragOver)
+    window.removeEventListener('drop', handleDrop)
+  }
+}, [handleDragEnter, handleDragLeave, handleDragOver, handleDrop])
+```
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@ramu-narasinga](https://www.youtube.com/@ramu-narasinga)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/kern/filepizza/blob/main/src/components/DropZone.tsx#L4](https://github.com/kern/filepizza/blob/main/src/components/DropZone.tsx#L4)
+    
+2. [https://github.com/kern/filepizza/blob/327dcc3581b930ee191f54840110679b959445c7/src/app/page.tsx#L30](https://github.com/kern/filepizza/blob/327dcc3581b930ee191f54840110679b959445c7/src/app/page.tsx#L30)
+    
+3. [https://github.com/kern/filepizza/blob/327dcc3581b930ee191f54840110679b959445c7/src/app/page.tsx#L141](https://github.com/kern/filepizza/blob/327dcc3581b930ee191f54840110679b959445c7/src/app/page.tsx#L141)

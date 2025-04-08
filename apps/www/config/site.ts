@@ -5,9 +5,9 @@ export const siteConfig = {
     description:
       "Learn the Large Codebase Architecture",
     links: {
-      twitter: "https://twitter.com/thinkthroo",
-      github: "https://github.com/thinkthroo",
-      youtube: "https://www.youtube.com/@thinkthroo",
+      twitter: "https://x.com/thinkthroo",
+      github: "https://github.com/ramu-narasinga/thinkthroo",
+      youtube: "https://www.youtube.com/@ramu-narasinga",
       learningPlatform: "https://app.thinkthroo.com/architecture",
       consultation: "https://cal.com/team-thinkthroo-dxiovj/consultation"
     },

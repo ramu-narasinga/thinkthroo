@@ -1,0 +1,208 @@
+---
+title: startTimingTracking in react-scan source code.
+---
+
+In this article, we review the below code snippet picked from [event-tracking.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/event-tracking.ts#L364)
+
+```plaintext
+export const startTimingTracking = () => {
+  const unSubPerformance = setupPerformancePublisher();
+  const unSubDirtyTaskTracking = startDirtyTaskTracking();
+  const unSubLongPipelineTracking = startLongPipelineTracking();
+
+  const onComplete = async (
+    _: string,
+    finalInteraction: FinalInteraction,
+    event: PerformanceEntryChannelEvent,
+  ) => {
+    toolbarEventStore.getState().actions.addEvent({
+      kind: 'interaction',
+      id: not_globally_unique_generateId(),
+      data: {
+        startAt: finalInteraction.detailedTiming.blockingTimeStart,
+        endAt: performance.now() + performance.timeOrigin,
+        meta: { ...finalInteraction, kind: event.kind }, // TODO, will need interaction specific metadata here
+      },
+    });
+
+    const existingCompletedInteractions =
+      performanceEntryChannels.getChannelState('recording');
+
+    finalInteraction.detailedTiming.stopListeningForRenders();
+
+    if (existingCompletedInteractions.length) {
+      // then performance entry and our detailed timing handlers are out of sync, we disregard that entry
+      // it may be possible the performance entry returned before detailed timing. If that's the case we should update
+      // assumptions and deal with mapping the entry back to the detailed timing here
+      performanceEntryChannels.updateChannelState(
+        'recording',
+        () => new BoundedArray(MAX_CHANNEL_SIZE),
+      );
+    }
+  };
+  const unSubDetailedPointerTiming = setupDetailedPointerTimingListener(
+    'pointer',
+    {
+      onComplete,
+    },
+  );
+  const unSubDetailedKeyboardTiming = setupDetailedPointerTimingListener(
+    'keyboard',
+    {
+      onComplete,
+    },
+  );
+
+  const unSubInteractions = listenForPerformanceEntryInteractions(
+    (completedInteraction) => {
+      interactionStore.setState(
+        BoundedArray.fromArray(
+          interactionStore.getCurrentState().concat(completedInteraction),
+          MAX_INTERACTION_BATCH,
+        ),
+      );
+    },
+  );
+
+  return () => {
+    unSubDirtyTaskTracking();
+    unSubLongPipelineTracking();
+    unSubPerformance();
+    unSubDetailedPointerTiming();
+    unSubInteractions();
+    unSubDetailedKeyboardTiming();
+  };
+};
+```
+
+Let’s go over this function in chunks.
+
+```plaintext
+const unSubPerformance = setupPerformancePublisher();
+const unSubDirtyTaskTracking = startDirtyTaskTracking();
+const unSubLongPipelineTracking = startLongPipelineTracking();
+```
+
+this calls three functions — setupPerformancePublisher, startDirtyTaskTracking, startLongPipelineTracking.
+
+startDirtyTaskTracking and startLongPipelineTracking are defined in the same event-tracking.ts file except for the setupPerformancePublisher which is imported from [core/notifications/performance.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/performance.ts#L333).
+
+> If there is one thing that I noticed, it is the cleanup involved across the react-scan codebase to avoid memory leaks.
+
+![](https://cdn-images-1.medium.com/max/1000/1*lzkeqQJsvALHF4CPpJrftQ.png)
+
+### onComplete function:
+
+```plaintext
+const onComplete = async (
+    _: string,
+    finalInteraction: FinalInteraction,
+    event: PerformanceEntryChannelEvent,
+  ) => {
+    toolbarEventStore.getState().actions.addEvent({
+      kind: 'interaction',
+      id: not_globally_unique_generateId(),
+      data: {
+        startAt: finalInteraction.detailedTiming.blockingTimeStart,
+        endAt: performance.now() + performance.timeOrigin,
+        meta: { ...finalInteraction, kind: event.kind }, // TODO, will need interaction specific metadata here
+      },
+    });
+
+    const existingCompletedInteractions =
+      performanceEntryChannels.getChannelState('recording');
+
+    finalInteraction.detailedTiming.stopListeningForRenders();
+
+    if (existingCompletedInteractions.length) {
+      // then performance entry and our detailed timing handlers are out of sync, we disregard that entry
+      // it may be possible the performance entry returned before detailed timing. If that's the case we should update
+      // assumptions and deal with mapping the entry back to the detailed timing here
+      performanceEntryChannels.updateChannelState(
+        'recording',
+        () => new BoundedArray(MAX_CHANNEL_SIZE),
+      );
+    }
+  };
+```
+
+this onComplete arrow function is defined in startTimingTracking. There’s an “interaction” event added and then there is this comment explaining what that if block is about:
+
+```plaintext
+// then performance entry and our detailed timing handlers are out of sync, we disregard that entry
+// it may be possible the performance entry returned before detailed timing. If that's the case we should update
+// assumptions and deal with mapping the entry back to the detailed timing here
+```
+
+```plaintext
+const unSubDetailedPointerTiming = setupDetailedPointerTimingListener(
+    'pointer',
+    {
+      onComplete,
+    },
+  );
+  const unSubDetailedKeyboardTiming = setupDetailedPointerTimingListener(
+    'keyboard',
+    {
+      onComplete,
+    },
+  );
+
+  const unSubInteractions = listenForPerformanceEntryInteractions(
+    (completedInteraction) => {
+      interactionStore.setState(
+        BoundedArray.fromArray(
+          interactionStore.getCurrentState().concat(completedInteraction),
+          MAX_INTERACTION_BATCH,
+        ),
+      );
+    },
+  );
+```
+
+These 2 functions — setupDetailedPointerTimingListener and listenForPerformanceEntryInteractions are defined in [performance.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/performance.ts#L333)
+
+```plaintext
+return () => {
+    unSubDirtyTaskTracking();
+    unSubLongPipelineTracking();
+    unSubPerformance();
+    unSubDetailedPointerTiming();
+    unSubInteractions();
+    unSubDetailedKeyboardTiming();
+  };
+```
+
+This function in the end returns an arrow function that triggers unsubscription/cleanup.
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/event-tracking.ts#L364](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/event-tracking.ts#L364)
+    
+2. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/event-tracking.ts#L365](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/event-tracking.ts#L365)
+    
+3. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/event-tracking.ts#L423](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/event-tracking.ts#L423)
+    
+4. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/performance.ts#L333](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/performance.ts#L333)
+    
+5. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/performance.ts#L333](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/notifications/performance.ts#L333)

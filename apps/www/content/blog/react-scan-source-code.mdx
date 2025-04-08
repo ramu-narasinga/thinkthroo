@@ -1,0 +1,106 @@
+---
+title: DOMParser() usage in react-scan source code.
+---
+
+I found [DOMParser](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser) in [react-scan source code](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L54) as shown below.
+
+```javascript
+const iconSprite = new DOMParser().parseFromString(
+    ICONS,
+    'image/svg+xml',
+  ).documentElement;
+```
+
+This picked from [line 54 in packages/scan/src/core/index.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L54). In this article, we understand
+
+* What is DOMParser?
+    
+* How it is used in react-scan?
+    
+
+![](https://miro.medium.com/v2/resize:fit:875/1*CGQtnCtVP4TWBVsX7q0pKw.png)
+
+# **What is DOMParser?**
+
+The `DOMParser` interface provides the ability to parse [XML](https://developer.mozilla.org/en-US/docs/Glossary/XML) or [HTML](https://developer.mozilla.org/en-US/docs/Glossary/HTML) source code from a string into a DOM [`Document`](https://developer.mozilla.org/en-US/docs/Web/API/Document).
+
+You can perform the opposite operation — converting a DOM tree into XML or HTML source — using the [`XMLSerializer`](https://developer.mozilla.org/en-US/docs/Web/API/XMLSerializer) interface.
+
+In the case of an HTML document, you can also replace portions of the DOM with new DOM trees built from HTML by setting the value of the [`Element.innerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) and [`outerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML) properties. These properties can also be read to fetch HTML fragments corresponding to the corresponding DOM subtree.
+
+Note that [`XMLHttpRequest`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) can parse XML and HTML directly from a URL-addressable resource, returning a `Document` in its [`response`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response) property.
+
+Read more about [DOMParser](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser).
+
+# **How it is used in react-scan?**
+
+DOMParser is used in a function called [initRootContainer](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L39).
+
+```javascript
+const initRootContainer = (): RootContainer => {
+  ...
+  const fragment = document.createDocumentFragment();
+  const cssStyles = document.createElement('style');
+  cssStyles.textContent = styles;
+
+  const iconSprite = new DOMParser().parseFromString(
+    ICONS,
+    'image/svg+xml',
+  ).documentElement;
+
+  fragment.appendChild(iconSprite);
+  ...
+  return { rootContainer, shadowRoot };
+};
+```
+
+iconSprite is assigned a value returned by DOMParser.documentElement. `parseFromString` accepts ICONS that is imported from [packages/scan/src/web/assets/svgs/svgs.ts](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/web/assets/svgs/svgs.ts).
+
+Now then, this [svgs.ts has ICONS](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/web/assets/svgs/svgs.ts) variable that contains svg as string as shown below
+
+```javascript
+export const ICONS = `
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="icon-inspect" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/>
+    <path d="M5 3a2 2 0 0 0-2 2"/>
+    <path d="M19 3a2 2 0 0 1 2 2"/>
+    ...
+```
+
+This below code snippet converts to:
+
+```javascript
+new DOMParser().parseFromString(
+  ICONS,
+  'image/svg+xml',
+)
+```
+
+This string is converted into a DOM document hence you have .documentElement that is assigned to [iconSprite](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L54).
+
+# **About me:**
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com/). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://developer.mozilla.org/en-US/docs/Web/API/DOMParser](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
+    
+2. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L54](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L54)

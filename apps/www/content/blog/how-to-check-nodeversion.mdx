@@ -1,0 +1,77 @@
+---
+title: How to check node version programmatically?
+---
+There’s a function named [checkNodeVersion()](https://github.com/umijs/father/blob/master/src/cli/cli.ts#L17) in [father/src/cli/cli.ts](https://github.com/umijs/father/blob/master/src/cli/cli.ts#L17).
+
+![](https://miro.medium.com/v2/resize:fit:875/1*6yQakQPyiNMo7cEfnESLoQ.png)
+
+This cli file has a function named run and in there, it calls a series of functions:
+
+```javascript
+export async function run(_opts?: IOpts) {
+  checkNodeVersion();
+  checkLocal();
+  setNodeTitle();
+  setNoDeprecation();
+  ...
+}
+```
+
+* checkNodeVersion
+    
+* checkLocal
+    
+* setNodeTitle
+    
+* setNoDepreciation
+    
+
+We are interested in [checkNodeVersion](https://github.com/umijs/father/blob/master/src/cli/cli.ts#L17)()
+
+# **checkNodeVersion**
+
+checkNodeVersion is defined in [cli/node.ts](https://github.com/umijs/father/blob/master/src/cli/node.ts#L6)
+
+```javascript
+export function checkVersion() {
+  const v = parseInt(process.version.slice(1));
+  if (v < MIN_NODE_VERSION || v === 15 || v === 17) {
+    logger.error(
+      `Your node version ${v} is not supported, please upgrade to ${MIN_NODE_VERSION} or above except 15 or 17.`,
+    );
+    process.exit(1);
+  }
+}
+```
+
+You can get the current node version using this method — `process.version.slice(1)`
+
+In this function, there’s a side-effect. process exits if the node version does not meet the criteria defined in the if block.
+
+logger.error logs the error message when the node version is not supported.
+
+# **About me:**
+
+Hey, my name is Ramu Narasinga. I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/umijs/father/blob/master/src/cli/node.ts#L6](https://github.com/umijs/father/blob/master/src/cli/node.ts#L6)
+    
+2. [https://github.com/umijs/father/blob/master/src/cli/cli.ts#L17](https://github.com/umijs/father/blob/master/src/cli/cli.ts#L17)

@@ -1,0 +1,93 @@
+---
+title: attachShadow() method in react-scan source code.
+---
+
+In this article, we will review the below code snippet from [react-scan source code](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L49).
+
+```plaintext
+const initRootContainer = (): RootContainer => {
+  if (rootContainer && shadowRoot) {
+    return { rootContainer, shadowRoot };
+  }
+
+  rootContainer = document.createElement('div');
+  rootContainer.id = 'react-scan-root';
+
+  // Notice the attachShadow here?
+  shadowRoot = rootContainer.attachShadow({ mode: 'open' });
+
+  const cssStyles = document.createElement('style');
+  cssStyles.textContent = styles;
+```
+
+What’s so interesting about this code snippet? well, it is the `attachShadow` method used.
+
+![](https://miro.medium.com/v2/resize:fit:875/1*52t_KqtFwTjPITgDbNscmw.png)
+
+# **attachShadow**
+
+The `Element.attachShadow()` method attaches a shadow DOM tree to the specified element and returns a reference to its [`ShadowRoot`](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot).
+
+I have seen [ShadowDOM usage in Next.js source code](https://dev.to/ramunarasinga/tips-from-open-source-use-shadow-dom-to-avoid-potential-css-breaks-41dd).
+
+It looks like you can’t attach shadowDOM to every type of element. Read more about [elements you can attach shadowDOM to](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#elements_you_can_attach_a_shadow_to).
+
+Coming back to the code snippet in consideration above:
+
+```plaintext
+attachShadow({ mode: 'open' })
+```
+
+There is a parameter here, mode.
+
+MDN documentation tells us that mode is a string specifying the *encapsulation mode* for the shadow DOM tree. This can be one of:
+
+* open
+    
+
+Elements of the shadow root are accessible from JavaScript outside the root, for example using [`Element.shadowRoot`](https://developer.mozilla.org/en-US/docs/Web/API/Element/shadowRoot):
+
+```plaintext
+element.attachShadow({ mode: "open" });
+element.shadowRoot; // Returns a ShadowRoot obj
+```
+
+* closed
+    
+
+Denies access to the node(s) of a closed shadow root from JavaScript outside it:
+
+```plaintext
+element.attachShadow({ mode: "closed" });
+element.shadowRoot; // Returns null
+```
+
+Read more about the [parameters you can pass into attachShadow method](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#parameters).
+
+# **About me:**
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com/). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@thinkthroo](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+# **References:**
+
+1. [https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L49](https://github.com/aidenybai/react-scan/blob/main/packages/scan/src/core/index.ts#L49)
+    
+2. [https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow)
+    
+3. [https://dev.to/ramunarasinga/tips-from-open-source-use-shadow-dom-to-avoid-potential-css-breaks-41dd](https://dev.to/ramunarasinga/tips-from-open-source-use-shadow-dom-to-avoid-potential-css-breaks-41dd)

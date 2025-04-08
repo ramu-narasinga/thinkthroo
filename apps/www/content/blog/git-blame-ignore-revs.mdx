@@ -1,6 +1,5 @@
 ---
 title: .git-blame-ignore-revs to ignore bulk formatting changes.
-toc: true
 ---
 
 `.git-blame-ignore-revs` is a Git feature introduced in version 2.23 that allows you to ignore specific commits in `git blame` results. This is particularly useful for bulk commits that change a large number of lines without altering the actual functionality of the code, such as formatting changes, renaming, or applying coding standards across a codebase. By ignoring these non-functional changes, `git blame` can focus on meaningful edits that explain the context and reasoning behind the code.
