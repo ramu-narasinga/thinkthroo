@@ -41,17 +41,52 @@ export const docsConfig: DocsConfig = {
       title: "March, 2025",
       items: [
         {
-          title: "WebRTCPeerProvider component in FilePizza codebase....",
-          href: "/blog/webrtc-peerprovider",
+          title: "Here is how Nue-js applies colors to the console...",
+          href: "/blog/Here-is-how-Nue.js-applies-colors",
           items: []
         },
         {
-          title: "WebRTCPeerProvider component in FilePizza codebase....",
-          href: "/blog/webrtc-peerprovider",
+          title: "expandArgs(args) in Nue.js source code...",
+          href: "/blog/expandArgs-in-Nue.js",
           items: []
         },
         {
-          title: "FilePizza, a peer-to-peer file transfers in your browser....",
+          title: "esMain(import.meta) in Nue-js source code...",
+          href: "/blog/esMain-import.meta-in-Nue.js",
+          items: []
+        },
+        {
+          title: "CLI tool in Nue.Js source code...",
+          href: "/blog/cli-tool-in-Nue.Js",
+          items: []
+        },
+        {
+          title: "Break the limits of Web with Nue.Js, a standards first web framework...",
+          href: "/blog/Break-the-limits-of-Web",
+          items: []
+        },
+        {
+          title: "UploadingState component in FilePizza codebase...",
+          href: "/blog/component-in-FilePizza",
+          items: []
+        },
+        {
+          title: "ConfirmUploadState component in FilePizza codebase...",
+          href: "/blog/ConfirmUploadState-component",
+          items: []
+        },
+        {
+          title: "DropZone component in FilePizza codebase...",
+          href: "/blog/DropZone-component",
+          items: []
+        },
+        {
+          title: "WebRTCPeerProvider component in FilePizza codebase...",
+          href: "/blog/WebRTC-Peer-Provider",
+          items: []
+        },
+        {
+          title: "FilePizza, a peer-to-peer file transfers in your browser...",
           href: "/blog/FilePizza-a-peer-to-peer",
           items: []
         },
@@ -869,6 +904,6 @@ export const docsConfig: DocsConfig = {
         
       ],
     },
-    
+
   ],
 }
