@@ -1,0 +1,177 @@
+---
+title: shadcn-ui/ui codebase analysis-How does shadcn-ui CLI work? — Part 3.0
+---
+
+I wanted to find out how shadcn-ui CLI works. In this article, I discuss the code used to build the shadcn-ui/ui CLI.
+
+In part 2.0 to 2.15, I discussed how *npx shadcn-ui init* works under the hood.
+
+We will look at how *npx shadcn-ui add &lt;component&gt;* works in this part 3.x.
+
+Since the [packages/cli/src/commands/add.ts](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts) file is large, I will break this analysis down into parts and talk about code snippets and explain how stuff works.
+
+In this article, we will look the concepts:
+
+1. Add command.
+    
+2. Commander.js package
+    
+3. How add command is registered?
+    
+4. Argument and options
+    
+5. addOptionsSchema
+    
+
+# **add command**
+
+```plaintext
+export const add = new Command()
+  .name("add")
+  .description("add a component to your project")
+  .argument("[components...]", "the components to add")
+  .option("-y, --yes", "skip confirmation prompt.", true)
+  .option("-o, --overwrite", "overwrite existing files.", false)
+  .option(
+    "-c, --cwd <cwd>",
+    "the working directory. defaults to the current directory.",
+    process.cwd()
+  )
+  .option("-a, --all", "add all available components", false)
+  .option("-p, --path <path>", "the path to add the component to.")
+  .action(async (components, opts) => {
+    try {
+      const options = addOptionsSchema.parse({
+        components,
+        ...opts,
+      })
+```
+
+We will begin with how add command is added. The above code snippet is picked from [packages/cli/src/commands/add.ts](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts#L31C1-L49C9)
+
+# **Commander.js package:**
+
+Command is imported from [commander.js](https://www.npmjs.com/package/commander), a complete solution for [node.js](http://nodejs.org/) command-line interfaces.
+
+# **How add command is registered?**
+
+The way add command is registered is that, if you open this [src/commands/index.ts](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/index.ts#L24) in a new tab, you will find this code as shown below
+
+![](https://miro.medium.com/v2/resize:fit:875/1*P3t8GFZm8Qrzc0iKp7u2aA.png)
+
+Commands are created separately in the [folder named commands](https://github.com/shadcn-ui/ui/tree/main/packages/cli/src/commands) for maintainability purposes. If you were to fork this shadcn-ui/ui repo and want to add your own command, this is one way to do it.
+
+# **Argument and options**
+
+When you write something like `npx shadcn-ui add Button`, `Button` here is an argument.
+
+```plaintext
+.argument("[components...]", "the components to add")
+```
+
+The above code snippet is picked from [here](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts#L34C3-L34C56).
+
+You also have options that go with your add command as shown below:
+
+```plaintext
+.option("-y, --yes", "skip confirmation prompt.", true)
+.option("-o, --overwrite", "overwrite existing files.", false)
+.option(
+  "-c, --cwd <cwd>",
+  "the working directory. defaults to the current directory.",
+  process.cwd()
+)
+.option("-a, --all", "add all available components", false)
+.option("-p, --path <path>", "the path to add the component to.")
+```
+
+and then you have `action`
+
+```plaintext
+.action(async (components, opts) => {
+```
+
+# **addOptionsSchema**
+
+```plaintext
+ const options = addOptionsSchema.parse({
+  components,
+  ...opts,
+})
+
+const cwd = path.resolve(options.cwd)
+
+if (!existsSync(cwd)) {
+  logger.error(`The path ${cwd} does not exist. Please try again.`)
+  process.exit(1)
+}
+```
+
+The above snippet is picked from [add.ts](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts#L34C3-L34C56)
+
+addOptionsSchema is declared just above the add function as shown below:
+
+```plaintext
+const addOptionsSchema = z.object({
+  components: z.array(z.string()).optional(),
+  yes: z.boolean(),
+  overwrite: z.boolean(),
+  cwd: z.string(),
+  all: z.boolean(),
+  path: z.string().optional(),
+})
+```
+
+This schema basically ensures all the options and arguments are valid before processing them further.
+
+# **Conclusion:**
+
+In Part 2.0 to 2.15, I discussed how npx shadcn-ui init works under the hood. It is time for a version bump to my articles. In 3.x articles, I will write about how npx shadcn-ui add works under the hood. Please note that [semver](https://semver.org/) is not applicable to my articles lol.
+
+Command is imported from [commander.js](https://www.npmjs.com/package/commander), a complete solution for [node.js](http://nodejs.org/) command-line interfaces. The way add command is registered with npx shadcn-ui CLI is that, if you open this [src/commands/index.ts](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/index.ts#L24) in a new tab, you will find this code as shown below:
+
+```plaintext
+program.addCommand(init).addCommand(add).addCommand(diff)
+```
+
+There’s an argument that accepts a single component name or an array of component names, that is why you would write something like `npx shadcn-ui add Button`
+
+`Button`here is an argument. add command also has few options such -y, -o, -c, -a, -p. Read more about these in the [shadcn-ui CLI documentation](https://ui.shadcn.com/docs/cli).
+
+addOptionsSchema ensures that arguments and the options passed to the add command are valid using zod
+
+![](https://miro.medium.com/v2/resize:fit:875/1*47EKz3q3aUidRrzxVGAjLg.png)
+
+> [*Get free courses inspired by the best practices used in open source.*](https://app.thinkthroo.com/best-practices)
+
+# **About me:**
+
+Hey, my name is [**Ramu Narasinga**](https://ramunarasinga.com/). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at*** [***ramu.narasinga@gmail.com***](mailto:ramu.narasinga@gmail.com)
+
+My Github — [**https://github.com/ramu-narasinga**](https://github.com/ramu-narasinga)
+
+My website — [**https://ramunarasinga.com**](https://ramunarasinga.com/)
+
+My Youtube channel — [**https://www.youtube.com/@thinkthroo**](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [**https://thinkthroo.com**](https://thinkthroo.com/)
+
+Codebase Architecture — [**https://app.thinkthroo.com/architecture**](https://app.thinkthroo.com/architecture)
+
+Best practices — [**https://app.thinkthroo.com/best-practices**](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [**https://app.thinkthroo.com/production-grade-projects**](https://app.thinkthroo.com/production-grade-projects)
+
+# **References**
+
+1. [https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts)
+    
+2. [https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts#L31C1-L49C9](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts#L31C1-L49C9)
+    
+3. [https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/index.ts#L24](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/index.ts#L24)
+    
+4. [https://www.npmjs.com/package/commander](https://www.npmjs.com/package/commander)
+    
+5. [https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts#L22](https://github.com/shadcn-ui/ui/blob/main/packages/cli/src/commands/add.ts#L22)
