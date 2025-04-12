@@ -1,6 +1,9 @@
 import { Command } from "commander"
+import prompts from "prompts"
 import { z } from "zod"
 import path from "path"
+import { logger } from "@/src/utils/logger"
+import { highlighter } from "../utils/highlighter"
 
 export const configureOptionsSchema = z.object({
     features: z.array(z.string()).optional(),
@@ -33,8 +36,22 @@ export const configure = new Command()
                 ...opts,
             })
 
-            console.log(options);
-
+            if (!options.yes) {
+                logger.break()
+                const { confirm } = await prompts({
+                    type: "confirm",
+                    name: "confirm",
+                    message: highlighter.warn(
+                        `You are about to configure ${features[0]}. Continue?`
+                    ),
+                })
+                if (!confirm) {
+                    logger.break()
+                    logger.log(`${features[0]} configuration cancelled.`)
+                    logger.break()
+                    process.exit(1)
+                }
+            }
         } catch (error) {
             console.error(error)
             process.exit(1)
