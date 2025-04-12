@@ -1,0 +1,77 @@
+---
+title: expandArgs(args) in Nue-js source code.
+---
+
+In this article, we will review a [function named expandArgs(args) in Nue.js source code](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L25).
+
+![](https://cdn-images-1.medium.com/max/1000/1*DDBktCTx1jDjkhPVVjdMmA.png)
+
+To give you some context, this function, expandArgs, is called in another function named getArgs. All these are part of [cli.js file in Nue.js source code.](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L25) Nue.js a web framework.
+
+### expandArgs
+
+```plaintext
+// [-npe] --> [-n, -p, -e]
+export function expandArgs(args) {
+  const arr = []
+  args.forEach(arg => {
+    if (arg[0] == '-' && arg[1] != '-' && arg[2]) {
+      arg.slice(1).split('').forEach(el => arr.push('-' + el))
+    } else {
+      arr.push(arg)
+    }
+  })
+  return arr
+}
+```
+
+You will find this above code in [packages/nuekit/src/cli.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L25). The comment just above this function explains what this function does.
+
+Given an argument `-npe` , it is converted to `[-n, -p, -e]` and the check is straight forward too.
+
+```plaintext
+if (arg[0] == '-' && arg[1] != '-' && arg[2]) {
+```
+
+and this function is used in getArgs function as shown below:
+
+```plaintext
+export function getArgs(argv) {
+  const commands = ['serve', 'build', 'init', 'create', 'docs']
+  const args = { paths: [], root: null }
+  let opt
+
+  expandArgs(argv).forEach((arg) => {
+    // skip
+    if (arg == '--') {
+
+      // test suite
+    } else if (arg.endsWith('.test.js')) {
+      args.test = true
+```
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github —  [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website —  [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel —  [https://www.youtube.com/@ramu-narasinga](https://www.youtube.com/@ramu-narasinga)
+
+Learning platform —  [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture —  [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices —  [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects —  [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L7](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L7)
+    
+2. [https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L25](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L25)

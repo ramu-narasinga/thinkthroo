@@ -1,0 +1,156 @@
+---
+title: ConfirmUploadState component in FilePizza codebase.
+---
+
+In this article, we will review [ConfirmUploadState component in FilePizza codebase](https://github.com/kern/filepizza/blob/main/src/app/page.tsx#L55).
+
+![](https://cdn-images-1.medium.com/max/1000/1*JFiGdKoihrb0m_913vbxVQ.png)
+
+### ConfirmUploadState
+
+This is the component that you see once you upload a file on FilePizza.
+
+![](https://cdn-images-1.medium.com/max/1000/1*Av5zfITiLDQuZmEsi32kcw.png)
+
+When you look at the code below for ConfirmUploadState component, it makes sense.
+
+```plaintext
+function ConfirmUploadState({
+  uploadedFiles,
+  password,
+  onChangePassword,
+  onCancel,
+  onStart,
+  onRemoveFile,
+}: {
+  uploadedFiles: UploadedFile[]
+  password: string
+  onChangePassword: (pw: string) => void
+  onCancel: () => void
+  onStart: () => void
+  onRemoveFile: (index: number) => void
+}): JSX.Element {
+  const fileListData = useUploaderFileListData(uploadedFiles)
+  return (
+    <PageWrapper>
+      <TitleText>
+        You are about to start uploading{' '}
+        {pluralize(uploadedFiles.length, 'file', 'files')}.
+      </TitleText>
+      <UploadFileList files={fileListData} onRemove={onRemoveFile} />
+      <PasswordField value={password} onChange={onChangePassword} />
+      <div className="flex space-x-4">
+        <CancelButton onClick={onCancel} />
+        <StartButton onClick={onStart} />
+      </div>
+    </PageWrapper>
+  )
+}
+```
+
+You can see, there’s StartButton, CancelButton and the UploadFileList components, most importantly PasswordField.
+
+#### PasswordField
+
+```plaintext
+import React, { JSX, useCallback } from 'react'
+import InputLabel from './InputLabel'
+
+export default function PasswordField({
+  value,
+  onChange,
+  isRequired = false,
+  isInvalid = false,
+}: {
+  value: string
+  onChange: (v: string) => void
+  isRequired?: boolean
+  isInvalid?: boolean
+}): JSX.Element {
+  const handleChange = useCallback(
+    function (e: React.ChangeEvent<HTMLInputElement>): void {
+      onChange(e.target.value)
+    },
+    [onChange],
+  )
+
+  return (
+    <div className="flex flex-col w-full">
+      <InputLabel
+        hasError={isInvalid}
+        tooltip="The downloader must provide this password to start downloading the file. If you don't specify a password here, any downloader with the link to the file will be able to download it. It is not used to encrypt the file, as this is performed by WebRTC's DTLS already."
+      >
+        {isRequired ? 'Password' : 'Password (optional)'}
+      </InputLabel>
+      <input
+        autoFocus
+        type="password"
+        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 ${
+          isInvalid
+            ? 'border-red-500 dark:border-red-400'
+            : 'border-stone-300 dark:border-stone-600'
+        } bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100`}
+        placeholder="Enter a secret password for this slice of FilePizza..."
+        value={value}
+        onChange={handleChange}
+      />
+    </div>
+  )
+}
+```
+
+The password entered here is managed in the root component, UploadPage and is passed as a prop to UploadingState component that has WebRTCProvider as shown below
+
+```plaintext
+<WebRTCPeerProvider>
+  <Uploader files={uploadedFiles} password={password} onStop={onStop} />
+</WebRTCPeerProvider>
+```
+
+This password is passed as a parameter to a function named useUploaderConnections
+
+```plaintext
+export default function Uploader({
+  files,
+  password,
+  onStop,
+}: {
+  files: UploadedFile[]
+  password: string
+  onStop: () => void
+}): JSX.Element {
+  const { peer, stop } = useWebRTCPeer()
+  const { isLoading, error, longSlug, shortSlug, longURL, shortURL } =
+    useUploaderChannel(peer.id)
+  const connections = useUploaderConnections(peer, files, password)
+```
+
+[useUploaderConnections](https://github.com/kern/filepizza/blob/main/src/hooks/useUploaderConnections.ts#L29) hook seems to large and complicated, I might write more about this in another article.
+
+### About me:
+
+Hey, my name is [Ramu Narasinga](https://ramunarasinga.com). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at ramu.narasinga@gmail.com***
+
+My Github — [https://github.com/ramu-narasinga](https://github.com/ramu-narasinga)
+
+My website — [https://ramunarasinga.com](https://ramunarasinga.com/)
+
+My Youtube channel — [https://www.youtube.com/@ramu-narasinga](https://www.youtube.com/@ramu-narasinga)
+
+Learning platform — [https://thinkthroo.com](https://thinkthroo.com/)
+
+Codebase Architecture — [https://app.thinkthroo.com/architecture](https://app.thinkthroo.com/architecture)
+
+Best practices — [https://app.thinkthroo.com/best-practices](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [https://app.thinkthroo.com/production-grade-projects](https://app.thinkthroo.com/production-grade-projects)
+
+### References:
+
+1. [https://github.com/kern/filepizza/blob/main/src/app/page.tsx#L55](https://github.com/kern/filepizza/blob/main/src/app/page.tsx#L55)
+    
+2. [https://github.com/kern/filepizza/blob/main/src/app/page.tsx#L146](https://github.com/kern/filepizza/blob/main/src/app/page.tsx#L146)
+    
+3. [https://github.com/kern/filepizza/blob/main/src/hooks/useUploaderConnections.ts#L29](https://github.com/kern/filepizza/blob/main/src/hooks/useUploaderConnections.ts#L29)

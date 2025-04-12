@@ -41,6 +41,56 @@ export const docsConfig: DocsConfig = {
       title: "March, 2025",
       items: [
         {
+          title: "Here is how Nue-js applies colors to the console...",
+          href: "/blog/Here-is-how-Nue.js-applies-colors",
+          items: []
+        },
+        {
+          title: "expandArgs(args) in Nue.js source code...",
+          href: "/blog/expandArgs-in-Nue.js",
+          items: []
+        },
+        {
+          title: "esMain(import.meta) in Nue-js source code...",
+          href: "/blog/esMain-import.meta-in-Nue.js",
+          items: []
+        },
+        {
+          title: "CLI tool in Nue.Js source code...",
+          href: "/blog/cli-tool-in-Nue.Js",
+          items: []
+        },
+        {
+          title: "Break the limits of Web with Nue.Js, a standards first web framework...",
+          href: "/blog/Break-the-limits-of-Web",
+          items: []
+        },
+        {
+          title: "UploadingState component in FilePizza codebase...",
+          href: "/blog/component-in-FilePizza",
+          items: []
+        },
+        {
+          title: "ConfirmUploadState component in FilePizza codebase...",
+          href: "/blog/ConfirmUploadState-component",
+          items: []
+        },
+        {
+          title: "DropZone component in FilePizza codebase...",
+          href: "/blog/DropZone-component",
+          items: []
+        },
+        {
+          title: "WebRTCPeerProvider component in FilePizza codebase...",
+          href: "/blog/WebRTC-Peer-Provider",
+          items: []
+        },
+        {
+          title: "FilePizza, a peer-to-peer file transfers in your browser...",
+          href: "/blog/FilePizza-a-peer-to-peer",
+          items: []
+        },
+        {
           title: "downloadInBrowser function in Refine...",
           href: "/blog/downloadInBrowser-function-in-Refine",
           items: []
@@ -827,12 +877,33 @@ export const docsConfig: DocsConfig = {
         },
         {
           title: "Cache your fetcher in useSWR with useCallback.",
-          href: "/blog/Cache-your-fetche",
+          href: "/blog/cache-your-fetche",
+          items: [],
+        },
+        {
+          title: "Using a custom backend server with Next.js in a monorepo.",
+          href: "/blog/Using-a-custom-backend",
+          items: [],
+        },
+        {
+          title: "shadcn-ui/ui codebase analysis 3.1...",
+          href: "/blog/shadcn-ui-codebase-3-1",
+          items: [],
+        },
+        {
+          title: "shadcn-ui/ui codebase analysis 3.0...",
+          href: "/blog/shadcn-ui-codebase-3-0",
+          items: [],
+        },
+        {
+          title: "shadcn-ui/ui codebase analysis 2.15...",
+          href: "/blog/shadcn-ui-codebase-2-15",
           items: [],
         },
         
+        
       ],
     },
-    
+
   ],
 }

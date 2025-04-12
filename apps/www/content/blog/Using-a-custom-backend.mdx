@@ -1,0 +1,142 @@
+---
+title: Using a custom backend server with Next.js in a monorepo.
+---
+
+I was searching for an open source repository that schedules and posts on social media. I found [Gitroom](https://github.com/gitroomhq/gitroom/tree/main).
+
+Gitroom is a awesome, built by [Nevo David](https://github.com/nevo-david). You can 📨 schedule social media and articles. Exchange or buy posts from other members 👨🏻‍💻. Monitor your GitHub trending, and so much more 📈.
+
+The following are some interesting things I learnt from this [repository](https://github.com/gitroomhq/gitroom/tree/main)
+
+1\. You can use your own backend with Next.js  
+2\. A note about customFetch  
+3\. The way the files are named.
+
+# **1\. You can use your own backend with Next.js**
+
+![](https://miro.medium.com/v2/resize:fit:825/1*8TB1LUyhDqT-usAkFmwAzQ.png)
+
+Gitroom uses the following tech stack:
+
+* NX (Monorepo)
+    
+* NextJS (React)
+    
+* NestJS
+    
+* Prisma (Default to PostgreSQL)
+    
+* Redis
+    
+* Resend (emails notifications)
+    
+
+It has folders named as frontend, backend, cron etc.,
+
+I wondered for quite some time now, if we could use our own backend when you are already using the Next.js, a “full stack” react framework but, I kept seeing people advising to use your custom backend when you need advanced features like cron, web sockets etc., on Reddit.
+
+Now that I found Gitroom that demonstrates the custom backend usage along with Next.js and cron, I have a good feeling that you could learn some advanced patterns studying this repository.
+
+# **2\. A note about customFetch**
+
+The following code snippet is picked from [apps/frontend/src/app/(site)/settings/page.tsx#L21](https://github.com/gitroomhq/gitroom/blob/e7b669f1253e3ef7ae6b9cc9d2f1d529ea86b288/apps/frontend/src/app/\(site\)/settings/page.tsx#L21)
+
+```plaintext
+if (searchParams.code) {
+  await internalFetch('/settings/github', {
+  method: 'POST',
+  body: JSON.stringify({ code: searchParams.code }),
+  });
+  
+  return redirect('/settings', RedirectType.replace);
+}
+```
+
+‘internalFetch’ uses customFetch.
+
+The below code snippet is picked from [libraries/helpers/src/utils/custom.fetch.func.ts](https://github.com/gitroomhq/gitroom/blob/e7b669f1253e3ef7ae6b9cc9d2f1d529ea86b288/libraries/helpers/src/utils/custom.fetch.func.ts#L10)
+
+```plaintext
+export const customFetch = (
+ params: Params,
+ auth?: string,
+ showorg?: string
+ ) => {
+ return async function newFetch(url: string, options: RequestInit = {}) {
+   const newRequestObject = await params?.beforeRequest?.(url, options);
+   const fetchRequest = await fetch(params.baseUrl + url, {
+   credentials: 'include',
+   …(newRequestObject || options),
+   headers: {
+   …(auth ? { auth } : {}),
+   …(showorg ? { showorg } : {}),
+   …(options.body instanceof FormData
+   ? {}
+   : { 'Content-Type': 'application/json' }),
+   Accept: 'application/json',
+   …options?.headers,
+   },
+   // @ts-ignore
+   …(!options.next && options.cache !== 'force-cache'
+   ? { cache: options.cache || 'no-store' }
+   : {}),
+ });
+
+if (
+ !params?.afterRequest ||
+ (await params?.afterRequest?.(url, options, fetchRequest))
+ ) {
+   return fetchRequest;
+ }
+// @ts-ignore
+   return new Promise((res) => {}) as Response;
+   };
+};
+```
+
+Why???, I don’t know the answer yet but, I can tell there is “beforeRequest” and “afterRequest” processing happening based on the above code snippet
+
+# **3\. The way the files are named.**
+
+![](https://miro.medium.com/v2/resize:fit:825/1*ienhHi1o5R89ivR7Xgtf6A.png)
+
+I have never seen a service file named using dots like “custom.fetch.func.ts”. Sure, there’s config files named as tailwind.config.ts etc.,
+
+Here’s what chatGPT has to say about this:  
+“  
+This kind of naming does not fit into a traditional case style like snake\_case, kebab-case, or camelCase.
+
+However, if we ignore the file extension (“.ts”) and consider only “custom.fetch.func,” it can be seen as:
+
+Dot notation: This isn’t a standard case style but is sometimes used in programming to represent a hierarchical relationship or to namespace parts of a name.  
+“
+
+To be honest, choose w/e naming conventions work for you. I use lowercase words separated by dashes as a file name, like custom-fetch-func.ts
+
+![](https://miro.medium.com/v2/resize:fit:875/1*47EKz3q3aUidRrzxVGAjLg.png)
+
+> [*Get free courses inspired by the best practices used in open source.*](https://app.thinkthroo.com/best-practices)
+
+# **About me:**
+
+Hey, my name is [**Ramu Narasinga**](https://ramunarasinga.com/). I study large open-source projects and create content about their codebase architecture and best practices, sharing it through articles, videos.
+
+***I am open to work on interesting projects. Send me an email at*** [***ramu.narasinga@gmail.com***](mailto:ramu.narasinga@gmail.com)
+
+My Github — [**https://github.com/ramu-narasinga**](https://github.com/ramu-narasinga)
+
+My website — [**https://ramunarasinga.com**](https://ramunarasinga.com/)
+
+My Youtube channel — [**https://www.youtube.com/@thinkthroo**](https://www.youtube.com/@thinkthroo)
+
+Learning platform — [**https://thinkthroo.com**](https://thinkthroo.com/)
+
+Codebase Architecture — [**https://app.thinkthroo.com/architecture**](https://app.thinkthroo.com/architecture)
+
+Best practices — [**https://app.thinkthroo.com/best-practices**](https://app.thinkthroo.com/best-practices)
+
+Production-grade projects — [**https://app.thinkthroo.com/production-grade-projects**](https://app.thinkthroo.com/production-grade-projects)
+
+# **Resources:**
+
+1\. https://github.com/gitroomhq/gitroom/blob/e7b669f1253e3ef7ae6b9cc9d2f1d529ea86b288/libraries/helpers/src/utils/internal.fetch.ts#L4
