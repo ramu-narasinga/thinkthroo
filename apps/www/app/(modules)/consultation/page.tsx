@@ -13,19 +13,15 @@ export default function HomePage() {
         <aside className="w-full lg:max-w-[300px] text-left">
           <div className="flex flex-col items-center lg:items-start">
             <Image
-              src="/tthroo/images/ramu.svg"
+              src="/logo.png"
               alt="Profile"
               width={150}
               height={150}
               className="rounded-full object-cover mb-4"
             />
-            <h1 className="text-2xl font-bold mb-4">Thinkthroo.com</h1>
+            <h1 className="text-2xl font-bold mb-4">Think Throo</h1>
             <p className="text-sm text-gray-800 leading-relaxed mb-4">
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-              Lorem Ipsum has been industry's standard dummy text ever since the 1500s,
-              when an unknown printer Lorem Ipsum is simply dummy text of the printing and
-              typesetting industry. Lorem Ipsum has been industry's standard dummy text ever
-              since the 1500s, when an unknown printer
+              
             </p>
             <div className="flex gap-4 text-xl">
               <a href="https://www.instagram.com/thinkthroo" target="_blank" rel="noopener noreferrer">
@@ -47,22 +43,23 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="border rounded-xl p-4 flex-1 min-h-[100px]">
               <p className="text-sm">
-                Highly praised for detailed, insightful career and visa guidance, especially for UK needs.
+              That was insightful and practical, thanks.
               </p>
-              <p className="text-xs text-gray-500 mt-2">✨ AI-generated based on testimonials</p>
+              <a href="https://dev.to/fyodorio/comment/2mc65" target="_blank"><p className="underline text-xs text-gray-500 mt-2">@Fyodor on Dev.to</p></a>
             </div>
             <div className="border rounded-xl p-4 flex-1 min-h-[100px]">
-              <p className="font-semibold">Change the World With Your Time. Come and join us!</p>
+              <p className="text-sm">
+              This content is really good, please keep it up.
+              </p>
+              <a href="https://youtu.be/fdorKWiW_hQ?si=BtxNPYHTJ2n8RF2f" target="_blank"><p className="underline text-xs text-gray-500 mt-2">@panchcw on YouTube</p></a>
             </div>
           </div>
 
           {/* Filters */}
           <div className="flex flex-wrap gap-3 mb-6">
             <button className="px-4 py-2 border rounded-xl font-medium text-sm bg-gray-100">All</button>
-            <button className="px-4 py-2 border rounded-xl font-medium text-sm">1:1 call</button>
-            <button className="px-4 py-2 border rounded-xl font-medium text-sm">Priority DM</button>
-            <button className="px-4 py-2 border rounded-xl font-medium text-sm">Digital Product</button>
-            <button className="px-4 py-2 border rounded-xl font-medium text-sm">Exclusive Content</button>
+            <button className="px-4 py-2 border rounded-xl font-medium text-sm">Enquiry</button>
+            <button className="px-4 py-2 border rounded-xl font-medium text-sm">Codebase Analysis</button>
           </div>
 
           {/* Cards */}
@@ -70,30 +67,30 @@ export default function HomePage() {
             {/* Card 1 */}
             <div className="border rounded-2xl p-6">
               <h2 className="text-lg font-semibold mb-4">Have a question?</h2>
-              <div className="flex justify-evenly items-center ml-10 mt-6 w-[300px] h-[60px] bg-white border border-gray-400 rounded-lg">
+              <div className="flex flex-col justify-evenly items-center ml-10 mt-6 bg-white border border-gray-400 rounded-lg">
                 <div className="text-sm">
-                  <p>Replies in 2 days</p>
-                  <p className="text-gray-500 text-xs">Priority DM</p>
+                  <p>30 mins</p>
+                  <p className="text-gray-500 text-xs">Video Meeting</p>
                 </div>
                 <button 
                   className="px-4 py-2 border rounded-xl text-sm hover:scale-110 transition-transform duration-300"
                   onClick={() => router.push('/consultation/detail')}
                 >
-                  ₹499 →
+                  Book a meeting
                 </button>
               </div>
             </div>
 
             {/* Card 2 */}
             <div className="border rounded-2xl p-6">
-              <h2 className="text-lg font-semibold mb-4">CV and Cover Letter Master Class with demo</h2>
+              <h2 className="text-lg font-semibold mb-4">Codebase Analysis</h2>
               <div className="flex justify-evenly items-center ml-10 mt-6 w-[300px] h-[60px] bg-white border border-gray-400 rounded-lg">
-                <p className="text-sm text-gray-600">Digital Product</p>
+                <p className="text-sm text-gray-600">Tech debt piled up? let's talk.</p>
                 <button 
                   className="px-4 py-2 border rounded-xl text-sm hover:scale-110 transition-transform duration-300"
                   onClick={() => router.push('/consultation/detail')}
                 >
-                  ₹499 →
+                  $1000+ →
                 </button>
               </div>
             </div>

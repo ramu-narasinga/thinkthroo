@@ -99,10 +99,10 @@ export function MainNav() {
           Blog
         </Link>
         <Link
-          href="/contact"
+          href="/consultation"
           className={cn(
             "transition-colors hover:text-foreground/80",
-            pathname?.startsWith("/build-from-scratch")
+            pathname?.startsWith("/consultation")
               ? "text-foreground"
               : "text-foreground/60"
           )}
