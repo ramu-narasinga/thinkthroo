@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { Icons } from "@/components/icons"
 import { MainNav } from "@/components/interfaces/site/header/main-nav"
 import { MobileNav } from "@/components/interfaces/site/header/mobile-nav"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 export async function SiteHeader() {
 
@@ -18,6 +18,15 @@ export async function SiteHeader() {
           <div className="w-full flex-1 md:w-auto md:flex-none">
           </div>
           <nav className="flex items-center">
+          <Button asChild size="sm" variant="outline">
+              <Link
+                target="_blank"
+                rel="noreferrer"
+                href="/consultation"
+              >
+                Book a meeting
+              </Link>
+          </Button>
           <Link
               href={siteConfig.links.youtube}
               target="_blank"

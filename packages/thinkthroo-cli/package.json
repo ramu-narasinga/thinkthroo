@@ -37,10 +37,12 @@
   },
   "homepage": "https://github.com/ramu-narasinga/thinkthroo#readme",
   "devDependencies": {
-    "@repo/typescript-config": "*"
+    "@repo/typescript-config": "*",
+    "@types/prompts": "^2.4.9"
   },
   "dependencies": {
     "commander": "^13.1.0",
+    "prompts": "^2.4.2",
     "tsup": "^8.4.0",
     "zod": "^3.24.2"
   }
