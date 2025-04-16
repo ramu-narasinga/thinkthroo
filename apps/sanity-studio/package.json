@@ -1,5 +1,5 @@
 {
-  "name": "sanity-studio",
+  "name": "think-throo",
   "private": true,
   "version": "1.0.0",
   "main": "package.json",
@@ -15,12 +15,12 @@
     "sanity"
   ],
   "dependencies": {
-    "@sanity/vision": "^3.83.0",
+    "@sanity/vision": "^3.84.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "sanity": "^3.83.0",
-    "sanity-studio": "file:",
-    "styled-components": "^6.1.15"
+    "sanity": "^3.84.0",
+    "styled-components": "^6.1.15",
+    "think-throo": "file:"
   },
   "devDependencies": {
     "@sanity/eslint-config-studio": "^5.0.2",
