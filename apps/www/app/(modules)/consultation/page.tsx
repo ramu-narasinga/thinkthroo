@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
@@ -109,118 +110,121 @@ export default function HomePage() {
 
           {/* Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mr-24">
-            {/* Card 1 */}
-            <div className="max-w-sm mx-auto">
-              <div className="group cursor-pointer w-[400px] h-[250px] bg-white rounded-3xl shadow p-4 space-y-4">
-                {/* Title & Description */}
-                <div className="space-y-2 mb-14 mt-6">
-                  <h3 className="text-gray-700 font-bold text-2xl">
-                    Got a question? let’s talk.
-                  </h3>
-                  <p className="text-gray-600">
-                    Could be related to our products.
-                  </p>
-                </div>
 
-                {/* Footer */}
-                <div className="flex flex-col gap-2">
-                  <div className="relative overflow-hidden bg-gray-100 rounded-xl flex items-center justify-between px-4 py-2  group-hover:bg-gray-100">
-            
-                    {/* Icon + Info */}
-                    <div className="flex items-start gap-2 z-10">
-                      <img
-                        src="/detail/images/calendar.svg"
-                        alt="Duration"
-                        className="w-8 h-8 mr-2"
-                      />
-                      <div>
-                        <div className="text-sm font-medium">30 Min</div>
-                        <div className="text-xs text-gray-500">
-                          video Meeting
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Pricing */}
-                    <div className="z-10 border border-gray-400 rounded-full flex items-center space-x-2 text-sm font-medium text-gray-800 px-4 py-1 transition duration-300 group-hover:border-black group-hover:bg-black group-hover:text-white">
-                      Book a Meeting
-                      <svg
-                        className="w-3 h-3 ml-2"
-                        viewBox="0 0 448 512"
-                        fill="currentColor"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z" />
-                      </svg>
-                    </div>
+            <Link href={"/consultation/got-question"}>
+              <div className="max-w-sm mx-auto">
+                <div className="group cursor-pointer w-[400px] h-[250px] bg-white rounded-3xl shadow p-4 space-y-4">
+                  {/* Title & Description */}
+                  <div className="space-y-2 mb-14 mt-6">
+                    <h3 className="text-gray-700 font-bold text-2xl">
+                      Got a question? let’s talk.
+                    </h3>
+                    <p className="text-gray-600">
+                      Could be related to our products.
+                    </p>
                   </div>
-                </div>
-              </div>
 
-              {/* Shimmer keyframe */}
-              <style jsx>{`
-                @keyframes shimmer {
-                  0% {
-                    left: -150%;
-                  }
-                  100% {
-                    left: 100%;
-                  }
-                }
-              `}</style>
-            </div>
-
-            {/* Card 2 */}
-            <div className="max-w-sm mx-auto ml-4">
-              <div className="group cursor-pointer w-[400px] h-[250px] bg-white rounded-3xl shadow p-4 space-y-4">
-                {/* Title & Description */}
-                <div className="space-y-2 mb-14 mt-6">
-                  <h3 className="text-gray-700 font-bold text-2xl">
-                    Codebase architecture review.
-                  </h3>
-                  <p className="text-gray-600">
-                    Want me to review your codebase architecture?
-                  </p>
-                </div>
-
-                {/* Footer */}
-                <div className="flex flex-col gap-2">
-                  <div className="relative overflow-hidden bg-gray-100 rounded-xl flex items-center justify-between px-4 py-2 transform transition duration-100 group-hover:bg-gray-100">
-                    
-
-                    {/* Icon + Info */}
-                    <div className="flex items-start gap-2 z-10">
-                      <img
-                        src="/detail/images/calendar.svg"
-                        alt="Duration"
-                        className="w-8 h-8 mr-2"
-                      />
-                      <div>
-                        <div className="text-sm font-medium">1 Hour</div>
-                        <div className="text-xs text-gray-500">
-                          Video Meeting
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Pricing */}
-                    <div className="z-10 border border-gray-400 rounded-full flex items-center space-x-2 text-sm font-medium text-gray-800 px-4 py-1 transition duration-300 group-hover:border-black group-hover:bg-black group-hover:text-white">
-                      Book a Meeting
-                      <svg
-                        className="w-3 h-3 ml-2"
-                        viewBox="0 0 448 512"
-                        fill="currentColor"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+                  {/* Footer */}
+                  <div className="flex flex-col gap-2">
+                    <div className="relative overflow-hidden bg-gray-100 rounded-xl flex items-center justify-between px-4 py-2  group-hover:bg-gray-100">
               
-            </div>
+                      {/* Icon + Info */}
+                      <div className="flex items-start gap-2 z-10">
+                        <img
+                          src="/detail/images/calendar.svg"
+                          alt="Duration"
+                          className="w-8 h-8 mr-2"
+                        />
+                        <div>
+                          <div className="text-sm font-medium">30 Min</div>
+                          <div className="text-xs text-gray-500">
+                            video Meeting
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Pricing */}
+                      <div className="z-10 border border-gray-400 rounded-full flex items-center space-x-2 text-sm font-medium text-gray-800 px-4 py-1 transition duration-300 group-hover:border-black group-hover:bg-black group-hover:text-white">
+                        Book a Meeting
+                        <svg
+                          className="w-3 h-3 ml-2"
+                          viewBox="0 0 448 512"
+                          fill="currentColor"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shimmer keyframe */}
+                <style jsx>{`
+                  @keyframes shimmer {
+                    0% {
+                      left: -150%;
+                    }
+                    100% {
+                      left: 100%;
+                    }
+                  }
+                `}</style>
+              </div>
+            </Link>
+
+            <Link href={"/consultation/codebase-architecture-review"}>
+              <div className="max-w-sm mx-auto ml-4">
+                <div className="group cursor-pointer w-[400px] h-[250px] bg-white rounded-3xl shadow p-4 space-y-4">
+                  {/* Title & Description */}
+                  <div className="space-y-2 mb-14 mt-6">
+                    <h3 className="text-gray-700 font-bold text-2xl">
+                      Codebase architecture review.
+                    </h3>
+                    <p className="text-gray-600">
+                      Want me to review your codebase architecture?
+                    </p>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex flex-col gap-2">
+                    <div className="relative overflow-hidden bg-gray-100 rounded-xl flex items-center justify-between px-4 py-2 transform transition duration-100 group-hover:bg-gray-100">
+                      
+
+                      {/* Icon + Info */}
+                      <div className="flex items-start gap-2 z-10">
+                        <img
+                          src="/detail/images/calendar.svg"
+                          alt="Duration"
+                          className="w-8 h-8 mr-2"
+                        />
+                        <div>
+                          <div className="text-sm font-medium">1 Hour</div>
+                          <div className="text-xs text-gray-500">
+                            Video Meeting
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Pricing */}
+                      <div className="z-10 border border-gray-400 rounded-full flex items-center space-x-2 text-sm font-medium text-gray-800 px-4 py-1 transition duration-300 group-hover:border-black group-hover:bg-black group-hover:text-white">
+                        Book a Meeting
+                        <svg
+                          className="w-3 h-3 ml-2"
+                          viewBox="0 0 448 512"
+                          fill="currentColor"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                
+              </div>
+            </Link>
           </div>
         </main>
       </div>
