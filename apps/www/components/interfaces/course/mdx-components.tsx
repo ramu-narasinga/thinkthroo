@@ -1,9 +1,6 @@
-"use client"
-
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { useMDXComponent } from "next-contentlayer2/hooks"
 import { NpmCommands } from "@/types/unist"
 
 import { Event } from "@/lib/events"
@@ -37,7 +34,7 @@ import {
 } from "@/components/ui/tabs"
 import { Style } from "@/registry/registry-styles"
 
-const components = {
+export const components = {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -316,17 +313,4 @@ const components = {
 
 interface MdxProps {
   code: string
-}
-
-export function Mdx({ code }: MdxProps) {
-  const [config] = useConfig()
-  const Component = useMDXComponent(code, {
-    style: config.style,
-  })
-
-  return (
-    <div className="mdx">
-      <Component components={components} />
-    </div>
-  )
 }

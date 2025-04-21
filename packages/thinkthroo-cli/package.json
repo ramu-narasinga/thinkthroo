@@ -17,7 +17,10 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "start:dev": "cross-env REGISTRY_URL=http://localhost:3000/r node dist/index.js",
+    "start:prod": "cross-env REGISTRY_URL=https://ui.shadcn.com/r node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -42,6 +45,7 @@
   },
   "dependencies": {
     "commander": "^13.1.0",
+    "https-proxy-agent": "^7.0.6",
     "node-fetch": "^3.3.2",
     "prompts": "^2.4.2",
     "tsup": "^8.4.0",

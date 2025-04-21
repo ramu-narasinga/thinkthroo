@@ -87,7 +87,10 @@ export async function fetchRegistry(paths: string[]) {
 
 export async function getRegistryIndex() {
     try {
+
         const [result] = await fetchRegistry(["index.json"])
+
+        logger.info("result", result);
 
         return registryIndexSchema.parse(result)
     } catch (error) {
@@ -97,5 +100,8 @@ export async function getRegistryIndex() {
 }
 
 function getRegistryUrl(path: string) {  
+
+    logger.info("REGISTRY_URL", REGISTRY_URL, "process.env.REGISTRY_URL", process.env.REGISTRY_URL)
+
     return `${REGISTRY_URL}/${path}`
 }

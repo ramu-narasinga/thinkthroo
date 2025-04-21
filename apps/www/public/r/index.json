@@ -1,0 +1,15 @@
+[
+    {
+      "name": "changesets",
+      "type": "registry:generator",
+      "dependencies": [
+        "@changesets/cli"
+      ],
+      "files": [
+        {
+          "path": "ui/accordion.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+]

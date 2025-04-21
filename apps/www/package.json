@@ -3,11 +3,10 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "contentlayer2 build && next dev",
-        "build": "contentlayer2 build && next build",
+        "dev": "next dev",
+        "build": "next build",
         "start": "next start",
-        "lint": "next lint",
-        "build:docs": "contentlayer2 build"
+        "lint": "next lint"
     },
     "dependencies": {
         "@calcom/embed-react": "^1.5.1",
@@ -26,15 +25,14 @@
         "@radix-ui/react-tabs": "^1.1.0",
         "@sanity/image-url": "^1.1.0",
         "@supabase/ssr": "^0.6.1",
+        "@thinkthroo/lesson": "*",
         "@vercel/analytics": "^1.2.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
-        "contentlayer2": "^0.5.4",
         "framer-motion": "^11.11.8",
         "jotai": "^2.1.0",
         "lucide-react": "^0.436.0",
         "next": "14.3.0-canary.43",
-        "next-contentlayer2": "^0.5.4",
         "next-sanity": "^9.10.2",
         "react": "^18",
         "react-dom": "^18",

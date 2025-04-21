@@ -5,6 +5,7 @@ import { z } from "zod"
 
 export const registryItemTypeSchema = z.enum([
     "registry:file",
+    "registry:generator"
 ])
 
 export const registryItemFileSchema = z.discriminatedUnion("type", [
