@@ -13,5 +13,8 @@
         "./generated"
       ]
     }
+  },
+  "dependencies": {
+    "dot-contentlayer": "file:"
   }
 }
