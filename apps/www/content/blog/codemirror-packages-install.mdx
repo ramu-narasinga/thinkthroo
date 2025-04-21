@@ -10,14 +10,14 @@ This leads to the next question how are packages installed as part development e
 
 ![](https://cdn-images-1.medium.com/max/1600/1*7UrMKzkOrYNADpIGIuFf-Q.png)
 
-```plaintext
+```js
 let base = arg == " - ssh" ? "git@github.com:codemirror/" : "https://github.com/codemirror/"
 if (arg && arg != " - ssh") help(1)
 ```
 
 In case you are wondeirng what these 2 lines are for, Github lets you clone a repository via the ssh, hence this scenaria is handled to set the correct base url.
 
-```plaintext
+```js
 for (let pkg of packages) {
  if (fs.existsSync(pkg.dir)) {
    console.warn(`Skipping cloning of ${pkg.name} (directory exists)`)
@@ -32,7 +32,7 @@ If a package already exists, it is checked via existsSync and console.warn is sh
 
 ### run function
 
-```plaintext
+```js
 function run(cmd, args, wd = root, { shell = false } = {}) {
  return child.execFileSync(cmd, args, {shell, cwd: wd, encoding: "utf8", stdio: ["ignore", "pipe", process.stderr]})
 }
@@ -40,7 +40,7 @@ function run(cmd, args, wd = root, { shell = false } = {}) {
 
 run functions seems to be using execFileSync API provided by `child`. `child` is initialized at the top of the file.
 
-```plaintext
+```js
 const child = require("child_process")
 ```
 
@@ -50,7 +50,7 @@ We need to understand what child\_process and execFileSync API are.
 
 The node:child\_process module provides the ability to spawn subprocesses in a manner that is similar, but not identical, to popen. This capability is primarily provided by the child\_process.spawn() function:
 
-```plaintext
+```js
 const { spawn } = require('node:child_process');
 const ls = spawn('ls', ['-lh', '/usr']);
 ls.stdout.on('data', (data) => {
@@ -76,7 +76,7 @@ If the process times out or has a non-zero exit code, this method will throw an 
 
 If the shell option is enabled, do not pass unsanitized user input to this function. Any input containing shell metacharacters may be used to trigger arbitrary command execution.
 
-```plaintext
+```js
 const { execFileSync } = require('node:child_process');
 try {
  const stdout = execFileSync('my-script.sh', ['my-arg'], {
@@ -104,7 +104,7 @@ This above information is picked from [Node.js documentation](https://nodejs.org
 
 Now that we understand what this API is used for, we can now look at the run function from CodeMirror.
 
-```plaintext
+```js
 function run(cmd, args, wd = root, { shell = false } = {}) {
  return child.execFileSync(cmd, args, {shell, cwd: wd, encoding: "utf8", stdio: ["ignore", "pipe", process.stderr]})
 }
@@ -112,7 +112,7 @@ function run(cmd, args, wd = root, { shell = false } = {}) {
 
 execFileSync executes the cmd (command) passed in as the first parameter. Install function calls run using the below variables.
 
-```plaintext
+```js
 run("git", ["clone", origin, pkg.dir])
 ```
 

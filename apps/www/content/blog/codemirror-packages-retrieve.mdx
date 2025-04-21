@@ -13,7 +13,7 @@ will find these packages listed in [bin/packages.js file](https://github.com/cod
 
 These below are the core packages:
 
-```plaintext
+```js
 exports.core = [
  "state",
  "view",
@@ -30,7 +30,7 @@ exports.core = [
 
 These below are the non-core packages.
 
-```plaintext
+```js
 exports.nonCore = [
  "lang-javascript",
  "lang-java",
@@ -71,13 +71,13 @@ You might be wondering what exports.all here is in the above image, at [line 42]
 
 ### exports.loadPackages
 
-```plaintext
+```js
 let packages = exports.all.map(n => new Pkg(n))
 ```
 
 Using map on exports.all, new Pkg class is instantiated using the Pkg class that’s shown below:
 
-```plaintext
+```js
 class Pkg {
  constructor(name) {
  this.name = name
@@ -96,7 +96,7 @@ class Pkg {
 
 It technically sets `name`, `dir` and `main`.
 
-```plaintext
+```js
 let packageNames = Object.create(null)
 for (let p of packages) packageNames[p.name] = p
 ```
@@ -105,7 +105,7 @@ for (let p of packages) packageNames[p.name] = p
 
 Object.create(null) creates an empty object, that’s fancy way of creating a obj that would otherwise be just `obj = {}` and finally below is the return statement.
 
-```plaintext
+```js
 return {
   packages, 
   packageNames, 

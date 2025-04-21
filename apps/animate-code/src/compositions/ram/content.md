@@ -1,16 +1,17 @@
-!videoTitle How Nue.js Adds Console Colors Without External Libraries
+!videoTitle Understanding useIsMobile Hook in Vercel AI Chatbot
 
 ## !!steps
 
 !duration 220
 
-!title 1. Custom log Function in Nue.js CLI
+!title 1. useIsMobile Hook Overview
 
-```ts ! packages/nuekit/src/util.js
-// log function used in Nue CLI
-// !callout[/log/] Logs output with a green checkmark symbol followed by the main message and optional extra text.
-export function log(msg, extra = '') {
-  console.log(colors.green('✓'), msg, extra)
+```ts ! vercel/hooks/use-mobile.ts
+// !callout[/function/] Custom hook that detects if the viewport is mobile-sized using `matchMedia`.
+export function useIsMobile() {
+  const [isMobile, setIsMobile] =
+    React.useState<boolean | undefined>(undefined);
+  // hook starts with undefined state
 }
 ```
 
@@ -18,13 +19,43 @@ export function log(msg, extra = '') {
 
 !duration 220
 
-!title 2. The printVersion Function
+!title 2. Setting Up matchMedia for Responsiveness
 
-```ts ! packages/nuekit/src/cli.js
-// Usage of log in printVersion
-// !callout[/printVersion/] Calls `log` with version details and a green bullet using `colors.green`.
-async function printVersion() {
-  log(`Nue ${version} ${colors.green('•')} ${getEngine()}`)
+```ts ! vercel/hooks/use-mobile.ts
+// !callout[/useEffect/] Uses `matchMedia` to check if screen width is below MOBILE_BREAKPOINT.
+React.useEffect(() => {
+  const mql = window.matchMedia('(max-width: 767px)');
+  const onChange = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+```
+
+## !!steps
+
+!duration 220
+
+!title 3. Listening for Viewport Changes
+
+```ts ! vercel/hooks/use-mobile.ts
+// !callout[/addEventListener/] Registers change listener to update state on viewport resize.
+  mql.addEventListener('change', onChange);
+  setIsMobile(window.innerWidth < 768);
+  return () => {
+    mql.removeEventListener('change', onChange);
+  };
+}, []);
+```
+
+## !!steps
+
+!duration 220
+
+!title 4. Why use !!isMobile and Cleanup Importance
+
+```ts ! vercel/hooks/use-mobile.ts
+// !callout[/isMobile/] Ensures a boolean is always returned.
+return !!isMobile;
+// ensures we don't return undefined
 }
 ```
 
@@ -32,53 +63,20 @@ async function printVersion() {
 
 !duration 220
 
-!title 3. The Custom colors Utility
+!title 5. Summary of useIsMobile Behavior
 
-```ts ! packages/nuekit/src/util.js
-// console colors object
-// !callout[/colors/] Dynamically creates color formatting functions using ANSI codes. Disables colors when NO_COLOR is set or when unsupported.
-export const colors = function () {
-  const codes = { green: 32 }
-  const fns = {}
-  const noColor = process.env.NO_COLOR || 
-  !(process.env.TERM || process.platform == 'win32')
-  fns.green = msg => noColor ? msg 
-  : `\u001b[${codes.green}m${msg}\u001b[39m`
-  return fns
-}()
+```ts ! vercel/hooks/use-mobile.ts
+// !callout[/Behavior/] Initializes, subscribes to changes, returns boolean — clean and efficient.
+useIsMobile(); // Usage returns true if width < 768
+// - Initial state: undefined
+// - Updates on window resize
+// - Cleaned up on unmount
 ```
 
-## !!steps
 
-!duration 220
+**title**: Detecting Mobile Viewports with `useIsMobile` Hook
 
-!title 4. ANSI Escape Code Formatting
+**description**: In this video, we break down the `useIsMobile` custom hook from Vercel’s AI Chatbot project. This concise React hook uses `window.matchMedia` to track screen size and determine if the user is on a mobile device, with clean event handling and return logic.
 
-```ts ! packages/nuekit/src/util.js
-// How color is applied
-// !callout[/green/] Wraps message with `\u001b[32m` and `\u001b[39m` for green. These are ANSI escape codes for terminal formatting.
-fns.green = msg => noColor
-  ? msg
-  : `\u001b[32m${msg}\u001b[39m`
-```
-
-## !!steps
-
-!duration 220
-
-!title 5. Comparison with chalk or picocolors
-
-```ts ! no/path
-// Compared to chalk or picocolors
-// !callout[/chalk/] Unlike libraries like `chalk` or `picocolors`, Nue.js implements coloring manually using raw ANSI codes, reducing dependency overhead.
-chalk.green('✓') // using chalk
-picocolors.green('✓') // using picocolors
-colors.green('✓') // custom method in Nue.js
-```
-
----
-
-title: How Nue.js Adds Console Colors Without External Libraries  
-description: Nue.js applies CLI colors without using libraries like Chalk or Picocolors. Instead, it builds a custom utility using ANSI escape codes, as seen in the `colors` object in `util.js`. In this video, we break down how it works and how it's used in the CLI log output.  
-tags: [nuejs, console, colors, chalk, picocolors, ansi, cli, open-source, codebase-architecture]
+**tags**: zustand, vercel, react hooks, responsive design, matchMedia, open source, react, frontend, useEffect, javascript
 ```

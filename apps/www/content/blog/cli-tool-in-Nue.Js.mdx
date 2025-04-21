@@ -25,7 +25,7 @@ We will review Help, Init commands to understand the underlying pattern.
 
 Let’s find out how help is printed to CLI. At line 126-133 in packages/nuejs/src/cli.js, you will find the below code:
 
-```plaintext
+```js
 // Only run main when called as real CLI
 if (esMain(import.meta)) {
 
@@ -43,7 +43,7 @@ if (esMain(import.meta)) {
 
 printHelp() is defined in the [same cli.js file](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L76) and has the below code:
 
-```plaintext
+```js
 async function printHelp() {
   const { getHelp } = await import('./cli-help.js')
   console.info(getHelp())
@@ -52,7 +52,7 @@ async function printHelp() {
 
 Check out the [cli-help.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli-help.js) it contains the below code:
 
-```plaintext
+```js
 
 #!/usr/bin/env bun
 
@@ -207,7 +207,7 @@ if (esMain(import.meta)) {
 
 [At line 90 in cli.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L90), there is this below check:
 
-```plaintext
+```js
 async function runCommand(args) {
   if (args.cmd == 'docs') return openUrl('https://nuejs.org/docs/')
 
@@ -218,7 +218,7 @@ async function runCommand(args) {
 
 At [line 112 in the cli.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L112), you will find the below code:
 
-```plaintext
+```js
 if (init) {
     await nue.init(true)
     if (deploy) await deployer({ root: nue.dist, init: true })
@@ -227,7 +227,7 @@ if (init) {
 
 nue.init? where is that coming from? you will see this below code [at line 104](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/cli.js#L104)
 
-```plaintext
+```js
   const nue = await createKit(args)
 ```
 
@@ -235,7 +235,7 @@ nue.init? where is that coming from? you will see this below code [at line 104](
 
 createKit is exported from [nuekit.js](https://github.com/nuejs/nue/blob/master/packages/nuekit/src/nuekit.js#L23) and has 383 LOC at the time of writing this article. Since we are interested in init, I searched for “init” in this nuekit.js file and found the below code:
 
-```plaintext
+```js
 async function init(force) {
     await initNueDir({ dist, is_dev, esbuild, force })
 }

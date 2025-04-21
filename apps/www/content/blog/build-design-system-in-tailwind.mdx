@@ -8,7 +8,7 @@ In this article, we analyze [buildDesignSystem function in Tailwind CSS source c
 
 DesignSystem type picked from [design-system.ts](https://github.com/tailwindlabs/tailwindcss/blob/next/packages/tailwindcss/src/design-system.ts#L36)
 
-```plaintext
+```js
 export type DesignSystem = {
   theme: Theme
   utilities: Utilities
@@ -39,7 +39,7 @@ At the time of writing this article, [design-system.ts](https://github.com/tailw
 
 Let’s discuss how the values returned by DefaultMap utility function is used in [designSystem](https://github.com/tailwindlabs/tailwindcss/blob/next/packages/tailwindcss/src/design-system.ts#L48).
 
-```plaintext
+```js
 let parsedVariants = new DefaultMap((variant) => parseVariant(variant, designSystem))
 let parsedCandidates = new DefaultMap((candidate) =>
   Array.from(parseCandidate(candidate, designSystem)),
@@ -51,7 +51,7 @@ let compiledAstNodes = new DefaultMap<Candidate>((candidate) =>
 
 These variables are used in designSystem object as shown below:
 
-```plaintext
+```js
 parseCandidate(candidate: string) {
   return parsedCandidates.get(candidate)
 },

@@ -17,19 +17,19 @@ If you want to use CodeMirror, install the separate packages from npm, and ignor
 
 To get started, make sure you are running node.js version 16. After cloning the repository, run
 
-```plaintext
+```js
 node bin/cm.js install
 ```
 
 To clone the packages that make up the system, install dependencies, and build the packages. At any time you can rebuild packages, either by running npm run prepare in their subdirectory, or all at once with
 
-```plaintext
+```js
 node bin/cm.js build
 ```
 
 Developing is best done by setting up
 
-```plaintext
+```js
 npm run dev
 ```
 
@@ -43,7 +43,7 @@ When you run the command `node bin/cm.js install`, this executes the script bin/
 
 `cm.js` has the install function at [line 81](https://github.com/codemirror/dev/blob/main/bin/cm.js#L81), but does it mean you could just down the function you want to execute in a script as a CLI argument and it would not get called? No, I don’t think so. `install` would be an argument passed in via CLI and start function does some processing. Below is the start function code picked from CodeMirror v6 source code.
 
-```plaintext
+```js
 function start() {
   let command = process.argv[2]
   if (command && !["install", "--help"].includes(command)) assertInstalled()
@@ -72,13 +72,13 @@ function start() {
 
 Argument is accessed via `let command = process.argv[2]`, this means command now has the value “install”. Then next step is assert if the project has been already installed using the below shown check:
 
-```plaintext
+```js
 if (command && !["install", " - help"].includes(command)) assertInstalled()
 ```
 
 If you passed in any additional arguments after install, they get asssigned to args variable and then cmdFn is decided using an object as shown below:
 
-```plaintext
+```js
 let args = process.argv.slice(3)
 let cmdFn = {
  packages: listPackages,
@@ -101,7 +101,7 @@ let cmdFn = {
 
 Since command value is install and cmdFn object has “install” key/value pair, value here would be the install function itself.
 
-```plaintext
+```js
 if (!cmdFn || cmdFn.length > args.length) help(1)
 new Promise(r => r(cmdFn.apply(null, args))).catch(e => error(e))
 ```

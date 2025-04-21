@@ -6,7 +6,7 @@ In this article, we provide an overview of [analyzeSizeChange script in trpc sou
 
 This file has the following functions:
 
-1\. func analyzeSizeChange  
+1\. func analyzeSizeChange   
 2\. func onAnalysis  
 3\. type GitHubLogType  
 4\. type GitHubLogOptions  
@@ -23,7 +23,7 @@ This file has the following functions:
 
 The most important function here is analyzeSizeChange because it has a function named onAnalysis.
 
-```plaintext
+```js
 export default function analyzeSizeChange(packageDir: string) {
  let analyzePluginIterations = 0;
  return analyze({
@@ -50,7 +50,7 @@ logDifference and logNewModule are in this same file and are colocated. This is 
 
 # **logNewModule:**
 
-```plaintext
+```js
 function logNewModule(name: string, size: number) {
  if (size < ABSOLUTE_BYTE_CHANGE_THRESHOLD) {
    return;
@@ -69,7 +69,7 @@ function.
 
 # **logDifference:**
 
-```plaintext
+```js
 function logDifference(name: string, before: number, after: number) {
  const change = difference(before, after);
  if (
@@ -94,7 +94,7 @@ from top to bottom, core functions are ranked higher while single responsibility
 
 # **logGithubMessage**
 
-```plaintext
+```js
 function logGithubMessage(
  type: GitHubLogType,
  message: string,

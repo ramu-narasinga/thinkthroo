@@ -15,7 +15,7 @@ All this trouble to invoke a MacroTask called setImmediate that is available in 
 When you want to execute some piece of code asynchronously,  
 but as soon as possible, one option is to use the setImmediate() function provided by Node.js:
 
-```plaintext
+```js
 setImmediate(() => {
  // run something
 });
@@ -39,7 +39,7 @@ This enqueueTask is a fallback method used in [ReactAct.js](https://github.com/f
 
 ![](https://miro.medium.com/v2/resize:fit:875/1*EaUXDJhoXv9cdKs4AVcVOg.png)
 
-```plaintext
+```js
 // $FlowFixMe[invalid-computed-prop]
 const nodeRequire = module && module[requireString];
 // assuming we're in node, let's try to get node's
@@ -50,7 +50,7 @@ enqueueTaskImpl = nodeRequire.call(module, 'timers').setImmediate;
 `timers` is a core module in Node.js. It provides a set of timer functions that can be used to schedule code execution at specific intervals or after a delay. These functions are similar to the global timer functions in  
 JavaScript (like setTimeout and setInterval), but they are provided as part of the timers module for additional control and precision.
 
-```plaintext
+```js
 nodeRequire.call(module, 'timers')
 ```
 
