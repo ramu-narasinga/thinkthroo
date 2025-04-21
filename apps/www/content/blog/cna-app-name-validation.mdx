@@ -3,7 +3,7 @@ title: create-next-app validates your app name using this package
 ---
 In this article, we analyze how [create-next-app](https://github.com/vercel/next.js/blob/canary/packages/create-next-app/index.ts#L162) validates your project name.
 
-```plaintext
+```js
 validate: (name) => {
  const validation = validateNpmName(basename(resolve(name)))
  if (validation.valid) {
@@ -27,7 +27,7 @@ This function is straight forward, calls a function named `validateProjectName` 
 
 [Documentation](https://www.npmjs.com/package/validate-npm-package-name) says that if a name is valid, you will get the below object back:
 
-```plaintext
+```js
 {
  validForNewPackages: true,
  validForOldPackages: true

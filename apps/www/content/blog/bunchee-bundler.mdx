@@ -20,21 +20,21 @@ to match your exports and build them into bundles.
 
 Install bunchee using the below command:
 
-```plaintext
+```js
 npm install - save-dev bunchee typescript
 ```
 
 2\. [Configuration](https://www.npmjs.com/package/bunchee#configuration)  
 You can use Bunchee to configure the package.json automatically using the below command:
 
-```plaintext
+```js
 # Use bunchee to prepare package.json configuration
 npm exec bunchee - prepare
 ```
 
 Or you can configure the package.json manually. The below configuration is an example picked from documentation.
 
-```plaintext
+```js
 {
  "files": ["dist"],
  "exports": {
@@ -63,7 +63,7 @@ For example: src/index.ts will match the exports name “.” or the only main e
 
 This below code is picked from [t3-env/packages/core/package.json](https://github.com/t3-oss/t3-env/blob/main/packages/core/package.json#L13C3-L23C5).
 
-```plaintext
+```js
 "exports": {
  "./package.json": "./package.json",
  ".": {
@@ -81,7 +81,7 @@ This below code is picked from [t3-env/packages/core/package.json](https://githu
 
 This below code is picked from [t3-env/packages/nextjs/package.json](https://github.com/t3-oss/t3-env/blob/main/packages/nextjs/package.json#L13-L23)
 
-```plaintext
+```js
 "exports": {
  "./package.json": "./package.json",
  ".": {
@@ -99,7 +99,7 @@ This below code is picked from [t3-env/packages/nextjs/package.json](https://git
 
 This below code is picked from [t3-env/packages/nuxt/package.json](https://github.com/t3-oss/t3-env/blob/main/packages/nuxt/package.json)
 
-```plaintext
+```js
 "exports": {
  "./package.json": "./package.json",
  ".": {

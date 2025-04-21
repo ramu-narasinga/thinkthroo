@@ -14,7 +14,7 @@ we’ll explore how to optimize data fetching in your React applications using t
 
 Let’s dive into the code step by step:
 
-```plaintext
+```js
 const load = useCallback(async () => {
   setLoading(true);
   const load = (
@@ -29,7 +29,7 @@ Here, we’re defining an asynchronous function `load` inside a `useCallback` ho
 
 Next, we use `useSWR` to manage the data fetching:
 
-```plaintext
+```js
 const { data } = useSWR(`/analytics-${integration?.id}-${date}`, load, {
   refreshInterval: 0,
   refreshWhenHidden: false,
@@ -62,7 +62,7 @@ Here’s a detailed explanation:
 1. **Without** `useCallback`:
     
 
-```plaintext
+```js
 const load = async () => {
   setLoading(true);
   const load = (
@@ -87,7 +87,7 @@ In this case, every render creates a new `load` function. `useSWR` sees a differ
 
 **With** `useCallback`:
 
-```plaintext
+```js
 const load = useCallback(async () => {
   setLoading(true);
   const load = (

@@ -21,6 +21,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@calcom/embed-react": "^1.5.2",
     "thinkthroo": "file:"
   }
 }

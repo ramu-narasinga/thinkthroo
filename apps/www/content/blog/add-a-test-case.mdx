@@ -45,7 +45,7 @@ Subscribers are a Set. Here’s a proof from Zustand’s source code related to 
 
 After fixing this issue, Zustand added a test case to ensure the correct subscriber is removed on unmount:
 
-```plaintext
+```js
 // https://github.com/pmndrs/zustand/issues/84
 it('ensures the correct subscriber is removed on unmount', async () => {
   const useBoundStore = create(() => ({ count: 0 }))
@@ -117,7 +117,7 @@ The issue boiled down to a problem in managing multiple subscribers — each sub
 
 Here’s the test case added after fixing this issue:
 
-```plaintext
+```js
 // https://github.com/pmndrs/zustand/issues/86
 it('ensures a subscriber is not mistakenly overwritten', async () => {
   const useBoundStore = create(() => ({ count: 0 }))

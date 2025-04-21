@@ -8,7 +8,7 @@ In this article, we will compare the Copy button code between [Shadcn-ui/ui](htt
 
 The code snippet below is picked from [shadcn-ui source code](https://github.com/shadcn-ui/ui/blob/main/apps/www/components/copy-button.tsx#L24).
 
-```plaintext
+```js
 export async function copyToClipboardWithMeta(value: string, event?: Event) {
   navigator.clipboard.writeText(value)
   if (event) {
@@ -19,7 +19,7 @@ export async function copyToClipboardWithMeta(value: string, event?: Event) {
 
 I think ‘withMeta’ in the function name copyToClipboardWithMeta refers to the analytics recorded in the [trackEvent function](https://github.com/shadcn-ui/ui/blob/main/apps/www/lib/events.ts#L27).
 
-```plaintext
+```js
 import va from "@vercel/analytics"
 
 export function trackEvent(input: Event): void {
@@ -34,7 +34,7 @@ export function trackEvent(input: Event): void {
 
 The code snippet below is picked from [codehike source code](https://github.com/code-hike/codehike/blob/next/packages/mdx/src/smooth-code/copy-button.tsx#L54).
 
-```plaintext
+```js
 function copyToClipboard(text: string) {
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text)
@@ -57,7 +57,7 @@ Codehike implements the copyToClipboard differently.
 
 This below code snippet is picked from [Codehike source code](https://github.com/code-hike/codehike/blob/next/packages/mdx/src/smooth-code/copy-button.tsx#L62C1-L84C2). This function is just under the copyToClipboard.
 
-```plaintext
+```js
 function fallbackCopyTextToClipboard(text: string) {
   var textArea = document.createElement("textarea")
   textArea.value = text
