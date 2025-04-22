@@ -7,8 +7,8 @@
       ],
       "files": [
         {
-          "path": "ui/accordion.tsx",
-          "type": "registry:ui"
+          "path": "generators/.github/workflows/npm-release.yml",
+          "type": "registry:file"
         }
       ]
     }

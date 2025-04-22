@@ -41,10 +41,12 @@
   "homepage": "https://github.com/ramu-narasinga/thinkthroo#readme",
   "devDependencies": {
     "@repo/typescript-config": "*",
+    "@types/fs-extra": "^11.0.4",
     "@types/prompts": "^2.4.9"
   },
   "dependencies": {
     "commander": "^13.1.0",
+    "fs-extra": "^11.3.0",
     "https-proxy-agent": "^7.0.6",
     "node-fetch": "^3.3.2",
     "prompts": "^2.4.2",

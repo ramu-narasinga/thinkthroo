@@ -14,7 +14,7 @@ export const registryItemFileSchema = z.discriminatedUnion("type", [
         path: z.string(),
         content: z.string().optional(),
         type: z.enum(["registry:file"]),
-        target: z.string(),
+        target: z.string().optional(),
     }),
     z.object({
         path: z.string(),

@@ -90,7 +90,7 @@ export async function getRegistryIndex() {
 
         const [result] = await fetchRegistry(["index.json"])
 
-        logger.info("result", result);
+        logger.info("result", JSON.stringify(result));
 
         return registryIndexSchema.parse(result)
     } catch (error) {

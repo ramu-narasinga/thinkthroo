@@ -1,0 +1,1 @@
+export const MISSING_DIR_OR_EMPTY_PROJECT = "1"

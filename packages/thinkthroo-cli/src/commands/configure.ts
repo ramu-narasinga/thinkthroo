@@ -61,6 +61,8 @@ export const configure = new Command()
                 options.features = await promptForRegistryFeatures(options)
             }
 
+            console.log("options", options);
+
         } catch (error) {
             console.error(error)
             process.exit(1)
