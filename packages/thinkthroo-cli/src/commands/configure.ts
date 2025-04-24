@@ -6,6 +6,9 @@ import { logger } from "@/src/utils/logger"
 import { highlighter } from "@/src/utils/highlighter"
 import { handleError } from "@/src/utils/handle-error"
 import { getRegistryIndex } from "@/src/registry/api"
+import { preFlightConfigure } from "../preflights/preflight-configure"
+import * as ERRORS from "@/src/utils/errors"
+import { configureFeatures } from "../utils/configure-features"
 
 export const configureOptionsSchema = z.object({
     features: z.array(z.string()).optional(),
@@ -40,28 +43,35 @@ export const configure = new Command()
                 ...opts,
             })
 
-            if (!options.yes) {
-                logger.break()
-                const { confirm } = await prompts({
-                    type: "confirm",
-                    name: "confirm",
-                    message: highlighter.warn(
-                        `You are about to configure ${features[0]}. Continue?`
-                    ),
-                })
-                if (!confirm) {
-                    logger.break()
-                    logger.log(`${features[0]} configuration cancelled.`)
-                    logger.break()
-                    process.exit(1)
-                }
-            }
-
             if (!options.features?.length) {
                 options.features = await promptForRegistryFeatures(options)
             }
 
-            console.log("options", options);
+            let { errors, config } = await preFlightConfigure(options)
+
+            if (errors[ERRORS.MISSING_DIR_OR_EMPTY_PROJECT]) {
+                logger.error(
+                    `The directory ${highlighter.info(
+                        options.cwd
+                    )} does not exist or is empty.`
+                )
+
+                logger.break()
+                process.exit(1)
+            }
+
+            if (errors[ERRORS.EXISTING_CHANGESETS]) {
+                logger.error(
+                    `The directory ${highlighter.info(
+                        options.cwd
+                    )} already has changesets configured.`
+                )
+
+                logger.break()
+                process.exit(1)
+            }
+
+            await configureFeatures(options.features, options)
 
         } catch (error) {
             console.error(error)

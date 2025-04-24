@@ -49,6 +49,7 @@
     "fs-extra": "^11.3.0",
     "https-proxy-agent": "^7.0.6",
     "node-fetch": "^3.3.2",
+    "ora": "^8.2.0",
     "prompts": "^2.4.2",
     "tsup": "^8.4.0",
     "zod": "^3.24.2"

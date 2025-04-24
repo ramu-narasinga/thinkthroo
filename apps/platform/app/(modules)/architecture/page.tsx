@@ -1,4 +1,4 @@
-'use client'
+// 'use client'
 
 import Image from "next/image";
 import {
@@ -23,7 +23,8 @@ import { NavTabs } from "@/components/interfaces/page/nav-tabs";
 import { Icons } from "@/components/icons";
 import { getArchitectureCourses } from "@/lib/data/get-architecture-courses";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+// import { useState } from "react";
+import { client } from "@thinkthroo/lesson/utils/sanity-client";
 
 type Course = {
   title: string;
@@ -38,31 +39,43 @@ type Course = {
   tags: string[];
 };
 
-export default function ArchitecturePage() {
+const POST_QUERY = `
+  *[_type == "module"][0]{
+    _id,
+    title,
+    description,
+  }
+`
+
+export default async function ArchitecturePage() {
   const architectureCourses = getArchitectureCourses();
-  const [selectedFramework, setSelectedFramework] = useState<string>("All");
-  const [selectedProject, setSelectedProject] = useState<string>("All");
+  // const [selectedFramework, setSelectedFramework] = useState<string>("All");
+  // const [selectedProject, setSelectedProject] = useState<string>("All");
 
-  const handleFrameworkChange = (value: string) => {
-    setSelectedFramework(value);
-  };
+  const doc = await client.fetch(POST_QUERY)
 
-  const handleProjectChange = (value: string) => {
-    setSelectedProject(value);
-  };
+  console.log("doc fetched in the architecture page", doc);
+
+  // const handleFrameworkChange = (value: string) => {
+  //   setSelectedFramework(value);
+  // };
+
+  // const handleProjectChange = (value: string) => {
+  //   setSelectedProject(value);
+  // };
 
   // Filter the courses based on selected dropdown values
-  const filterCourses = (courseList: any[]) => {
-    return courseList.filter((course) => {
-      const frameworkMatches =
-        selectedFramework === "All" || course.tags.includes(selectedFramework.toLowerCase());
+  // const filterCourses = (courseList: any[]) => {
+  //   return courseList.filter((course) => {
+  //     const frameworkMatches =
+  //       selectedFramework === "All" || course.tags.includes(selectedFramework.toLowerCase());
 
-      const projectMatches =
-        selectedProject === "All" || course.tags.includes(selectedProject.toLowerCase());
+  //     const projectMatches =
+  //       selectedProject === "All" || course.tags.includes(selectedProject.toLowerCase());
 
-      return frameworkMatches && projectMatches;
-    });
-  };
+  //     return frameworkMatches && projectMatches;
+  //   });
+  // };
 
   const Item: React.FC<{ courses: any[] }> = ({ courses }) => {
     return (

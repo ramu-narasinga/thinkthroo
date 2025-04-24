@@ -3,13 +3,14 @@ import { handleError } from "@/src/utils/handle-error"
 import { HttpsProxyAgent } from "https-proxy-agent"
 import fetch from "node-fetch"
 import { highlighter } from "@/src/utils/highlighter"
-import { registryIndexSchema } from "./schema"
+import { registryIndexSchema, registryItemSchema } from "./schema"
+import { z } from "zod"
 
 const REGISTRY_URL = process.env.REGISTRY_URL ?? "https://thinkthroo.com/r"
 const registryCache = new Map<string, Promise<any>>()
 const agent = process.env.https_proxy
-  ? new HttpsProxyAgent(process.env.https_proxy)
-  : undefined
+    ? new HttpsProxyAgent(process.env.https_proxy)
+    : undefined
 
 export async function fetchRegistry(paths: string[]) {
     try {
@@ -90,8 +91,6 @@ export async function getRegistryIndex() {
 
         const [result] = await fetchRegistry(["index.json"])
 
-        logger.info("result", JSON.stringify(result));
-
         return registryIndexSchema.parse(result)
     } catch (error) {
         logger.error("\n")
@@ -99,9 +98,100 @@ export async function getRegistryIndex() {
     }
 }
 
-function getRegistryUrl(path: string) {  
+function getRegistryUrl(path: string) {
 
-    logger.info("REGISTRY_URL", REGISTRY_URL, "process.env.REGISTRY_URL", process.env.REGISTRY_URL)
+    if (isUrl(path)) {
+        const url = new URL(path)
+        return url.toString()
+    }
 
     return `${REGISTRY_URL}/${path}`
 }
+
+export async function registryResolveItemsTree(
+    names: z.infer<typeof registryItemSchema>["name"][]
+) {
+    try {
+
+        console.log("[registryResolveItemsTree]:names", names);
+        let registryItems = await resolveRegistryItems(names)
+        console.log("[registryResolveItemsTree]:registryItems", registryItems);
+        let result = await fetchRegistry(registryItems)
+        const payload = z.array(registryItemSchema).parse(result)
+
+        if (!payload) {
+            return null
+        }
+
+    } catch (error) {
+        handleError(error)
+        return null
+    }
+}
+
+export async function resolveRegistryItems(names: string[]) {
+    let registryDependencies: string[] = []
+    for (const name of names) {
+        console.log("[resolveRegistryItems]:name", name);
+        const itemRegistryDependencies = await resolveRegistryDependencies(
+            name
+        )
+        registryDependencies.push(...itemRegistryDependencies)
+    }
+
+    return Array.from(new Set(registryDependencies))
+}
+
+async function resolveRegistryDependencies(
+    url: string
+): Promise<string[]> {
+    const visited = new Set<string>()
+    const payload: string[] = []
+
+    async function resolveDependencies(itemUrl: string) {
+
+        console.log("[resolveDependencies]:itemUrl", itemUrl);
+
+        const url = getRegistryUrl(isUrl(itemUrl) ? itemUrl : `index.json`)
+
+        console.log("[resolveDependencies]:url", url);
+
+        if (visited.has(url)) {
+            return
+        }
+
+        visited.add(url)
+
+        try {
+            const [result] = await fetchRegistry([url])
+
+            console.log("[resolveDependencies]:result", result);
+
+            const item = registryItemSchema.parse(result)
+            payload.push(url)
+
+            if (item.registryDependencies) {
+                for (const dependency of item.registryDependencies) {
+                    await resolveDependencies(dependency)
+                }
+            }
+        } catch (error) {
+            console.error(
+                `Error fetching or parsing registry item at ${itemUrl}:`,
+                error
+            )
+        }
+    }
+
+    await resolveDependencies(url)
+    return Array.from(new Set(payload))
+}
+
+export function isUrl(path: string) {
+    try {
+      new URL(path)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
