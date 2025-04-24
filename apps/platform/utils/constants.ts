@@ -1,0 +1,1 @@
+export const MODULE_SLUG_INDEX = 2

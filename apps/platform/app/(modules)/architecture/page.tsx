@@ -26,6 +26,10 @@ import { Separator } from "@/components/ui/separator";
 // import { useState } from "react";
 import { client } from "@thinkthroo/lesson/utils/sanity-client";
 
+type Tag = {
+  title: string;
+}
+
 type Course = {
   title: string;
   description: string;
@@ -36,57 +40,52 @@ type Course = {
     label: string;
     slug: string;
   };
-  tags: string[];
+  tags: Tag[];
 };
 
 const POST_QUERY = `
-  *[_type == "module"][0]{
-    _id,
-    title,
-    description,
+ *[
+  _type == "module" &&
+  "Codebase Architecture" in categories[]->title
+]{
+  title,
+  description,
+  slug,
+  tags[]->{
+    title
+  },
+  "chapter": *[
+    _type == "chapter" &&
+    references(^._id) &&
+    order == 1
+  ][0]{ // First chapter referencing this module
+    "chapterSlug": slug,
+    "lesson": *[
+      _type == "codebaseArchitecture" &&
+      references(^._id) &&
+      order == 1
+    ][0]{ // First lesson with order = 1 in this chapter
+      "lessonSlug": slug.current
+    }
   }
+}
 `
 
 export default async function ArchitecturePage() {
-  const architectureCourses = getArchitectureCourses();
-  // const [selectedFramework, setSelectedFramework] = useState<string>("All");
-  // const [selectedProject, setSelectedProject] = useState<string>("All");
+  // const architectureCourses = getArchitectureCourses();
 
-  const doc = await client.fetch(POST_QUERY)
+  const architectureCourses = await client.fetch(POST_QUERY)
 
-  console.log("doc fetched in the architecture page", doc);
-
-  // const handleFrameworkChange = (value: string) => {
-  //   setSelectedFramework(value);
-  // };
-
-  // const handleProjectChange = (value: string) => {
-  //   setSelectedProject(value);
-  // };
-
-  // Filter the courses based on selected dropdown values
-  // const filterCourses = (courseList: any[]) => {
-  //   return courseList.filter((course) => {
-  //     const frameworkMatches =
-  //       selectedFramework === "All" || course.tags.includes(selectedFramework.toLowerCase());
-
-  //     const projectMatches =
-  //       selectedProject === "All" || course.tags.includes(selectedProject.toLowerCase());
-
-  //     return frameworkMatches && projectMatches;
-  //   });
-  // };
+  console.log("doc fetched in the architecture page", architectureCourses);
 
   const Item: React.FC<{ courses: any[] }> = ({ courses }) => {
+
     return (
       <>
         {courses.map((course, index: number) => (
-          <Link key={index} href={course.slug}>
+          <Link key={index} href={`/guide/codebase-architecture/${course.slug}/${course?.chapter?.chapterSlug}/${course?.chapter?.lesson?.lessonSlug}`} className="group">
             <div className="relative flex flex-col overflow-hidden rounded-xl border shadow transition-all duration-200 ease-in-out hover:z-30">
               <div className="items-center gap-2 relative z-20 flex justify-end border-b bg-card px-3 py-2.5 text-card-foreground">
-                <div className="flex items-center gap-1.5 pl-1 text-[13px] text-muted-foreground">
-                  {course.concept.label}
-                </div>
                 <div className="ml-auto flex items-center gap-2 [&amp;>form]:flex">
                   <button className="inline-flex items-center justify-center h-6 rounded-[6px] border bg-transparent px-2 text-xs">
                     {course.chapters} Chapters
@@ -110,7 +109,7 @@ export default async function ArchitecturePage() {
                     {course.tags.map((tag: string, index: number) => (
                       <div key={index} className="flex items-center">
                         <Icons.tag />
-                        {tag}
+                        {tag.title}
                       </div>
                     ))}
                   </div>

@@ -59,6 +59,17 @@ export function MainNav() {
         >
           Build From Scratch
         </Link>
+        <Link
+          href="/cli"
+          className={cn(
+            "transition-colors hover:text-foreground/80",
+            pathname?.startsWith("/cli")
+              ? "text-foreground"
+              : "text-foreground/60"
+          )}
+        >
+          CLI
+        </Link>
       </nav>
     </div>
   )

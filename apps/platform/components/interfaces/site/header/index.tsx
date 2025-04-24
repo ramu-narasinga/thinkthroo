@@ -25,17 +25,17 @@ export async function SiteHeader() {
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <div className="w-full flex-1 md:w-auto md:flex-none">
           </div>
-          <nav className="flex items-center">
-            <Button asChild size="sm" variant="outline">
+          <nav className="flex items-center gap-4">
+            <Button asChild size="sm" variant="default">
               <Link
                 target="_blank"
                 rel="noreferrer"
                 href={siteConfig.links.consultation}
               >
-                Book a meeting
+                Upgrade
               </Link>
             </Button>
-            <Link
+            {/* <Link
               href={siteConfig.links.github}
               target="_blank"
               rel="noreferrer"
@@ -68,7 +68,7 @@ export async function SiteHeader() {
                 <Icons.twitter className="h-3 w-3 fill-current" />
                 <span className="sr-only">Twitter</span>
               </div>
-            </Link>
+            </Link> */}
             {
               user ? 
               <AccountMenu fullName={user.user_metadata.full_name} />

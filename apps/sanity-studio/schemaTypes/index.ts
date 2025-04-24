@@ -8,6 +8,7 @@ import productionGradeProjects from './productionGradeProjects'
 import buildFromScratch from './buildFromScratch'
 import module from './module'
 import chapter from './chapter'
+import tag from './tag'
 
 export const schemaTypes = [
     post, 
@@ -19,5 +20,6 @@ export const schemaTypes = [
     productionGradeProjects,
     buildFromScratch,
     module,
-    chapter
+    chapter,
+    tag
 ]

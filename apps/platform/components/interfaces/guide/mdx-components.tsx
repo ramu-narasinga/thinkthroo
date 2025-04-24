@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -36,9 +34,9 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import { Style } from "@/registry/registry-styles"
-import { NewsLetterForm } from "@/components/interfaces/guide/newsletter-form"
+// import { NewsLetterForm } from "@/components/interfaces/guide/newsletter-form"
 
-const components = {
+export const components = {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -231,7 +229,7 @@ const components = {
   ),
   Image,
   Callout,
-  NewsLetterForm,
+  // NewsLetterForm,
 //   ComponentPreview,
 //   ComponentExample,
 //   ComponentSource,
@@ -318,17 +316,4 @@ const components = {
 
 interface MdxProps {
   code: string
-}
-
-export function Mdx({ code }: MdxProps) {
-  const [config] = useConfig()
-  const Component = useMDXComponent(code, {
-    style: config.style,
-  })
-
-  return (
-    <div className="mdx">
-      <Component components={components} />
-    </div>
-  )
 }
