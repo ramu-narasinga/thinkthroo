@@ -9,7 +9,7 @@ const POST_QUERY = `
 `;
 
 export async function fetchLessonBySlug(slug: string) {
-  const params = { slug }; // must be a string
+  const params = { slug };
   const options = { next: { revalidate: 30 } };
 
   const post = await client.fetch<SanityDocument>(POST_QUERY, params, options);
@@ -19,7 +19,7 @@ export async function fetchLessonBySlug(slug: string) {
 const CHAPTERS_QUERY = `
   *[
   _type == "chapter" &&
-  "shadcn-ui" in module[]->slug
+  $slug in module[]->slug
 ] | order(order asc) {
   title,
   order,

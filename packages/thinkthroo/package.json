@@ -1,0 +1,65 @@
+{
+  "name": "thinkthroo",
+  "version": "0.0.2",
+  "description": "Configure features such as authentication, file upload via CLI and save time.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./registry": {
+      "types": "./dist/registry/index.d.ts",
+      "default": "./dist/registry/index.js"
+    }
+  },
+  "bin": "./dist/index.js",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "start:dev": "cross-env REGISTRY_URL=http://localhost:3000/r node dist/index.js",
+    "start:prod": "cross-env REGISTRY_URL=https://thinkthroo.com/r node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ramu-narasinga/thinkthroo.git"
+  },
+  "keywords": [
+    "auth",
+    "file-upload",
+    "cli",
+    "nextjs",
+    "thinkthroo"
+  ],
+  "author": "Ramu Narasinga",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ramu-narasinga/thinkthroo/issues"
+  },
+  "homepage": "https://github.com/ramu-narasinga/thinkthroo#readme",
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/fs-extra": "^11.0.4",
+    "@types/prompts": "^2.4.9"
+  },
+  "dependencies": {
+    "@antfu/ni": "^24.3.0",
+    "commander": "^13.1.0",
+    "cosmiconfig": "^9.0.0",
+    "deepmerge": "^4.3.1",
+    "execa": "^9.5.2",
+    "fast-glob": "^3.3.3",
+    "fs-extra": "^11.3.0",
+    "https-proxy-agent": "^7.0.6",
+    "kleur": "^4.1.5",
+    "node-fetch": "^3.3.2",
+    "ora": "^8.2.0",
+    "prompts": "^2.4.2",
+    "ts-morph": "^25.0.1",
+    "tsup": "^8.4.0",
+    "type-fest": "^4.40.0",
+    "zod": "^3.24.2"
+  }
+}

@@ -8,7 +8,7 @@ export const siteConfig = {
       twitter: "https://twitter.com/thinkthroo",
       github: "https://github.com/thinkthroo",
       learningPlatform: "https://app.thinkthroo.com/architecture",
-      consultation: "https://cal.com/team-thinkthroo-dxiovj/consultation"
+      consultation: "https://cal.com/team-thinkthroo-dxiovj/consultation",
     },
   }
   

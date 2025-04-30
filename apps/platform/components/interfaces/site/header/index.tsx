@@ -8,6 +8,7 @@ import { MobileNav } from "@/components/interfaces/site/header/mobile-nav"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { createClient } from '@/utils/supabase/server';
 import { AccountMenu } from "./account-menu"
+import { BadgeCheck, Rocket, Star } from "lucide-react"
 
 export async function SiteHeader() {
 
@@ -27,13 +28,13 @@ export async function SiteHeader() {
           </div>
           <nav className="flex items-center gap-4">
             <Button asChild size="sm" variant="default">
-              <Link
-                target="_blank"
-                rel="noreferrer"
-                href={siteConfig.links.consultation}
-              >
-                Upgrade
-              </Link>
+                <Link
+                  href="/upgrade"
+                  className="flex items-center gap-2"
+                >
+                  <Rocket />
+                  <span>Upgrade</span>
+                </Link>
             </Button>
             {/* <Link
               href={siteConfig.links.github}

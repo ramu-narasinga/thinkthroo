@@ -2,9 +2,11 @@
     "name": "www",
     "version": "0.1.0",
     "private": true,
+    "type": "module",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
+        "build:registry": "tsx --tsconfig ./tsconfig.scripts.json ./scripts/build-registry.mts && prettier --loglevel silent --write \"registry/**/*.{ts,tsx,mdx}\" --cache",
         "start": "next start",
         "lint": "next lint"
     },
@@ -37,8 +39,10 @@
         "react": "^18",
         "react-dom": "^18",
         "react-wrap-balancer": "^0.4.1",
+        "rimraf": "^6.0.1",
         "tailwind-merge": "^2.5.2",
         "tailwindcss-animate": "^1.0.7",
+        "thinkthroo": "*",
         "www": "file:"
     },
     "devDependencies": {

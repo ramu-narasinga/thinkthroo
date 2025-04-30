@@ -1,0 +1,7 @@
+{
+  "name": "changesets",
+  "type": "registry:generator",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": []
+}
