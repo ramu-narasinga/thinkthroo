@@ -3,6 +3,7 @@ import category from './category'
 import post from './post'
 import author from './author'
 import codebaseArchitecture from './codebaseArchitecture'
+import cli from './cli'
 import bestPractices from './bestPractices'
 import productionGradeProjects from './productionGradeProjects'
 import buildFromScratch from './buildFromScratch'
@@ -16,6 +17,7 @@ export const schemaTypes = [
     category, 
     blockContent,
     codebaseArchitecture,
+    cli,
     bestPractices,
     productionGradeProjects,
     buildFromScratch,
