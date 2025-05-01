@@ -48,8 +48,6 @@ export async function updateFiles(
 
   for (const file of files) {
 
-    console.log("file.content", file.content);
-    
     if (!file.content) {
       continue
     }
@@ -115,6 +113,10 @@ export async function updateFiles(
         options.rootSpinner.start()
       }
     }
+
+    logger.info("file.target", file.target,)
+
+    logger.info("existsSync(targetDir)", existsSync(targetDir), "targetDir", targetDir)
 
     // Create the target directory if it doesn't exist.
     if (!existsSync(targetDir)) {

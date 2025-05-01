@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PoweredByPaddle } from '@/components/interfaces/site/footer/powered-by-paddle';
-import '../../../styles/checkout.css';
+// import '../../../styles/checkout.css';
 import { createClient } from '@/utils/supabase/server';
 
 export default async function SuccessPage() {

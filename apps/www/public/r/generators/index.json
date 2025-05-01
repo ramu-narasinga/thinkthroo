@@ -9,7 +9,8 @@
     "files": [
       {
         "path": ".github/workflows/npm-release.yml",
-        "type": "registry:file"
+        "type": "registry:file",
+        "target": ".github/workflows/npm-release.yml"
       }
     ]
   }

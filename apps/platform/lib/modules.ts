@@ -19,7 +19,7 @@ const MODULE_QUERY = `
   ][0]{ // First chapter referencing this module
     "chapterSlug": slug,
     "lesson": *[
-      _type == "codebaseArchitecture" &&
+      _type == $lessonType &&
       references(^._id) &&
       order == 1
     ][0]{ // First lesson with order = 1 in this chapter
@@ -29,8 +29,8 @@ const MODULE_QUERY = `
 }
 `
 
-export async function getModules(module: string) {
-    const params = { module };
+export async function getModules(module: string, lessonType: string) {
+    const params = { module, lessonType };
     const options = { next: { revalidate: 30 } };
   
     const modules = await client.fetch<SanityDocument>(MODULE_QUERY, params, options)

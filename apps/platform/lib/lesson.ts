@@ -3,13 +3,16 @@ import { type SanityDocument } from "next-sanity";
 
 const POST_QUERY = `
   *[
-    _type == "codebaseArchitecture" &&
+    _type == $category &&
     slug.current == $slug
   ][0]
 `;
 
-export async function fetchLessonBySlug(slug: string) {
-  const params = { slug };
+export async function fetchLessonBySlug(slug: string, category: string) {
+  const params = { slug, category };
+
+  console.log("fetchLessonBySlug", params);
+
   const options = { next: { revalidate: 30 } };
 
   const post = await client.fetch<SanityDocument>(POST_QUERY, params, options);

@@ -17,7 +17,7 @@ import { createClient } from "@/utils/supabase/server"
 import RequestSignin from "@/components/interfaces/guide/request-signin"
 import { fetchChaptersByModuleSlug, fetchLessonBySlug } from "@/lib/lesson"
 import { components } from "@/components/interfaces/guide/mdx-components"
-import { MODULE_SLUG_INDEX } from "@/utils/constants"
+import { CATEGORY_SLUG_INDEX, categoryToGroqLabel, catergoryToGroqLabel, LESSON_SLUG_INDEX, MODULE_SLUG_INDEX } from "@/utils/constants"
 import { DocsSidebarNav } from "@/components/interfaces/guide/side-nav"
 interface DocPageProps {
   params: {
@@ -83,9 +83,13 @@ interface DocPageProps {
 
 export default async function DocPage({ params }: DocPageProps) {
 
-  const lesson = await fetchLessonBySlug(params.slug[params.slug.length - 1]);
+  let category = params.slug[CATEGORY_SLUG_INDEX]
+
+  const lesson = await fetchLessonBySlug(params.slug[LESSON_SLUG_INDEX], categoryToGroqLabel[category]);
 
   const chapters = await fetchChaptersByModuleSlug(params.slug[MODULE_SLUG_INDEX])
+
+  console.log("lesson", lesson)
 
   // if (!doc) {
   //   notFound()

@@ -26,7 +26,7 @@ type Course = {
 };
 
 export default async function ArchitecturePage() {
-  const architectureCourses = await getModules("Codebase Architecture");
+  const architectureCourses = await getModules("Codebase Architecture", "codebaseArchitecture");
 
   return (
     <div className="container relative">

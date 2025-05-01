@@ -13,7 +13,7 @@
         files: [{
           path: "registry/changesets/.github/workflows/npm-release.yml",
           type: "registry:file",
-          target: ""
+          target: ".github/workflows/npm-release.yml"
         }],
         source: "",
         meta: undefined,

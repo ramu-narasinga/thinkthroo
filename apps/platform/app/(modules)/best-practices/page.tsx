@@ -48,7 +48,7 @@ type Course = {
 
 export default async function BestPracticesPage() {
 
-  const bestPracticesCourses = await getModules("Best Practices");
+  const bestPracticesCourses = await getModules("Best Practices", "bestPractices");
 
   return (
     <div className="container relative">

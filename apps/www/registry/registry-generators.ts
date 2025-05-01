@@ -10,7 +10,7 @@ export const generators: Registry["items"] = [
       {
         path: ".github/workflows/npm-release.yml",
         type: "registry:file",
-        target: ".github/workflows/npm-release.yml"
+        target: ".github/workflows/npm-release.yml",
       },
     ],
   },
