@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    transpilePackages: ['@thinkthroo/lesson'],
     typescript: {
         ignoreBuildErrors: true,
     },
