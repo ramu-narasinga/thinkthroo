@@ -89,8 +89,6 @@ export default async function DocPage({ params }: DocPageProps) {
 
   const chapters = await fetchChaptersByModuleSlug(params.slug[MODULE_SLUG_INDEX], categoryToGroqLabel[category])
 
-  console.log("lesson", lesson)
-
   // if (!doc) {
   //   notFound()
   // }

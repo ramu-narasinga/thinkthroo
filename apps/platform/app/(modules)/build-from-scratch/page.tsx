@@ -26,14 +26,14 @@ type Course = {
 };
 
 export default async function BuildFromScratchPage() {
-  const buildFromScratchCourses = await getModules("Build From Scratch");
+  const buildFromScratchCourses = await getModules("Build From Scratch", "buildFromScratch");
 
   return (
     <div className="container relative">
       <PageHeader>
         <PageHeaderHeading>Build From Scratch</PageHeaderHeading>
         <PageHeaderDescription>
-          Build libraries like Tsup from scratch. 
+          Build tools like Shadcn CLI from scratch. 
         </PageHeaderDescription>
         {/* <PageActions>
           

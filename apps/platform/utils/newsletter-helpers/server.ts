@@ -7,8 +7,6 @@ export async function subscribeToNewsLetter(
   const email = formData.get("email") as string;
   const name = formData.get("name") as string;
 
-  console.log("email", email, "name", name);
-
   // Prepare the payload for the Listmonk subscription request
   const payload = {
     email,

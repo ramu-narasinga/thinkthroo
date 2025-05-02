@@ -35,12 +35,14 @@
         "lodash.throttle": "^4.1.1",
         "lucide-react": "^0.436.0",
         "next": "14.3.0-canary.43",
+        "next-sanity": "^9.10.6",
         "platform": "file:",
         "react": "^18",
         "react-dom": "^18",
         "react-wrap-balancer": "^0.4.1",
         "tailwind-merge": "^2.5.2",
-        "tailwindcss-animate": "^1.0.7"
+        "tailwindcss-animate": "^1.0.7",
+        "zod": "^3.24.3"
     },
     "devDependencies": {
         "@shikijs/compat": "^1.1.7",

@@ -17,13 +17,6 @@ interface Props {
 
 export function PriceCards({ loading, frequency, priceMap }: Props) {
 
-  const getDescription = (tier: Tier) => {
-
-    console.log("[getDescription]:tier", tier)
-
-    return `${tier.description} ${priceMap[tier.priceId[frequency.value]] ?? '$0'}`;
-  }
-
   return (
     <div className="isolate mx-auto grid grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-4">
 

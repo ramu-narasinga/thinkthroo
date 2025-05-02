@@ -156,11 +156,6 @@ async function buildGenerators(registry: Registry) {
                         let content: string
                         try {
 
-                            console.log(
-                                "path.join(process.cwd(), 'registry', generator.name, file.path)",
-                                path.join(process.cwd(), "registry", generator.name, file.path)
-                            )
-
                             let sourcePath = path.join(process.cwd(), "registry", "generator", generator.name, file.path)
 
                             content = await fs.readFile(
@@ -168,7 +163,6 @@ async function buildGenerators(registry: Registry) {
                                 "utf8"
                             )
 
-                            console.log("content", content)
                         } catch (error) {
                             console.error("[buildGenerators]::error", error)
                             return

@@ -6,7 +6,6 @@ export type PaddlePrices = Record<string, string>;
 
 function getLineItems(): PricePreviewParams['items'] {
   const priceId = PricingTier.map((tier) => {
-    console.log("tier", tier);
     return [tier.priceId["3months"], tier.priceId["6months"], tier.priceId["12months"]]
   });
   return priceId.flat().map((priceId) => ({ priceId, quantity: 1 }));
@@ -35,9 +34,6 @@ export function usePaddlePrices(
     setLoading(true);
 
     paddle?.PricePreview(paddlePricePreviewRequest as PricePreviewParams).then((prices) => {
-
-      console.log("Paddle Prices:", prices);
-
       setPrices((prevState) => ({ ...prevState, ...getPriceAmounts(prices) }));
       setLoading(false);
     });
