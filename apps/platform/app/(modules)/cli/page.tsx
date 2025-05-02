@@ -26,7 +26,7 @@ type Course = {
 };
 
 export default async function CliPage() {
-  const cliCourses = await getModules("CLI");
+  const cliCourses = await getModules("CLI", "cli");
 
   return (
     <div className="container relative">
@@ -44,7 +44,10 @@ export default async function CliPage() {
         <div 
           id="open-source-projects"
           className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 lg:grid-cols-3">
-          <Module courses={cliCourses} />
+          <Module 
+            courses={cliCourses} 
+            module="cli"
+          />
         </div>
         <Separator />
       </div>

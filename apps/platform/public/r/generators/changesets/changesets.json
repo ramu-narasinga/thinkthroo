@@ -1,0 +1,19 @@
+{
+  "$schema": "https://app.thinkthroo.com/schema/registry-item.json",
+  "name": "changesets",
+  "type": "registry:generator",
+  "author": "Ramu Narasinga (https://thinkthroo.com)",
+  "dependencies": [],
+  "devDependencies": [
+    "@changesets/cli"
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/npm-release.yml",
+      "content": "name: Release new NPM version\r\n\r\non:\r\n  pull_request:\r\n    types: [closed]\r\n    branches:\r\n      - main\r\n\r\nconcurrency:\r\n  group: changeset-${{ github.head_ref }}\r\n  cancel-in-progress: true\r\n\r\njobs:\r\n  npm:\r\n    name: Changeset release\r\n    runs-on: ubuntu-latest\r\n    permissions:\r\n      contents: write # to be able to publish a GitHub release\r\n      pull-requests: write # to be able to comment on released pull requests\r\n      id-token: write # to enable use of OIDC for npm provenance\r\n    steps:\r\n      - name: Checkout the repo\r\n        uses: actions/checkout@v4\r\n        with:\r\n          fetch-depth: 1\r\n\r\n      - name: Setup Node.js\r\n        uses: actions/setup-node@v4\r\n        with:\r\n          node-version: \"22.14\"\r\n\r\n      - name: Install dependencies\r\n        run: npm install\r\n\r\n      - name: Check for changesets\r\n        id: check_changesets\r\n        run: |\r\n          if [ -z \"$(ls -A .changeset)\" ]; then\r\n            echo \"No changesets found. Exiting.\"\r\n            echo \"changesets_found=false\" >> $GITHUB_ENV\r\n            exit 0\r\n          else\r\n            echo \"changesets_found=true\" >> $GITHUB_ENV\r\n          fi\r\n\r\n      - name: Update package version and remove changesets\r\n        if: env.changesets_found == 'true'\r\n        run: npx changeset version\r\n\r\n      - name: Publish to NPM\r\n        if: env.changesets_found == 'true'\r\n        id: changesets\r\n        uses: changesets/action@v1\r\n        with:\r\n          publish: npx changeset publish\r\n        env:\r\n          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}\r\n          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}\r\n          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}\r\n          NPM_CONFIG_PROVENANCE: true\r\n\r\n      - name: Update package.json version and reset changesets\r\n        if: env.changesets_found == 'true'\r\n        run: |\r\n          git config --global user.name 'github-actions[bot]'\r\n          git config --global user.email 'github-actions[bot]@users.noreply.github.com'\r\n          git add package.json .changeset\r\n          git commit -m \"release: update package version & delete changesets\"\r\n          git push",
+      "type": "registry:file",
+      "target": ".github/workflows/npm-release.yml"
+    }
+  ],
+  "docs": "Changesets is configured sucessfully. Learn how Changesets is configured in OSS projects and find the next steps at https://app.thinkthroo.com/cli"
+}

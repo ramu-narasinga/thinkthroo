@@ -68,7 +68,10 @@ export default async function BestPracticesPage() {
         <div 
           id="open-source-projects"
           className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 lg:grid-cols-3">
-          <Module courses={bestPracticesCourses} />
+          <Module 
+            courses={bestPracticesCourses} 
+            module="best-practices"  
+          />
         </div>
         <Separator />
       </div>

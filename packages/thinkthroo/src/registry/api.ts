@@ -39,7 +39,7 @@ export async function fetchRegistry(paths: string[]) {
 
                         if (response.status === 401) {
                             throw new Error(
-                                `You are not authorized to access the component at ${highlighter.info(
+                                `You are not authorized to access the feature at ${highlighter.info(
                                     url
                                 )}.\nIf this is a remote registry, you may need to authenticate.`
                             )
@@ -47,7 +47,7 @@ export async function fetchRegistry(paths: string[]) {
 
                         if (response.status === 404) {
                             throw new Error(
-                                `The component at ${highlighter.info(
+                                `The feature at ${highlighter.info(
                                     url
                                 )} was not found.\nIt may not exist at the registry. Please make sure it is a valid component.`
                             )
@@ -55,7 +55,7 @@ export async function fetchRegistry(paths: string[]) {
 
                         if (response.status === 403) {
                             throw new Error(
-                                `You do not have access to the component at ${highlighter.info(
+                                `You do not have access to the feature at ${highlighter.info(
                                     url
                                 )}.\nIf this is a remote registry, you may need to authenticate or a token.`
                             )
@@ -114,17 +114,21 @@ export async function registryResolveItemsTree(
 ) {
     try {
 
-        console.log("[registryResolveItemsTree]:names", names);
         let registryItems = await resolveRegistryItems(names)
-        console.log("[registryResolveItemsTree]:registryItems", registryItems);
         let result = await fetchRegistry(registryItems)
-        console.log("[registryResolveItemsTree]:result", result);
 
         const payload = z.array(registryItemSchema).parse(result)
 
         if (!payload) {
             return null
         }
+
+        let docs = ""
+        payload.forEach((item) => {
+          if (item.docs) {
+            docs += `${item.docs}\n`
+          }
+        })
 
         return registryResolvedItemsTreeSchema.parse({
             dependencies: deepmerge.all(
@@ -134,6 +138,7 @@ export async function registryResolveItemsTree(
                 payload.map((item) => item.devDependencies ?? [])
             ),
             files: deepmerge.all(payload.map((item) => item.files ?? [])),
+            docs,
         })
 
     } catch (error) {
@@ -145,7 +150,6 @@ export async function registryResolveItemsTree(
 export async function resolveRegistryItems(names: string[]) {
     let registryDependencies: string[] = []
     for (const name of names) {
-        console.log("[resolveRegistryItems]:name", name);
         const itemRegistryDependencies = await resolveRegistryDependencies(
             name
         )
@@ -163,11 +167,7 @@ async function resolveRegistryDependencies(
 
     async function resolveDependencies(itemUrl: string) {
 
-        console.log("[resolveDependencies]:itemUrl", itemUrl);
-
         const url = getRegistryUrl(isUrl(itemUrl) ? itemUrl : `generators/${itemUrl}/${itemUrl}.json`)
-
-        console.log("[resolveDependencies]:url", url);
 
         if (visited.has(url)) {
             return
@@ -178,13 +178,8 @@ async function resolveRegistryDependencies(
         try {
             const [result] = await fetchRegistry([url])
 
-            console.log("[resolveDependencies]:result", result);
-
             const item = registryItemSchema.parse(result)
             payload.push(url)
-
-            console.log("[resolveDependencies]:payload", payload);
-            console.log("[resolveDependencies]:item", item);
 
             if (item.registryDependencies) {
                 for (const dependency of item.registryDependencies) {

@@ -1,12 +1,12 @@
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 
-export const Module: React.FC<{ courses: any[] }> = ({ courses }) => {
+export const Module: React.FC<{ courses: any[], module: string }> = ({ courses, module }) => {
 
     return (
         <>
             {courses.map((course, index: number) => (
-                <Link key={index} href={`/guide/codebase-architecture/${course.slug}/${course?.chapter?.chapterSlug}/${course?.chapter?.lesson?.lessonSlug}`} className="group">
+                <Link key={index} href={`/guide/${module}/${course.slug}/${course?.chapter?.chapterSlug}/${course?.chapter?.lesson?.lessonSlug}`} className="group">
                     <div className="relative flex flex-col overflow-hidden rounded-xl border shadow transition-all duration-200 ease-in-out hover:z-30">
                         <div className="items-center gap-2 relative z-20 flex justify-end border-b bg-card px-3 py-2.5 text-card-foreground">
                             <div className="ml-auto flex items-center gap-2 [&amp;>form]:flex">

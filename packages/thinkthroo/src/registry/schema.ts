@@ -47,6 +47,7 @@ export const registryResolvedItemsTreeSchema = registryItemSchema.pick({
     dependencies: true,
     devDependencies: true,
     files: true,
+    docs: true,
 })
 
 export type RegistryItem = z.infer<typeof registryItemSchema>

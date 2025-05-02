@@ -9,6 +9,7 @@ import { getRegistryIndex } from "@/src/registry/api"
 import { preFlightConfigure } from "../preflights/preflight-configure"
 import * as ERRORS from "@/src/utils/errors"
 import { configureFeatures } from "../utils/configure-features"
+import { runInit } from "./init"
 
 export const configureOptionsSchema = z.object({
     features: z.array(z.string()).optional(),
@@ -58,6 +59,31 @@ export const configure = new Command()
 
                 logger.break()
                 process.exit(1)
+            }
+
+            // No components.json file. Prompt the user to run init.
+            if (errors[ERRORS.MISSING_CONFIG]) {
+                const { proceed } = await prompts({
+                    type: "confirm",
+                    name: "proceed",
+                    message: `You need to create a ${highlighter.info(
+                        "features.json"
+                    )} file to add features. Proceed?`,
+                    initial: true,
+                })
+
+                if (!proceed) {
+                    logger.break()
+                    process.exit(1)
+                }
+
+                config = await runInit({
+                    cwd: options.cwd,
+                    yes: true,
+                    force: true,
+                    skipPreflight: false,
+                    silent: true,
+                })
             }
 
             if (errors[ERRORS.EXISTING_CHANGESETS]) {

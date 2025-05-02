@@ -114,10 +114,6 @@ export async function updateFiles(
       }
     }
 
-    logger.info("file.target", file.target,)
-
-    logger.info("existsSync(targetDir)", existsSync(targetDir), "targetDir", targetDir)
-
     // Create the target directory if it doesn't exist.
     if (!existsSync(targetDir)) {
       await fs.mkdir(targetDir, { recursive: true })

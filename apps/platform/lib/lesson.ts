@@ -27,7 +27,7 @@ const CHAPTERS_QUERY = `
   title,
   order,
   "lessons": *[
-    _type == "codebaseArchitecture" &&
+    _type == $category &&
     ^._id in chapter[]._ref
   ] | order(order asc) {
     title,
@@ -36,8 +36,8 @@ const CHAPTERS_QUERY = `
   }
 }
 `;
-export async function fetchChaptersByModuleSlug(slug: string) {
-  const params = { slug }; // must be a string
+export async function fetchChaptersByModuleSlug(slug: string, category: string) {
+  const params = { slug, category }; // must be a string
   const options = { next: { revalidate: 30 } };
 
   const chapters = await client.fetch<SanityDocument>(CHAPTERS_QUERY, params, options);

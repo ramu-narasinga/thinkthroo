@@ -26,7 +26,7 @@ type Course = {
 };
 
 export default async function ProductionGradeprojectsPage() {
-  const pgpCourses = await getModules("Production Grade Projects");
+  const pgpCourses = await getModules("Production Grade Projects", "production-grade-projects");
 
   return (
     <div className="container relative">
@@ -45,7 +45,10 @@ export default async function ProductionGradeprojectsPage() {
         <div 
           id="open-source-projects"
           className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 lg:grid-cols-3">
-          <Module courses={pgpCourses} />
+          <Module 
+            courses={pgpCourses} 
+            module="production-grade-projects"  
+          />
         </div>
         <Separator />
       </div>

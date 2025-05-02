@@ -20,7 +20,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "start:dev": "cross-env REGISTRY_URL=http://localhost:3000/r node dist/index.js",
-    "start:prod": "cross-env REGISTRY_URL=https://thinkthroo.com/r node dist/index.js"
+    "start:prod": "cross-env REGISTRY_URL=https://app.thinkthroo.com/r node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -40,6 +40,7 @@
   },
   "homepage": "https://github.com/ramu-narasinga/thinkthroo#readme",
   "devDependencies": {
+    "@changesets/cli": "^2.29.2",
     "@repo/typescript-config": "*",
     "@types/fs-extra": "^11.0.4",
     "@types/prompts": "^2.4.9"

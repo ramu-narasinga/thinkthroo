@@ -23,6 +23,15 @@ export async function preFlightConfigure(options: z.infer<typeof configureOption
     }
   }
 
+  // Check for existing components.json file.
+  if (!fs.existsSync(path.resolve(options.cwd, "features.json"))) {
+    errors[ERRORS.MISSING_CONFIG] = true
+    return {
+      errors,
+      config: null,
+    }
+  }
+
   // Check for .changesets folder in the project. We assume if .changesets folder exists, 
   // the project already has changesets configured.
   if (
@@ -44,9 +53,6 @@ export async function preFlightConfigure(options: z.infer<typeof configureOption
       config: config!,
     }
   } catch (error) {
-
-    console.log("[preFlightConfigure]::error", error);
-
     logger.break()
     logger.error(
       `An invalid ${highlighter.info(

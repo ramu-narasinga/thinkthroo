@@ -87,7 +87,7 @@ export default async function DocPage({ params }: DocPageProps) {
 
   const lesson = await fetchLessonBySlug(params.slug[LESSON_SLUG_INDEX], categoryToGroqLabel[category]);
 
-  const chapters = await fetchChaptersByModuleSlug(params.slug[MODULE_SLUG_INDEX])
+  const chapters = await fetchChaptersByModuleSlug(params.slug[MODULE_SLUG_INDEX], categoryToGroqLabel[category])
 
   console.log("lesson", lesson)
 

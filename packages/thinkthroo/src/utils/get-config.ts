@@ -59,7 +59,6 @@ export async function getRawConfig(cwd: string): Promise<RawConfig | null> {
 
     return configSchema.parse(configResult.config)
   } catch (error) {
-    console.log("[getRawConfig]::error", error)
     const featurePath = `${cwd}/features.json`
     throw new Error(
       `Invalid configuration found in ${highlighter.info(featurePath)}.`

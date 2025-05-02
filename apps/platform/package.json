@@ -2,14 +2,17 @@
     "name": "platform",
     "version": "0.1.0",
     "private": true,
+    "type": "module",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
+        "build:registry": "tsx --tsconfig ./tsconfig.scripts.json ./scripts/build-registry.mts && prettier --loglevel silent --write \"registry/**/*.{ts,tsx,mdx}\" --cache",
         "start": "next start",
         "lint": "next lint"
     },
     "dependencies": {
         "@paddle/paddle-js": "^1.4.1",
+        "@paddle/paddle-node-sdk": "^2.7.0",
         "@radix-ui/react-accordion": "^1.2.0",
         "@radix-ui/react-aspect-ratio": "^1.0.3",
         "@radix-ui/react-collapsible": "^1.1.0",
@@ -56,7 +59,9 @@
         "remark": "^14.0.3",
         "remark-code-import": "^1.2.0",
         "remark-gfm": "^4.0.0",
+        "rimraf": "^5.0.10",
         "tailwindcss": "^3.4.1",
+        "ts-morph": "^25.0.1",
         "typescript": "^5",
         "unist-builder": "3.0.0",
         "unist-util-visit": "^4.1.2"
