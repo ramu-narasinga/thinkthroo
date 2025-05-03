@@ -7,7 +7,7 @@ import { registryIndexSchema, registryItemSchema, registryResolvedItemsTreeSchem
 import { z } from "zod"
 import deepmerge from "deepmerge"
 
-const REGISTRY_URL = process.env.REGISTRY_URL ?? "http://localhost:3000/r"
+const REGISTRY_URL = process.env.REGISTRY_URL ?? "https://app.thinkthroo.com/r"
 const registryCache = new Map<string, Promise<any>>()
 const agent = process.env.https_proxy
     ? new HttpsProxyAgent(process.env.https_proxy)
