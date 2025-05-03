@@ -111,7 +111,9 @@ export async function runInit(
     ...(options.features ?? []),
   ]
 
-  if (!features.length) {
+  console.log("features", features);
+
+  if (features.length) {
     await configureFeatures(features, fullConfig, {
       // Init will always overwrite files.
       overwrite: true,
