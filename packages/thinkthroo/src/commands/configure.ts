@@ -22,7 +22,7 @@ export const configureOptionsSchema = z.object({
 
 export const configure = new Command()
     .name("configure")
-    .description("configure a feature in your project")
+    .description("Configure a feature in your project")
     .argument(
         "[features...]",
         "the features to add."
@@ -34,7 +34,7 @@ export const configure = new Command()
         "the working directory. defaults to the current directory.",
         process.cwd()
     )
-    .option("-a, --all", "add all available components", false)
+    .option("-a, --all", "add all available features", false)
     .option("-s, --silent", "mute output.", false)
     .action(async (features, opts) => {
         try {

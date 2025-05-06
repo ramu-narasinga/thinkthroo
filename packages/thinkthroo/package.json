@@ -1,6 +1,6 @@
 {
   "name": "thinkthroo",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "Configure features such as authentication, file upload via CLI and save time.",
   "type": "module",
   "exports": {
@@ -43,10 +43,13 @@
     "@changesets/cli": "^2.29.2",
     "@repo/typescript-config": "*",
     "@types/fs-extra": "^11.0.4",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/prompts": "^2.4.9"
   },
   "dependencies": {
     "@antfu/ni": "^24.3.0",
+    "axios": "^1.9.0",
+    "chalk": "^5.4.1",
     "commander": "^13.1.0",
     "cosmiconfig": "^9.0.0",
     "deepmerge": "^4.3.1",
@@ -54,13 +57,17 @@
     "fast-glob": "^3.3.3",
     "fs-extra": "^11.3.0",
     "https-proxy-agent": "^7.0.6",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.2.0",
     "kleur": "^4.1.5",
+    "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
     "ora": "^8.2.0",
     "prompts": "^2.4.2",
     "ts-morph": "^25.0.1",
     "tsup": "^8.4.0",
     "type-fest": "^4.40.0",
+    "xdg-app-paths": "^8.3.0",
     "zod": "^3.24.2"
   }
 }
