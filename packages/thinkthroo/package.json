@@ -20,7 +20,9 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "start:dev": "cross-env REGISTRY_URL=http://localhost:3000/r node dist/index.js",
-    "start:prod": "cross-env REGISTRY_URL=https://app.thinkthroo.com/r node dist/index.js"
+    "start:prod": "cross-env REGISTRY_URL=https://app.thinkthroo.com/r node dist/index.js",
+    "changeset:init": "npx changeset init",
+    "changeset:add": "npx changeset add"
   },
   "repository": {
     "type": "git",
@@ -40,14 +42,16 @@
   },
   "homepage": "https://github.com/ramu-narasinga/thinkthroo#readme",
   "devDependencies": {
-    "@changesets/cli": "^2.29.2",
+    "@changesets/cli": "^2.29.3",
     "@repo/typescript-config": "*",
     "@types/fs-extra": "^11.0.4",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/npmcli__package-json": "^4.0.4",
     "@types/prompts": "^2.4.9"
   },
   "dependencies": {
     "@antfu/ni": "^24.3.0",
+    "@npmcli/package-json": "^6.1.1",
     "axios": "^1.9.0",
     "chalk": "^5.4.1",
     "commander": "^13.1.0",

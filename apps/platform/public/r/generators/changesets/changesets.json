@@ -3,10 +3,12 @@
   "name": "changesets",
   "type": "registry:generator",
   "author": "Ramu Narasinga (https://thinkthroo.com)",
+  "scripts": {
+    "changeset:init": "npx changeset init",
+    "changeset:add": "npx changeset add"
+  },
   "dependencies": [],
-  "devDependencies": [
-    "@changesets/cli"
-  ],
+  "devDependencies": [],
   "files": [
     {
       "path": ".github/workflows/npm-release.yml",
@@ -15,5 +17,5 @@
       "target": ".github/workflows/npm-release.yml"
     }
   ],
-  "docs": "Changesets is configured sucessfully. Learn how Changesets is configured in OSS projects and find the next steps at https://app.thinkthroo.com/cli"
+  "docs": "Changesets is configured sucessfully. Learn how Changesets is configured in OSS projects and find the next steps at https://app.thinkthroo.com/guide/cli/configure-changesets/c-configure-changesets/l-configure-changesets-introduction"
 }

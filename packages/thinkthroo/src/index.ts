@@ -2,7 +2,6 @@
 
 import { configure } from "@/src/commands/configure"
 import { init } from "@/src/commands/init"
-import { login } from "@/src/commands/login"
 import { Command } from "commander"
 
 import packageJson from "../package.json"
@@ -23,7 +22,6 @@ async function main() {
   program
     .addCommand(init)
     .addCommand(configure)
-    .addCommand(login)
 
   program.parse()
 }

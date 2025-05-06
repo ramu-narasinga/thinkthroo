@@ -32,6 +32,7 @@ export const registryItemSchema = z.object({
     title: z.string().optional(),
     author: z.string().min(2).optional(),
     description: z.string().optional(),
+    scripts: z.record(z.string(), z.string()).optional(),
     dependencies: z.array(z.string()).optional(),
     devDependencies: z.array(z.string()).optional(),
     registryDependencies: z.array(z.string()).optional(),
@@ -48,6 +49,7 @@ export const registryResolvedItemsTreeSchema = registryItemSchema.pick({
     devDependencies: true,
     files: true,
     docs: true,
+    scripts: true,
 })
 
 export type RegistryItem = z.infer<typeof registryItemSchema>

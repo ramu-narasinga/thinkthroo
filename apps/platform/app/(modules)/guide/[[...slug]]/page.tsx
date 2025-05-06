@@ -95,12 +95,6 @@ export default async function DocPage({ params }: DocPageProps) {
 
   const toc = await getTableOfContents(lesson.body)
 
-  function allowPublicRoutes() {
-    let noAuthRoutes = process.env.NEXT_PUBLIC_NO_AUTH_ROUTES?.split(",") ?? [];
-    let matchedRoute = noAuthRoutes.filter((noAuthRoute: string) => params.slug?.join("/").includes(noAuthRoute))
-    return matchedRoute.length > 0;
-  }
-
   const supabase = createClient();
 
   const {
@@ -134,15 +128,14 @@ export default async function DocPage({ params }: DocPageProps) {
           <div className="pb-12 pt-8">
             {
               (
-                user?.id || 
-                allowPublicRoutes()
+                user?.id
               ) ? 
               // <Mdx code={doc.body.code} />
               <MDX
                 source={lesson.body}
                 components={components}
               /> :
-              <div className="text-center w-full mx-auto">
+              <div className="w-full mx-auto flex justify-center">
                 <RequestSignin />
               </div>
             }

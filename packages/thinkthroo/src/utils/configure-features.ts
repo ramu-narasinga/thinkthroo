@@ -6,6 +6,7 @@ import { logger } from "./logger"
 import { spinner } from "./spinner"
 import { updateDependencies } from "./updaters/update-dependencies"
 import { updateFiles } from "./updaters/update-files"
+import { updateScripts } from "./updaters/update-scripts"
 
 export async function configureFeatures(
     features: string[],
@@ -39,6 +40,10 @@ export async function configureFeatures(
         overwrite: options.overwrite,
         silent: options.silent,
     })
+
+    await updateScripts(tree.scripts ?? {}, config, {
+        silent: options.silent,
+    });
 
     if (tree.docs) {
         logger.info(tree.docs)
