@@ -3,6 +3,7 @@ import { CheckoutEventsData } from '@paddle/paddle-js/types/checkout/events';
 import { formatMoney } from '@/utils/paddle/parse-money';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatBillingCycle } from '@/utils/paddle/data-helpers';
+import { useSearchParams } from 'next/navigation';
 
 interface Props {
   checkoutData: CheckoutEventsData | null;
@@ -11,6 +12,10 @@ interface Props {
 export function CheckoutPriceContainer({ checkoutData }: Props) {
   const recurringTotal = checkoutData?.recurring_totals?.total;
   const billingCycle = checkoutData?.items.find((item) => item.billing_cycle)?.billing_cycle;
+
+  const searchParams = useSearchParams()
+  const accessFor = searchParams.get('accessFor')
+
   return (
     <>
       <div className={'text-base leading-[20px] font-semibold'}>Order summary</div>
@@ -22,7 +27,9 @@ export function CheckoutPriceContainer({ checkoutData }: Props) {
           </div>
         )
       ) : (
-        <Skeleton className="mt-4 h-[20px] w-full bg-border" />
+        <div className={'pt-4 text-base leading-[20px] font-medium text-muted-foreground'}>
+          One time payment of {formatMoney(checkoutData?.totals.total, checkoutData?.currency_code)} {accessFor ? `for ${accessFor} access.` : ''}
+        </div>
       )}
     </>
   );

@@ -48,7 +48,7 @@ export function CheckoutContents({ userEmail }: Props) {
           settings: {
             variant: 'one-page',
             displayMode: 'inline',
-            theme: 'dark',
+            theme: 'light',
             allowLogout: !userEmail,
             frameTarget: 'paddle-checkout-frame',
             frameInitialHeight: 450,
@@ -77,7 +77,7 @@ export function CheckoutContents({ userEmail }: Props) {
   return (
     <div
       className={
-        'rounded-lg md:bg-background/80 md:backdrop-blur-[24px] md:p-10 md:pl-16 md:pt-16 md:min-h-[400px] flex flex-col justify-between relative'
+        'rounded-lg md:bg-background/80 md:backdrop-blur-[24px] md:p-10 md:pl-16 md:pt-16 md:min-h-[400px] flex flex-col justify-between relative border-2 border-muted'
       }
     >
       <div className={'flex flex-col md:flex-row gap-8 md:gap-16'}>

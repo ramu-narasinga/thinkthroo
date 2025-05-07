@@ -38,7 +38,7 @@ export function PriceCards({ loading, frequency, priceMap }: Props) {
         </div>
         <div className={'px-8 mt-8'}>
           <Button className={'w-full'} variant={'default'} asChild={true}>
-            <Link href={`/checkout/${freePricingTier.priceId[frequency.value]}`}>Get started</Link>
+            <Link href={`/signin`}>Get started</Link>
           </Button>
         </div>
         <FeaturesList tier={freePricingTier} />
@@ -63,7 +63,7 @@ export function PriceCards({ loading, frequency, priceMap }: Props) {
           </div>
           <div className={'px-8 mt-8'}>
             <Button className={'w-full'} variant={'default'} asChild={true}>
-              <Link href={`/checkout/${tier.priceId[frequency.value]}`}>Get started</Link>
+              <Link href={`/checkout/${tier.priceId[frequency.value]}?accessFor=${frequency.label}`}>Get started</Link>
             </Button>
           </div>
           <FeaturesList tier={tier} />

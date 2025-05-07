@@ -13,18 +13,18 @@ export function QuantityField({ handleQuantityChange, quantity }: Props) {
         disabled={quantity === 1}
         variant={'secondary'}
         className={
-          'h-[32px] bg-[#182222] disabled:bg-transparent text-muted-foreground border-border w-[32px] p-0 rounded-[4px]'
+          'h-[32px] disabled:bg-transparent text-muted-foreground border-border w-[32px] p-0 rounded-[4px]'
         }
         onClick={() => handleQuantityChange(quantity - 1)}
       >
         <Minus />
       </Button>
-      <span className={'text-center leading-[24px] bg-[#182222] rounded-[4px] w-[56px] px-2 py-1 text-xs'}>
+      <span className={'text-center leading-[24px] rounded-[4px] w-[56px] px-2 py-1 text-xs'}>
         {quantity}
       </span>
       <Button
         variant={'secondary'}
-        className={'h-[32px] bg-[#182222] text-muted-foreground border-border w-[32px] p-0 rounded-[4px]'}
+        className={'h-[32px] text-muted-foreground border-border w-[32px] p-0 rounded-[4px]'}
         onClick={() => handleQuantityChange(quantity + 1)}
       >
         <Plus />
