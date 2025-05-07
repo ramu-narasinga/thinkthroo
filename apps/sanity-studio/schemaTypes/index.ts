@@ -10,6 +10,8 @@ import buildFromScratch from './buildFromScratch'
 import module from './module'
 import chapter from './chapter'
 import tag from './tag'
+import privacy from './privacy'
+import terms from './terms'
 
 export const schemaTypes = [
     post, 
@@ -23,5 +25,7 @@ export const schemaTypes = [
     buildFromScratch,
     module,
     chapter,
-    tag
+    tag,
+    terms,
+    privacy
 ]
