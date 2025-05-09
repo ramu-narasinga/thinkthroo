@@ -17,8 +17,9 @@ import { createClient } from "@/utils/supabase/server"
 import RequestSignin from "@/components/interfaces/guide/request-signin"
 import { fetchChaptersByModuleSlug, fetchLessonBySlug } from "@/lib/lesson"
 import { components } from "@/components/interfaces/guide/mdx-components"
-import { CATEGORY_SLUG_INDEX, categoryToGroqLabel, catergoryToGroqLabel, LESSON_SLUG_INDEX, MODULE_SLUG_INDEX } from "@/utils/constants"
+import { CATEGORY_SLUG_INDEX, categoryToGroqLabel, LESSON_SLUG_INDEX, MODULE_SLUG_INDEX } from "@/utils/constants"
 import { DocsSidebarNav } from "@/components/interfaces/guide/side-nav"
+import RequestUpgrade from "@/components/interfaces/guide/request-upgrade"
 interface DocPageProps {
   params: {
     slug: string[]
@@ -101,6 +102,20 @@ export default async function DocPage({ params }: DocPageProps) {
     data: { user }
   } = await supabase.auth.getUser();
 
+  let hasAccess = false
+
+  if (user) {
+    const { data } = await supabase
+      .from("subscriptions")
+      .select("expires_at")
+      .eq("customer_id", user.id)
+      .single()
+
+    if (data?.expires_at) {
+      hasAccess = new Date(data.expires_at).getTime() > Date.now()
+    }
+  }
+
   return (
     <>
       <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block">
@@ -127,18 +142,21 @@ export default async function DocPage({ params }: DocPageProps) {
           </div>
           <div className="pb-12 pt-8">
             {
+              !user?.id ? (
+                <div className="w-full mx-auto flex justify-center">
+                  <RequestSignin />
+                </div>
+              ) : 
               (
-                user?.id
-              ) ? 
-              // <Mdx code={doc.body.code} />
-              <MDX
-                source={lesson.body}
-                components={components}
-              /> :
+                !hasAccess && 
+                process.env.NO_PAY_WALL?.split(",").indexOf(category) == -1
+              ) ? (
               <div className="w-full mx-auto flex justify-center">
-                <RequestSignin />
+                <RequestUpgrade />
               </div>
-            }
+            ) : (
+              <MDX source={lesson.body} components={components} />
+            )}
           </div>
           {/* <DocsPager doc={doc} pathname={params.slug?.join("/")} /> */}
           {/* <DocsPager doc={{
@@ -146,15 +164,15 @@ export default async function DocPage({ params }: DocPageProps) {
             }} pathname={params.slug?.join("/")} /> */}
         </div>
         {/* {lesson.toc && ( */}
-          <div className="hidden text-sm xl:block">
-            <div className="sticky top-16 -mt-10 pt-4">
-              <ScrollArea className="pb-10">
-                <div className="sticky top-16 -mt-10 h-[calc(100vh-3.5rem)] py-12">
-                  <DashboardTableOfContents toc={toc} />
-                </div>
-              </ScrollArea>
-            </div>
+        <div className="hidden text-sm xl:block">
+          <div className="sticky top-16 -mt-10 pt-4">
+            <ScrollArea className="pb-10">
+              <div className="sticky top-16 -mt-10 h-[calc(100vh-3.5rem)] py-12">
+                <DashboardTableOfContents toc={toc} />
+              </div>
+            </ScrollArea>
           </div>
+        </div>
         {/* )} */}
       </main>
     </>

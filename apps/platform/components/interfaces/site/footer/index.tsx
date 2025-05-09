@@ -155,13 +155,18 @@ export const Footer = () => {
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
                             <li>
-                                <a href="#" className="text-gray-600 text-sm leading-5">
+                                <Link href="/privacy" className="text-gray-600 text-sm leading-5">
                                     Privacy Policy
-                                </a>
+                                </Link>
                             </li>
                             <li>
                                 <Link href="/terms" className="text-gray-600 text-sm leading-5">
                                     Terms of Service
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/refund" className="text-gray-600 text-sm leading-5">
+                                    Refund Policy
                                 </Link>
                             </li>
                         </ul>

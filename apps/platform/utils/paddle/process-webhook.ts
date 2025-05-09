@@ -23,7 +23,17 @@ export class ProcessWebhook {
     }
 
     private async updateSubscriptionData(eventData: SubscriptionCreatedEvent | SubscriptionUpdatedEvent) {
+        console.log('[updateSubscriptionData] eventData', eventData);
+
         const supabase = await createClient();
+        const period = eventData.data.currentBillingPeriod!;
+        const startsAt = new Date(period.startsAt);
+        const endsAt = new Date(period.endsAt);
+
+        const durationMs = endsAt.getTime() - startsAt.getTime();
+        const monthCount = Math.round(durationMs / (1000 * 60 * 60 * 24 * 30));
+        const planDurationLabel = `${monthCount}_months`;
+
         const { error } = await supabase
             .from('subscriptions')
             .upsert({
@@ -33,6 +43,8 @@ export class ProcessWebhook {
                 product_id: eventData.data.items[0].price?.productId ?? '',
                 scheduled_change: eventData.data.scheduledChange?.effectiveAt,
                 customer_id: eventData.data.customerId,
+                expires_at: endsAt.toISOString(),
+                plan_duration: `${planDurationLabel}`,
             })
             .select();
 
@@ -40,6 +52,9 @@ export class ProcessWebhook {
     }
 
     private async updateCustomerData(eventData: CustomerCreatedEvent | CustomerUpdatedEvent) {
+
+        console.log('[updateCustomerData] eventData', eventData);
+
         const supabase = await createClient();
         const { error } = await supabase
             .from('customers')

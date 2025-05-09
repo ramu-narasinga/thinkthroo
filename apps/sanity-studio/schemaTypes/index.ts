@@ -12,6 +12,7 @@ import chapter from './chapter'
 import tag from './tag'
 import privacy from './privacy'
 import terms from './terms'
+import refund from './refund'
 
 export const schemaTypes = [
     post, 
@@ -27,5 +28,6 @@ export const schemaTypes = [
     chapter,
     tag,
     terms,
-    privacy
+    privacy,
+    refund
 ]
