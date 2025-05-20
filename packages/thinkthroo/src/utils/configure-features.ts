@@ -4,6 +4,7 @@ import { handleError } from "./handle-error"
 import { logDocs } from "./log-docs"
 import { logger } from "./logger"
 import { spinner } from "./spinner"
+import { updateCommands } from "./updaters/update-commands"
 import { updateDependencies } from "./updaters/update-dependencies"
 import { updateFiles } from "./updaters/update-files"
 import { updateScripts } from "./updaters/update-scripts"
@@ -33,6 +34,10 @@ export async function configureFeatures(
     registrySpinner?.succeed()
 
     await updateDependencies(tree.dependencies, tree.devDependencies, config, {
+        silent: options.silent,
+    })
+
+    await updateCommands(tree.commands, config, {
         silent: options.silent,
     })
 

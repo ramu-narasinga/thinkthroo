@@ -17,5 +17,5 @@
       "target": ".github/workflows/npm-release.yml"
     }
   ],
-  "docs": "Changesets is configured sucessfully. Learn how Changesets is configured in OSS projects and find the next steps at https://app.thinkthroo.com/guide/cli/configure-changesets/c-configure-changesets/l-configure-changesets-introduction"
+  "docs": "Changesets is configured sucessfully. Find the next steps at https://app.thinkthroo.com/guide/cli/configure-changesets/c-configure-changesets/l-configure-changesets-introduction"
 }

@@ -18,6 +18,94 @@
         source: "",
         meta: undefined,
       },
+      "supabase-auth": {
+        name: "supabase-auth",
+        description: "",
+        type: "registry:generator",
+        registryDependencies: undefined,
+        files: [{
+          path: "registry/changesets/middleware.ts",
+          type: "registry:file",
+          target: "middleware.ts"
+        },{
+          path: "registry/changesets/utils/supabase/client.ts",
+          type: "registry:file",
+          target: "utils/supabase/client.ts"
+        },{
+          path: "registry/changesets/utils/supabase/middleware.ts",
+          type: "registry:file",
+          target: "utils/supabase/middleware.ts"
+        },{
+          path: "registry/changesets/utils/supabase/server.ts",
+          type: "registry:file",
+          target: "utils/supabase/server.ts"
+        },{
+          path: "registry/changesets/app/login/actions.ts",
+          type: "registry:file",
+          target: "app/login/actions.ts"
+        },{
+          path: "registry/changesets/app/error/page.tsx",
+          type: "registry:file",
+          target: "app/error/page.tsx"
+        },{
+          path: "registry/changesets/app/auth/confirm/route.ts",
+          type: "registry:file",
+          target: "app/auth/confirm/route.ts"
+        }],
+        source: "",
+        meta: undefined,
+      },
+    },  "supabase-auth": {
+      "changesets": {
+        name: "changesets",
+        description: "",
+        type: "registry:generator",
+        registryDependencies: undefined,
+        files: [{
+          path: "registry/supabase-auth/.github/workflows/npm-release.yml",
+          type: "registry:file",
+          target: ".github/workflows/npm-release.yml"
+        }],
+        source: "",
+        meta: undefined,
+      },
+      "supabase-auth": {
+        name: "supabase-auth",
+        description: "",
+        type: "registry:generator",
+        registryDependencies: undefined,
+        files: [{
+          path: "registry/supabase-auth/middleware.ts",
+          type: "registry:file",
+          target: "middleware.ts"
+        },{
+          path: "registry/supabase-auth/utils/supabase/client.ts",
+          type: "registry:file",
+          target: "utils/supabase/client.ts"
+        },{
+          path: "registry/supabase-auth/utils/supabase/middleware.ts",
+          type: "registry:file",
+          target: "utils/supabase/middleware.ts"
+        },{
+          path: "registry/supabase-auth/utils/supabase/server.ts",
+          type: "registry:file",
+          target: "utils/supabase/server.ts"
+        },{
+          path: "registry/supabase-auth/app/login/actions.ts",
+          type: "registry:file",
+          target: "app/login/actions.ts"
+        },{
+          path: "registry/supabase-auth/app/error/page.tsx",
+          type: "registry:file",
+          target: "app/error/page.tsx"
+        },{
+          path: "registry/supabase-auth/app/auth/confirm/route.ts",
+          type: "registry:file",
+          target: "app/auth/confirm/route.ts"
+        }],
+        source: "",
+        meta: undefined,
+      },
     },
   }
   

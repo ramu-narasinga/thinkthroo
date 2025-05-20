@@ -140,6 +140,9 @@ export async function registryResolveItemsTree(
             files: deepmerge.all(payload.map((item) => item.files ?? [])),
             docs,
             scripts: deepmerge.all(payload.map((item) => item.scripts ?? {})),
+            commands: deepmerge.all(
+                payload.map((item) => item.commands ?? [])
+            )
         })
 
     } catch (error) {

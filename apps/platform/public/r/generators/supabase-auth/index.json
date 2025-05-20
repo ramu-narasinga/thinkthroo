@@ -1,0 +1,7 @@
+{
+  "name": "supabase-auth",
+  "type": "registry:generator",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": []
+}

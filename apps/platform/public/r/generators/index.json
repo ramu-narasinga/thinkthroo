@@ -15,6 +15,57 @@
         "target": ".github/workflows/npm-release.yml"
       }
     ],
-    "docs": "Changesets is configured sucessfully. Learn how Changesets is configured in OSS projects and find the next steps at https://app.thinkthroo.com/guide/cli/configure-changesets/c-configure-changesets/l-configure-changesets-introduction"
+    "docs": "Changesets is configured sucessfully. Find the next steps at https://app.thinkthroo.com/guide/cli/configure-changesets/c-configure-changesets/l-configure-changesets-introduction"
+  },
+  {
+    "name": "supabase-auth",
+    "type": "registry:generator",
+    "dependencies": [
+      "@supabase/supabase-js",
+      "@supabase/ssr"
+    ],
+    "devDependencies": [],
+    "scripts": {},
+    "commands": [
+      "npx shadcn@latest add login-01"
+    ],
+    "files": [
+      {
+        "path": "middleware.ts",
+        "type": "registry:file",
+        "target": "middleware.ts"
+      },
+      {
+        "path": "utils/supabase/client.ts",
+        "type": "registry:file",
+        "target": "utils/supabase/client.ts"
+      },
+      {
+        "path": "utils/supabase/middleware.ts",
+        "type": "registry:file",
+        "target": "utils/supabase/middleware.ts"
+      },
+      {
+        "path": "utils/supabase/server.ts",
+        "type": "registry:file",
+        "target": "utils/supabase/server.ts"
+      },
+      {
+        "path": "app/login/actions.ts",
+        "type": "registry:file",
+        "target": "app/login/actions.ts"
+      },
+      {
+        "path": "app/error/page.tsx",
+        "type": "registry:file",
+        "target": "app/error/page.tsx"
+      },
+      {
+        "path": "app/auth/confirm/route.ts",
+        "type": "registry:file",
+        "target": "app/auth/confirm/route.ts"
+      }
+    ],
+    "docs": "Supabase auth is configured sucessfully. Find the next steps at https://app.thinkthroo.com/guide/cli/configure-supabase-auth/c-configure-supabase-auth/l-configure-supabase-auth-introduction"
   }
 ]

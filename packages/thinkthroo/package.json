@@ -1,7 +1,7 @@
 {
   "name": "thinkthroo",
   "version": "0.0.8",
-  "description": "Configure features such as authentication, file upload via CLI and save time.",
+  "description": "Configure features such as authentication, file upload via CLI with confidence.",
   "type": "module",
   "exports": {
     ".": {
@@ -13,7 +13,9 @@
       "default": "./dist/registry/index.js"
     }
   },
-  "bin": "./dist/index.js",
+  "bin": {
+    "thinkthroo": "dist/index.js"
+  },
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
@@ -73,5 +75,6 @@
     "type-fest": "^4.40.0",
     "xdg-app-paths": "^8.3.0",
     "zod": "^3.24.2"
-  }
+  },
+  "main": "index.js"
 }
