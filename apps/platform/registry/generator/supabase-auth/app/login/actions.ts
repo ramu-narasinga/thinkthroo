@@ -18,7 +18,8 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    redirect("/error");
+    const encoded = encodeURIComponent(error.message);
+    redirect(`/login?error=${encoded}`);
   }
 
   revalidatePath("/", "layout");

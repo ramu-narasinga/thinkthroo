@@ -18,7 +18,8 @@ export async function signup(formData: FormData) {
   const { error } = await supabase.auth.signUp(data);
 
   if (error) {
-    redirect("/error");
+    const encoded = encodeURIComponent(error.message);
+    redirect(`/signup?error=${encoded}`);
   }
 
   revalidatePath("/", "layout");
