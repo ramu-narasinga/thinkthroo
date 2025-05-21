@@ -40,17 +40,37 @@
           type: "registry:file",
           target: "utils/supabase/server.ts"
         },{
-          path: "registry/changesets/app/login/actions.ts",
+          path: "registry/changesets/components/login-form.tsx",
           type: "registry:file",
-          target: "app/login/actions.ts"
+          target: "components/login-form.tsx"
+        },{
+          path: "registry/changesets/components/signup-form.tsx",
+          type: "registry:file",
+          target: "components/signup-form.tsx"
+        },{
+          path: "registry/changesets/app/auth/confirm/route.ts",
+          type: "registry:file",
+          target: "app/auth/confirm/route.ts"
         },{
           path: "registry/changesets/app/error/page.tsx",
           type: "registry:file",
           target: "app/error/page.tsx"
         },{
-          path: "registry/changesets/app/auth/confirm/route.ts",
+          path: "registry/changesets/app/login/actions.ts",
           type: "registry:file",
-          target: "app/auth/confirm/route.ts"
+          target: "app/login/actions.ts"
+        },{
+          path: "registry/changesets/app/login/page.tsx",
+          type: "registry:file",
+          target: "app/login/page.tsx"
+        },{
+          path: "registry/changesets/app/signup/actions.ts",
+          type: "registry:file",
+          target: "app/signup/actions.ts"
+        },{
+          path: "registry/changesets/app/signup/page.tsx",
+          type: "registry:file",
+          target: "app/signup/page.tsx"
         }],
         source: "",
         meta: undefined,
@@ -91,17 +111,37 @@
           type: "registry:file",
           target: "utils/supabase/server.ts"
         },{
-          path: "registry/supabase-auth/app/login/actions.ts",
+          path: "registry/supabase-auth/components/login-form.tsx",
           type: "registry:file",
-          target: "app/login/actions.ts"
+          target: "components/login-form.tsx"
+        },{
+          path: "registry/supabase-auth/components/signup-form.tsx",
+          type: "registry:file",
+          target: "components/signup-form.tsx"
+        },{
+          path: "registry/supabase-auth/app/auth/confirm/route.ts",
+          type: "registry:file",
+          target: "app/auth/confirm/route.ts"
         },{
           path: "registry/supabase-auth/app/error/page.tsx",
           type: "registry:file",
           target: "app/error/page.tsx"
         },{
-          path: "registry/supabase-auth/app/auth/confirm/route.ts",
+          path: "registry/supabase-auth/app/login/actions.ts",
           type: "registry:file",
-          target: "app/auth/confirm/route.ts"
+          target: "app/login/actions.ts"
+        },{
+          path: "registry/supabase-auth/app/login/page.tsx",
+          type: "registry:file",
+          target: "app/login/page.tsx"
+        },{
+          path: "registry/supabase-auth/app/signup/actions.ts",
+          type: "registry:file",
+          target: "app/signup/actions.ts"
+        },{
+          path: "registry/supabase-auth/app/signup/page.tsx",
+          type: "registry:file",
+          target: "app/signup/page.tsx"
         }],
         source: "",
         meta: undefined,

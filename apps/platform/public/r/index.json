@@ -51,9 +51,19 @@
         "target": "utils/supabase/server.ts"
       },
       {
-        "path": "app/login/actions.ts",
+        "path": "components/login-form.tsx",
         "type": "registry:file",
-        "target": "app/login/actions.ts"
+        "target": "components/login-form.tsx"
+      },
+      {
+        "path": "components/signup-form.tsx",
+        "type": "registry:file",
+        "target": "components/signup-form.tsx"
+      },
+      {
+        "path": "app/auth/confirm/route.ts",
+        "type": "registry:file",
+        "target": "app/auth/confirm/route.ts"
       },
       {
         "path": "app/error/page.tsx",
@@ -61,9 +71,24 @@
         "target": "app/error/page.tsx"
       },
       {
-        "path": "app/auth/confirm/route.ts",
+        "path": "app/login/actions.ts",
         "type": "registry:file",
-        "target": "app/auth/confirm/route.ts"
+        "target": "app/login/actions.ts"
+      },
+      {
+        "path": "app/login/page.tsx",
+        "type": "registry:file",
+        "target": "app/login/page.tsx"
+      },
+      {
+        "path": "app/signup/actions.ts",
+        "type": "registry:file",
+        "target": "app/signup/actions.ts"
+      },
+      {
+        "path": "app/signup/page.tsx",
+        "type": "registry:file",
+        "target": "app/signup/page.tsx"
       }
     ],
     "docs": "Supabase auth is configured sucessfully. Find the next steps at https://app.thinkthroo.com/guide/cli/configure-supabase-auth/c-configure-supabase-auth/l-configure-supabase-auth-introduction"
