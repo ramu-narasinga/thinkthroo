@@ -13,8 +13,9 @@ import { login } from "@/app/login/actions";
 
 export function LoginForm({
   className,
+  error,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { error?: string }) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -49,8 +50,17 @@ export function LoginForm({
                 </div>
                 <Input id="password" type="password" required name="password" />
               </div>
+
+              {error && (
+                <p className="text-sm text-red-600">{decodeURIComponent(error)}</p>
+              )}
+
               <div className="flex flex-col gap-3">
-                <Button formAction={login} type="submit" className="w-full">
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  formAction={login}
+                >
                   Login
                 </Button>
                 <Button variant="outline" className="w-full">

@@ -13,6 +13,7 @@ import { signup } from "@/app/signup/actions";
 
 export function SignupForm({
   className,
+  error,
   ...props
 }: React.ComponentProps<"div">) {
   return (
@@ -46,8 +47,17 @@ export function SignupForm({
                   name="password"  
                 />
               </div>
+
+              {error && (
+                <p className="text-sm text-red-600">{decodeURIComponent(error)}</p>
+              )}
+
               <div className="flex flex-col gap-3">
-                <Button formAction={signup} type="submit" className="w-full">
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  formAction={signup}
+                >
                   Sign up
                 </Button>
                 <Button variant="outline" className="w-full">
