@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "supabase-auth",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
     "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.49.6",
+    "@supabase/supabase-js": "^2.49.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
@@ -28,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "tailwindcss": "^4",
+    "tw-animate-css": "^1.3.0",
     "typescript": "^5"
   }
 }

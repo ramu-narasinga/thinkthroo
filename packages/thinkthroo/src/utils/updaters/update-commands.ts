@@ -22,13 +22,10 @@ export async function updateCommands(
         ...options,
     }
 
-    // const commandsSpinner = spinner(`Running commands.`, {
-    //     silent: options.silent,
-    // })?.start()
+
+    logger.info("Running the commands...");
 
     try {
-
-        console.log("commands", commands, "config.resolvedPaths.cwd", config.resolvedPaths.cwd)
 
         for (const cmd of commands) {
             await execaCommand(cmd, {
@@ -38,9 +35,7 @@ export async function updateCommands(
             })
         }
 
-        // commandsSpinner?.succeed()
     } catch (err) {
-        // commandsSpinner?.fail("Failed to run commands.")
         logger.error(err)
         throw err
     }
