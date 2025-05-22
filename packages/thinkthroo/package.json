@@ -1,6 +1,6 @@
 {
   "name": "thinkthroo",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Configure features such as authentication, file upload via CLI with confidence.",
   "type": "module",
   "exports": {
