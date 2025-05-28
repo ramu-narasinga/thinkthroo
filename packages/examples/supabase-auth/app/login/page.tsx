@@ -1,7 +1,7 @@
 import { LoginForm } from "@/components/login-form";
 
 export default function Page({
-  searchParams
+  searchParams,
 }: {
   searchParams?: { error?: string };
 }) {

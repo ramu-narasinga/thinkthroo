@@ -52,15 +52,13 @@ export function LoginForm({
               </div>
 
               {error && (
-                <p className="text-sm text-red-600">{decodeURIComponent(error)}</p>
+                <p className="text-sm text-red-600">
+                  {decodeURIComponent(error)}
+                </p>
               )}
 
               <div className="flex flex-col gap-3">
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  formAction={login}
-                >
+                <Button type="submit" className="w-full" formAction={login}>
                   Login
                 </Button>
                 <Button variant="outline" className="w-full">

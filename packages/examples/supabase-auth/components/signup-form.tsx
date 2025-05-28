@@ -40,24 +40,17 @@ export function SignupForm({
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                 </div>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  required 
-                  name="password"  
-                />
+                <Input id="password" type="password" required name="password" />
               </div>
 
               {error && (
-                <p className="text-sm text-red-600">{decodeURIComponent(error)}</p>
+                <p className="text-sm text-red-600">
+                  {decodeURIComponent(error)}
+                </p>
               )}
 
               <div className="flex flex-col gap-3">
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  formAction={signup}
-                >
+                <Button type="submit" className="w-full" formAction={signup}>
                   Sign up
                 </Button>
                 <Button variant="outline" className="w-full">
