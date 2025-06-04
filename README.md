@@ -1,3 +1,3 @@
 # Think Throo
 
-Think Throo is a learning platform. 
+Think Throo is a learning platform. It contains:
