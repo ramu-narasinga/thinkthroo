@@ -28,6 +28,7 @@
         "@sanity/image-url": "^1.1.0",
         "@supabase/ssr": "^0.6.1",
         "@thinkthroo/lesson": "*",
+        "@thinkthroo/ui": "*",
         "@vercel/analytics": "^1.2.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",

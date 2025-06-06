@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { Button } from '@thinkthroo/ui/components/button';
 import Link from 'next/link';
 import { PoweredByPaddle } from '@/components/interfaces/site/footer/powered-by-paddle';
 // import '../../../styles/checkout.css';

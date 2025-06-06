@@ -6,8 +6,8 @@ import {
     CardFooter,
     CardHeader,
     CardTitle
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+} from "@thinkthroo/ui/components/card"
+import { Button } from "@thinkthroo/ui/components/button"
 
 export default function RequestUpgrade() {
     return (

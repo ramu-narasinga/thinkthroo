@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@thinkthroo/ui/components/skeleton';
 import { CheckoutEventsData } from '@paddle/paddle-js/types/checkout/events';
 import { formatMoney } from '@/utils/paddle/parse-money';
 

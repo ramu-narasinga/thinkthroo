@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 
 import { cn } from "@/lib/utils";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@thinkthroo/ui/components/scroll-area";
 
 const architecture = [
   {

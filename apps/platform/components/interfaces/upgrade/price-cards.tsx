@@ -3,9 +3,9 @@ import { IBillingFrequency } from '@/constants/billing-frequency';
 import { FeaturesList } from '@/components/interfaces/upgrade/features-list';
 import { PriceAmount } from '@/components/interfaces/upgrade/price-amount';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button } from '@thinkthroo/ui/components/button';
 import { PriceTitle } from '@/components/interfaces/upgrade/price-title';
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '@thinkthroo/ui/components/separator';
 import { FeaturedCardGradient } from '@/components/interfaces/upgrade/featured-card-gradient';
 import Link from 'next/link';
 

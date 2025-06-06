@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@thinkthroo/ui/components/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
     DropdownMenuSubContent,
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
+  } from "@thinkthroo/ui/components/dropdown-menu"
 import { handleRequest } from "@/utils/auth-helpers/client"
 import { SignOut } from "@/utils/auth-helpers/server"
 import { getRedirectMethod } from "@/utils/auth-helpers/settings"

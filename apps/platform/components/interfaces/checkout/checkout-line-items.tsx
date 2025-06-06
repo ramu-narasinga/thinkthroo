@@ -1,8 +1,8 @@
 import { QuantityField } from '@/components/interfaces/checkout/quantity-field';
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '@thinkthroo/ui/components/separator';
 import { CheckoutEventsData } from '@paddle/paddle-js/types/checkout/events';
 import { formatMoney } from '@/utils/paddle/parse-money';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@thinkthroo/ui/components/skeleton';
 
 interface LoadingTextProps {
   value: number | undefined;

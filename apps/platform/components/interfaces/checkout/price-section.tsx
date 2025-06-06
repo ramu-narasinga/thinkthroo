@@ -1,8 +1,8 @@
 import { CheckoutLineItems } from '@/components/interfaces/checkout/checkout-line-items';
 import { CheckoutPriceContainer } from '@/components/interfaces/checkout/checkout-price-container';
 import { CheckoutPriceAmount } from '@/components/interfaces/checkout/checkout-price-amount';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Separator } from '@/components/ui/separator';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@thinkthroo/ui/components/accordion';
+import { Separator } from '@thinkthroo/ui/components/separator';
 import { CheckoutEventsData } from '@paddle/paddle-js/types/checkout/events';
 
 interface Props {

@@ -1,12 +1,12 @@
 import { PageActions, PageHeader, PageHeaderDescription, PageHeaderHeading } from "@/components/interfaces/page/header";
-import { Button } from "@/components/ui/button";
+import { Button } from "@thinkthroo/ui/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@thinkthroo/ui/components/card";
 import { siteConfig } from "@/config/site";
 import Image from "next/image";
 import Link from "next/link";

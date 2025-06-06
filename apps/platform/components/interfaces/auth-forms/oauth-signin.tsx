@@ -1,7 +1,7 @@
 'use client';
 
 import { Icons } from '@/components/icons';
-import { Button } from '@/components/ui/button';
+import { Button } from '@thinkthroo/ui/components/button';
 import { signInWithOAuth } from '@/utils/auth-helpers/client';
 import { type Provider } from '@supabase/supabase-js';
 import { Github } from 'lucide-react';

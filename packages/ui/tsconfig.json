@@ -1,8 +1,11 @@
 {
-  "extends": "@repo/typescript-config/react-library.json",
-  "compilerOptions": {
-    "outDir": "dist"
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
-}
+    "extends": "@thinkthroo/typescript-config/react-library.json",
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "@thinkthroo/ui/*": ["./src/*"]
+      }
+    },
+    "include": ["."],
+    "exclude": ["node_modules", "dist"]
+  }

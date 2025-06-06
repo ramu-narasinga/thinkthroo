@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@thinkthroo/ui/components/card"
+import { Button } from "@thinkthroo/ui/components/button"
 
 export default function RequestSignin() {
   return (
