@@ -1,6 +1,6 @@
 import { Tier } from '@/constants/pricing-tier';
 import { cn } from '@/lib/utils';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@thinkthroo/ui/components/skeleton';
 
 interface Props {
   loading: boolean;

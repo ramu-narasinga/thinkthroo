@@ -5,7 +5,7 @@ import {
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/interfaces/page/header";
-import { Button } from "@/components/ui/button";
+import { Button } from "@thinkthroo/ui/components/button";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import ConvertKitForm from "@/components/interfaces/site/forms/newsletter";

@@ -7,7 +7,7 @@ import {
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/interfaces/page/header";
-import { Button } from "@/components/ui/button";
+import { Button } from "@thinkthroo/ui/components/button";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import {
@@ -18,11 +18,11 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@thinkthroo/ui/components/select";
 import { NavTabs } from "@/components/interfaces/page/nav-tabs";
 import { Icons } from "@/components/icons";
 import { getArchitectureCourses } from "@/lib/data/get-architecture-courses";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@thinkthroo/ui/components/separator";
 // import { useState } from "react";
 import { client } from "@thinkthroo/lesson/utils/sanity-client";
 import { Lock } from "lucide-react";

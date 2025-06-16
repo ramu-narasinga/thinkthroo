@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@thinkthroo/ui/components/button";
+import { Input } from "@thinkthroo/ui/components/input";
+import { Label } from "@thinkthroo/ui/components/label";
 import {
   Card,
   CardContent,
@@ -9,7 +9,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@thinkthroo/ui/components/card";
 import { CheckCircle } from "lucide-react";
 import { Icons } from "@/components/icons";
 import { subscribeToNewsLetter } from '@/utils/newsletter-helpers/server';

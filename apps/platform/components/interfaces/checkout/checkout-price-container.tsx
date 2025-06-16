@@ -1,7 +1,7 @@
 import { CheckoutPriceAmount } from '@/components/interfaces/checkout/checkout-price-amount';
 import { CheckoutEventsData } from '@paddle/paddle-js/types/checkout/events';
 import { formatMoney } from '@/utils/paddle/parse-money';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@thinkthroo/ui/components/skeleton';
 import { formatBillingCycle } from '@/utils/paddle/data-helpers';
 import { useSearchParams } from 'next/navigation';
 

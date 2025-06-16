@@ -16,7 +16,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+} from "@thinkthroo/ui/components/navigation-menu";
 
 export function MainNav() {
   const pathname = usePathname();

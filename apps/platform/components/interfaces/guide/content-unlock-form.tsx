@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@thinkthroo/ui/components/button";
 import Link from "next/link";
 
 export default function ContentUnlockForm() {

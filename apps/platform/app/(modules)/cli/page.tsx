@@ -4,7 +4,7 @@ import {
   PageHeaderHeading,
 } from "@/components/interfaces/page/header";
 import { NavTabs } from "@/components/interfaces/page/nav-tabs";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@thinkthroo/ui/components/separator";
 import { Module } from "@/components/interfaces/modules/module";
 import { getModules } from "@/lib/modules";
 

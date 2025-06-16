@@ -4,7 +4,7 @@ import { NavItem, NavItemWithChildren } from "@/types/nav"
 
 import { docsConfig } from "@/config/docs"
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@thinkthroo/ui/components/button"
 
 interface DocsPagerProps {
   doc: any

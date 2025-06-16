@@ -1,6 +1,6 @@
 
 
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@thinkthroo/ui/components/tabs';
 import { BillingFrequency, IBillingFrequency } from '@/constants/billing-frequency';
 
 interface Props {

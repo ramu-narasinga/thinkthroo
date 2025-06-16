@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '@thinkthroo/ui/components/separator';
 import { ArrowUpRight } from 'lucide-react';
 
 export function PoweredByPaddle() {

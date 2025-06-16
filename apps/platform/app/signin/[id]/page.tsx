@@ -20,7 +20,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@thinkthroo/ui/components/button"
 import { UserAuthForm } from "@/components/interfaces/auth-forms/user-auth-form"
 
 export const metadata: Metadata = {
