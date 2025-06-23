@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
-import "./globals.css";
+import "@thinkthroo/ui/globals.css"
 import Metrics from "@/components/metrics";
 import { siteConfig } from "@/config/site"
 import ChatwootWidget from "@/components/interfaces/integrations/chatwoot";
