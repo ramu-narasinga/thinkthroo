@@ -42,9 +42,9 @@ export const PricingTier: Tier[] = [
     ],
     featured: false,
     priceId: {
-      '3months': 'pri_01jtt26qk629dqqh41xywpyh3y',
-      '6months': 'pri_01jtt2e8cr192ywg4174qd26kr',
-      '12months': 'pri_01jtt2eyvncwm38qe12ha0azdy',
+      '3months': process.env.NEXT_PUBLIC_PRO_3M!,
+      '6months': process.env.NEXT_PUBLIC_PRO_6M!,
+      '12months': process.env.NEXT_PUBLIC_PRO_12M!,
     },
   },
   {
@@ -61,9 +61,9 @@ export const PricingTier: Tier[] = [
     ],
     featured: true,
     priceId: {
-      '3months': 'pri_01jtt2h3f4116ee8npba17hfda',
-      '6months': 'pri_01jtt2hv9tz3jyaa349b57hz65',
-      '12months': 'pri_01jtt2mgw71xaphdqw19p6ddhy',
+      '3months': process.env.NEXT_PUBLIC_ELITE_3M!,
+      '6months': process.env.NEXT_PUBLIC_ELITE_6M!,
+      '12months': process.env.NEXT_PUBLIC_ELITE_12M!,
     },
   },
 ];
