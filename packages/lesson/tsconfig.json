@@ -23,7 +23,11 @@
         "skipLibCheck": true,
         "strict": true,
         "resolveJsonModule": true,
-        "noEmit": true
+        "noEmit": true,
+        "baseUrl": "./",
+        "paths": {
+          "@/*": ["./*"],
+        }
     },
     "exclude": [
         "node_modules"

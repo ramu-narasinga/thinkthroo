@@ -8,7 +8,8 @@ import { siteConfig } from "@/config/site"
 import { getTableOfContents } from "@/lib/toc"
 import { absoluteUrl, cn } from "@/lib/utils"
 // import { Mdx } from "@/components/interfaces/guide/mdx-components"
-import MDX from "@thinkthroo/lesson/markdown/mdx"
+// import MDX from "@thinkthroo/lesson/markdown/mdx"
+import { Mdx } from "@thinkthroo/lesson/markdown/mdx-components"
 import { DocsPager } from "@/components/interfaces/guide/pager"
 import { DashboardTableOfContents } from "@/components/interfaces/guide/toc"
 import { badgeVariants } from "@thinkthroo/ui/components/badge"
@@ -155,7 +156,8 @@ export default async function DocPage({ params }: DocPageProps) {
                 <RequestUpgrade />
               </div>
             ) : (
-              <MDX source={lesson.body} components={components} />
+              // <MDX source={lesson.body} components={components} />
+              <Mdx source={lesson.body} />
             )}
           </div>
           {/* <DocsPager doc={doc} pathname={params.slug?.join("/")} /> */}
