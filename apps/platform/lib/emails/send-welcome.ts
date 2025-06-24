@@ -12,7 +12,7 @@ export const sendWelcomeEmail = async (params: CreateUserEmailProps) => {
       to: email as string,
       subject: "Welcome to Think Throo!",
       react: emailTemplate,
-      test: process.env.NODE_ENV === "development",
+      // test: process.env.NODE_ENV === "development",
     });
   } catch (e) {
     console.error(e);

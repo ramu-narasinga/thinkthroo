@@ -3,8 +3,7 @@ import { sendWelcomeEmail } from "@/lib/emails/send-welcome";
 
 export async function POST(req: NextRequest) {
   try {
-    const { record } = await req.json();
-    console.log("[USER_CREATED]", req.json())
+    const { record } = await req.json()
     const email = record?.email;
     const fullName = record?.user_metadata?.full_name || "there";
 
