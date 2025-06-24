@@ -88,7 +88,7 @@ const WelcomeEmail = ({ name }: WelcomeEmailProps) => {
                       href="https://thinkthroo.com/consultation/got-question"
                       target="_blank"
                     >
-                      Let's talk
+                      Let&apos;s talk
                     </Link>
                   </li>
                 </ul>
