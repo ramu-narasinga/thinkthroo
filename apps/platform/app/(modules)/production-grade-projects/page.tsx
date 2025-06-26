@@ -26,7 +26,7 @@ type Course = {
 };
 
 export default async function ProductionGradeprojectsPage() {
-  const pgpCourses = await getModules("Production Grade Projects", "production-grade-projects");
+  const pgpCourses = await getModules("Production Grade Projects", "productionGradeProjects");
 
   return (
     <div className="container relative">

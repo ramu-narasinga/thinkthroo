@@ -10,7 +10,11 @@ import { ScrollArea, ScrollBar } from "@thinkthroo/ui/components/scroll-area";
 const architecture = [
   {
     name: "Open Source Projects",
-    href: "#open-source-projects"
+    href: "/architecture"
+  },
+  {
+    name: "Templates",
+    href: "/architecture/templates"
   }
 ];
 
