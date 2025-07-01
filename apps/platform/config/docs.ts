@@ -46,6 +46,14 @@ export const docsConfig: DocsConfig = {
     {
       title: "Build From Scratch",
       href: "/build-from-scratch",
+    },
+    {
+      title: "CLI",
+      href: "/cli",
+    },
+    {
+      title: "Challenges",
+      href: "/challenges",
     }
   ],
   // TODO: do we still need this sidebarNav?

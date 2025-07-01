@@ -70,6 +70,28 @@ export function MainNav() {
         >
           CLI
         </Link>
+        <Link
+          href="/challenges"
+          className={cn(
+            "transition-colors hover:text-foreground/80",
+            pathname?.startsWith("/challenges")
+              ? "text-foreground"
+              : "text-foreground/60"
+          )}
+        >
+          Challenges
+        </Link>
+        <Link
+          href="/leaderboard"
+          className={cn(
+            "transition-colors hover:text-foreground/80",
+            pathname?.startsWith("/leader-board")
+              ? "text-foreground"
+              : "text-foreground/60"
+          )}
+        >
+          Leaderboard
+        </Link>
       </nav>
     </div>
   )
