@@ -3,11 +3,8 @@ import {
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/interfaces/page/header";
-import { NavTabs } from "@/components/interfaces/page/nav-tabs";
-import { Separator } from "@thinkthroo/ui/components/separator";
-import { Module } from "@/components/interfaces/modules/module";
-import { getModules } from "@/lib/modules";
-import { List } from "@/components/interfaces/modules/challenges/list";
+import { Challenge } from "@/components/interfaces/modules/challenge";
+import { getChallenges } from "@/lib/challenges";
 
 type Tag = {
   title: string;
@@ -26,8 +23,8 @@ type Course = {
   tags: Tag[];
 };
 
-export default async function CliPage() {
-  const cliCourses = await getModules("CLI", "cli");
+export default async function ChallengesPage() {
+  const challenges = await getChallenges();
 
   return (
     <div className="container relative">
@@ -42,16 +39,14 @@ export default async function CliPage() {
       </PageHeader>
 
       <div className="grid flex-1 gap-12">
-        <div 
+        <div
           id="open-source-projects"
-          className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 lg:grid-cols-3">
-          <List/>
-          {/* <Module 
-            courses={cliCourses} 
-            module="cli"
-          /> */}
+          className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-rows-2 lg:grid-rows-3"
+        >
+          {challenges.map((challenge) => (
+            <Challenge key={challenge.slug.current} {...challenge} />
+          ))}
         </div>
-        <Separator />
       </div>
     </div>
   );

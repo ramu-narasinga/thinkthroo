@@ -42,6 +42,7 @@
         "platform": "file:",
         "react": "^18",
         "react-dom": "^18",
+        "react-markdown": "^10.1.0",
         "react-wrap-balancer": "^0.4.1",
         "resend": "^4.6.0",
         "tailwind-merge": "^2.5.2",

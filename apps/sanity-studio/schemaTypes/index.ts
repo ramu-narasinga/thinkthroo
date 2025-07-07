@@ -13,6 +13,7 @@ import tag from './tag'
 import privacy from './privacy'
 import terms from './terms'
 import refund from './refund'
+import challenges from './challenge'
 
 export const schemaTypes = [
     post, 
@@ -24,6 +25,7 @@ export const schemaTypes = [
     bestPractices,
     productionGradeProjects,
     buildFromScratch,
+    challenges,
     module,
     chapter,
     tag,
