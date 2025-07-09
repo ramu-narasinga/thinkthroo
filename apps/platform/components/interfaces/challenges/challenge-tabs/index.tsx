@@ -299,70 +299,9 @@ export default function ChallengeTabs(props) {
                             <h3 className="text-xl font-semibold mb-4">Challenge Description</h3>
                             <Markdown
                                 components={components}
-                            >{challenge.description}</Markdown>
-                            <p className="text-muted-foreground leading-relaxed text-lg">
-                                Given an array of integers <code className="bg-muted px-2 py-1 rounded text-sm">nums</code> and an
-                                integer <code className="bg-muted px-2 py-1 rounded text-sm">target</code>, return indices of the
-                                two numbers such that they add up to target. You may assume that each input would have exactly one
-                                solution, and you may not use the same element twice. You can return the answer in any order.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="text-xl font-semibold mb-4">Examples</h3>
-                            <div className="bg-muted p-6 rounded-lg font-mono text-sm space-y-4">
-                                <div>
-                                    <div className="font-bold mb-2">Example 1:</div>
-                                    <div>Input: nums = [2,7,11,15], target = 9</div>
-                                    <div>Output: [0,1]</div>
-                                    <div className="text-muted-foreground mt-1">
-                                        Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].
-                                    </div>
-                                </div>
-                                <Separator />
-                                <div>
-                                    <div className="font-bold mb-2">Example 2:</div>
-                                    <div>Input: nums = [3,2,4], target = 6</div>
-                                    <div>Output: [1,2]</div>
-                                </div>
-                                <Separator />
-                                <div>
-                                    <div className="font-bold mb-2">Example 3:</div>
-                                    <div>Input: nums = [3,3], target = 6</div>
-                                    <div>Output: [0,1]</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 className="text-xl font-semibold mb-4">Constraints</h3>
-                            <ul className="list-disc list-inside space-y-2 text-muted-foreground text-lg">
-                                <li>2 ≤ nums.length ≤ 10⁴</li>
-                                <li>-10⁹ ≤ nums[i] ≤ 10⁹</li>
-                                <li>-10⁹ ≤ target ≤ 10⁹</li>
-                                <li>Only one valid answer exists</li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <h3 className="text-xl font-semibold mb-4">Evaluation Criteria</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="text-center p-6 bg-muted rounded-lg">
-                                    <Trophy className="h-8 w-8 mx-auto mb-3 text-yellow-600" />
-                                    <div className="font-semibold text-lg">Performance</div>
-                                    <div className="text-muted-foreground">Time & Space Complexity</div>
-                                </div>
-                                <div className="text-center p-6 bg-muted rounded-lg">
-                                    <Code className="h-8 w-8 mx-auto mb-3 text-blue-600" />
-                                    <div className="font-semibold text-lg">Readability</div>
-                                    <div className="text-muted-foreground">Code Quality & Style</div>
-                                </div>
-                                <div className="text-center p-6 bg-muted rounded-lg">
-                                    <Users className="h-8 w-8 mx-auto mb-3 text-purple-600" />
-                                    <div className="font-semibold text-lg">Creativity</div>
-                                    <div className="text-muted-foreground">Innovative Approach</div>
-                                </div>
-                            </div>
+                            >
+                                {challenge.description}
+                            </Markdown>
                         </div>
                     </CardContent>
                 </Card>
@@ -676,7 +615,7 @@ export default function ChallengeTabs(props) {
                                     required
                                 />
                                 <p className="text-sm text-muted-foreground">
-                                    Explain your solution approach, time/space complexity, and any unique aspects
+                                    Explain your solution approach, and any unique aspects
                                 </p>
                             </div>
 
@@ -716,7 +655,7 @@ export default function ChallengeTabs(props) {
 
                                 {submissionForm.ossReferences.length === 0 && (
                                     <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
-                                        No references added yet. Click "Add Reference" to include libraries you used.
+                                        No references added yet. Click &quot;Add Reference&quot; to include libraries you used.
                                     </div>
                                 )}
                             </div>
