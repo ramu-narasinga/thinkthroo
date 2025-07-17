@@ -1,17 +1,28 @@
-!videoTitle Understanding useIsMobile Hook in Vercel AI Chatbot
+!videoTitle wrangler deploy in git-mcp — Cloudflare Workers Deployment
 
 ## !!steps
 
 !duration 220
 
-!title 1. useIsMobile Hook Overview
+!title 1. What is wrangler deploy?
 
-```ts ! vercel/hooks/use-mobile.ts
-// !callout[/function/] Custom hook that detects if the viewport is mobile-sized using `matchMedia`.
-export function useIsMobile() {
-  const [isMobile, setIsMobile] =
-    React.useState<boolean | undefined>(undefined);
-  // hook starts with undefined state
+```ts ! docs/wrangler
+// !callout[/wrangler/] `wrangler` is the CLI for deploying and managing Cloudflare Workers.
+npm install -g wrangler
+wrangler deploy
+```
+
+## !!steps
+
+!duration 220
+
+!title 2. Deploy Script in package.json
+
+```json ! git-mcp/package.json
+// !callout[/scripts/] The deploy script builds the app and deploys it using `wrangler deploy`.
+"scripts": {
+  "build": "react-router build",
+  "deploy": "npm run build && wrangler deploy"
 }
 ```
 
@@ -19,43 +30,14 @@ export function useIsMobile() {
 
 !duration 220
 
-!title 2. Setting Up matchMedia for Responsiveness
+!title 3. Basic wrangler.jsonc Configuration
 
-```ts ! vercel/hooks/use-mobile.ts
-// !callout[/useEffect/] Uses `matchMedia` to check if screen width is below MOBILE_BREAKPOINT.
-React.useEffect(() => {
-  const mql = window.matchMedia('(max-width: 767px)');
-  const onChange = () => {
-    setIsMobile(window.innerWidth < 768);
-  };
-```
-
-## !!steps
-
-!duration 220
-
-!title 3. Listening for Viewport Changes
-
-```ts ! vercel/hooks/use-mobile.ts
-// !callout[/addEventListener/] Registers change listener to update state on viewport resize.
-  mql.addEventListener('change', onChange);
-  setIsMobile(window.innerWidth < 768);
-  return () => {
-    mql.removeEventListener('change', onChange);
-  };
-}, []);
-```
-
-## !!steps
-
-!duration 220
-
-!title 4. Why use !!isMobile and Cleanup Importance
-
-```ts ! vercel/hooks/use-mobile.ts
-// !callout[/isMobile/] Ensures a boolean is always returned.
-return !!isMobile;
-// ensures we don't return undefined
+```ts ! git-mcp/wrangler.jsonc
+{
+  // !callout[/name/] Specifies the Worker entrypoint and project name.
+  "name": "git-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-04-26"
 }
 ```
 
@@ -63,20 +45,44 @@ return !!isMobile;
 
 !duration 220
 
-!title 5. Summary of useIsMobile Behavior
+!title 4. Durable Objects & KV Bindings
 
-```ts ! vercel/hooks/use-mobile.ts
-// !callout[/Behavior/] Initializes, subscribes to changes, returns boolean — clean and efficient.
-useIsMobile(); // Usage returns true if width < 768
-// - Initial state: undefined
-// - Updates on window resize
-// - Cleaned up on unmount
+```ts ! git-mcp/wrangler.jsonc
+{
+  // !callout[/durable_objects/] Durable Objects persist state across Worker invocations.
+  "durable_objects": {
+    "bindings": [{ "class_name": "ViewCounterDO",
+     "name": "VIEW_COUNTER" }]
+  },
+  "kv_namespaces": [{
+    "binding": "CACHE_KV",
+    "id": "c5dd8e05242a471b9d7bf12f0ddcee3a"
+  }]
+}
 ```
 
+## !!steps
 
-**title**: Detecting Mobile Viewports with `useIsMobile` Hook
+!duration 220
 
-**description**: In this video, we break down the `useIsMobile` custom hook from Vercel’s AI Chatbot project. This concise React hook uses `window.matchMedia` to track screen size and determine if the user is on a mobile device, with clean event handling and return logic.
+!title 5. Routes, Analytics & Assets
 
-**tags**: zustand, vercel, react hooks, responsive design, matchMedia, open source, react, frontend, useEffect, javascript
+```ts ! git-mcp/wrangler.jsonc
+{
+  // !callout[/routes/] Maps your domain to the Worker deployment.
+  "routes": [{ "pattern": "gitmcp.io", "custom_domain": true }],
+  // !callout[/analytics/] Enables Cloudflare Analytics Engine.
+  "analytics_engine_datasets": [{ "binding": "MY_METRICS" }],
+  // !callout[/assets/] Specifies static file directory.
+  "assets": { "directory": "./static/", "binding": "ASSETS" }
+}
+```
+
+---
+
+**title:** How `wrangler deploy` is used in git-mcp
+**description:** Learn how the `git-mcp` codebase uses the `wrangler deploy` command to ship Cloudflare Workers. We cover the deploy script in `package.json`, `wrangler.jsonc` configuration including routes, KV, Durable Objects, and analytics setup.
+**tags:** wrangler, cloudflare workers, deploy, durable objects, git-mcp, wrangler.jsonc, kv storage, open source, devops
+
+```
 ```
