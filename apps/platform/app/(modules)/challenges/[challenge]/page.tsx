@@ -71,7 +71,7 @@ export default async function ChallengePage({ params }: { params: { challenge: s
   const challenge = await getChallengeBySlug(params.challenge);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen p-4">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <Card className="mb-6">
