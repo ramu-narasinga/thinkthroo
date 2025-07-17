@@ -55,32 +55,32 @@ export default async function ChallengesPage() {
               <Accordion type="multiple" className="w-full space-y-4">
                 {/* Difficulty Filter */}
                 <AccordionItem value="difficulty">
-                <div className="pb-4 border-b border-gray-300">
-    <AccordionTrigger className="text-md font-regular">
-      Difficulty
-    </AccordionTrigger>
-    <AccordionContent>
-                    <div className="flex flex-row gap-2 text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <Checkbox id="easy" className="border-neutral-300" />
-                        <Label htmlFor="easy" className="font-normal text-gray-500">
-                          Easy
-                        </Label>
+                  <div className="pb-4 border-b border-gray-300">
+                    <AccordionTrigger className="text-md font-regular">
+                      Difficulty
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="flex flex-row gap-2 text-gray-500">
+                        <div className="flex items-center gap-2">
+                          <Checkbox id="easy" className="border-neutral-300" />
+                          <Label htmlFor="easy" className="font-normal text-gray-500">
+                            Easy
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox id="medium" className="border-neutral-300" />
+                          <Label htmlFor="medium" className="font-normal text-gray-500">
+                            Medium
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox id="hard" className="border-neutral-300" />
+                          <Label htmlFor="hard" className="font-normal text-gray-500">
+                            Hard
+                          </Label>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Checkbox id="medium" className="border-neutral-300" />
-                        <Label htmlFor="medium" className="font-normal text-gray-500">
-                          Medium
-                        </Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Checkbox id="hard" className="border-neutral-300" />
-                        <Label htmlFor="hard" className="font-normal text-gray-500">
-                          Hard
-                        </Label>
-                      </div>
-                    </div>
-                  </AccordionContent>
+                    </AccordionContent>
                   </div>
                 </AccordionItem>
 
@@ -111,9 +111,9 @@ export default async function ChallengesPage() {
             </div>
           </div>
         </div>
-        
+
       </div>
     </div>
-    
+
   );
 }
