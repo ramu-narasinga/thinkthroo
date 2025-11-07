@@ -1,86 +1,63 @@
-import Link from "next/link"
+import Link from "next/link";
 
-import { siteConfig } from "@/config/site"
-import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
-import { MainNav } from "@/components/interfaces/site/header/main-nav"
-import { MobileNav } from "@/components/interfaces/site/header/mobile-nav"
-import { Button, buttonVariants } from "@thinkthroo/ui/components/button"
+import { getColors } from "@/lib/colors";
+import { siteConfig } from "@/lib/config";
+import { GitHubLink } from "@/components/interfaces/site/header/github-link";
+import { cn } from "@/lib/utils";
+import { Icons } from "@/components/icons";
+import { MainNav } from "@/components/interfaces/site/header/main-nav";
+import { MobileNav } from "@/components/interfaces/site/header/mobile-nav";
+import { ModeSwitcher } from "@/components/interfaces/site/header/mode-switcher";
+import { Button, buttonVariants } from "@thinkthroo/ui/components/button";
+import { Separator } from "@thinkthroo/ui/components/separator";
+import { SiteConfig } from "./site-config";
 
 export async function SiteHeader() {
-
   return (
-    <header className="sticky top-0 z-50 w-full border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
-        <MainNav />
-        <MobileNav />
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-          </div>
-          <nav className="flex items-center">
-          <Button asChild size="sm" variant="outline">
+    <header className="bg-background sticky top-0 z-50 w-full">
+      <div className="container-wrapper 3xl:fixed:px-0 px-6">
+        <div className="3xl:fixed:container flex h-(--header-height) items-center **:data-[slot=separator]:!h-4">
+          <MobileNav 
+            className="flex lg:hidden"
+          />
+          <MainNav className="hidden lg:flex" />
+          {/* <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+            <div className="w-full flex-1 md:w-auto md:flex-none"></div>
+            <nav className="flex items-center">
+              <Button asChild size="sm" variant="default">
+                <Link target="_blank" rel="noreferrer" href="/consultation">
+                  Book a meeting
+                </Link>
+              </Button>
+
               <Link
+                href={siteConfig.links.github}
                 target="_blank"
                 rel="noreferrer"
-                href="/consultation"
               >
-                Book a meeting
+                <div
+                  className={cn(
+                    buttonVariants({
+                      variant: "ghost",
+                    }),
+                    "h-8 w-8 px-0"
+                  )}
+                >
+                  <Icons.gitHub className="h-4 w-4" />
+                  <span className="sr-only">GitHub</span>
+                </div>
               </Link>
-          </Button>
-          <Link
-              href={siteConfig.links.youtube}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <div
-                className={cn(
-                  buttonVariants({
-                    variant: "ghost",
-                  }),
-                  "h-8 w-8 px-0"
-                )}
-              >
-                <Icons.youtube className="h-4 w-4" />
-                <span className="sr-only">Youtube</span>
-              </div>
-            </Link>
-            <Link
-              href={siteConfig.links.github}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <div
-                className={cn(
-                  buttonVariants({
-                    variant: "ghost",
-                  }),
-                  "h-8 w-8 px-0"
-                )}
-              >
-                <Icons.gitHub className="h-4 w-4" />
-                <span className="sr-only">GitHub</span>
-              </div>
-            </Link>
-            <Link
-              href={siteConfig.links.twitter}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <div
-                className={cn(
-                  buttonVariants({
-                    variant: "ghost",
-                  }),
-                  "h-8 w-8 px-0"
-                )}
-              >
-                <Icons.twitter className="h-3 w-3 fill-current" />
-                <span className="sr-only">Twitter</span>
-              </div>
-            </Link>
-          </nav>
+            </nav>
+          </div> */}
+          <div className="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
+            <GitHubLink />
+            <Separator orientation="vertical" className="3xl:flex hidden" />
+            <SiteConfig className="3xl:flex hidden" />
+            <Separator orientation="vertical" />
+            <ModeSwitcher />
+          </div>
         </div>
       </div>
     </header>
-  )
+  );
 }

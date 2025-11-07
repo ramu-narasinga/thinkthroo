@@ -47,11 +47,11 @@
         "react-wrap-balancer": "^0.4.1",
         "resend": "^4.6.0",
         "tailwind-merge": "^2.5.2",
-        "tailwindcss-animate": "^1.0.7",
         "zod": "^3.24.3"
     },
     "devDependencies": {
         "@shikijs/compat": "^1.1.7",
+        "@tailwindcss/postcss": "^4.1.16",
         "@types/lodash.throttle": "^4.1.9",
         "@types/node": "^20",
         "@types/react": "^18",
@@ -68,7 +68,7 @@
         "remark-code-import": "^1.2.0",
         "remark-gfm": "^4.0.0",
         "rimraf": "^5.0.10",
-        "tailwindcss": "^3.4.1",
+        "tailwindcss": "^4.1.16",
         "ts-morph": "^25.0.1",
         "typescript": "^5",
         "unist-builder": "3.0.0",

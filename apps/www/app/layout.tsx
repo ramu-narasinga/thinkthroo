@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Inter as FontSans } from "next/font/google";
+import { META_THEME_COLORS, siteConfig } from "@/lib/config"
+import { fontVariables } from "@/lib/fonts"
 import { cn } from "@/lib/utils";
-import "./globals.css";
-import { siteConfig } from "@/config/site";
+import { LayoutProvider } from "@/hooks/use-layout"
+import { ActiveThemeProvider } from "@/components/providers/active-theme"
 import Metrics from "@/components/metrics";
+import { ThemeProvider } from "@/components/providers/theme";
+import { CookieConsent } from "@thinkthroo/ui/components/blocks/cookie-consent";
 
-const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-})
+import "@/styles/globals.css"
 
 export const metadata: Metadata = {
   title: siteConfig.name,
@@ -18,7 +18,10 @@ export const metadata: Metadata = {
     "React",
     "Tailwind CSS",
     "TypeScript",
-    "JavaScript"
+    "JavaScript",
+    "Code Review",
+    "Github App",
+    "Codebase Architecture"
   ],
   authors: [
     {
@@ -61,20 +64,45 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <head />
-      <body className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
-        )}>
-        <div className="relative flex min-h-screen flex-col bg-background">
-          {children}
-        </div>
-        <Metrics />
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.theme === 'dark' || ((!('theme' in localStorage) || localStorage.theme === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.querySelector('meta[name="theme-color"]').setAttribute('content', '${META_THEME_COLORS.dark}')
+                }
+                if (localStorage.layout) {
+                  document.documentElement.classList.add('layout-' + localStorage.layout)
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+        <meta name="theme-color" content={META_THEME_COLORS.light} />
+      </head>
+      <body
+        className={cn(
+          "group/body overscroll-none antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]",
+          fontVariables
+        )}
+      >
+        <ThemeProvider>
+          <LayoutProvider>
+            <ActiveThemeProvider>
+              {children}
+              <Metrics />
+              <CookieConsent 
+                variant="default" 
+              />
+            </ActiveThemeProvider>
+          </LayoutProvider>
+        </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }

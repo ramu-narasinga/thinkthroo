@@ -5,22 +5,32 @@ import Link, { LinkProps } from "next/link"
 import { useRouter } from "next/navigation"
 
 import { docsConfig } from "@/config/docs"
-import { siteConfig } from "@/config/site"
+import { siteConfig } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import { Icons } from "@/components/icons"
 import { Button } from "@thinkthroo/ui/components/button"
 import { ScrollArea } from "@thinkthroo/ui/components/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@thinkthroo/ui/components/sheet"
+import { MENU } from "./constant"
 
-export function MobileNav() {
+export function MobileNav({
+    className,
+}: {
+  className?: string
+}) {
   const [open, setOpen] = React.useState(false)
+
+  
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+          className={cn(
+            "extend-touch-target h-8 touch-manipulation items-center justify-start gap-2.5 !p-0 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent dark:hover:bg-transparent",
+            className
+          )}
         >
           <svg
             strokeWidth="1.5"
@@ -60,23 +70,20 @@ export function MobileNav() {
           className="flex items-center"
           onOpenChange={setOpen}
         >
-          <Icons.logo className="mr-2 h-4 w-4" />
+          <Icons.logo className="mr-2 h-8 w-8" />
           <span className="font-bold">{siteConfig.name}</span>
         </MobileLink>
         <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
-          <div className="flex flex-col space-y-3">
-            {docsConfig.mainNav?.map(
-              (item) =>
-                item.href && (
-                  <MobileLink
-                    key={item.href}
-                    href={item.href}
-                    onOpenChange={setOpen}
-                  >
-                    {item.title}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
+              {MENU.map(({ name, href }) => {
+                return (
+                  <MobileLink key={name} href={href} onOpenChange={setOpen}>
+                    {name}
                   </MobileLink>
                 )
-            )}
+              })}
+            </div>
           </div>
         </ScrollArea>
       </SheetContent>
@@ -105,7 +112,7 @@ function MobileLink({
         router.push(href.toString())
         onOpenChange?.(false)
       }}
-      className={cn(className)}
+      className={cn("text-2xl font-medium", className)}
       {...props}
     >
       {children}

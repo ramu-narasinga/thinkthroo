@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@thinkthroo/ui/components/button"
 import { Globe } from 'lucide-react'
 import Link from "next/link"
-import { siteConfig } from "@/config/site"
+import { siteConfig } from "@/lib/config"
 
 export default function ServicesPromo() {
   return (

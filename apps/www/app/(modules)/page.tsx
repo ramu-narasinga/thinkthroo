@@ -7,29 +7,36 @@ import {
 } from "@/components/interfaces/page/header";
 import { Button } from "@thinkthroo/ui/components/button";
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/lib/config";
 import ConvertKitForm from "@/components/interfaces/site/forms/newsletter";
 
 export default function RootPage() {
   return (
     <div className="container relative">
       <PageHeader>
-        <PageHeaderHeading>Insights from Open Source projects</PageHeaderHeading>
+        <PageHeaderHeading>Enforce Codebase Architecture in your Pull Request</PageHeaderHeading>
         <PageHeaderDescription>
-          Hey, my name is <a href="https://ramunarasinga.com" className="underline">Ramu Narasinga</a>. 
-          I study large open-source projects and provide a detailed codebase architecture of Shadcn/ui, LobeChat. I created this learning platform to compare the feature implementation in 
-          OSS projects against documentation and share the best practices found in OSS so you can learn advanced 
-          techniques and unique coding patterns.
+          Stop AI slop from reaching your main branch. 
+          Our AI powered GitHub app enforces proven architecture patterns, catching violations before code review.
         </PageHeaderDescription>
         
         <PageActions>
-          <Button asChild size="sm">
+          <Button asChild size="sm" variant="default">
             <Link
               target="_blank"
               rel="noreferrer"
               href={siteConfig.links.learningPlatform}
             >
-              Get Started For Free
+              Install GitHub App
+            </Link>
+          </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link
+              target="_blank"
+              rel="noreferrer"
+              href={siteConfig.links.learningPlatform}
+            >
+              Learn the patterns
             </Link>
           </Button>
         </PageActions>

@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@thinkthroo/ui/components/card";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/lib/config";
 import Image from "next/image";
 import Link from "next/link";
 

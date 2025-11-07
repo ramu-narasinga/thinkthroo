@@ -6,7 +6,7 @@ import Link from "next/link"
 import { ChevronRightIcon, ExternalLinkIcon } from "@radix-ui/react-icons"
 import Balancer from "react-wrap-balancer"
 
-import { siteConfig } from "@/config/site"
+import { siteConfig } from "@/lib/config"
 import { getTableOfContents } from "@/lib/toc"
 import { absoluteUrl, cn } from "@/lib/utils"
 import { components } from "@/components/interfaces/course/mdx-components"
