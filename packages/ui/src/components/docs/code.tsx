@@ -77,14 +77,18 @@ export function Code(props: CodeProps) {
 async function render(lang: string, code: string) {
   if (!code) return null;
 
-  const { getSingletonHighlighter } = await import("shiki/bundle/web");
+  const { getSingletonHighlighter, bundledLanguages } = await import("shiki/bundle/web");
+  
+  // Check if the language is supported, fallback to 'text' if not
+  const supportedLang = lang in bundledLanguages ? lang : 'text';
+  
   const highlighter = await getSingletonHighlighter({
-    langs: [lang],
+    langs: [supportedLang],
     themes: ["vesper", "one-light"],
   });
 
   const hast = highlighter.codeToHast(code, {
-    lang,
+    lang: supportedLang,
     themes: {
       light: "one-light",
       dark: "vesper",
