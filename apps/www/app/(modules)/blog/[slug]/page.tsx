@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation"
 
-import "@/styles/mdx.css"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { ChevronRightIcon, ExternalLinkIcon } from "@radix-ui/react-icons"
@@ -22,9 +21,9 @@ import { DocsSidebarNav } from "@/components/interfaces/course/side-nav"
 import { client } from "@/sanity/client";
 
 interface DocPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 const POST_QUERY = `
@@ -39,8 +38,9 @@ const POST_QUERY = `
   }
 `
 
-async function getDocFromParams({ params }: DocPageProps) {
-  const slug = params.slug || ""
+async function getDocFromParams(params: { slug: string }) {
+  const slug = params.slug || "";
+  
   const doc = await client.fetch(POST_QUERY, { slug })
 
   return doc || null
@@ -49,7 +49,9 @@ async function getDocFromParams({ params }: DocPageProps) {
 export async function generateMetadata({
   params,
 }: DocPageProps): Promise<Metadata> {
-  const doc = await getDocFromParams({ params })
+  const resolvedParams = await params;
+  console.log("Fetching doc for slug:", resolvedParams);
+  const doc = await getDocFromParams(resolvedParams)
 
   if (!doc) {
     return {}
@@ -82,7 +84,7 @@ export async function generateMetadata({
   }
 }
 
-export async function generateStaticParams(): Promise<DocPageProps["params"][]> {
+export async function generateStaticParams() {
   const slugs = await client.fetch(`
     *[_type == "post" && defined(slug.current)][]{
       "slug": slug.current
@@ -95,10 +97,11 @@ export async function generateStaticParams(): Promise<DocPageProps["params"][]> 
 }
 
 export default async function DocPage({ params }: DocPageProps) {
+  const resolvedParams = await params;
+  const post = await fetchPostBySlug(resolvedParams.slug);
 
-  const post = await fetchPostBySlug(params.slug);
-
-  const doc = await getDocFromParams({ params })
+  console.log("Fetching doc for slug:", resolvedParams.slug);
+  const doc = await getDocFromParams(resolvedParams)
 
   const postImageUrl = post.image
     ? urlFor(post.image)?.width(550).height(310).url()
@@ -187,7 +190,7 @@ export default async function DocPage({ params }: DocPageProps) {
             <ConvertKitForm />
           </div>
           <DocsPager doc={{ 
-            slug: params.slug,
+            slug: resolvedParams.slug,
             sidebarNav: groupedPosts 
           }} />
         </div>

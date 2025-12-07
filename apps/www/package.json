@@ -29,10 +29,14 @@
         "@supabase/ssr": "^0.6.1",
         "@thinkthroo/lesson": "*",
         "@thinkthroo/ui": "*",
+        "@types/mdx": "^2.0.13",
         "@vercel/analytics": "^1.2.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
         "framer-motion": "^11.11.8",
+        "fumadocs-core": "^16.0.12",
+        "fumadocs-mdx": "^13.0.8",
+        "fumadocs-ui": "^16.0.11",
         "jotai": "^2.1.0",
         "lucide-react": "^0.436.0",
         "next": "^16.0.1",
@@ -69,5 +73,9 @@
     },
     "peerDependencies": {
         "esbuild": "^0.25.1"
+    },
+    "overrides": {
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0"
     }
 }

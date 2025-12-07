@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import 'fumadocs-ui/css/shadcn.css';
+@import 'fumadocs-ui/css/preset.css';
 
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
 @source "../components/**/*.{ts,tsx}";
@@ -7,6 +9,7 @@
 @import "tw-animate-css";
 
 @import "./themes.css";
+@import "./mdx.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -103,6 +106,7 @@
   --code-number: oklch(0.56 0 0);
   --selection: oklch(0.145 0 0);
   --selection-foreground: oklch(1 0 0);
+  --fd-banner-height: 0rem;
 }
 
 .dark {
@@ -349,4 +353,12 @@
     font-family: var(--font-mono);
     font-size: 0.8rem;
   }
+}
+
+#nd-toc {
+  @apply mt-12;
+}
+
+#nd-sidebar {
+  @apply mt-12;
 }

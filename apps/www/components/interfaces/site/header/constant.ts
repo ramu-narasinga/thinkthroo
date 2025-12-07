@@ -1,15 +1,19 @@
 export const MENU = [
-    {
-      name: "CodeArc AI",
-      href: "https://app.thinkthroo.com/",
+    { 
+      name: "How It Works", 
+      href: "#how-it-works" 
     },
     { 
-      name: "Cobebase Architecture", 
-      href: "https://app.thinkthroo.com/architecture" 
+      name: "Production-Grade Projects", 
+      href: "#production-grade-projects" 
     },
     {
-      name: "Production Grade Projects",
-      href: "https://app.thinkthroo.com/production-grade-projects",
+      name: "Pricing",
+      href: "https://app.thinkthroo.com/upgrade",
+    },
+    {
+      name: "Docs",
+      href: "/docs",
     },
     {
       name: "Blog",

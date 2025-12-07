@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/config"
 import { Icons } from "@/components/icons"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Skeleton } from "@thinkthroo/ui/components/skeleton"
+import { getRepoStars } from "@/lib/get-repo-stars"
 
 export function GitHubLink() {
   return (
@@ -20,21 +21,12 @@ export function GitHubLink() {
 }
 
 export async function StarsCount() {
-  const data = await fetch("https://api.github.com/repos/ramu-narasinga/thinkthroo", {
-    next: { revalidate: 86400 },
-  })
-  const json = await data.json()
 
-  const formattedCount =
-    json.stargazers_count >= 1000
-      ? json.stargazers_count % 1000 === 0
-        ? `${Math.floor(json.stargazers_count / 1000)}k`
-        : `${(json.stargazers_count / 1000).toFixed(1)}k`
-      : json.stargazers_count?.toLocaleString()
+  let stars = await getRepoStars("ramu-narasinga/thinkthroo")
 
   return (
     <span className="text-muted-foreground w-fit text-xs tabular-nums">
-      {formattedCount?.replace(".0k", "k")}
+      {stars?.replace(".0k", "k")}
     </span>
   )
 }

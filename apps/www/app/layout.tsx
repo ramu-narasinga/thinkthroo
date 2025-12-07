@@ -7,6 +7,7 @@ import { ActiveThemeProvider } from "@/components/providers/active-theme"
 import Metrics from "@/components/metrics";
 import { ThemeProvider } from "@/components/providers/theme";
 import { CookieConsent } from "@thinkthroo/ui/components/blocks/cookie-consent";
+import { RootProvider } from 'fumadocs-ui/provider/next';
 
 import "@/styles/globals.css"
 
@@ -94,11 +95,13 @@ export default function RootLayout({
         <ThemeProvider>
           <LayoutProvider>
             <ActiveThemeProvider>
-              {children}
-              <Metrics />
-              <CookieConsent 
-                variant="default" 
-              />
+              <RootProvider>
+                {children}
+                <Metrics />
+                <CookieConsent 
+                  variant="default" 
+                />
+              </RootProvider>
             </ActiveThemeProvider>
           </LayoutProvider>
         </ThemeProvider>

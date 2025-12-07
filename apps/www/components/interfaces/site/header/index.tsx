@@ -55,6 +55,17 @@ export async function SiteHeader() {
             <SiteConfig className="3xl:flex hidden" />
             <Separator orientation="vertical" />
             <ModeSwitcher />
+            <Separator orientation="vertical" />
+            <Button asChild size="sm" variant="outline" className="3xl:flex">
+              <Link target="_blank" rel="noreferrer" href="/consultation">
+                Login
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="default" className="3xl:flex">
+              <Link target="_blank" rel="noreferrer" href="/consultation">
+                Signup
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

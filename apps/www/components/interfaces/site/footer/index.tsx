@@ -1,6 +1,7 @@
 'use client'
 
 import Image from "next/image"
+import Link from "next/link"
 
 export const Footer = () => {
     return (
@@ -33,41 +34,22 @@ export const Footer = () => {
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
                             <li>
-                                <a
+                                <Link
                                     href="https://app.thinkthroo.com/course/codebase-architecture/shadcn-ui/tooling/introduction"
                                     target="_blank"
-                                    className="text-gray-600 text-sm leading-5"
                                 >
                                     Shadcn/ui codebase architecture
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a
+                                <Link
                                     href="https://app.thinkthroo.com/course/codebase-architecture/supabase/tooling/introduction"
                                     target="_blank"
-                                    className="text-gray-600 text-sm leading-5"
                                 >
                                     Supabase codebase architecture
-                                </a>
+                                </Link>
                             </li>
-                            <li>
-                                <a
-                                    href="https://app.thinkthroo.com/course/codebase-architecture/cal-com/tooling/introduction"
-                                    target="_blank"
-                                    className="text-gray-600 text-sm leading-5"
-                                >
-                                    Cal.com codebase architecture
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href="https://app.thinkthroo.com/course/codebase-architecture/lobechat/tooling/introduction"
-                                    target="_blank"
-                                    className="text-gray-600 text-sm leading-5"
-                                >
-                                    Lobechat codebase architecture
-                                </a>
-                            </li>
+                            
                         </ul>
                     </div>
 
@@ -77,31 +59,12 @@ export const Footer = () => {
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
                             <li>
-                                <a
-                                    href="https://app.thinkthroo.com/best-practices"
-                                    target="_blank"
-                                    className="text-gray-600 text-sm leading-5"
-                                >
-                                    Best Practices
-                                </a>
-                            </li>
-                            <li>
-                                <a
+                                <Link
                                     href="https://app.thinkthroo.com/production-grade-projects"
                                     target="_blank"
-                                    className="text-gray-600 text-sm leading-5"
                                 >
                                     Production-Grade Projects
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href="https://app.thinkthroo.com/build-from-scratch"
-                                    target="_blank"
-                                    className="text-gray-600 text-sm leading-5"
-                                >
-                                    Build From Scratch
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>
@@ -112,34 +75,24 @@ export const Footer = () => {
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
                             <li>
-                                <a href="https://discord.gg/3kwruUXW4g" className="text-gray-600 text-sm leading-5">
+                                <Link href="https://discord.gg/3kwruUXW4g" target="_blank">
                                     Discord
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="https://www.youtube.com/@thinkthroo" className="text-gray-600 text-sm leading-5">
-                                    Youtube
-                                </a>
-                            </li>
-                            <li>
-                                <a href="https://www.instagram.com/thinkthroo" className="text-gray-600 text-sm leading-5">
+                                <Link href="https://www.instagram.com/thinkthroo" target="_blank">
                                     Instagram
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="https://www.facebook.com/profile.php?id=61554871892197" className="text-gray-600 text-sm leading-5">
-                                    Facebook
-                                </a>
-                            </li>
-                            <li>
-                                <a href="https://x.com/thinkthroo" className="text-gray-600 text-sm leading-5">
+                                <Link href="https://x.com/thinkthroo" target="_blank">
                                     X.com
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="https://github.com/thinkthroo" className="text-gray-600 text-sm leading-5">
+                                <Link href="https://github.com/thinkthroo" target="_blank">
                                     Github
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>
@@ -150,14 +103,19 @@ export const Footer = () => {
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
                             <li>
-                                <a href="#" className="text-gray-600 text-sm leading-5">
+                                <Link href="https://app.thinkthroo.com/privacy" target="_blank">
                                     Privacy Policy
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-600 text-sm leading-5">
+                                <Link href="https://app.thinkthroo.com/terms" target="_blank">
                                     Terms and Conditions
-                                </a>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="https://app.thinkthroo.com/refund" target="_blank">
+                                    Refund Policy
+                                </Link>
                             </li>
                         </ul>
                     </div>

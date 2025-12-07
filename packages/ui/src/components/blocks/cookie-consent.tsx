@@ -39,7 +39,10 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
   ) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const [hide, setHide] = React.useState(false);
-    const userChoice = localStorage.getItem('cookiesAccepted');
+    let userChoice;
+    if (typeof window !== 'undefined') {
+      userChoice = localStorage.getItem('cookiesAccepted');
+    }
 
     const handleAccept = React.useCallback(() => {
       setIsOpen(false);
@@ -47,7 +50,9 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
       //   "cookieConsent=true; expires=Fri, 31 Dec 9999 23:59:59 GMT";
       if (window.clarity) {
         window.clarity("consent");
-        localStorage.setItem('cookiesAccepted', 'true');
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('cookiesAccepted', 'true');
+        }
       }
       setTimeout(() => {
         setHide(true);
@@ -59,7 +64,9 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
       setIsOpen(false);
       if (window.clarity) {
         window.clarity("consent", false);
-        localStorage.setItem('cookiesAccepted', 'false');
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('cookiesAccepted', 'false');
+        }
       }
       setTimeout(() => {
         setHide(true);

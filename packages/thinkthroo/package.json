@@ -45,7 +45,6 @@
   "homepage": "https://github.com/ramu-narasinga/thinkthroo#readme",
   "devDependencies": {
     "@changesets/cli": "^2.29.3",
-    "@repo/typescript-config": "*",
     "@types/fs-extra": "^11.0.4",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/npmcli__package-json": "^4.0.4",
