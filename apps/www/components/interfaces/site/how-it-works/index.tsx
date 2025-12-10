@@ -2,9 +2,11 @@
 
 import { useState } from "react"
 import { Play } from "lucide-react"
+import { useUmami } from "@/hooks/use-umami"
 
 export function HowItWorks() {
   const [activeStep, setActiveStep] = useState(1)
+  const { track } = useUmami();
 
   const steps = [
     {
@@ -59,7 +61,14 @@ export function HowItWorks() {
           {/* Steps */}
           <div className="space-y-4">
             {steps.map((step) => (
-              <button key={step.number} onClick={() => setActiveStep(step.number)} className="w-full text-left">
+              <button 
+                key={step.number} 
+                onClick={() => {
+                  setActiveStep(step.number);
+                  track('how-it-works-step', { step: step.number, title: step.title });
+                }} 
+                className="w-full text-left"
+              >
                 <div
                   className={`p-6 rounded-lg border transition-all duration-300 cursor-pointer group ${
                     activeStep === step.number
