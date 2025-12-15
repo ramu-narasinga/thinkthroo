@@ -12,6 +12,7 @@ import { Button } from "@thinkthroo/ui/components/components/button"
 import { ScrollArea } from "@thinkthroo/ui/components/components/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@thinkthroo/ui/components/components/sheet"
 import { MENU } from "./constant"
+import { useUmami } from "@/hooks/use-umami"
 
 export function MobileNav({
     className,
@@ -105,10 +106,15 @@ function MobileLink({
   ...props
 }: MobileLinkProps) {
   const router = useRouter()
+  const { track } = useUmami();
   return (
     <Link
       href={href}
       onClick={() => {
+        track('navigation-click', {
+          menu_item: typeof children === 'string' ? children : '',
+          href: href.toString()
+        });
         router.push(href.toString())
         onOpenChange?.(false)
       }}

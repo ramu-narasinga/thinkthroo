@@ -1,3 +1,4 @@
+"use client";
 import {
   PageActions,
   PageHeader,
@@ -8,8 +9,10 @@ import { Button } from "@thinkthroo/ui/components/components/button";
 import { Announcement } from "../../page/announcement";
 import Link from "next/link";
 import { siteConfig } from "@/lib/config";
+import { useUmami } from "@/hooks/use-umami";
 
 export function Hero() {
+  const { track } = useUmami();
   return (
     <PageHeader>
       <Announcement />
@@ -28,6 +31,12 @@ export function Hero() {
             target="_blank"
             rel="noreferrer"
             href={siteConfig.links.learningPlatform}
+            onClick={() =>
+              track("get-started", {
+                button: "Get Started",
+                href: siteConfig.links.learningPlatform,
+              })
+            }
           >
             Get Started
           </Link>
@@ -37,6 +46,12 @@ export function Hero() {
             target="_blank"
             rel="noreferrer"
             href={siteConfig.links.consultation}
+             onClick={() =>
+              track("book-a-demo", {
+                button: "Book a demo",
+                href: siteConfig.links.consultation,
+              })
+            }
           >
             Book a demo
           </Link>
