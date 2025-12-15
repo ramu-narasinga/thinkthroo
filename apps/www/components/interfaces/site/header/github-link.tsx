@@ -3,8 +3,8 @@ import Link from "next/link"
 
 import { siteConfig } from "@/lib/config"
 import { Icons } from "@/components/icons"
-import { Button } from "@thinkthroo/ui/components/button"
-import { Skeleton } from "@thinkthroo/ui/components/skeleton"
+import { Button } from "@thinkthroo/ui/components/components/button"
+import { Skeleton } from "@thinkthroo/ui/components/components/skeleton"
 import { getRepoStars } from "@/lib/get-repo-stars"
 
 export function GitHubLink() {

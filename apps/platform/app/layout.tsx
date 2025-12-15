@@ -1,82 +1,32 @@
-import type { Metadata } from "next";
-import { Inter as FontSans } from "next/font/google";
-import { cn } from "@/lib/utils";
-import "@thinkthroo/ui/globals.css"
-import Metrics from "@/components/metrics";
-import { siteConfig } from "@/config/site"
-import ChatwootWidget from "@/components/interfaces/integrations/chatwoot";
+import type React from "react"
+import type { Metadata } from "next"
+import { GeistSans } from "geist/font/sans"
+import { Toaster } from "@thinkthroo/ui/components/sonner"
+import GlobalProvider from "@/layout/GlobalProvider";
 
-const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-})
+import "@/styles/globals.css";
+import "@/styles/prosemirror.css";
 
 export const metadata: Metadata = {
-  title: siteConfig.name,
-  description: siteConfig.description,
-  keywords: [
-    "Next.js",
-    "React",
-    "Tailwind CSS",
-    "TypeScript",
-    "JavaScript"
-  ],
-  authors: [
-    {
-      name: "Think Throo",
-      url: "https://thinkthroo.com",
-    },
-  ],
-  creator: "thinkthroo",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: siteConfig.url,
-    title: siteConfig.name,
-    description: siteConfig.description,
-    siteName: siteConfig.name,
-    images: [
-      {
-        url: siteConfig.ogImage,
-        width: 1200,
-        height: 630,
-        alt: siteConfig.name,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: siteConfig.name,
-    description: siteConfig.description,
-    images: [siteConfig.ogImage],
-    creator: "@thinkthroo",
-  },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
-  },
-  manifest: `${siteConfig.url}/site.webmanifest`,
-};
+  title: "CodeArc | Enforce Codebase Architecture",
+  description: "Enforce codebase architecture using AI.",
+}
 
-export default function RootLayout({
+function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <head />
-      <body className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
-        )}>
-        <div className="relative flex min-h-screen flex-col bg-background">
+      <body className={GeistSans.className}>
+        <GlobalProvider>
           {children}
-        </div>
-        <Metrics />
-        <ChatwootWidget />
+        </GlobalProvider>
+        <Toaster />
       </body>
     </html>
-  );
+  )
 }
+
+export default RootLayout;

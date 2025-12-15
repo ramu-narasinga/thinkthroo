@@ -7,7 +7,7 @@ import { siteConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { MENU } from "./constant";
-import { Button } from "@thinkthroo/ui/components/button";
+import { Button } from "@thinkthroo/ui/components/components/button";
 
 export function MainNav({
   className,

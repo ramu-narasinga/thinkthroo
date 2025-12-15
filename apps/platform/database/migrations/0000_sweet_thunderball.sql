@@ -1,0 +1,179 @@
+-- -- Current sql file was generated after introspecting the database
+-- -- If you want to run this migration please uncomment this code before executing migrations
+-- /*
+-- CREATE TABLE "organizations" (
+-- 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+-- 	"github_org_id" text NOT NULL,
+-- 	"login" text,
+-- 	"avatar_url" text,
+-- 	"description" text,
+-- 	"api_url" text,
+-- 	"repos_url" text,
+-- 	"user_id" uuid,
+-- 	"last_fetched" timestamp with time zone DEFAULT now(),
+-- 	CONSTRAINT "organizations_github_org_id_user_id_key" UNIQUE("github_org_id","user_id")
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "organizations" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "repositories" (
+-- 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+-- 	"name" text NOT NULL,
+-- 	"full_name" text NOT NULL,
+-- 	"private" boolean DEFAULT false NOT NULL,
+-- 	"html_url" text NOT NULL,
+-- 	"default_branch" text,
+-- 	"installation_id" text NOT NULL,
+-- 	"organization_id" uuid NOT NULL,
+-- 	"user_id" uuid DEFAULT auth.uid()
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "repositories" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "challenge_participants" (
+-- 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+-- 	"user_id" uuid NOT NULL,
+-- 	"challenge_slug" text NOT NULL,
+-- 	"started_at" timestamp with time zone DEFAULT now() NOT NULL,
+-- 	"completed_at" timestamp with time zone,
+-- 	CONSTRAINT "unique_user_challenge" UNIQUE("user_id","challenge_slug")
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "challenge_participants" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "challenge_submissions" (
+-- 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+-- 	"challenge_slug" text NOT NULL,
+-- 	"user_id" uuid NOT NULL,
+-- 	"github_url" text NOT NULL,
+-- 	"description" text NOT NULL,
+-- 	"oss_references" jsonb DEFAULT '[]'::jsonb,
+-- 	"screenshot_urls" text[] DEFAULT '{""}',
+-- 	"submitted_at" timestamp with time zone DEFAULT now() NOT NULL,
+-- 	"time_taken" interval,
+-- 	"upvotes" integer DEFAULT 0,
+-- 	"downvotes" integer DEFAULT 0
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "challenge_submissions" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "submission_votes" (
+-- 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+-- 	"submission_id" uuid NOT NULL,
+-- 	"user_id" uuid NOT NULL,
+-- 	"vote_type" text,
+-- 	"created_at" timestamp with time zone DEFAULT now(),
+-- 	CONSTRAINT "unique_vote_per_user_submission" UNIQUE("submission_id","user_id"),
+-- 	CONSTRAINT "submission_votes_vote_type_check" CHECK (vote_type = ANY (ARRAY['upvote'::text, 'downvote'::text]))
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "submission_votes" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "User" (
+-- 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+-- 	"full_name" text,
+-- 	"avatar_url" text
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "installations" (
+-- 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+-- 	"installation_id" text NOT NULL,
+-- 	"github_org_id" text NOT NULL,
+-- 	"user_id" uuid NOT NULL,
+-- 	CONSTRAINT "installations_installation_id_key" UNIQUE("installation_id"),
+-- 	CONSTRAINT "installations_github_org_id_user_id_key" UNIQUE("github_org_id","user_id")
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "installations" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "customers" (
+-- 	"customer_id" text PRIMARY KEY NOT NULL,
+-- 	"email" text NOT NULL,
+-- 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+-- 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "customers" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "subscriptions" (
+-- 	"subscription_id" text PRIMARY KEY NOT NULL,
+-- 	"subscription_status" text NOT NULL,
+-- 	"price_id" text,
+-- 	"product_id" text,
+-- 	"scheduled_change" text,
+-- 	"customer_id" text NOT NULL,
+-- 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+-- 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+-- 	"plan_duration" text,
+-- 	"expires_at" timestamp with time zone
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "subscriptions" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "profiles" (
+-- 	"id" uuid PRIMARY KEY NOT NULL,
+-- 	"email" text,
+-- 	"full_name" text,
+-- 	"avatar_url" text,
+-- 	"user_name" text,
+-- 	CONSTRAINT "profiles_email_key" UNIQUE("email")
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "profiles" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- CREATE TABLE "codebase_arch" (
+-- 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+-- 	"repository_id" uuid,
+-- 	"user_id" uuid,
+-- 	"parent_id" uuid,
+-- 	"name" text NOT NULL,
+-- 	"type" text NOT NULL,
+-- 	"content" text,
+-- 	"created_at" timestamp with time zone DEFAULT now(),
+-- 	"updated_at" timestamp with time zone DEFAULT now(),
+-- 	CONSTRAINT "codebase_arch_type_check" CHECK (type = ANY (ARRAY['file'::text, 'folder'::text]))
+-- );
+-- --> statement-breakpoint
+-- CREATE TABLE "submission_leaderboard" (
+-- 	"challenge_slug" text NOT NULL,
+-- 	"submission_id" uuid NOT NULL,
+-- 	"user_id" uuid NOT NULL,
+-- 	"rank" integer,
+-- 	"score" double precision,
+-- 	"computed_at" timestamp with time zone DEFAULT now(),
+-- 	CONSTRAINT "submission_leaderboard_pkey" PRIMARY KEY("challenge_slug","submission_id")
+-- );
+-- --> statement-breakpoint
+-- ALTER TABLE "submission_leaderboard" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+-- ALTER TABLE "organizations" ADD CONSTRAINT "organizations_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "repositories" ADD CONSTRAINT "repositories_installation_id_fkey" FOREIGN KEY ("installation_id") REFERENCES "public"."installations"("installation_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "repositories" ADD CONSTRAINT "repositories_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "repositories" ADD CONSTRAINT "repositories_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "challenge_participants" ADD CONSTRAINT "challenge_participants_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "challenge_submissions" ADD CONSTRAINT "fk_user_id" FOREIGN KEY ("user_id") REFERENCES "public"."User"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "submission_votes" ADD CONSTRAINT "submission_votes_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."challenge_submissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "submission_votes" ADD CONSTRAINT "submission_votes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "installations" ADD CONSTRAINT "installations_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "subscriptions" ADD CONSTRAINT "public_subscriptions_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("customer_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "profiles" ADD CONSTRAINT "profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "codebase_arch" ADD CONSTRAINT "codebase_arch_parent_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "public"."codebase_arch"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "codebase_arch" ADD CONSTRAINT "codebase_arch_repository_id_fkey" FOREIGN KEY ("repository_id") REFERENCES "public"."repositories"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "codebase_arch" ADD CONSTRAINT "codebase_arch_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "submission_leaderboard" ADD CONSTRAINT "submission_leaderboard_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."challenge_submissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- ALTER TABLE "submission_leaderboard" ADD CONSTRAINT "submission_leaderboard_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+-- CREATE INDEX "idx_submissions_challenge_slug" ON "challenge_submissions" USING btree ("challenge_slug" text_ops);--> statement-breakpoint
+-- CREATE INDEX "idx_leaderboard_challenge_slug" ON "submission_leaderboard" USING btree ("challenge_slug" text_ops);--> statement-breakpoint
+-- CREATE POLICY "Enable insert for authenticated users only" ON "repositories" AS PERMISSIVE FOR INSERT TO "authenticated" WITH CHECK (true);--> statement-breakpoint
+-- CREATE POLICY "Enable insert for users based on user_id" ON "repositories" AS PERMISSIVE FOR INSERT TO public;--> statement-breakpoint
+-- CREATE POLICY "Enable users to view their own data only" ON "repositories" AS PERMISSIVE FOR SELECT TO "authenticated";--> statement-breakpoint
+-- CREATE POLICY "Allow delete for own participation" ON "challenge_participants" AS PERMISSIVE FOR DELETE TO public USING ((auth.uid() = user_id));--> statement-breakpoint
+-- CREATE POLICY "Allow insert for own participation" ON "challenge_participants" AS PERMISSIVE FOR INSERT TO public;--> statement-breakpoint
+-- CREATE POLICY "Allow select for own participation" ON "challenge_participants" AS PERMISSIVE FOR SELECT TO public;--> statement-breakpoint
+-- CREATE POLICY "Allow update for own participation" ON "challenge_participants" AS PERMISSIVE FOR UPDATE TO public;--> statement-breakpoint
+-- CREATE POLICY "Delete own submission" ON "challenge_submissions" AS PERMISSIVE FOR DELETE TO public USING ((auth.uid() = user_id));--> statement-breakpoint
+-- CREATE POLICY "Insert own submission" ON "challenge_submissions" AS PERMISSIVE FOR INSERT TO public;--> statement-breakpoint
+-- CREATE POLICY "Public can view submissions" ON "challenge_submissions" AS PERMISSIVE FOR SELECT TO public;--> statement-breakpoint
+-- CREATE POLICY "Update own submission" ON "challenge_submissions" AS PERMISSIVE FOR UPDATE TO public;--> statement-breakpoint
+-- CREATE POLICY "Delete own vote" ON "submission_votes" AS PERMISSIVE FOR DELETE TO public USING ((auth.uid() = user_id));--> statement-breakpoint
+-- CREATE POLICY "Insert own vote" ON "submission_votes" AS PERMISSIVE FOR INSERT TO public;--> statement-breakpoint
+-- CREATE POLICY "Public can view votes" ON "submission_votes" AS PERMISSIVE FOR SELECT TO public;--> statement-breakpoint
+-- CREATE POLICY "Update own vote" ON "submission_votes" AS PERMISSIVE FOR UPDATE TO public;--> statement-breakpoint
+-- CREATE POLICY "users can insert their own installations" ON "installations" AS PERMISSIVE FOR INSERT TO "authenticated" WITH CHECK ((auth.uid() = user_id));--> statement-breakpoint
+-- CREATE POLICY "users can select their own installations" ON "installations" AS PERMISSIVE FOR SELECT TO "authenticated";--> statement-breakpoint
+-- CREATE POLICY "users can update their own installations" ON "installations" AS PERMISSIVE FOR UPDATE TO "authenticated";--> statement-breakpoint
+-- CREATE POLICY "Enable read access for authenticated users to customers" ON "customers" AS PERMISSIVE FOR SELECT TO "authenticated" USING (true);--> statement-breakpoint
+-- CREATE POLICY "Enable read access for authenticated users to subscriptions" ON "subscriptions" AS PERMISSIVE FOR SELECT TO "authenticated" USING (true);--> statement-breakpoint
+-- CREATE POLICY "Public can read leaderboard" ON "submission_leaderboard" AS PERMISSIVE FOR SELECT TO public USING (true);
+-- */

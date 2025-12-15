@@ -4,14 +4,14 @@ import {
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/interfaces/page/header";
-import { Button } from "@thinkthroo/ui/components/button";
+import { Button } from "@thinkthroo/ui/components/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@thinkthroo/ui/components/card";
+} from "@thinkthroo/ui/components/components/card";
 import { siteConfig } from "@/lib/config";
 import Image from "next/image";
 import Link from "next/link";

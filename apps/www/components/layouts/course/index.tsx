@@ -1,6 +1,6 @@
 import { docsConfig } from "@/config/docs"
 import { DocsSidebarNav } from "@/components/interfaces/course/side-nav"
-import { ScrollArea } from "@thinkthroo/ui/components/scroll-area"
+import { ScrollArea } from "@thinkthroo/ui/components/components/scroll-area"
 
 
 export interface CommonCourseLayoutProps {

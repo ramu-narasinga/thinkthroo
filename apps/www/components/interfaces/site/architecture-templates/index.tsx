@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { CheckCircle, Zap, Layers, Sprout, TreeDeciduous, Hammer } from "lucide-react"
-import { Card } from "@thinkthroo/ui/components/card"
-import { Button } from "@thinkthroo/ui/components/button"
+import { Card } from "@thinkthroo/ui/components/components/card"
+import { Button } from "@thinkthroo/ui/components/components/button"
 
 export function ArchitectureTemplates() {
   const [selectedTemplate, setSelectedTemplate] = useState("canopy")

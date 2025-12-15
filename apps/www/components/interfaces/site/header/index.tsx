@@ -8,8 +8,8 @@ import { Icons } from "@/components/icons";
 import { MainNav } from "@/components/interfaces/site/header/main-nav";
 import { MobileNav } from "@/components/interfaces/site/header/mobile-nav";
 import { ModeSwitcher } from "@/components/interfaces/site/header/mode-switcher";
-import { Button, buttonVariants } from "@thinkthroo/ui/components/button";
-import { Separator } from "@thinkthroo/ui/components/separator";
+import { Button, buttonVariants } from "@thinkthroo/ui/components/components/button";
+import { Separator } from "@thinkthroo/ui/components/components/separator";
 import { SiteConfig } from "./site-config";
 
 export async function SiteHeader() {

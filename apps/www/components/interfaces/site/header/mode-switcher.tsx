@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useTheme } from "next-themes"
-import { Button } from "@thinkthroo/ui/components/button"
+import { Button } from "@thinkthroo/ui/components/components/button"
 import { useMetaColor } from "@/hooks/use-meta-color"
 
 export function ModeSwitcher() {
