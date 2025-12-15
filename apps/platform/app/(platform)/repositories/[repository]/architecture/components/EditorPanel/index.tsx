@@ -23,7 +23,8 @@ import { MathSelector } from "./selectors/math-selector";
 import { NodeSelector } from "./selectors/node-selector";
 import { Separator } from "./ui/separator";
 import { DocumentItem } from '@/database/schemas';
-import { documentClientService } from '@/service/document';
+import { useDocumentStore } from '@/store/document';
+import { documentByIdSelector } from '@/store/document/selectors';
 
 import GenerativeMenuSwitch from "./generative/generative-menu-switch";
 import { uploadFn } from "./image-upload";
@@ -40,7 +41,11 @@ export interface EditorPanelProps {
 const SAVE_DEBOUNCE_TIME = 2000; // 2 seconds
 
 export default function EditorPanel({ documentId }: EditorPanelProps) {
-  const [document, setDocument] = useState<DocumentItem | null>(null);
+  // Get document from store
+  const document = useDocumentStore(documentByIdSelector(documentId));
+  const fetchDocumentById = useDocumentStore((s) => s.fetchDocumentById);
+  const internal_updateSingleDocument = useDocumentStore((s) => s.internal_updateSingleDocument);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState("Saved");
   const [charsCount, setCharsCount] = useState();
@@ -68,24 +73,25 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
     []
   );
 
-  // Fetch document when documentId changes
+  // Fetch document when documentId changes (if not already in store with content)
   useEffect(() => {
-    const fetchDocument = async () => {
+    const loadDocument = async () => {
       setIsLoading(true);
       try {
-        const fetchedDocument = await documentClientService.getById(documentId);
-        if (fetchedDocument) {
-          setDocument(fetchedDocument);
+        // Check if document exists in store with content
+        if (!document?.editorData && !document?.content) {
+          // Fetch from API if not cached
+          await fetchDocumentById(documentId);
         }
       } catch (error) {
-        console.error('[EditorPanel] Error fetching document:', error);
+        console.error('[EditorPanel] Error loading document:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchDocument();
-  }, [documentId]);
+    loadDocument();
+  }, [documentId, document?.editorData, document?.content, fetchDocumentById]);
 
   // Calculate initial content from document
   const initialContent: JSONContent = useMemo(() => {
@@ -122,8 +128,15 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
     setCharsCount(editor.storage.characterCount.words());
     const htmlContent = highlightCodeblocks(editor.getHTML());
     
+    // Update store immediately (optimistic update)
+    internal_updateSingleDocument(document.id, {
+      content: htmlContent,
+      editorData: json,
+    });
+    
+    // Then save to API
     try {
-      await documentClientService.update(document.id, {
+      await useDocumentStore.getState().updateDocument(document.id, {
         content: htmlContent,
         editorData: json,
       });

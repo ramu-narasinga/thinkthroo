@@ -77,19 +77,23 @@ export function Code(props: CodeProps) {
 async function render(lang: string, code: string) {
   if (!code) return null;
 
-  const { getSingletonHighlighter } = await import("shiki/bundle/web");
-  const highlighter = await getSingletonHighlighter({
-    langs: [lang],
-    themes: ["vesper", "one-light"],
-  });
+  try {
+    const { getSingletonHighlighter } = await import("shiki");
+    const highlighter = await getSingletonHighlighter({
+      langs: import.meta.webpackIgnore ? [] : Object.keys((await import("shiki/langs")).bundledLanguages),
+      themes: ["vesper", "one-light"],
+    });
+    
+    // Load the specific language if not already loaded
+    await highlighter.loadLanguage(lang);
 
-  const hast = highlighter.codeToHast(code, {
-    lang,
-    themes: {
-      light: "one-light",
-      dark: "vesper",
-    },
-    defaultColor: false,
+    const hast = highlighter.codeToHast(code, {
+      lang,
+      themes: {
+        light: "one-light",
+        dark: "vesper",
+      },
+      defaultColor: false,
     transformers: [
       {
         // add empty space to empty lines, so it has a height in 'display: grid' layout
@@ -105,17 +109,28 @@ async function render(lang: string, code: string) {
     ],
   });
 
-  return toJsxRuntime(hast, {
-    Fragment,
-    jsx,
-    jsxs,
-    development: false,
-    components: {
-      pre: (props) => (
-        <CodeBlock keepBackground {...props}>
-          <Pre>{props.children}</Pre>
-        </CodeBlock>
-      ),
-    },
-  });
+    return toJsxRuntime(hast, {
+      Fragment,
+      jsx,
+      jsxs,
+      development: false,
+      components: {
+        pre: (props) => (
+          <CodeBlock keepBackground {...props}>
+            <Pre>{props.children}</Pre>
+          </CodeBlock>
+        ),
+      },
+    });
+  } catch (error) {
+    // If language is not supported, render as plain code block
+    console.warn(`Language "${lang}" not supported by Shiki, rendering as plain text`);
+    return (
+      <CodeBlock>
+        <Pre>
+          <code>{code}</code>
+        </Pre>
+      </CodeBlock>
+    );
+  }
 }

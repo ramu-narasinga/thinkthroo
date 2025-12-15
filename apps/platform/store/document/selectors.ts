@@ -11,6 +11,13 @@ export const selectedDocumentSelector = (s: {
 };
 
 /**
+ * Get document by ID
+ */
+export const documentByIdSelector = (documentId: string) => (s: { documents: DocumentItem[] }) => {
+  return s.documents.find((doc) => doc.id === documentId) || null;
+};
+
+/**
  * Get all files (excluding folders)
  */
 export const filesSelector = (s: { documents: DocumentItem[] }) => {
