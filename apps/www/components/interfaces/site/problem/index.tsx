@@ -1,5 +1,5 @@
 // import { AlertCircle, GitPullRequest, Zap } from "lucide-react"
-// import { Card } from "@thinkthroo/ui/components/components/card"
+// import { Card } from "@thinkthroo/ui/components/card"
 
 // export function Problem() {
 //   const problems = [
@@ -172,7 +172,7 @@
 // }
 
 import { AlertCircle, GitPullRequest, Zap } from "lucide-react"
-import { Card } from "@thinkthroo/ui/components/components/card"
+import { Card } from "@thinkthroo/ui/components/card"
 
 export function Problem() {
   const problems = [

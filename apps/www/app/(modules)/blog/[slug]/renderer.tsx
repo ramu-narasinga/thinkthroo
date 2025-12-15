@@ -8,7 +8,7 @@ import {
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { Heading } from "fumadocs-ui/components/heading";
 import { Card } from "fumadocs-ui/components/card";
-import { Code } from "@thinkthroo/ui/components/components/docs/code";
+import { Code } from "@thinkthroo/ui/components/code";
 import { urlFor } from "@/sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { buildMarksTree } from "@portabletext/toolkit";

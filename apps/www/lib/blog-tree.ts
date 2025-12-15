@@ -1,21 +1,19 @@
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import React, { ReactNode } from "react";
-import { POST_QUERYResult } from "@/sanity/types";
-import { sanityFetch } from "@/sanity/lib/live";
+import { cache } from "react";
+import { client } from "@/sanity/client";
 import { ALL_POSTS_QUERY } from "@/sanity/lib/queries";
+import { POST_QUERYResult } from "@/sanity/types";
 import type * as PageTree from "fumadocs-core/page-tree";
 
-export default async function Layout({ children }: { children: ReactNode }) {
-  return (
-      <Content>{children}</Content>
-  );
-}
-
-async function Content({ children }: { children: ReactNode }) {
-  const docs = (await sanityFetch({ query: ALL_POSTS_QUERY }))
-    .data as POST_QUERYResult;
+/**
+ * Cached function to build blog sidebar tree from Sanity posts
+ * Uses React cache() to deduplicate requests within a single render
+ */
+export const getBlogTree = cache(async (): Promise<PageTree.Root> => {
+  // Fetch all posts - cached at build time with no revalidation
+  const docs = await client.fetch<POST_QUERYResult>(ALL_POSTS_QUERY);
+  
   const root: PageTree.Root = {
-    name: "Docs",
+    name: "Blog",
     children: [],
   };
 
@@ -69,7 +67,7 @@ async function Content({ children }: { children: ReactNode }) {
         monthFolder.children.push({
           type: "page",
           name: page.title ?? "",
-          url: `/sanity-docs/${page.slug}`,
+          url: `/blog/${page.slug}`,
         });
       }
 
@@ -79,9 +77,5 @@ async function Content({ children }: { children: ReactNode }) {
     root.children.push(yearFolder);
   }
 
-  return (
-    <DocsLayout tree={root}>
-      {children}
-    </DocsLayout>
-  );
-}
+  return root;
+});

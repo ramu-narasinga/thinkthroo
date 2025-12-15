@@ -5,7 +5,7 @@ import {
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/interfaces/page/header";
-import { Button } from "@thinkthroo/ui/components/components/button";
+import { Button } from "@thinkthroo/ui/components/button";
 import { Announcement } from "../../page/announcement";
 import Link from "next/link";
 import { siteConfig } from "@/lib/config";

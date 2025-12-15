@@ -1,17 +1,14 @@
-import { docsConfig } from "@/config/docs"
-import { DocsSidebarNav } from "@/components/interfaces/course/side-nav"
-import { ScrollArea } from "@thinkthroo/ui/components/components/scroll-area"
-import { fetchGroupedPostsForSidebar } from "@/lib/articles"
+import { DocsLayout } from "fumadocs-ui/layouts/docs";
+import React, { ReactNode } from "react";
+import { getBlogTree } from "@/lib/blog-tree";
 
-export interface CommonCourseLayoutProps {
-  children: React.ReactNode
-}
-
-export default async function CommonCourseLayout({ children }: CommonCourseLayoutProps) {
+export default async function Layout({ children }: { children: ReactNode }) {
+  // Fetch cached blog tree - uses React cache() to deduplicate within render
+  const tree = await getBlogTree();
 
   return (
-    <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
+    <DocsLayout tree={tree}>
       {children}
-    </div>
-  )
+    </DocsLayout>
+  );
 }

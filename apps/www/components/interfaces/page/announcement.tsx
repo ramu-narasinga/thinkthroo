@@ -3,7 +3,7 @@ import Link from "next/link"
 import { ArrowRightIcon } from "lucide-react"
 import { useUmami } from "@/hooks/use-umami"
 
-import { Badge } from "@thinkthroo/ui/components/components/badge"
+import { Badge } from "@thinkthroo/ui/components/badge"
 
 export function Announcement() {
   const { track } = useUmami();

@@ -2,7 +2,7 @@ import {
     Alert,
     AlertDescription,
     AlertTitle,
-  } from "@thinkthroo/ui/components/components/alert"
+  } from "@thinkthroo/ui/components/alert"
   
   interface CalloutProps {
     icon?: string

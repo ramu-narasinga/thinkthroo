@@ -7,13 +7,13 @@ import { NpmCommands } from "@/types/unist"
 
 import { Event, trackEvent } from "@/lib/events"
 import { cn } from "@/lib/utils"
-import { Button, ButtonProps } from "@thinkthroo/ui/components/components/button"
+import { Button, ButtonProps } from "@thinkthroo/ui/components/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@thinkthroo/ui/components/components/dropdown-menu"
+} from "@thinkthroo/ui/components/dropdown-menu"
 
 interface CopyButtonProps extends ButtonProps {
   value: string

@@ -1,5 +1,5 @@
 import { BookOpen, Code2, Zap, Lock, Gauge, AlertTriangle, Boxes, Rocket, Layers, TrendingUp, Building2 } from "lucide-react"
-import { Card } from "@thinkthroo/ui/components/components/card"
+import { Card } from "@thinkthroo/ui/components/card"
 
 export function ProductionGradeProjects() {
   const learningTopics = [

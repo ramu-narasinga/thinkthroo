@@ -19,19 +19,19 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@thinkthroo/ui/components/components/accordion"
+} from "@thinkthroo/ui/components/accordion"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@thinkthroo/ui/components/components/alert"
-import { AspectRatio } from "@thinkthroo/ui/components/components/aspect-ratio"
+} from "@thinkthroo/ui/components/alert"
+import { AspectRatio } from "@thinkthroo/ui/components/aspect-ratio"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@thinkthroo/ui/components/components/tabs"
+} from "@thinkthroo/ui/components/tabs"
 import { Style } from "@/registry/registry-styles"
 
 export const components = {

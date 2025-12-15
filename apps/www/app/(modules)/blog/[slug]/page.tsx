@@ -1,56 +1,78 @@
-import { notFound } from "next/navigation"
-
-import type { Metadata } from "next"
-import Link from "next/link"
-import { ChevronRightIcon, ExternalLinkIcon } from "@radix-ui/react-icons"
-import Balancer from "react-wrap-balancer"
-
-import { siteConfig } from "@/lib/config"
-import { getTableOfContents } from "@/lib/toc"
-import { absoluteUrl, cn } from "@/lib/utils"
-import { components } from "@/components/interfaces/course/mdx-components"
-import { DocsPager } from "@/components/interfaces/course/pager"
-import { DashboardTableOfContents } from "@/components/interfaces/course/toc"
-import { badgeVariants } from "@thinkthroo/ui/components/components/badge"
-import { ScrollArea } from "@thinkthroo/ui/components/components/scroll-area"
-import { fetchGroupedPostsForSidebar, fetchPostBySlug, urlFor } from "@/lib/articles"
-import serializeMDX from "@thinkthroo/lesson/markdown/serialize-mdx"
-import ConvertKitForm from "@/components/interfaces/site/forms/newsletter"
-import MDX from "@thinkthroo/lesson/markdown/mdx"
-import { DocsSidebarNav } from "@/components/interfaces/course/side-nav"
+import {
+  DocsPage,
+  DocsBody,
+  DocsDescription,
+  DocsTitle,
+} from "fumadocs-ui/page";
+import { notFound } from "next/navigation";
+import { PortableTextBlock } from "sanity";
+import { Renderer } from "@/app/(modules)/blog/[slug]/renderer";
+import { fetchPostBySlug } from "@/lib/articles";
 import { client } from "@/sanity/client";
+import { ALL_POSTS_QUERY } from "@/sanity/lib/queries";
+import { siteConfig } from "@/lib/config";
+import { Metadata } from "next";
+import { absoluteUrl } from "@/lib/utils";
+import { extractTocFromMarkdown } from "@/lib/markdown-utils";
 
-interface DocPageProps {
-  params: Promise<{
-    slug: string
-  }>
+export default async function Page(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = await props.params;
+  const page = await fetchPostBySlug(params.slug);
+
+  if (!page) notFound();
+
+  let toc;
+  
+  if (typeof page.body === 'string') {
+    toc = extractTocFromMarkdown(page.body);
+  } else if (page.toc) {
+    toc = page.toc.map((item: any) => ({
+      depth: item.level ?? 0,
+      title: (
+        <Renderer
+          body={{
+            ...(item as PortableTextBlock),
+            style: undefined,
+          }}
+        />
+      ),
+      url: `#${item._key}`,
+    }));
+  }
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.title}</DocsTitle>
+      <DocsDescription>{page.description}</DocsDescription>
+      <DocsBody>
+        <Renderer body={page.body} />
+      </DocsBody>
+    </DocsPage>
+  );
 }
 
-const POST_QUERY = `
-  *[_type == "post" && slug.current == $slug][0]{
-    _id,
-    title,
-    description,
-    slug,
-    body,
-    categories,
-    links
-  }
-`
+export async function generateStaticParams() {
+  const slugs = await client.fetch(ALL_POSTS_QUERY)
+
+  return slugs.map((doc: { slug: string }) => ({
+    slug: doc.slug
+  }))
+}
 
 async function getDocFromParams(params: { slug: string }) {
   const slug = params.slug || "";
-  
-  const doc = await client.fetch(POST_QUERY, { slug })
+  const doc = await fetchPostBySlug(slug)
 
   return doc || null
 }
 
 export async function generateMetadata({
   params,
-}: DocPageProps): Promise<Metadata> {
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
   const resolvedParams = await params;
-  console.log("Fetching doc for slug:", resolvedParams);
   const doc = await getDocFromParams(resolvedParams)
 
   if (!doc) {
@@ -84,128 +106,3 @@ export async function generateMetadata({
   }
 }
 
-export async function generateStaticParams() {
-  const slugs = await client.fetch(`
-    *[_type == "post" && defined(slug.current)][]{
-      "slug": slug.current
-    }
-  `)
-
-  return slugs.map((doc: { slug: string }) => ({
-    slug: doc.slug
-  }))
-}
-
-export default async function DocPage({ params }: DocPageProps) {
-  const resolvedParams = await params;
-  const post = await fetchPostBySlug(resolvedParams.slug);
-
-  console.log("Fetching doc for slug:", resolvedParams.slug);
-  const doc = await getDocFromParams(resolvedParams)
-
-  const postImageUrl = post.image
-    ? urlFor(post.image)?.width(550).height(310).url()
-    : null;
-
-  const articleBodySerialized =
-    typeof post.body === 'string' &&
-    (await serializeMDX(post.body, 
-      // {
-      //   useShikiTwoslash: true,
-      //   syntaxHighlighterOptions: {
-      //     theme: 'dark-plus',
-      //     // showCopyButton: true,
-      //   },
-      // }
-  ))
-
-  if (!doc) {
-    notFound()
-  }
-
-  const toc = await getTableOfContents(post.body)
-  const groupedPosts = await fetchGroupedPostsForSidebar()
-
-  return (
-    <>
-      <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block">
-        <ScrollArea className="h-full py-6 pr-6 lg:py-8">
-          <DocsSidebarNav
-            // config={docsConfig}
-            config={{ sidebarNav: groupedPosts }}
-          />
-        </ScrollArea>
-      </aside>
-      <main className="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
-        <div className="mx-auto w-full min-w-0">
-          <div className="mb-4 flex items-center space-x-1 text-sm leading-none text-muted-foreground">
-            <div className="truncate">Blog</div>
-            <ChevronRightIcon className="h-3.5 w-3.5" />
-            <div className="text-foreground">{doc.title}</div>
-          </div>
-          <div className="space-y-2">
-            <h1 className={cn("scroll-m-20 text-3xl font-bold tracking-tight")}>
-              {doc.title}
-            </h1>
-            {doc.description && (
-              <p className="text-base text-muted-foreground">
-                <Balancer>{doc.description}</Balancer>
-              </p>
-            )}
-          </div>
-          {doc.links ? (
-            <div className="flex items-center space-x-2 pt-4">
-              {doc.links?.doc && (
-                <Link
-                  href={doc.links.doc}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={cn(badgeVariants({ variant: "secondary" }), "gap-1")}
-                >
-                  Docs
-                  <ExternalLinkIcon className="h-3 w-3" />
-                </Link>
-              )}
-              {doc.links?.api && (
-                <Link
-                  href={doc.links.api}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={cn(badgeVariants({ variant: "secondary" }), "gap-1")}
-                >
-                  API Reference
-                  <ExternalLinkIcon className="h-3 w-3" />
-                </Link>
-              )}
-            </div>
-          ) : null}
-          <div className="pb-12 pt-8">
-            {/* <Mdx code={doc.body.code} /> */}
-            <MDX
-              // contents={articleBodySerialized}
-              // components={components}
-              source={post.body}  // Pass the raw MDX content here
-              components={components}
-            />
-            <ConvertKitForm />
-          </div>
-          <DocsPager doc={{ 
-            slug: resolvedParams.slug,
-            sidebarNav: groupedPosts 
-          }} />
-        </div>
-        {/* {doc.toc && ( */}
-          <div className="hidden text-sm xl:block">
-            <div className="sticky top-16 -mt-10 pt-4">
-              <ScrollArea className="pb-10">
-                <div className="sticky top-16 -mt-10 h-[calc(100vh-3.5rem)] py-12">
-                  <DashboardTableOfContents toc={toc} />
-                </div>
-              </ScrollArea>
-            </div>
-          </div>
-        {/* )} */}
-      </main>
-    </>
-  )
-}
