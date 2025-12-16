@@ -13,11 +13,13 @@ import { Label } from "@thinkthroo/ui/components/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@thinkthroo/ui/components/select"
 import { Input } from "@thinkthroo/ui/components/input"
 import { Button } from "@thinkthroo/ui/components/button"
+import { Switch } from "@thinkthroo/ui/components/switch"
 import { HelpCircle } from "lucide-react"
 
 export function GeneralTab() {
   const [language, setLanguage] = useState("")
   const [tone, setTone] = useState("")
+  const [useOrgSettings, setUseOrgSettings] = useState(false)
 
   return (
     <Card>
@@ -29,6 +31,26 @@ export function GeneralTab() {
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* Organization Settings Toggle */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+          <div>
+            <Label className="text-base font-semibold">Use Organization Settings</Label>
+            <p className="text-md text-muted-foreground mt-1">
+              Organization settings will be applied. If disabled, the
+              repository-specific settings configured below will be used.
+            </p>
+          </div>
+          <div className="flex items-center">
+            <Switch
+              checked={useOrgSettings}
+              onCheckedChange={setUseOrgSettings}
+              className="data-[state=checked]:bg-black data-[state=unchecked]:bg-gray-200"
+            />
+          </div>
+        </div>
+
+        <hr />
+
         {/* Review Language */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
           <div>
