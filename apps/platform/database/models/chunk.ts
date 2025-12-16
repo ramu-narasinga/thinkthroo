@@ -1,4 +1,4 @@
-import { ChunkMetadata, FileChunk } from '@lobechat/types';
+import { ChunkMetadata, FileChunk } from '@/types/chunk';
 import { and, asc, cosineDistance, count, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { chunk } from 'lodash-es';
 
@@ -7,9 +7,9 @@ import {
   NewUnstructuredChunkItem,
   chunks,
   embeddings,
-  fileChunks,
-  files,
   unstructuredChunks,
+  documents,
+  documentChunks,
 } from '../schemas';
 import { ThinkThrooDatabase } from '../type';
 
@@ -23,7 +23,7 @@ export class ChunkModel {
     this.db = db;
   }
 
-  bulkCreate = async (params: NewChunkItem[], fileId: string) => {
+  bulkCreate = async (params: NewChunkItem[], documentId: string) => {
     return this.db.transaction(async (trx) => {
       if (params.length === 0) return [];
 
@@ -31,12 +31,12 @@ export class ChunkModel {
 
       const fileChunksData = result.map((chunk) => ({
         chunkId: chunk.id,
-        fileId,
+        documentId,
         userId: this.userId,
       }));
 
       if (fileChunksData.length > 0) {
-        await trx.insert(fileChunks).values(fileChunksData);
+        await trx.insert(documentChunks).values(fileChunksData);
       }
 
       return result;
@@ -55,8 +55,8 @@ export class ChunkModel {
     const orphanedChunks = await this.db
       .select({ chunkId: chunks.id })
       .from(chunks)
-      .leftJoin(fileChunks, eq(chunks.id, fileChunks.chunkId))
-      .where(isNull(fileChunks.fileId));
+      .leftJoin(documentChunks, eq(chunks.id, documentChunks.chunkId))
+      .where(isNull(documentChunks.documentId));
 
     const ids = orphanedChunks.map((chunk) => chunk.chunkId);
     if (ids.length === 0) return;
@@ -91,8 +91,8 @@ export class ChunkModel {
         updatedAt: chunks.updatedAt,
       })
       .from(chunks)
-      .innerJoin(fileChunks, eq(chunks.id, fileChunks.chunkId))
-      .where(and(eq(fileChunks.fileId, id), eq(chunks.userId, this.userId)))
+      .innerJoin(documentChunks, eq(chunks.id, documentChunks.chunkId))
+      .where(and(eq(documentChunks.documentId, id), eq(chunks.userId, this.userId)))
       .limit(20)
       .offset(page * 20)
       .orderBy(asc(chunks.index));
@@ -100,7 +100,13 @@ export class ChunkModel {
     return data.map((item) => {
       const metadata = item.metadata as ChunkMetadata;
 
-      return { ...item, metadata, pageNumber: metadata?.pageNumber } as FileChunk;
+      return {
+        ...item,
+        metadata,
+        pageNumber: metadata?.pageNumber,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+        updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+      } as FileChunk;
     });
   };
 
@@ -108,8 +114,8 @@ export class ChunkModel {
     const data = await this.db
       .select()
       .from(chunks)
-      .innerJoin(fileChunks, eq(chunks.id, fileChunks.chunkId))
-      .where(eq(fileChunks.fileId, id));
+      .innerJoin(documentChunks, eq(chunks.id, documentChunks.chunkId))
+      .where(eq(documentChunks.documentId, id));
 
     return data
       .map((item) => item.chunks)
@@ -122,23 +128,23 @@ export class ChunkModel {
 
     return this.db
       .select({
-        count: count(fileChunks.chunkId),
-        id: fileChunks.fileId,
+        count: count(documentChunks.chunkId),
+        id: documentChunks.documentId,
       })
-      .from(fileChunks)
-      .where(inArray(fileChunks.fileId, ids))
-      .groupBy(fileChunks.fileId);
+      .from(documentChunks)
+      .where(inArray(documentChunks.documentId, ids))
+      .groupBy(documentChunks.documentId);
   };
 
   countByFileId = async (ids: string) => {
     const data = await this.db
       .select({
-        count: count(fileChunks.chunkId),
-        id: fileChunks.fileId,
+        count: count(documentChunks.chunkId),
+        id: documentChunks.documentId,
       })
-      .from(fileChunks)
-      .where(eq(fileChunks.fileId, ids))
-      .groupBy(fileChunks.fileId);
+      .from(documentChunks)
+      .where(eq(documentChunks.documentId, ids))
+      .groupBy(documentChunks.documentId);
 
     return data[0]?.count ?? 0;
   };
@@ -155,8 +161,8 @@ export class ChunkModel {
 
     const data = await this.db
       .select({
-        fileId: fileChunks.fileId,
-        fileName: files.name,
+        documentId: documentChunks.documentId,
+        fileName: documents.name,
         id: chunks.id,
         index: chunks.index,
         metadata: chunks.metadata,
@@ -166,9 +172,9 @@ export class ChunkModel {
       })
       .from(chunks)
       .leftJoin(embeddings, eq(chunks.id, embeddings.chunkId))
-      .leftJoin(fileChunks, eq(chunks.id, fileChunks.chunkId))
-      .leftJoin(files, eq(fileChunks.fileId, files.id))
-      .where(fileIds ? inArray(fileChunks.fileId, fileIds) : undefined)
+      .leftJoin(documentChunks, eq(chunks.id, documentChunks.chunkId))
+      .leftJoin(documents, eq(documentChunks.documentId, documents.id))
+      .where(fileIds ? inArray(documentChunks.documentId, fileIds) : undefined)
       .orderBy((t) => desc(t.similarity))
       .limit(30);
 
@@ -196,8 +202,8 @@ export class ChunkModel {
 
     const result = await this.db
       .select({
-        fileId: files.id,
-        fileName: files.name,
+        documentId: documents.id,
+        fileName: documents.name,
         id: chunks.id,
         index: chunks.index,
         metadata: chunks.metadata,
@@ -207,16 +213,16 @@ export class ChunkModel {
       })
       .from(chunks)
       .leftJoin(embeddings, eq(chunks.id, embeddings.chunkId))
-      .leftJoin(fileChunks, eq(chunks.id, fileChunks.chunkId))
-      .leftJoin(files, eq(files.id, fileChunks.fileId))
-      .where(inArray(fileChunks.fileId, fileIds))
+      .leftJoin(documentChunks, eq(chunks.id, documentChunks.chunkId))
+      .leftJoin(documents, eq(documents.id, documentChunks.documentId))
+      .where(inArray(documentChunks.documentId, fileIds))
       .orderBy((t) => desc(t.similarity))
       // Relaxed to 15 for now
       .limit(topK);
 
     return result.map((item) => {
       return {
-        fileId: item.fileId,
+        documentId: item.documentId,
         fileName: item.fileName,
         id: item.id,
         index: item.index,

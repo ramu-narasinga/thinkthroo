@@ -22,7 +22,6 @@ import { LinkSelector } from "./selectors/link-selector";
 import { MathSelector } from "./selectors/math-selector";
 import { NodeSelector } from "./selectors/node-selector";
 import { Separator } from "./ui/separator";
-import { DocumentItem } from '@/database/schemas';
 import { useDocumentStore } from '@/store/document';
 import { documentByIdSelector } from '@/store/document/selectors';
 
@@ -198,7 +197,7 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
               {suggestionItems.map((item) => (
                 <EditorCommandItem
                   value={item.title}
-                  onCommand={(val) => item.command(val)}
+                  onCommand={(val) => item.command?.(val)}
                   className="flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent aria-selected:bg-accent"
                   key={item.title}
                 >

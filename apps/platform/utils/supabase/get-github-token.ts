@@ -11,7 +11,7 @@ export async function getGithubToken() {
   return githubToken;
 }
 
-export async function getInstallationAccessToken(installationId: string) {
+export async function getInstallationAccessToken(installationId: string): Promise<string> {
   const octokit = new Octokit({
     authStrategy: createAppAuth,
     auth: {
@@ -21,7 +21,7 @@ export async function getInstallationAccessToken(installationId: string) {
     },
   });
 
-  const token = await octokit.auth({ type: "installation" });
+  const token = await octokit.auth({ type: "installation" }) as { token: string };
 
   return token.token;
 }

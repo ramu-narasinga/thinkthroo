@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { authedProcedure, router } from '@/lib/trpc/lambda';
 import { serverDatabase } from '@/lib/trpc/lambda/middleware';
-import { DocumentService } from '@/service/document';
+import { DocumentService } from '@/server/service/document';
 import { eq, and, or } from 'drizzle-orm';
 import { repositories } from '@/database/schemas';
 

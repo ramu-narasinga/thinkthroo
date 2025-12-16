@@ -1,4 +1,4 @@
-import { ClientSecretPayload } from '@/types';
+import { ClientSecretPayload } from '@/types/auth';
 
 import { SECRET_XOR_KEY } from '@/const/auth';
 

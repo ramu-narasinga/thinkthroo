@@ -1,4 +1,4 @@
-import { getXorPayload } from '@/utils/server';
+import { getXorPayload } from '@/utils/server/xor';
 import { TRPCError } from '@trpc/server';
 
 import { trpc } from '../init';

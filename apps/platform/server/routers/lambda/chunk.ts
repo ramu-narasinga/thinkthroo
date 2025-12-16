@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { authedProcedure, router } from "@/lib/trpc/lambda";
 import { serverDatabase } from "@/lib/trpc/lambda/middleware";
+import { ChunkModel } from "@/database/models/chunk";
+import { ChunkService } from "@/service/chunk";
 
 const chunkProcedure = authedProcedure
   .use(serverDatabase)
@@ -50,9 +52,9 @@ export const chunkRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const asyncTaskId = await ctx.chunkService.asyncParseFileToChunks(
-        input.id,
+        // input.id,
         // ctx.jwtPayload,
-        input.skipExist
+        // input.skipExist
       );
 
       return { id: asyncTaskId, success: true };

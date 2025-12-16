@@ -27,8 +27,7 @@ export const createDocumentSlice: StateCreator<
 
     updateDocumentOptimistically: async (id: string, content: string) => {
         try {
-            await documentService.updateDocument({
-                id,
+            await documentService.update(id, {
                 content
             })
         } catch (error) {

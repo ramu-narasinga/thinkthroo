@@ -1,0 +1,1 @@
+export const SECRET_XOR_KEY = 'ThinkThroo · ThinkThroo';
