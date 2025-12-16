@@ -119,23 +119,6 @@ const data = {
       icon: BookMarked,
     },
   ],
-  community: [
-    {
-      name: "Challenges",
-      url: "/challenges",
-      icon: DollarSign,
-    },
-    {
-      name: "Leaderboard",
-      url: "/leaderboard",
-      icon: PieChart,
-    },
-    {
-      name: "Discord",
-      url: "/discord",
-      icon: LifeBuoy,
-    }
-  ]
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -167,7 +150,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* <NavMain items={data.navMain} /> */}
         <NavProjects projects={data.codearc} label="CodeArc" />
         <NavProjects projects={data.learn} label="Learn" />
-        <NavProjects projects={data.community} label="Community" />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
