@@ -1,4 +1,4 @@
-export default function DashboardPage() {
+export default function ArchitecturePage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-8">
       <div className="max-w-2xl text-center space-y-4">
