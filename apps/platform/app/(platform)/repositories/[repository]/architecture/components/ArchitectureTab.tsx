@@ -157,7 +157,7 @@ export default function ArchitectureTab() {
   }
 
   return (
-    <div className="flex min-h-full bg-white border rounded shadow-sm overflow-hidden">
+    <div className="flex min-h-full bg-white rounded overflow-hidden h-full">
       {/* File Tree Sidebar */}
       <FileTree
         onCreateFile={(parentId) => handleOpenCreate('file', parentId)}

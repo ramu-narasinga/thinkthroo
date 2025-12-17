@@ -54,7 +54,7 @@ export function FileTree({
   };
 
   return (
-    <aside className="w-80 border-r px-3 py-4 bg-white flex flex-col gap-3">
+    <aside className="w-80 border-r h-full px-3 py-4 bg-white flex flex-col gap-3">
       {/* Header with actions */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Architecture</h3>

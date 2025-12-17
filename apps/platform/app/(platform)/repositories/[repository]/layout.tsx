@@ -28,13 +28,7 @@ export default function RepositoryDetailLayout({
   };
 
   return (
-    <div className="px-6 space-y-2">
-      {/* Header with repository name and Apply Changes button */}
-      <div className="mb-6">
-        <div className="flex justify-between items-start">
-          <h1 className="text-3xl font-semibold lowercase">{repository}</h1>
-        </div>
-      </div>
+    <div className="h-full px-6 space-y-2">
 
       {/* Tab Navigation */}
       <Tabs value={currentTab} onValueChange={handleTabChange}>
@@ -48,7 +42,7 @@ export default function RepositoryDetailLayout({
       </Tabs>
 
       {/* Tab Content */}
-      <div className="mt-4">{children}</div>
+      <div className="mt-4 h-[92.5%]">{children}</div>
     </div>
   );
 }

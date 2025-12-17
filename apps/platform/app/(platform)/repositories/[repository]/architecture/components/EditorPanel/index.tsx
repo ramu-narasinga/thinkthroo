@@ -173,7 +173,7 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
           immediatelyRender={false}
           initialContent={initialContent}
           extensions={extensions}
-          className="relative w-full h-full max-w-screen-lg border-muted bg-background sm:mb-[calc(20vh)] sm:rounded-lg sm:border"
+          className="relative w-full h-full max-w-screen-lg bg-background sm:mb-[calc(20vh)] sm:rounded-lg"
           editorProps={{
             handleDOMEvents: {
               keydown: (_view, event) => handleCommandNavigation(event),
