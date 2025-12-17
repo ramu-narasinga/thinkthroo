@@ -92,3 +92,34 @@ export function isDescendant(
   if (child.parentId === ancestorId) return true;
   return isDescendant(child.parentId, ancestorId, documents);
 }
+
+/**
+ * Get all parent folder IDs for a document
+ * Returns an array of folder IDs from immediate parent to root
+ */
+export function getParentFolderIds(
+  documentId: string,
+  documents: DocumentItem[]
+): string[] {
+  const parentIds: string[] = [];
+  const document = documents.find((doc) => doc.id === documentId);
+  
+  if (!document || !document.parentId) {
+    return parentIds;
+  }
+
+  let currentParentId: string | null = document.parentId;
+  
+  while (currentParentId) {
+    const parent = documents.find((doc) => doc.id === currentParentId);
+    if (!parent) break;
+    
+    if (parent.type === 'folder') {
+      parentIds.push(parent.id);
+    }
+    
+    currentParentId = parent.parentId || null;
+  }
+
+  return parentIds;
+}

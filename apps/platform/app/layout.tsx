@@ -8,8 +8,11 @@ import "@/styles/globals.css";
 import "@/styles/prosemirror.css";
 
 export const metadata: Metadata = {
-  title: "CodeArc | Enforce Codebase Architecture",
+  title: "CodeArc | Think Throo",
   description: "Enforce codebase architecture using AI.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 }
 
 function RootLayout({

@@ -43,6 +43,8 @@ export function FileTree({
         node={node}
         isExpanded={isFolderExpanded(node.id)}
         isSelected={selectedDocumentId === node.id}
+        selectedDocumentId={selectedDocumentId}
+        isFolderExpanded={isFolderExpanded}
         onToggle={toggleFolder}
         onSelect={handleSelectDocument}
         onRename={onRename}

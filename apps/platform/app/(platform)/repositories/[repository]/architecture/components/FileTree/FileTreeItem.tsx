@@ -23,6 +23,8 @@ export interface FileTreeItemProps {
   level?: number;
   isExpanded: boolean;
   isSelected: boolean;
+  selectedDocumentId: string | null;
+  isFolderExpanded: (id: string) => boolean;
   onToggle: (id: string) => void;
   onSelect: (id: string) => void;
   onRename: (id: string) => void;
@@ -36,6 +38,8 @@ export function FileTreeItem({
   level = 0,
   isExpanded,
   isSelected,
+  selectedDocumentId,
+  isFolderExpanded,
   onToggle,
   onSelect,
   onRename,
@@ -165,8 +169,10 @@ export function FileTreeItem({
                 key={child.id}
                 node={child}
                 level={level + 1}
-                isExpanded={isExpanded}
-                isSelected={isSelected}
+                isExpanded={isFolderExpanded(child.id)}
+                isSelected={selectedDocumentId === child.id}
+                selectedDocumentId={selectedDocumentId}
+                isFolderExpanded={isFolderExpanded}
                 onToggle={onToggle}
                 onSelect={onSelect}
                 onRename={onRename}
