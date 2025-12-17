@@ -12,6 +12,8 @@ import {
   DeleteDocumentModal,
 } from './modals';
 import { documentClientService } from '@/service/document';
+import { useDocumentStore } from '@/store/document';
+import { getParentFolderIds } from '../utils/documentTree';
 
 interface ModalState {
   create: {
@@ -76,8 +78,21 @@ export default function ArchitectureTab() {
   }, [repositoryName]);
 
   // Hooks
-  const { documents, isLoading } = useDocuments(repositoryId || '');
+  const { documents, isLoading, isFirstFetchFinished } = useDocuments(repositoryId || '');
   const { createDocument, updateDocument, deleteDocument } = useDocumentMutations();
+  const expandFolder = useDocumentStore((s) => s.expandFolder);
+
+  // Expand parent folders when a document is selected from URL on page load/refresh
+  useEffect(() => {
+    if (selectedDocumentId && isFirstFetchFinished && documents.length > 0) {
+      const parentFolderIds = getParentFolderIds(selectedDocumentId, documents);
+      
+      // Expand all parent folders so the selected document is visible
+      parentFolderIds.forEach((folderId) => {
+        expandFolder(folderId);
+      });
+    }
+  }, [selectedDocumentId, isFirstFetchFinished, documents, expandFolder]);
 
   // Create handlers
   const handleOpenCreate = useCallback((type: 'file' | 'folder', parentId?: string) => {
