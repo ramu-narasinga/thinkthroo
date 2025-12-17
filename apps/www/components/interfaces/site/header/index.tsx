@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 import { getColors } from "@/lib/colors";
@@ -13,10 +11,9 @@ import { ModeSwitcher } from "@/components/interfaces/site/header/mode-switcher"
 import { Button, buttonVariants } from "@thinkthroo/ui/components/button";
 import { Separator } from "@thinkthroo/ui/components/separator";
 import { SiteConfig } from "./site-config";
-import { useUmami } from "@/hooks/use-umami";
+import { AuthButtons } from "./auth-buttons";
 
 export function SiteHeader() {
-  const { track } = useUmami();
   return (
     <header className="bg-background sticky top-0 z-50 w-full">
       <div className="container-wrapper 3xl:fixed:px-0 px-6">
@@ -60,26 +57,7 @@ export function SiteHeader() {
             <Separator orientation="vertical" />
             <ModeSwitcher />
             <Separator orientation="vertical" />
-            <Button asChild size="sm" variant="outline" className="3xl:flex">
-              <Link 
-                target="_blank" 
-                rel="noreferrer" 
-                href="https://app.thinkthroo.com/signin/email_signin"
-                onClick={() => track('navigation-click', { menu_item: 'login', href: 'https://app.thinkthroo.com/signin/email_signin' })}
-              >
-                Login
-              </Link>
-            </Button>
-            <Button asChild size="sm" variant="default" className="3xl:flex">
-              <Link 
-                target="_blank" 
-                rel="noreferrer" 
-                href="https://app.thinkthroo.com/signin/email_signin"
-                onClick={() => track('navigation-click', { menu_item: 'signup', href: 'https://app.thinkthroo.com/signin/email_signin' })}
-              >
-                Signup
-              </Link>
-            </Button>
+            <AuthButtons />
           </div>
         </div>
       </div>

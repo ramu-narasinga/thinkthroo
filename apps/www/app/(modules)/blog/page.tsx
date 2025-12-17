@@ -1,9 +1,6 @@
 import FeaturedThumb from "@/components/interfaces/blog/featured-thumb";
-import Image from "next/image";
 import Link from "next/link";
-import { DropdownMenu, DropdownMenuTrigger } from "@thinkthroo/ui/components/dropdown-menu";
 import { Button } from "@thinkthroo/ui/components/button";
-import { ChevronDown } from "lucide-react";
 import { client } from "@/sanity/client";
 
 const allCategories = ["All", "Zustand", "React", "Changesets", "Monorepo", "T3 Env"];

@@ -40,8 +40,9 @@ const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]`;
 
 export async function fetchPostBySlug(slug: string) {
     const params = { slug };
-    const options = { next: { revalidate: 30 } };
-    const post = await client.fetch<SanityDocument>(POST_QUERY, params, options);
+    // Use static generation for blog posts - no revalidation
+    // To update content, rebuild the site or use on-demand revalidation via webhook
+    const post = await client.fetch<SanityDocument>(POST_QUERY, params);
     return post;
 }
 

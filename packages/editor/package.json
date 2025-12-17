@@ -1,0 +1,82 @@
+{
+  "name": "@thinkthroo/editor",
+  "version": "1.0.0",
+  "description": "Notion-style WYSIWYG editor with AI-powered autocompletions",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "build": "tsup",
+    "lint": "biome lint ./src",
+    "format": "biome format ./src "
+  },
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.1.1",
+    "@tiptap/core": "^2.11.2",
+    "@tiptap/extension-character-count": "^2.11.2",
+    "@tiptap/extension-code-block-lowlight": "^2.11.2",
+    "@tiptap/extension-color": "^2.11.2",
+    "@tiptap/extension-highlight": "^2.11.2",
+    "@tiptap/extension-horizontal-rule": "^2.11.2",
+    "@tiptap/extension-image": "^2.11.2",
+    "@tiptap/extension-link": "^2.11.2",
+    "@tiptap/extension-placeholder": "^2.11.2",
+    "@tiptap/extension-task-item": "^2.11.2",
+    "@tiptap/extension-task-list": "^2.11.2",
+    "@tiptap/extension-text-style": "^2.11.2",
+    "@tiptap/extension-underline": "^2.11.2",
+    "@tiptap/extension-youtube": "^2.11.2",
+    "@tiptap/pm": "^2.11.2",
+    "@tiptap/react": "^2.11.2",
+    "@tiptap/starter-kit": "^2.11.2",
+    "@tiptap/suggestion": "^2.11.2",
+    "@types/node": "^22.10.6",
+    "cmdk": "^1.0.4",
+    "jotai": "^2.11.0",
+    "react-markdown": "^9.0.3",
+    "react-moveable": "^0.56.0",
+    "react-tweet": "^3.2.1",
+    "katex": "^0.16.20",
+    "tippy.js": "^6.3.7",
+    "tiptap-extension-global-drag-handle": "^0.1.16",
+    "tiptap-markdown": "^0.8.10",
+    "tunnel-rat": "^0.1.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/katex": "^0.16.7",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@thinkthroo/tsconfig": "*",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3"
+  },
+  "author": "Steven Tey <stevensteel97@gmail.com>",
+  "homepage": "https://novel.sh",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/steven-tey/novel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/steven-tey/novel/issues"
+  },
+  "keywords": [
+    "ai",
+    "novel",
+    "editor",
+    "markdown",
+    "nextjs",
+    "react"
+  ]
+}

@@ -20,8 +20,7 @@ export function GitHubLink() {
   )
 }
 
-export async function StarsCount() {
-
+async function StarsCount() {
   let stars = await getRepoStars("ramu-narasinga/thinkthroo")
 
   return (
