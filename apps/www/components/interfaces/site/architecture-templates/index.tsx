@@ -4,9 +4,12 @@ import { useState } from "react"
 import { CheckCircle, Zap, Layers, Sprout, TreeDeciduous, Hammer } from "lucide-react"
 import { Card } from "@thinkthroo/ui/components/card"
 import { Button } from "@thinkthroo/ui/components/button"
+import { useUmami } from "@/hooks/use-umami"
+import Link from "next/link"
 
 export function ArchitectureTemplates() {
   const [selectedTemplate, setSelectedTemplate] = useState("canopy")
+  const { track } = useUmami();
 
   const templates = [
     {
@@ -110,7 +113,10 @@ export function ArchitectureTemplates() {
               {templates.map((template) => (
                 <button
                   key={template.id}
-                  onClick={() => setSelectedTemplate(template.id)}
+                  onClick={() => {
+                    setSelectedTemplate(template.id);
+                    track('architecture-template-select', { templateId: template.id, templateName: template.name });
+                  }}
                   className="w-full text-left transition-all duration-300"
                 >
                   <Card
@@ -195,7 +201,16 @@ export function ArchitectureTemplates() {
               </div>
 
               <div className="w-full flex justify-center">
-                <Button variant="default" className="mt-6">Get Started</Button>
+                <Button asChild variant="default" className="mt-6">
+                  <Link
+                    href="https://app.thinkthroo.com/architecture"
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => track('architecture-get-started', { button: 'Get Started', href: 'https://app.thinkthroo.com/architecture' })}
+                  >
+                    Get Started
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
