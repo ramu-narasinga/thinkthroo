@@ -62,6 +62,7 @@
     "@trpc/next": "^11.7.1",
     "@trpc/react-query": "^11.7.1",
     "@trpc/server": "^11.7.1",
+    "@vercel/blob": "^2.0.0",
     "ahooks": "^3.9.6",
     "ai": "^5.0.108",
     "class-variance-authority": "^0.7.1",

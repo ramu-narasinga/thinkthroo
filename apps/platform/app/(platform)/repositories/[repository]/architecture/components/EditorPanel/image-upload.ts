@@ -2,11 +2,16 @@ import { createImageUpload } from "@thinkthroo/editor";
 import { toast } from "sonner";
 
 const onUpload = (file: File) => {
+  // Generate timestamp-based filename to avoid encoding issues
+  const timestamp = Date.now();
+  const extension = file.type.split("/")[1] || "png";
+  const filename = `image-${timestamp}.${extension}`;
+
   const promise = fetch("/api/upload", {
     method: "POST",
     headers: {
       "content-type": file?.type || "application/octet-stream",
-      "x-vercel-filename": file?.name || "image.png",
+      "x-vercel-filename": filename,
     },
     body: file,
   });
