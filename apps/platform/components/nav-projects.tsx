@@ -9,8 +9,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@thinkthroo/ui/components/sidebar"
 import { usePathname } from "next/navigation"
+import { useUmamiTracking } from "@/hooks/useUmamiTracking"
 
 export function NavProjects({
   projects,
@@ -24,6 +26,17 @@ export function NavProjects({
   label: string
 }) {
   const pathname = usePathname()
+  const { isMobile } = useSidebar()
+  const { trackEvent } = useUmamiTracking()
+
+  const handleNavClick = (itemName: string, url: string) => {
+    trackEvent("sidebar_navigation", {
+      item: itemName,
+      url: url,
+      section: label,
+      device: isMobile ? "mobile" : "desktop",
+    })
+  }
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -32,7 +45,7 @@ export function NavProjects({
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild isActive={pathname === item.url}>
-              <a href={item.url}>
+              <a href={item.url} onClick={() => handleNavClick(item.name, item.url)}>
                 <item.icon />
                 <span>{item.name}</span>
               </a>

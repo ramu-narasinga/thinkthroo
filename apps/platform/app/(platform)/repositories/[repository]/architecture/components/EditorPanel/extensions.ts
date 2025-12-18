@@ -14,11 +14,14 @@ import {
   TaskItem,
   TaskList,
   TextStyle,
+  TiptapImage,
   TiptapLink,
   TiptapUnderline,
   Twitter,
   UpdatedImage,
+  UploadImagesPlugin,
   Youtube,
+  FirstHeading,
 } from "@thinkthroo/editor";
 
 import { cx } from "class-variance-authority";
@@ -33,6 +36,21 @@ const tiptapLink = TiptapLink.configure({
     class: cx(
       "text-muted-foreground underline underline-offset-[3px] hover:text-primary transition-colors cursor-pointer",
     ),
+  },
+});
+
+const tiptapImage = TiptapImage.extend({
+  addProseMirrorPlugins() {
+    return [
+      UploadImagesPlugin({
+        imageClass: cx("opacity-40 rounded-lg border border-stone-200"),
+      }),
+    ];
+  },
+}).configure({
+  allowBase64: true,
+  HTMLAttributes: {
+    class: cx("rounded-lg border border-muted"),
   },
 });
 
@@ -138,11 +156,14 @@ const markdownExtension = MarkdownExtension.configure({
   transformCopiedText: false,
 });
 
+const firstHeading = FirstHeading.configure();
+
 export const defaultExtensions = [
   starterKit,
   placeholder,
   tiptapLink,
-  updatedImage, // Use updatedImage instead of tiptapImage to avoid duplicate 'image' extension
+  tiptapImage,
+  updatedImage,
   taskList,
   taskItem,
   horizontalRule,
@@ -159,4 +180,5 @@ export const defaultExtensions = [
   Color,
   CustomKeymap,
   GlobalDragHandle,
+  firstHeading,
 ];

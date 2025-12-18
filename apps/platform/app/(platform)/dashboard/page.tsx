@@ -1,4 +1,18 @@
+"use client";
+
+import { useEffect } from "react";
+import { useUmamiTracking } from "@/hooks/useUmamiTracking";
+
 export default function DashboardPage() {
+  const { trackEvent } = useUmamiTracking();
+
+  useEffect(() => {
+    trackEvent("page_visit", {
+      page: "dashboard",
+      timestamp: new Date().toISOString(),
+    });
+  }, [trackEvent]);
+
   return (
     <div className="flex min-h-screen items-center justify-center p-8">
       <div className="max-w-2xl text-center space-y-4">

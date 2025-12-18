@@ -29,6 +29,7 @@ import GenerativeMenuSwitch from "./generative/generative-menu-switch";
 import { uploadFn } from "./image-upload";
 import { TextButtons } from "./selectors/text-buttons";
 import { slashCommand, suggestionItems } from "./slash-command";
+
 import hljs from "highlight.js";
 
 const extensions = [...defaultExtensions, slashCommand];
@@ -59,13 +60,17 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
       type: "doc",
       content: [
         {
-          type: "paragraph",
+          type: "heading",
+          attrs: { level: 1 },
           content: [
             {
               type: "text",
-              text: "Start writing your document here...",
+              text: "Untitled Document",
             },
           ],
+        },
+        {
+          type: "paragraph",
         },
       ],
     }),
