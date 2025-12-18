@@ -21,6 +21,7 @@ import {
   UpdatedImage,
   UploadImagesPlugin,
   Youtube,
+  FirstHeading,
 } from "@thinkthroo/editor";
 
 import { cx } from "class-variance-authority";
@@ -155,6 +156,8 @@ const markdownExtension = MarkdownExtension.configure({
   transformCopiedText: false,
 });
 
+const firstHeading = FirstHeading.configure();
+
 export const defaultExtensions = [
   starterKit,
   placeholder,
@@ -177,4 +180,5 @@ export const defaultExtensions = [
   Color,
   CustomKeymap,
   GlobalDragHandle,
+  firstHeading,
 ];

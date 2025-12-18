@@ -16,6 +16,7 @@ import { ImageResizer } from "./image-resizer";
 import { Twitter } from "./twitter";
 import { Mathematics } from "./mathematics";
 import UpdatedImage from "./updated-image";
+import { FirstHeading } from "./first-heading";
 
 import CharacterCount from "@tiptap/extension-character-count";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -23,8 +24,13 @@ import Youtube from "@tiptap/extension-youtube";
 import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 
 const PlaceholderExtension = Placeholder.configure({
-  placeholder: ({ node }) => {
+  placeholder: ({ node, pos, editor }) => {
     if (node.type.name === "heading") {
+      // Check if this is the first node in the document
+      const firstNode = editor.state.doc.firstChild;
+      if (firstNode && firstNode === node) {
+        return "Title";
+      }
       return `Heading ${node.attrs.level}`;
     }
     return "Press '/' for commands";
@@ -85,4 +91,5 @@ export {
   Mathematics,
   CharacterCount,
   GlobalDragHandle,
+  FirstHeading,
 };
