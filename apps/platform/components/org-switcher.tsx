@@ -2,6 +2,7 @@
 
 import { Building2, ChevronsUpDown, Plus, RefreshCw } from "lucide-react"
 import { useOrganizations } from "@/hooks/useOrganizations"
+import { useUmamiTracking } from "@/hooks/useUmamiTracking"
 import Image from "next/image"
 
 import {
@@ -25,6 +26,7 @@ export function OrgSwitcher() {
   const settingsUrl = `${baseUrl}/${clientId}`
 
   const { isMobile } = useSidebar()
+  const { trackEvent } = useUmamiTracking()
   
   const {
     organizations,
@@ -64,7 +66,12 @@ export function OrgSwitcher() {
             <DropdownMenuLabel className="text-muted-foreground text-xs flex items-center justify-between">
               Organizations
               <button
-                onClick={syncFromGitHub}
+                onClick={() => {
+                  syncFromGitHub()
+                  trackEvent("org_sync_clicked", {
+                    device: isMobile ? "mobile" : "desktop",
+                  })
+                }}
                 disabled={isSyncing}
                 className="ml-2 text-xs flex items-center gap-1 hover:opacity-80 disabled:opacity-50"
               >
@@ -76,7 +83,13 @@ export function OrgSwitcher() {
             {organizations.map((org) => (
               <DropdownMenuItem
                 key={org.id}
-                onClick={() => setActiveOrg(org.id)}
+                onClick={() => {
+                  setActiveOrg(org.id)
+                  trackEvent("org_switched", {
+                    org_name: org.login || org.githubOrgId,
+                    device: isMobile ? "mobile" : "desktop",
+                  })
+                }}
                 className="gap-2 p-2"
               >
                 <div className="flex items-center gap-2">

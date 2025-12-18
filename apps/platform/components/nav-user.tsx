@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
+import { useUmamiTracking } from "@/hooks/useUmamiTracking"
 
 import {
   BadgeCheck,
@@ -34,6 +35,7 @@ export function NavUser() {
   const supabase = createClient()
   const router = useRouter()
   const { isMobile } = useSidebar()
+  const { identifyUser, trackEvent } = useUmamiTracking()
 
   const [user, setUser] = useState<{
     name: string
@@ -55,10 +57,17 @@ export function NavUser() {
         email: user.email ?? "",
         avatar: user.user_metadata?.avatar_url ?? null,
       })
+
+      // Identify user in Umami
+      identifyUser(user.id)
+      trackEvent("user_identified", {
+        source: "sidebar",
+        user_email: user.email || "unknown",
+      })
     }
 
     fetchUser()
-  }, [supabase])
+  }, [supabase, identifyUser, trackEvent])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
