@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { Toaster } from "@thinkthroo/ui/components/sonner"
 import GlobalProvider from "@/layout/GlobalProvider";
+import Metrics from "@/components/metrics";
 
 import "@/styles/globals.css";
 import "@/styles/prosemirror.css";
@@ -27,6 +28,7 @@ function RootLayout({
           {children}
         </GlobalProvider>
         <Toaster />
+        <Metrics />
       </body>
     </html>
   )

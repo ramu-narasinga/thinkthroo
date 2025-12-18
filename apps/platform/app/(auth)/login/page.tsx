@@ -1,12 +1,24 @@
-import { LoginForm } from "@/components/login-form";
+"use client";
 
-export default async function Page({
+import { useEffect } from "react";
+import { LoginForm } from "@/components/login-form";
+import { useUmamiTracking } from "@/hooks/useUmamiTracking";
+
+export default function Page({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: { error?: string };
 }) {
+  const { trackEvent } = useUmamiTracking();
 
-  const error = (await searchParams)?.error;
+  useEffect(() => {
+    trackEvent("page_visit", {
+      page: "login",
+      timestamp: new Date().toISOString(),
+    });
+  }, [trackEvent]);
+
+  const error = searchParams?.error;
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
