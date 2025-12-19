@@ -3,9 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 
 export default function HomePage() {
   const router = useRouter(); // <--- add this inside your component
+
+  const handleConsultationClick = (type: string, duration: string) => {
+    posthog.capture(`consultation_${type}_clicked`, {
+      consultation_type: type,
+      duration
+    });
+  };
 
   return (
     <div className="bg-white text-black font-sans">
@@ -111,7 +119,7 @@ export default function HomePage() {
           {/* Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mr-24">
 
-            <Link href={"/consultation/got-question"}>
+            <Link href={"/consultation/got-question"} onClick={() => handleConsultationClick("question_meeting", "30min")}>
               <div className="max-w-sm mx-auto">
                 <div className="group cursor-pointer w-[400px] h-[250px] bg-white rounded-3xl shadow p-4 space-y-4">
                   {/* Title & Description */}
@@ -173,7 +181,7 @@ export default function HomePage() {
               </div>
             </Link>
 
-            <Link href={"/consultation/codebase-architecture-review"}>
+            <Link href={"/consultation/codebase-architecture-review"} onClick={() => handleConsultationClick("architecture_review", "1hour")}>
               <div className="max-w-sm mx-auto ml-4">
                 <div className="group cursor-pointer w-[400px] h-[250px] bg-white rounded-3xl shadow p-4 space-y-4">
                   {/* Title & Description */}

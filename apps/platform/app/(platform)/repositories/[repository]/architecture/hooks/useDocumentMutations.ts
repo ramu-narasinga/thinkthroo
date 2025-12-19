@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useDocumentStore } from '@/store/document';
 import { toast } from 'sonner';
+import posthog from 'posthog-js';
 
 export interface CreateDocumentInput {
   repositoryId: string;
@@ -36,10 +37,20 @@ export function useDocumentMutations() {
       try {
         const document = await createDocument(input);
         toast.success(`${input.type === 'file' ? 'File' : 'Folder'} created successfully`);
+
+        // PostHog: Track document created
+        posthog.capture('document_created', {
+          document_type: input.type,
+          document_name: input.name,
+          repository_id: input.repositoryId,
+          has_parent: !!input.parentId,
+        });
+
         return document;
       } catch (error: any) {
         console.error('[useDocumentMutations] Create error:', error);
         toast.error(error?.message || 'Failed to create document');
+        posthog.captureException(error);
         throw error;
       } finally {
         setIsCreating(false);
@@ -72,9 +83,15 @@ export function useDocumentMutations() {
       try {
         await deleteDocument(id);
         toast.success('Document deleted successfully');
+
+        // PostHog: Track document deleted
+        posthog.capture('document_deleted', {
+          document_id: id,
+        });
       } catch (error: any) {
         console.error('[useDocumentMutations] Delete error:', error);
         toast.error(error?.message || 'Failed to delete document');
+        posthog.captureException(error);
         throw error;
       } finally {
         setIsDeleting(false);

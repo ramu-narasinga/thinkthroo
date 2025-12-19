@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@thinkthroo/ui/components/button";
 import {
@@ -10,12 +12,37 @@ import {
 import { Input } from "@thinkthroo/ui/components/input";
 import { Label } from "@thinkthroo/ui/components/label";
 import { signup } from "@/app/(auth)/signup/actions";
+import posthog from "posthog-js";
 
 export function SignupForm({
   className,
   error,
   ...props
 }: React.ComponentProps<"div"> & { error?: string }) {
+  const handleSignupClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const form = e.currentTarget.closest('form');
+    const emailInput = form?.querySelector<HTMLInputElement>('input[name="email"]');
+    const email = emailInput?.value;
+
+    if (email) {
+      // Identify user with email before signup
+      posthog.identify(email, {
+        email: email,
+      });
+    }
+
+    posthog.capture('user_signed_up', {
+      method: 'email',
+      email: email || undefined,
+    });
+  };
+
+  const handleGoogleSignupClick = () => {
+    posthog.capture('user_signed_up', {
+      method: 'google',
+    });
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -50,10 +77,10 @@ export function SignupForm({
               )}
 
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full" formAction={signup}>
+                <Button type="submit" className="w-full" formAction={signup} onClick={handleSignupClick}>
                   Sign up
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={handleGoogleSignupClick}>
                   Sign up with Google
                 </Button>
               </div>
