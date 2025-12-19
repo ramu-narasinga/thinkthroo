@@ -13,8 +13,8 @@ export function AuthButtons() {
         <Link 
           target="_blank" 
           rel="noreferrer" 
-          href="https://app.thinkthroo.com/signin/email_signin"
-          onClick={() => track('navigation-click', { menu_item: 'login', href: 'https://app.thinkthroo.com/signin/email_signin' })}
+          href="https://app.thinkthroo.com/login"
+          onClick={() => track('navigation-click', { menu_item: 'login', href: 'https://app.thinkthroo.com/login' })}
         >
           Login
         </Link>
@@ -23,8 +23,8 @@ export function AuthButtons() {
         <Link 
           target="_blank" 
           rel="noreferrer" 
-          href="https://app.thinkthroo.com/signin/email_signin"
-          onClick={() => track('navigation-click', { menu_item: 'signup', href: 'https://app.thinkthroo.com/signin/email_signin' })}
+          href="https://app.thinkthroo.com/login"
+          onClick={() => track('navigation-click', { menu_item: 'signup', href: 'https://app.thinkthroo.com/login' })}
         >
           Signup
         </Link>
