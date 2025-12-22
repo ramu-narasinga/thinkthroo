@@ -1,3 +1,5 @@
+"use client";
+
 import {
   PageActions,
   PageHeader,
@@ -16,8 +18,16 @@ import { siteConfig } from "@/lib/config";
 import Image from "next/image";
 import Link from "next/link";
 import HeroOne from "./components/hero/hero-one";
+import posthog from "posthog-js";
 
 export default function Page() {
+  const handleCTAClick = (buttonType: string) => {
+    posthog.capture("components_get_started_clicked", {
+      button_type: buttonType,
+      page: "components"
+    });
+  };
+
   return (
     <div className="container relative">
       <PageHeader>
@@ -79,6 +89,7 @@ export default function Page() {
                       type="button"
                       className="relative justify-center cursor-pointer inline-flex items-center space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border bg-black dark:bg-white-500 hover:bg-black/80 dark:hover:bg-white/50 text-white border-brand-500/75 dark:border-brand/30 hover:border-black-600 dark:hover:border-white focus-visible:outline-black-600 data-[state=open]:bg-black-400/80 dark:data-[state=open]:bg-white-500/80 data-[state=open]:outline-black-600 text-sm px-4 py-2 h-[38px]"
                       href="#"
+                      onClick={() => handleCTAClick("get_started_free")}
                     >
                       <span className="truncate">Get Started Free</span>
                     </a>
@@ -87,6 +98,7 @@ export default function Page() {
                       type="button"
                       className="relative justify-center cursor-pointer inline-flex items-center space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border text-foreground bg-alternative dark:bg-muted hover:bg-selection border-strong hover:border-stronger focus-visible:outline-brand-600 data-[state=open]:bg-selection data-[state=open]:outline-brand-600 data-[state=open]:border-button-hover text-sm px-4 py-2 h-[38px]"
                       href="#"
+                      onClick={() => handleCTAClick("request_demo")}
                     >
                       <span className="truncate">Request a demo</span>
                     </a>

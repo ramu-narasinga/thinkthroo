@@ -1,3 +1,5 @@
+"use client";
+
 import { PageActions, PageHeader, PageHeaderDescription, PageHeaderHeading } from "@/components/interfaces/page/header";
 import { Button } from "@thinkthroo/ui/components/button";
 import {
@@ -10,8 +12,16 @@ import {
 import { siteConfig } from "@/lib/config";
 import Image from "next/image";
 import Link from "next/link";
+import posthog from "posthog-js";
 
 export default function Page() {
+  const handleOSSClick = (projectName: string, projectUrl: string) => {
+    posthog.capture("open_source_project_clicked", {
+      project_name: projectName,
+      project_url: projectUrl
+    });
+  };
+
   return (
     <div className="container relative">
       <PageHeader>
@@ -19,7 +29,7 @@ export default function Page() {
             Open Source Projects.
         </PageHeaderHeading>
         <PageHeaderDescription>
-          
+
         </PageHeaderDescription>
       </PageHeader>
       <div className="grid gap-4">
@@ -30,7 +40,11 @@ export default function Page() {
               id="oss"
               className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:gap-10"
             >
-              <Link href={"https://github.com/ramu-narasinga/thinkthroo-cli"} target="_blank">
+              <Link
+                href={"https://github.com/ramu-narasinga/thinkthroo-cli"}
+                target="_blank"
+                onClick={() => handleOSSClick("@thinkthroo/cli", "https://github.com/ramu-narasinga/thinkthroo-cli")}
+              >
                 <div
                   className={
                     "themes-wrapper group relative flex flex-col overflow-hidden rounded-xl border cursor-pointer hover:shadow transition-all duration-200 ease-in-out hover:z-30"
@@ -54,7 +68,11 @@ export default function Page() {
               id="oss"
               className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:gap-10"
             >
-              <Link href={"https://github.com/ramu-narasinga/animate-code"} target="_blank">
+              <Link
+                href={"https://github.com/ramu-narasinga/animate-code"}
+                target="_blank"
+                onClick={() => handleOSSClick("Animate Code", "https://github.com/ramu-narasinga/animate-code")}
+              >
                 <div
                   className={
                     "themes-wrapper group relative flex flex-col overflow-hidden rounded-xl border cursor-pointer hover:shadow transition-all duration-200 ease-in-out hover:z-30"
@@ -67,7 +85,7 @@ export default function Page() {
                         <CardDescription>Generate code animations based on markdown. Built with Remotion + CodeHike</CardDescription>
                       </CardHeader>
                       <CardContent>
-                          
+
                       </CardContent>
                     </Card>
                   </div>

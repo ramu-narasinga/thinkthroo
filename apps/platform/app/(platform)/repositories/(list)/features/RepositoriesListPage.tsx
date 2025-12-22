@@ -1,12 +1,13 @@
 'use client';
 
-import { memo, useState, useMemo } from 'react';
+import { memo, useState, useMemo, useCallback } from 'react';
 import { useRepositories } from "../hooks/useRepositories";
 import NoRepoScreen from "../components/NoRepoScreen";
 import DataTable from "../components/DataTable";
 import { columns } from "../components/Columns";
 import Header from "../components/Header";
 import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs";
+import posthog from "posthog-js";
 
 const RepositoriesListPage = memo(() => {
   const { repositories, isLoading, error, hasInstallations } = useRepositories();
@@ -20,6 +21,19 @@ const RepositoriesListPage = memo(() => {
   }, [repositories]);
 
   const displayedRepos = activeTab === 'accessible' ? accessibleRepos : revokedRepos;
+
+  const handleTabChange = useCallback((value: string) => {
+    const newTab = value as 'accessible' | 'revoked';
+    setActiveTab(newTab);
+
+    // PostHog: Track tab switch
+    posthog.capture('repository_tab_switched', {
+      from_tab: activeTab,
+      to_tab: newTab,
+      accessible_count: accessibleRepos.length,
+      revoked_count: revokedRepos.length,
+    });
+  }, [activeTab, accessibleRepos.length, revokedRepos.length]);
 
   if (isLoading) {
     return (
@@ -55,7 +69,7 @@ const RepositoriesListPage = memo(() => {
       </h2>
       
       {/* Tab Navigation */}
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'accessible' | 'revoked')} className="mb-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-4">
         <TabsList>
           <TabsTrigger value="accessible">
             Accessible ({accessibleRepos.length})

@@ -31,6 +31,7 @@ import { TextButtons } from "./selectors/text-buttons";
 import { slashCommand, suggestionItems } from "./slash-command";
 
 import hljs from "highlight.js";
+import posthog from "posthog-js";
 
 const extensions = [...defaultExtensions, slashCommand];
 
@@ -145,9 +146,17 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
         editorData: json,
       });
       setSaveStatus("Saved");
+
+      // PostHog: Track document saved
+      posthog.capture('document_saved', {
+        document_id: document.id,
+        document_name: document.name,
+        word_count: editor.storage.characterCount.words(),
+      });
     } catch (error) {
       console.error('[EditorPanel] Error saving document:', error);
       setSaveStatus("Error");
+      posthog.captureException(error as Error);
     }
   }, SAVE_DEBOUNCE_TIME);
 
