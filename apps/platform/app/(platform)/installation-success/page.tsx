@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@thinkthroo/ui/components/a
 import { Button } from "@thinkthroo/ui/components/button";
 import Link from "next/link";
 import posthog from "posthog-js";
+import * as Sentry from "@sentry/nextjs";
 
 function InstallationSuccessContent() {
   const searchParams = useSearchParams();
@@ -25,9 +26,37 @@ function InstallationSuccessContent() {
   useEffect(() => {
     const installationId = searchParams.get("installation_id");
 
+    Sentry.addBreadcrumb({
+      category: "installation",
+      message: "Installation success page loaded",
+      level: "info",
+      data: {
+        installation_id: installationId,
+        organization_id: activeOrg?.id,
+        has_active_org: !!activeOrg,
+      },
+    });
+
     // Use active organization ID from store
     if (installationId && activeOrg?.id) {
+      Sentry.setContext("installation", {
+        installation_id: installationId,
+        organization_id: activeOrg.id,
+      });
       processInstallation(installationId, activeOrg.id);
+    } else if (!activeOrg?.id) {
+      Sentry.captureMessage("Installation success: Missing active organization", {
+        level: "warning",
+        tags: {
+          page: "installation_success",
+        },
+        contexts: {
+          installation: {
+            installation_id: installationId,
+            has_org: !!activeOrg,
+          },
+        },
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeOrg?.id]); // Re-run if active org changes
@@ -58,6 +87,21 @@ function InstallationSuccessContent() {
         organization_id: activeOrg?.id,
       });
       posthog.captureException(new Error(`GitHub App installation failed: ${error}`));
+      
+      // Sentry: Capture installation failure with detailed context
+      Sentry.captureException(new Error(`GitHub App installation failed: ${error}`), {
+        tags: {
+          flow: "installation",
+          status: "failed",
+        },
+        contexts: {
+          installation: {
+            installation_id: searchParams.get("installation_id"),
+            organization_id: activeOrg?.id,
+            error_message: error,
+          },
+        },
+      });
     }
 
     return (
@@ -95,6 +139,23 @@ function InstallationSuccessContent() {
         github_org_id: result.githubOrgId,
         repository_count: result.repoCount,
         organization_id: activeOrg?.id,
+      });
+      
+      // Sentry: Track successful installation with metrics
+      Sentry.captureMessage("GitHub App installation completed successfully", {
+        level: "info",
+        tags: {
+          flow: "installation",
+          status: "success",
+        },
+        contexts: {
+          installation: {
+            installation_id: result.installationId,
+            github_org_id: result.githubOrgId,
+            repository_count: result.repoCount,
+            organization_id: activeOrg?.id,
+          },
+        },
       });
     }
 

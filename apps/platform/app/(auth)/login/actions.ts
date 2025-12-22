@@ -30,24 +30,62 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import * as Sentry from "@sentry/nextjs";
 
 export async function login() {
   const supabase = await createClient();
 
-  // Redirect to GitHub OAuth
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "github",
-    options: {
-      scopes: "repo gist notifications", // request repo access
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-    },
+  Sentry.addBreadcrumb({
+    category: "auth",
+    message: "Initiating GitHub OAuth login",
+    level: "info",
   });
 
-  if (error) {
-    const encoded = encodeURIComponent(error.message);
-    redirect(`/login?error=${encoded}`);
-  }
+  try {
+    // Redirect to GitHub OAuth
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        scopes: "repo gist notifications", // request repo access
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
+    });
 
-  // Redirect user to GitHub OAuth consent screen
-  redirect(data.url);
+    if (error) {
+      Sentry.captureException(error, {
+        tags: {
+          action: "login",
+          provider: "github",
+        },
+        contexts: {
+          oauth: {
+            error_message: error.message,
+            provider: "github",
+          },
+        },
+      });
+      
+      const encoded = encodeURIComponent(error.message);
+      redirect(`/login?error=${encoded}`);
+    }
+
+    Sentry.addBreadcrumb({
+      category: "auth",
+      message: "GitHub OAuth URL generated successfully",
+      level: "info",
+      data: { has_url: !!data.url },
+    });
+
+    // Redirect user to GitHub OAuth consent screen
+    redirect(data.url);
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: {
+        action: "login",
+        flow: "github_oauth",
+      },
+      level: "error",
+    });
+    throw err;
+  }
 }
