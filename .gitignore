@@ -37,3 +37,5 @@ yarn-error.log*
 */.contentlayer
 
 **/*/.source
+
+.env.sentry-build-plugin
