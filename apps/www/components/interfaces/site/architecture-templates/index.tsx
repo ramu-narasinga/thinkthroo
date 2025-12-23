@@ -4,6 +4,7 @@ import { useState } from "react"
 import { CheckCircle, Zap, Layers, Sprout, TreeDeciduous, Hammer } from "lucide-react"
 import { Card } from "@thinkthroo/ui/components/card"
 import { Button } from "@thinkthroo/ui/components/button"
+import posthog from "posthog-js"
 
 export function ArchitectureTemplates() {
   const [selectedTemplate, setSelectedTemplate] = useState("canopy")
@@ -110,7 +111,13 @@ export function ArchitectureTemplates() {
               {templates.map((template) => (
                 <button
                   key={template.id}
-                  onClick={() => setSelectedTemplate(template.id)}
+                  onClick={() => {
+                    setSelectedTemplate(template.id);
+                    posthog.capture("architecture_template_selected", {
+                      template_id: template.id,
+                      template_name: template.name
+                    });
+                  }}
                   className="w-full text-left transition-all duration-300"
                 >
                   <Card
@@ -195,7 +202,16 @@ export function ArchitectureTemplates() {
               </div>
 
               <div className="w-full flex justify-center">
-                <Button variant="default" className="mt-6">Get Started</Button>
+                <Button
+                  variant="default"
+                  className="mt-6"
+                  onClick={() => {
+                    posthog.capture("architecture_template_get_started", {
+                      selected_template: selectedTemplate,
+                      template_name: selectedTemplateData?.name
+                    });
+                  }}
+                >Get Started</Button>
               </div>
             </div>
           </div>

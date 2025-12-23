@@ -4,6 +4,7 @@ import * as React from "react"
 import { DropdownMenuTriggerProps } from "@radix-ui/react-dropdown-menu"
 import { CheckIcon, ClipboardIcon } from "lucide-react"
 import { NpmCommands } from "@/types/unist"
+import posthog from "posthog-js"
 
 import { Event, trackEvent } from "@/lib/events"
 import { cn } from "@/lib/utils"
@@ -26,6 +27,12 @@ export async function copyToClipboardWithMeta(value: string, event?: Event) {
   if (event) {
     trackEvent(event)
   }
+  // PostHog tracking for code copy
+  posthog.capture("code_copied", {
+    event_type: event?.name ?? "generic_copy",
+    code_length: value.length,
+    code_preview: value.substring(0, 100)
+  });
 }
 
 export function CopyButton({
