@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Play } from "lucide-react"
 import { useUmami } from "@/hooks/use-umami"
+import posthog from "posthog-js"
 
 export function HowItWorks() {
   const [activeStep, setActiveStep] = useState(1)
@@ -66,6 +67,10 @@ export function HowItWorks() {
                 onClick={() => {
                   setActiveStep(step.number);
                   track('how-it-works-step', { step: step.number, title: step.title });
+                  posthog.capture("how_it_works_step_selected", {
+                    step_number: step.number,
+                    step_title: step.title
+                  });
                 }} 
                 className="w-full text-left"
               >

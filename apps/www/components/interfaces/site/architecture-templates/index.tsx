@@ -6,6 +6,7 @@ import { Card } from "@thinkthroo/ui/components/card"
 import { Button } from "@thinkthroo/ui/components/button"
 import { useUmami } from "@/hooks/use-umami"
 import Link from "next/link"
+import posthog from "posthog-js"
 
 export function ArchitectureTemplates() {
   const [selectedTemplate, setSelectedTemplate] = useState("canopy")
@@ -116,6 +117,10 @@ export function ArchitectureTemplates() {
                   onClick={() => {
                     setSelectedTemplate(template.id);
                     track('architecture-template-select', { templateId: template.id, templateName: template.name });
+                    posthog.capture("architecture_template_selected", {
+                      template_id: template.id,
+                      template_name: template.name
+                    });
                   }}
                   className="w-full text-left transition-all duration-300"
                 >
@@ -206,7 +211,14 @@ export function ArchitectureTemplates() {
                     href="https://app.thinkthroo.com/architecture"
                     target="_blank"
                     rel="noreferrer"
-                    onClick={() => track('architecture-get-started', { button: 'Get Started', href: 'https://app.thinkthroo.com/architecture' })}
+                    onClick={() => {
+                      posthog.capture("architecture_template_get_started", {
+                        selected_template: selectedTemplate,
+                        template_name: selectedTemplateData?.name
+                      });
+                      track('architecture-get-started', { button: 'Get Started', href: 'https://app.thinkthroo.com/architecture' })}
+                    
+                    }
                   >
                     Get Started
                   </Link>

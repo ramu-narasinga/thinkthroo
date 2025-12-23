@@ -11,6 +11,7 @@ import {
 } from "@thinkthroo/ui/components/card";
 import { login } from "@/app/(auth)/login/actions";
 import { useUmamiTracking } from "@/hooks/useUmamiTracking";
+import posthog from "posthog-js";
 
 export function LoginForm({
   className,
@@ -23,6 +24,12 @@ export function LoginForm({
     trackEvent("login_submit", {
       provider: "github",
       action: "initiated",
+    });
+
+    // PostHog: Track login with GitHub clicked
+    posthog.capture('login_with_github_clicked', {
+      provider: 'github',
+      timestamp: new Date().toISOString(),
     });
   };
 

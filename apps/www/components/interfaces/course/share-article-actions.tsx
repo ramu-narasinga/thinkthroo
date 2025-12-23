@@ -1,5 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import { Icons } from '@/components/icons'
+import posthog from 'posthog-js'
 
 const ShareArticleActions = ({
   title,
@@ -15,6 +18,14 @@ const ShareArticleActions = ({
   const permalink = encodeURIComponent(`${basePath}${slug}`)
   const encodedTitle = encodeURIComponent(title)
 
+  const handleShare = (platform: string) => {
+    posthog.capture("article_shared", {
+      platform,
+      article_title: title,
+      article_slug: slug
+    });
+  };
+
   return (
     <div className="mt-4 flex items-center gap-4">
       <Link
@@ -22,6 +33,7 @@ const ShareArticleActions = ({
         href={`https://twitter.com/intent/tweet?url=${permalink}&text=${encodedTitle}`}
         target="_blank"
         className="text-foreground-lighter hover:text-foreground"
+        onClick={() => handleShare('twitter')}
       >
         <Icons.twitter />
       </Link>
@@ -31,6 +43,7 @@ const ShareArticleActions = ({
         href={`https://www.linkedin.com/shareArticle?url=${permalink}&text=${encodedTitle}`}
         target="_blank"
         className="text-foreground-lighter hover:text-foreground"
+        onClick={() => handleShare('linkedin')}
       >
         <Icons.linkedin />
       </Link>
@@ -40,6 +53,7 @@ const ShareArticleActions = ({
         href={`https://www.reddit.com/submit?url=${permalink}&text=${encodedTitle}`}
         target="_blank"
         className="text-foreground-lighter hover:text-foreground"
+        onClick={() => handleShare('reddit')}
       >
         <Icons.reddit />
       </Link>

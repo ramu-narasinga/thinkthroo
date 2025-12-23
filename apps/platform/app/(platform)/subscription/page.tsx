@@ -7,6 +7,7 @@ import { Card, CardContent } from "@thinkthroo/ui/components/card"
 import { Trash2, DollarSign, Github, Users } from "lucide-react"
 import { DataTable } from "@/components/subscription-table/data-table"
 import { getColumns, Payment } from "@/components/subscription-table/columns"
+import posthog from "posthog-js"
 
 export default function SubscriptionPage() {
   const [data, setData] = useState<Payment[]>([])
@@ -34,10 +35,18 @@ export default function SubscriptionPage() {
   }, [])
 
   const handleDeleteAccount = () => {
+    // PostHog: Track delete account clicked (churn indicator)
+    posthog.capture('delete_account_clicked', {
+      timestamp: new Date().toISOString(),
+    });
     alert("Delete Account Clicked")
   }
 
   const handleManageSubscription = () => {
+    // PostHog: Track manage subscription clicked (monetization funnel)
+    posthog.capture('manage_subscription_clicked', {
+      timestamp: new Date().toISOString(),
+    });
     alert("Manage Subscription Clicked")
   }
 

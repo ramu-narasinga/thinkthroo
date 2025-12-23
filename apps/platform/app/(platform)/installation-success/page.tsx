@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useInstallation } from "@/hooks/useInstallation";
 import { useOrganizationStore } from "@/store/organization";
@@ -9,20 +9,54 @@ import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@thinkthroo/ui/components/alert";
 import { Button } from "@thinkthroo/ui/components/button";
 import Link from "next/link";
+import posthog from "posthog-js";
+import * as Sentry from "@sentry/nextjs";
 
 function InstallationSuccessContent() {
   const searchParams = useSearchParams();
   const { processInstallation, isProcessing, error, result } = useInstallation();
-  
+
   // Get active organization from store
   const activeOrg = useOrganizationStore(organizationSelectors.activeOrg);
+
+  // Use refs to track if we've already captured events to prevent duplicates
+  const hasTrackedSuccess = useRef(false);
+  const hasTrackedError = useRef(false);
 
   useEffect(() => {
     const installationId = searchParams.get("installation_id");
 
+    Sentry.addBreadcrumb({
+      category: "installation",
+      message: "Installation success page loaded",
+      level: "info",
+      data: {
+        installation_id: installationId,
+        organization_id: activeOrg?.id,
+        has_active_org: !!activeOrg,
+      },
+    });
+
     // Use active organization ID from store
     if (installationId && activeOrg?.id) {
+      Sentry.setContext("installation", {
+        installation_id: installationId,
+        organization_id: activeOrg.id,
+      });
       processInstallation(installationId, activeOrg.id);
+    } else if (!activeOrg?.id) {
+      Sentry.captureMessage("Installation success: Missing active organization", {
+        level: "warning",
+        tags: {
+          page: "installation_success",
+        },
+        contexts: {
+          installation: {
+            installation_id: installationId,
+            has_org: !!activeOrg,
+          },
+        },
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeOrg?.id]); // Re-run if active org changes
@@ -44,6 +78,32 @@ function InstallationSuccessContent() {
 
   // Error state
   if (error) {
+    // PostHog: Track installation failed (only once)
+    if (!hasTrackedError.current) {
+      hasTrackedError.current = true;
+      posthog.capture('github_app_installation_failed', {
+        error_message: error,
+        installation_id: searchParams.get("installation_id"),
+        organization_id: activeOrg?.id,
+      });
+      posthog.captureException(new Error(`GitHub App installation failed: ${error}`));
+      
+      // Sentry: Capture installation failure with detailed context
+      Sentry.captureException(new Error(`GitHub App installation failed: ${error}`), {
+        tags: {
+          flow: "installation",
+          status: "failed",
+        },
+        contexts: {
+          installation: {
+            installation_id: searchParams.get("installation_id"),
+            organization_id: activeOrg?.id,
+            error_message: error,
+          },
+        },
+      });
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Alert variant="destructive" className="max-w-md">
@@ -71,6 +131,34 @@ function InstallationSuccessContent() {
 
   // Success state
   if (result) {
+    // PostHog: Track installation completed (only once)
+    if (!hasTrackedSuccess.current) {
+      hasTrackedSuccess.current = true;
+      posthog.capture('github_app_installation_completed', {
+        installation_id: result.installationId,
+        github_org_id: result.githubOrgId,
+        repository_count: result.repoCount,
+        organization_id: activeOrg?.id,
+      });
+      
+      // Sentry: Track successful installation with metrics
+      Sentry.captureMessage("GitHub App installation completed successfully", {
+        level: "info",
+        tags: {
+          flow: "installation",
+          status: "success",
+        },
+        contexts: {
+          installation: {
+            installation_id: result.installationId,
+            github_org_id: result.githubOrgId,
+            repository_count: result.repoCount,
+            organization_id: activeOrg?.id,
+          },
+        },
+      });
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center space-y-6 max-w-md">
