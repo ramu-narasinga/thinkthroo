@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { memo, useState, useMemo } from 'react';
+import { memo, useState, useMemo } from "react";
+import { useUmami } from "@/hooks/use-umami";
 import { useRepositories } from "../hooks/useRepositories";
 import NoRepoScreen from "../components/NoRepoScreen";
 import DataTable from "../components/DataTable";
@@ -9,25 +10,28 @@ import Header from "../components/Header";
 import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs";
 
 const RepositoriesListPage = memo(() => {
-  const { repositories, isLoading, error, hasInstallations } = useRepositories();
-  const [activeTab, setActiveTab] = useState<'accessible' | 'revoked'>('accessible');
+  const { repositories, isLoading, error, hasInstallations } =
+    useRepositories();
+  const [activeTab, setActiveTab] = useState<"accessible" | "revoked">(
+    "accessible"
+  );
+  const { track } = useUmami();
 
   // Separate repositories by access status
   const { accessibleRepos, revokedRepos } = useMemo(() => {
-    const accessible = repositories.filter(repo => repo.hasAccess);
-    const revoked = repositories.filter(repo => !repo.hasAccess);
+    const accessible = repositories.filter((repo) => repo.hasAccess);
+    const revoked = repositories.filter((repo) => !repo.hasAccess);
     return { accessibleRepos: accessible, revokedRepos: revoked };
   }, [repositories]);
 
-  const displayedRepos = activeTab === 'accessible' ? accessibleRepos : revokedRepos;
+  const displayedRepos =
+    activeTab === "accessible" ? accessibleRepos : revokedRepos;
 
   if (isLoading) {
     return (
       <div className="p-6 w-full">
         <Header />
-        <div className="text-muted-foreground">
-          Loading repositories...
-        </div>
+        <div className="text-muted-foreground">Loading repositories...</div>
       </div>
     );
   }
@@ -53,9 +57,21 @@ const RepositoriesListPage = memo(() => {
       <h2 className="font-normal font-inter text-black text-sm leading-5 mb-4">
         List of repositories accessible to Codearc.
       </h2>
-      
+
       {/* Tab Navigation */}
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'accessible' | 'revoked')} className="mb-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          setActiveTab(value as "accessible" | "revoked");
+          track(
+            value === "accessible"
+              ? "repositories_tab_accessible"
+              : "repositories_tab_revoked",
+            { tab: value }
+          );
+        }}
+        className="mb-4"
+      >
         <TabsList>
           <TabsTrigger value="accessible">
             Accessible ({accessibleRepos.length})
@@ -69,9 +85,9 @@ const RepositoriesListPage = memo(() => {
       <div className="mt-2">
         {displayedRepos.length === 0 ? (
           <div className="text-muted-foreground text-sm py-8 text-center">
-            {activeTab === 'accessible' 
-              ? 'No accessible repositories found.'
-              : 'No repositories with revoked access.'}
+            {activeTab === "accessible"
+              ? "No accessible repositories found."
+              : "No repositories with revoked access."}
           </div>
         ) : (
           <DataTable columns={columns} data={displayedRepos} />
@@ -81,6 +97,6 @@ const RepositoriesListPage = memo(() => {
   );
 });
 
-RepositoriesListPage.displayName = 'RepositoriesListPage';
+RepositoriesListPage.displayName = "RepositoriesListPage";
 
 export default RepositoriesListPage;

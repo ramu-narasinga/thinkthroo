@@ -2,9 +2,11 @@
 import { Button } from "@thinkthroo/ui/components/button";
 
 export function AddReposButton() {
-
   const handleClick = () => {
-    const githubAppName = process.env.NEXT_PUBLIC_GITHUB_APP_NAME // replace with your actual GitHub App slug
+    if (typeof window !== "undefined" && typeof window.umami === "function") {
+      window.umami("add_repositories_click");
+    }
+    const githubAppName = process.env.NEXT_PUBLIC_GITHUB_APP_NAME; // replace with your actual GitHub App slug
     const url = `https://github.com/apps/${githubAppName}/installations/new`;
     window.location.href = url; // trigger redirect to GitHub install
   };
