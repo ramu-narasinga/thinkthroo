@@ -11,7 +11,7 @@ export function ProductionGradeProjects() {
     },
     {
       icon: Boxes,
-      title: "Scalable Project Structure",
+      title: "Scalable Project St ructure",
       description:
         "Discover folder hierarchies and file organization patterns that scale with your team.",
     },

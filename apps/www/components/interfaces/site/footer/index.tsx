@@ -2,8 +2,10 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useUmami } from "@/hooks/use-umami"
 
 export const Footer = () => {
+    const { track } = useUmami();
     return (
         <div className="max-w-[80rem] mt-24 mx-auto px-6 md:px-8">
             <footer className="pb-24 md:pt-32 md:pb-32 border-t border-gray-900/10 relative">
@@ -37,6 +39,7 @@ export const Footer = () => {
                                 <Link
                                     href="https://app.thinkthroo.com/course/codebase-architecture/shadcn-ui/tooling/introduction"
                                     target="_blank"
+                                    onClick={() => track('footer-architecture-link', { link: 'shadcn-ui', href: 'https://app.thinkthroo.com/course/codebase-architecture/shadcn-ui/tooling/introduction' })}
                                 >
                                     Shadcn/ui codebase architecture
                                 </Link>
@@ -45,6 +48,7 @@ export const Footer = () => {
                                 <Link
                                     href="https://app.thinkthroo.com/course/codebase-architecture/supabase/tooling/introduction"
                                     target="_blank"
+                                    onClick={() => track('footer-architecture-link', { link: 'supabase', href: 'https://app.thinkthroo.com/course/codebase-architecture/supabase/tooling/introduction' })}
                                 >
                                     Supabase codebase architecture
                                 </Link>
@@ -62,6 +66,7 @@ export const Footer = () => {
                                 <Link
                                     href="https://app.thinkthroo.com/production-grade-projects"
                                     target="_blank"
+                                    onClick={() => track('footer-link', { link: 'production-grade-projects', href: 'https://app.thinkthroo.com/production-grade-projects' })}
                                 >
                                     Production-Grade Projects
                                 </Link>
@@ -75,22 +80,22 @@ export const Footer = () => {
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
                             <li>
-                                <Link href="https://discord.gg/3kwruUXW4g" target="_blank">
+                                <Link href="https://discord.gg/3kwruUXW4g" target="_blank" onClick={() => track('footer-link', { link: 'discord', href: 'https://discord.gg/3kwruUXW4g' })}>
                                     Discord
                                 </Link>
                             </li>
                             <li>
-                                <Link href="https://www.instagram.com/thinkthroo" target="_blank">
+                                <Link href="https://www.instagram.com/thinkthroo" target="_blank" onClick={() => track('footer-link', { link: 'instagram', href: 'https://www.instagram.com/thinkthroo' })}>
                                     Instagram
                                 </Link>
                             </li>
                             <li>
-                                <Link href="https://x.com/thinkthroo" target="_blank">
+                                <Link href="https://x.com/thinkthroo" target="_blank" onClick={() => track('footer-link', { link: 'x.com', href: 'https://x.com/thinkthroo' })}>
                                     X.com
                                 </Link>
                             </li>
                             <li>
-                                <Link href="https://github.com/thinkthroo" target="_blank">
+                                <Link href="https://github.com/thinkthroo" target="_blank" onClick={() => track('footer-link', { link: 'github', href: 'https://github.com/thinkthroo' })}>
                                     Github
                                 </Link>
                             </li>
@@ -103,17 +108,17 @@ export const Footer = () => {
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
                             <li>
-                                <Link href="https://app.thinkthroo.com/privacy" target="_blank">
+                                <Link href="https://app.thinkthroo.com/privacy" target="_blank" onClick={() => track('footer-link', { link: 'privacy-policy', href: 'https://app.thinkthroo.com/privacy' })}>
                                     Privacy Policy
                                 </Link>
                             </li>
                             <li>
-                                <Link href="https://app.thinkthroo.com/terms" target="_blank">
+                                <Link href="https://app.thinkthroo.com/terms" target="_blank" onClick={() => track('footer-link', { link: 'terms-and-conditions', href: 'https://app.thinkthroo.com/terms' })}>
                                     Terms and Conditions
                                 </Link>
                             </li>
                             <li>
-                                <Link href="https://app.thinkthroo.com/refund" target="_blank">
+                                <Link href="https://app.thinkthroo.com/refund" target="_blank" onClick={() => track('footer-link', { link: 'refund-policy', href: 'https://app.thinkthroo.com/refund' })}>
                                     Refund Policy
                                 </Link>
                             </li>
