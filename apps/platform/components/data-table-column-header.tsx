@@ -1,30 +1,33 @@
-import { Column } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react"
+import { Column } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@thinkthroo/ui/components/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@thinkthroo/ui/components/button";
+import { useUmami } from "@/hooks/use-umami";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@thinkthroo/ui/components/dropdown-menu"
+} from "@thinkthroo/ui/components/dropdown-menu";
 
-interface DataTableColumnHeaderProps<TData, TValue>
-  extends React.HTMLAttributes<HTMLDivElement> {
-  column: Column<TData, TValue>
-  title: string
+interface DataTableColumnHeaderProps<
+  TData,
+  TValue,
+> extends React.HTMLAttributes<HTMLDivElement> {
+  column: Column<TData, TValue>;
+  title: string;
 }
-
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
+  const { track } = useUmami();
   if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>
+    return <div className={cn(className)}>{title}</div>;
   }
 
   return (
@@ -47,11 +50,27 @@ export function DataTableColumnHeader<TData, TValue>({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+          <DropdownMenuItem
+            onClick={() => {
+              track("repositories_column_sort", {
+                column: column.id,
+                direction: "asc",
+              });
+              column.toggleSorting(false);
+            }}
+          >
             <ArrowUp />
             Asc
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+          <DropdownMenuItem
+            onClick={() => {
+              track("repositories_column_sort", {
+                column: column.id,
+                direction: "desc",
+              });
+              column.toggleSorting(true);
+            }}
+          >
             <ArrowDown />
             Desc
           </DropdownMenuItem>
@@ -63,6 +82,5 @@ export function DataTableColumnHeader<TData, TValue>({
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-  )
+  );
 }
-

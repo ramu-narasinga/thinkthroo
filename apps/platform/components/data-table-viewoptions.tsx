@@ -1,22 +1,24 @@
-"use client"
+"use client";
 
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
-import { Table } from "@tanstack/react-table"
-import { Settings2 } from "lucide-react"
-import { Button } from "@thinkthroo/ui/components/button"
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { Table } from "@tanstack/react-table";
+import { Settings2 } from "lucide-react";
+import { Button } from "@thinkthroo/ui/components/button";
+import { useUmami } from "@/hooks/use-umami";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "@thinkthroo/ui/components/dropdown-menu"
+} from "@thinkthroo/ui/components/dropdown-menu";
 
 export function DataTableViewOptions<TData>({
   table,
 }: {
-  table: Table<TData>
+  table: Table<TData>;
 }) {
+  const { track } = useUmami();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -24,6 +26,13 @@ export function DataTableViewOptions<TData>({
           variant="outline"
           size="sm"
           className="ml-auto hidden h-8 lg:flex"
+          onClick={() => {
+            console.log("[DEBUG] View button clicked");
+            if (typeof window !== "undefined") {
+              console.log("[DEBUG] window.umami:", (window as any).umami);
+            }
+            track("repositories_view_options_opened");
+          }}
         >
           <Settings2 className="mr-2 h-4 w-4" />
           View
@@ -50,5 +59,5 @@ export function DataTableViewOptions<TData>({
           ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -3,9 +3,11 @@ import { Button } from "@thinkthroo/ui/components/button";
 import posthog from "posthog-js";
 
 export function AddReposButton() {
-
   const handleClick = () => {
-    // PostHog: Track add repositories button clicked
+    if (typeof window !== "undefined" && typeof window.umami === "function") {
+      window.umami("add_repositories_click");
+    }+
+     
     posthog.capture('add_repositories_clicked', {
       timestamp: new Date().toISOString(),
     });
