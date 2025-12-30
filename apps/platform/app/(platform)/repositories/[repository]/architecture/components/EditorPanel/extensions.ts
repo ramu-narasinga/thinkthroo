@@ -8,7 +8,6 @@ import {
   HighlightExtension,
   HorizontalRule,
   MarkdownExtension,
-  Mathematics,
   Placeholder,
   StarterKit,
   TaskItem,
@@ -17,10 +16,8 @@ import {
   TiptapImage,
   TiptapLink,
   TiptapUnderline,
-  Twitter,
   UpdatedImage,
   UploadImagesPlugin,
-  Youtube,
   FirstHeading,
 } from "@thinkthroo/editor";
 
@@ -120,29 +117,6 @@ const codeBlockLowlight = CodeBlockLowlight.configure({
   lowlight: createLowlight(common),
 });
 
-const youtube = Youtube.configure({
-  HTMLAttributes: {
-    class: cx("rounded-lg border border-muted"),
-  },
-  inline: false,
-});
-
-const twitter = Twitter.configure({
-  HTMLAttributes: {
-    class: cx("not-prose"),
-  },
-  inline: false,
-});
-
-const mathematics = Mathematics.configure({
-  HTMLAttributes: {
-    class: cx("text-foreground rounded p-1 hover:bg-accent cursor-pointer"),
-  },
-  katexOptions: {
-    throwOnError: false,
-  },
-});
-
 const characterCount = CharacterCount.configure();
 
 const markdownExtension = MarkdownExtension.configure({
@@ -169,9 +143,6 @@ export const defaultExtensions = [
   horizontalRule,
   aiHighlight,
   codeBlockLowlight,
-  youtube,
-  twitter,
-  mathematics,
   characterCount,
   TiptapUnderline,
   markdownExtension,
