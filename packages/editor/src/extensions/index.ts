@@ -13,14 +13,11 @@ import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
 import CustomKeymap from "./custom-keymap";
 import { ImageResizer } from "./image-resizer";
-import { Twitter } from "./twitter";
-import { Mathematics } from "./mathematics";
 import UpdatedImage from "./updated-image";
 import { FirstHeading } from "./first-heading";
 
 import CharacterCount from "@tiptap/extension-character-count";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-import Youtube from "@tiptap/extension-youtube";
 import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 
 const PlaceholderExtension = Placeholder.configure({
@@ -86,9 +83,6 @@ export {
   CustomKeymap,
   TiptapLink,
   UpdatedImage,
-  Youtube,
-  Twitter,
-  Mathematics,
   CharacterCount,
   GlobalDragHandle,
   FirstHeading,
