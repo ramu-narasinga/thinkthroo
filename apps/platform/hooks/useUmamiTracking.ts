@@ -15,8 +15,8 @@ export const useUmamiTracking = () => {
    * @param eventData - Optional data to send with the event
    */
   const trackEvent = useCallback((eventName: string, eventData?: EventData) => {
-    if (typeof window !== 'undefined' && window.umami) {
-      window.umami.track(eventName, eventData);
+    if (typeof window !== 'undefined' && (window as any).umami) {
+      (window as any).umami.track(eventName, eventData);
     }
   }, []);
 
@@ -25,20 +25,20 @@ export const useUmamiTracking = () => {
    * @param userId - Unique identifier for the user
    */
   const identifyUser = useCallback((userId: string) => {
-    if (typeof window !== 'undefined' && window.umami) {
-      window.umami.identify({ userId });
+    if (typeof window !== 'undefined' && (window as any).umami) {
+      (window as any).umami.identify({ userId });
     }
   }, []);
 
   return { trackEvent, identifyUser };
 };
 
-// Declare umami on window object for TypeScript
-declare global {
-  interface Window {
-    umami?: {
-      track: (eventName: string, eventData?: EventData) => void;
-      identify: (data: { userId: string }) => void;
-    };
-  }
-}
+// // Declare umami on window object for TypeScript
+// declare global {
+//   interface Window {
+//     umami?: {
+//       trackEvent: (eventName: string, eventData?: EventData) => void;
+//       identifyUser: (data: { userId: string }) => void;
+//     };
+//   }
+// }
