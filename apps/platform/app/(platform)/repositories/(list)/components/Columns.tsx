@@ -23,6 +23,28 @@ export type Repo = {
   removedAt: Date | null;
 };
 
+function ConfigureRepoButton({ repoName, hasAccess }: { repoName: string; hasAccess: boolean }) {
+  const { track } = useUmami();
+  return (
+    <Link href={`/repositories/${repoName}`}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="ml-auto hidden h-8 lg:flex"
+        disabled={!hasAccess}
+        onClick={() =>
+          track("repositories_configure_clicked", {
+            repo: repoName,
+          })
+        }
+      >
+        <Settings className="mr-2 h-4 w-4" />
+        Configure
+      </Button>
+    </Link>
+  );
+}
+
 export const columns: ColumnDef<Repo>[] = [
   {
     accessorKey: "name",
@@ -53,27 +75,8 @@ export const columns: ColumnDef<Repo>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const hasAccess = row.original.hasAccess;
-      const { track } = useUmami();
-      return (
-        <Link href={`/repositories/${row.original.name}`}>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto hidden h-8 lg:flex"
-            disabled={!hasAccess}
-            onClick={() =>
-              track("repositories_configure_clicked", {
-                repo: row.original.name,
-              })
-            }
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Configure
-          </Button>
-        </Link>
-      );
-    },
+    cell: ({ row }) => (
+      <ConfigureRepoButton repoName={row.original.name} hasAccess={row.original.hasAccess} />
+    ),
   },
 ];

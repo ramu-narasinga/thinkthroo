@@ -6,7 +6,7 @@ export function AddReposButton() {
   const handleClick = () => {
     if (typeof window !== "undefined" && typeof window.umami === "function") {
       window.umami("add_repositories_click");
-    }+
+    }
      
     posthog.capture('add_repositories_clicked', {
       timestamp: new Date().toISOString(),
