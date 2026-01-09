@@ -29,6 +29,11 @@ export function ModuleCard({ module, categorySlug }: ModuleCardProps) {
     0,
   )
 
+  const lessonQuery =
+    progress > 0 && progress < 100 && nextLesson
+      ? `?lesson=${nextLesson.id}`
+      : ""
+
   return (
     <Card className="group hover:shadow-md transition-shadow">
       <CardHeader>
@@ -44,6 +49,7 @@ export function ModuleCard({ module, categorySlug }: ModuleCardProps) {
           )}
         </div>
       </CardHeader>
+
       <CardContent className="space-y-4">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
@@ -68,7 +74,8 @@ export function ModuleCard({ module, categorySlug }: ModuleCardProps) {
 
         <div className="flex items-center gap-2 pt-2">
           <Button asChild className="flex-1">
-            <Link href={`/learn/${categorySlug}/${module.id}`}>
+            <Link href={`/${categorySlug}/${module.slug}${lessonQuery}`}>
+
               <PlayCircle className="mr-2 h-4 w-4" />
               {progress === 0 ? "Start" : progress === 100 ? "Review" : "Resume"}
             </Link>

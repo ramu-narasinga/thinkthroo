@@ -1,23 +1,24 @@
-"use client"
+"use client";
 
-import { type Category, getCategoryProgress } from "@/lib/course-data"
-import { Progress } from "@thinkthroo/ui/components/progress"
-import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs"
-import { BookOpen, Code2 } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { type Category, getCategoryProgress } from "@/lib/course-data";
+import { Progress } from "@thinkthroo/ui/components/progress";
+import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs";
+import { BookOpen, Code2 } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 interface CategoryHeaderProps {
-  category: Category
+  category: Category;
 }
 
 export function CategoryHeader({ category }: CategoryHeaderProps) {
-  const pathname = usePathname()
-  const progress = getCategoryProgress(category)
-  const totalModules = category.modules.length
+  const pathname = usePathname();
+  const progress = getCategoryProgress(category);
+  const totalModules = category.modules.length;
   const totalLessons = category.modules.reduce(
-    (acc, m) => acc + m.chapters.reduce((chAcc, ch) => chAcc + ch.lessons.length, 0),
-    0,
-  )
+    (acc, m) =>
+      acc + m.chapters.reduce((chAcc, ch) => chAcc + ch.lessons.length, 0),
+    0
+  );
 
   return (
     <div className="border-b border-border bg-background">
@@ -30,14 +31,18 @@ export function CategoryHeader({ category }: CategoryHeaderProps) {
               ) : (
                 <BookOpen className="h-5 w-5 text-primary" />
               )}
-              <h1 className="text-2xl font-bold tracking-tight">{category.title}</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {category.title}
+              </h1>
             </div>
             <p className="text-muted-foreground">
               {totalModules} modules • {totalLessons} lessons
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground mb-1">Overall Progress</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              Overall Progress
+            </p>
             <p className="text-2xl font-bold">{progress}%</p>
           </div>
         </div>
@@ -45,29 +50,14 @@ export function CategoryHeader({ category }: CategoryHeaderProps) {
       </div>
 
       <div className="px-6">
-        <Tabs value="modules" className="w-full">
-          <TabsList className="h-auto p-0 bg-transparent border-b-0">
-            <TabsTrigger
-              value="modules"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2"
-            >
-              Modules
-            </TabsTrigger>
-            <TabsTrigger
-              value="overview"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2"
-            >
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="resources"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2"
-            >
-              Resources
-            </TabsTrigger>
+        <Tabs value="modules">
+          <TabsList>
+            <TabsTrigger value="modules" className="cursor-pointer">Modules</TabsTrigger>
+            <TabsTrigger value="overview" className="cursor-pointer">Overview</TabsTrigger>
+            <TabsTrigger value="resources" className="cursor-pointer">Resources</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
     </div>
-  )
+  );
 }
