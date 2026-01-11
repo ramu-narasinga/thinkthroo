@@ -14,11 +14,11 @@ export function AuthButtons() {
         <Link
           target="_blank"
           rel="noreferrer"
-          href="https://app.thinkthroo.com/signin/email_signin"
+          href="https://app.thinkthroo.com//login"
           onClick={() => {
-            track('navigation-click', { menu_item: 'login', href: 'https://app.thinkthroo.com/signin/email_signin' });
+            track('navigation-click', { menu_item: 'login', href: 'https://app.thinkthroo.com//login' });
             posthog.capture("login_clicked", {
-              href: "https://app.thinkthroo.com/signin/email_signin"
+              href: "https://app.thinkthroo.com//login"
             });
           }}
         >
@@ -29,11 +29,11 @@ export function AuthButtons() {
         <Link
           target="_blank"
           rel="noreferrer"
-          href="https://app.thinkthroo.com/signin/email_signin"
+          href="https://app.thinkthroo.com//login"
           onClick={() => {
-            track('navigation-click', { menu_item: 'signup', href: 'https://app.thinkthroo.com/signin/email_signin' });
+            track('navigation-click', { menu_item: 'signup', href: 'https://app.thinkthroo.com//login' });
             posthog.capture("signup_clicked", {
-              href: "https://app.thinkthroo.com/signin/email_signin"
+              href: "https://app.thinkthroo.com//login"
             });
           }}
         >
