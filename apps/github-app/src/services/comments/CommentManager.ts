@@ -9,7 +9,8 @@ import {
   IN_PROGRESS_END_TAG,
   COMMENT_TAG,
   COMMENT_GREETING,
-} from "@/utils/constants";
+} from "@/services/constants";
+import { logger } from "@/lib/logger";
 
 export interface ExistingCommentData {
   comment: any | null;
@@ -56,7 +57,10 @@ export class CommentManager {
       issueCommentsCache[issueNumber] = allComments;
       return allComments;
     } catch (e: any) {
-      console.warn(`Failed to list comments: ${e}`);
+      logger.warn("Failed to list comments", {
+        issueNumber,
+        error: e.message,
+      });
       return allComments;
     }
   }
@@ -73,7 +77,7 @@ export class CommentManager {
       }
       return null;
     } catch (e: unknown) {
-      console.warn(`Failed to find comment with tag: ${e}`);
+      logger.warn("Failed to find comment with tag", { tag, error: String(e) });
       return null;
     }
   }
@@ -223,8 +227,11 @@ ${commentBody}`;
       } else {
         issueCommentsCache[target] = [response.data];
       }
-    } catch (e) {
-      console.warn(`Failed to create comment: ${e}`);
+    } catch (e: any) {
+      logger.warn("Failed to create comment", {
+        target,
+        error: e.message,
+      });
     }
   }
 
@@ -242,8 +249,12 @@ ${commentBody}`;
       } else {
         await this.create(body, target);
       }
-    } catch (e) {
-      console.warn(`Failed to replace comment: ${e}`);
+    } catch (e: any) {
+      logger.warn("Failed to replace comment", {
+        target,
+        tag,
+        error: e.message,
+      });
     }
   }
 
@@ -264,8 +275,53 @@ ${finalTag}`;
     } else if (mode === "replace") {
       await this.replace(body, finalTag, this.issueDetails.issue_number);
     } else {
-      console.warn(`Unknown mode: ${mode}, using "replace" instead`);
+      logger.warn("Unknown comment mode, using replace", { mode });
       await this.replace(body, finalTag, this.issueDetails.issue_number);
+    }
+  }
+
+  /**
+   * Update the PR description with release notes
+   */
+  async updateDescription(pullNumber: number, message: string): Promise<void> {
+    try {
+      const { data: pull } = await this.octokit.pulls.get({
+        owner: this.issueDetails.owner,
+        repo: this.issueDetails.repo,
+        pull_number: pullNumber,
+      });
+
+      let body = pull.body || "";
+      const tag = "<!-- This is an auto-generated comment: release notes by OSS Think Throo -->";
+
+      // Check if release notes already exist
+      const tagIndex = body.indexOf(tag);
+      if (tagIndex === -1) {
+        // Append release notes
+        body = `${body}\n\n---\n\n${message}\n${tag}`;
+      } else {
+        // Replace existing release notes
+        const endTag = "<!-- end of auto-generated comment: release notes by OSS Think Throo -->";
+        const endIndex = body.indexOf(endTag);
+        if (endIndex !== -1) {
+          body = body.substring(0, tagIndex) + `${message}\n${tag}` + body.substring(endIndex + endTag.length);
+        } else {
+          body = body.substring(0, tagIndex) + `${message}\n${tag}`;
+        }
+      }
+
+      await this.octokit.pulls.update({
+        owner: this.issueDetails.owner,
+        repo: this.issueDetails.repo,
+        pull_number: pullNumber,
+        body,
+      });
+    } catch (e: any) {
+      logger.warn("Failed to update PR description", {
+        pullNumber,
+        error: e.message,
+      });
+      throw e;
     }
   }
 }

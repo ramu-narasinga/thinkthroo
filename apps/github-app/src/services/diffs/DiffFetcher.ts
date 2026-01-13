@@ -1,5 +1,6 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
+import { logger } from "@/lib/logger";
 
 export interface DiffData {
   files: any[];
@@ -51,7 +52,10 @@ export class DiffFetcher {
     targetBranchFiles: any[]
   ): boolean {
     if (!incrementalFiles || !targetBranchFiles) {
-      console.warn("Skipped: files data is missing");
+      logger.warn("Skipping: files data is missing", {
+        hasIncrementalFiles: !!incrementalFiles,
+        hasTargetBranchFiles: !!targetBranchFiles,
+      });
       return false;
     }
     return true;

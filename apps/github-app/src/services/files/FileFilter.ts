@@ -1,3 +1,5 @@
+import { logger } from "@/lib/logger";
+
 export interface FilterResult {
   selected: any[];
   ignored: any[];
@@ -39,7 +41,7 @@ export class FileFilter {
 
   validateFiles(files: any[], context: string): boolean {
     if (!files || files.length === 0) {
-      console.warn(`Skipped: ${context}`);
+      logger.warn("File validation failed", { context, fileCount: files?.length ?? 0 });
       return false;
     }
     return true;

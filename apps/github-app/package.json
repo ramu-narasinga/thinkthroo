@@ -17,14 +17,19 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@logtail/pino": "^0.5.7",
+    "@sentry/node": "^10.32.1",
+    "p-limit": "^3.1.0",
+    "pino": "^10.1.1",
     "probot": "^13.4.5"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "nock": "^14.0.5",
     "smee-client": "^2.0.0",
-    "vitest": "^2.0.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^2.0.0"
   },
   "overrides": {
     "@types/pg": "8.15.1"

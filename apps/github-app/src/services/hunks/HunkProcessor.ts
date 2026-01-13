@@ -1,6 +1,7 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
 import pLimit from "p-limit";
+import { logger } from "@/lib/logger";
 
 // Helper types
 export type FileWithHunks = [
@@ -133,9 +134,11 @@ export class HunkProcessor {
               }
             }
           } catch (e: any) {
-            console.warn(
-              `Failed to get file contents: ${e}. This is OK if it's a new file.`
-            );
+            logger.debug("Failed to get file contents", {
+              filename: file.filename,
+              error: e.message,
+              note: "This is OK if it's a new file",
+            });
           }
 
           let fileDiff = "";

@@ -1,6 +1,7 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
-import { COMMIT_ID_END_TAG, COMMIT_ID_START_TAG } from "@/utils/constants";
+import { COMMIT_ID_END_TAG, COMMIT_ID_START_TAG } from "@/services/constants";
+import { logger } from "@/lib/logger";
 
 /**
  * Analyzes commits to determine what needs to be reviewed
@@ -77,7 +78,7 @@ export class CommitAnalyzer {
     headSha: string
   ): string {
     if (existingCommitIdsBlock === "") {
-      console.info(`Will review from the base commit: ${baseSha}`);
+      logger.info("Will review from base commit", { baseSha });
       return baseSha;
     }
 
@@ -88,11 +89,11 @@ export class CommitAnalyzer {
     );
 
     if (highestReviewedCommitId === "" || highestReviewedCommitId === headSha) {
-      console.info(`Will review from the base commit: ${baseSha}`);
+      logger.info("Will review from base commit", { baseSha });
       return baseSha;
     }
 
-    console.info(`Will review from commit: ${highestReviewedCommitId}`);
+    logger.info("Will review from highest reviewed commit", { highestReviewedCommitId });
     return highestReviewedCommitId;
   }
 }
