@@ -1,7 +1,7 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
 import { COMMENT_REPLY_TAG } from "@/services/constants-review";
-import { logger } from "@/lib/logger";
+import { logger } from "@/utils/logger";
 
 /**
  * Buffered review comment for batch submission

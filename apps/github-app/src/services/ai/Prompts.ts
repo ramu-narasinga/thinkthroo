@@ -16,6 +16,8 @@ export interface TemplateData {
   [key: string]: string | undefined;
 }
 
+import { logger } from "@/utils/logger";
+
 /**
  * Prompts service for PR review and summarization
  */
@@ -267,7 +269,17 @@ $comment
    * Render a template string with data
    */
   private render(template: string, data: TemplateData): string {
+    logger.debug("Rendering prompt template", {
+      templateLength: template.length,
+      dataKeys: Object.keys(data),
+      hasTitle: !!data.title,
+      hasDescription: !!data.description,
+      hasFilename: !!data.filename,
+      hasRawSummary: !!data.raw_summary,
+    });
+
     let result = template;
+    const replacements: Record<string, number> = {};
 
     // Replace all template variables with actual values
     for (const [key, value] of Object.entries(data)) {
@@ -275,10 +287,26 @@ $comment
         // Support both $key and ${key} formats
         const regex1 = new RegExp(`\\$${key}\\b`, "g");
         const regex2 = new RegExp(`\\$\\{${key}\\}`, "g");
+        
+        const matches1 = (result.match(regex1) || []).length;
+        const matches2 = (result.match(regex2) || []).length;
+        const totalMatches = matches1 + matches2;
+        
+        if (totalMatches > 0) {
+          replacements[key] = totalMatches;
+        }
+        
         result = result.replace(regex1, value);
         result = result.replace(regex2, value);
       }
     }
+
+    logger.debug("Prompt template rendered", {
+      originalLength: template.length,
+      renderedLength: result.length,
+      replacementsMade: Object.keys(replacements).length,
+      replacements,
+    });
 
     return result;
   }
@@ -287,6 +315,13 @@ $comment
     data: TemplateData,
     reviewSimpleChanges: boolean
   ): string {
+    logger.debug("Rendering summarize file diff prompt", {
+      filename: data.filename,
+      reviewSimpleChanges,
+      hasFileDiff: !!(data.file_diff || data.fileDiff),
+      fileDiffLength: (data.file_diff || data.fileDiff || "").length,
+    });
+
     // Normalize fileDiff to file_diff
     const normalizedData = {
       ...data,
@@ -297,26 +332,83 @@ $comment
     if (reviewSimpleChanges === false) {
       prompt += this.triageFileDiff;
     }
-    return this.render(prompt, normalizedData);
+    
+    const result = this.render(prompt, normalizedData);
+    
+    logger.info("Summarize file diff prompt rendered", {
+      filename: data.filename,
+      includesTriage: reviewSimpleChanges === false,
+      promptLength: result.length,
+    });
+    
+    return result;
   }
 
   renderSummarizeChangesets(data: TemplateData): string {
-    return this.render(this.summarizeChangesets, data);
+    logger.debug("Rendering summarize changesets prompt", {
+      hasRawSummary: !!data.raw_summary,
+      rawSummaryLength: data.raw_summary?.length || 0,
+    });
+
+    const result = this.render(this.summarizeChangesets, data);
+    
+    logger.info("Summarize changesets prompt rendered", {
+      promptLength: result.length,
+      inputSummaryLength: data.raw_summary?.length || 0,
+    });
+    
+    return result;
   }
 
   renderSummarize(data: TemplateData): string {
+    logger.debug("Rendering summarize prompt", {
+      hasRawSummary: !!data.raw_summary,
+      rawSummaryLength: data.raw_summary?.length || 0,
+    });
+
     const prompt = this.summarizePrefix + this.summarize;
-    return this.render(prompt, data);
+    const result = this.render(prompt, data);
+    
+    logger.info("Summarize prompt rendered", {
+      promptLength: result.length,
+      inputSummaryLength: data.raw_summary?.length || 0,
+    });
+    
+    return result;
   }
 
   renderSummarizeShort(data: TemplateData): string {
+    logger.debug("Rendering summarize short prompt", {
+      hasRawSummary: !!data.raw_summary,
+      rawSummaryLength: data.raw_summary?.length || 0,
+    });
+
     const prompt = this.summarizePrefix + this.summarizeShort;
-    return this.render(prompt, data);
+    const result = this.render(prompt, data);
+    
+    logger.info("Summarize short prompt rendered", {
+      promptLength: result.length,
+      inputSummaryLength: data.raw_summary?.length || 0,
+    });
+    
+    return result;
   }
 
   renderSummarizeReleaseNotes(data: TemplateData): string {
+    logger.debug("Rendering summarize release notes prompt", {
+      hasRawSummary: !!data.raw_summary,
+      rawSummaryLength: data.raw_summary?.length || 0,
+    });
+
     const prompt = this.summarizePrefix + this.summarizeReleaseNotes;
-    return this.render(prompt, data);
+    const result = this.render(prompt, data);
+    
+    logger.info("Summarize release notes prompt rendered", {
+      promptLength: result.length,
+      inputSummaryLength: data.raw_summary?.length || 0,
+    });
+    
+    return result;
   }
 
   renderComment(data: TemplateData): string {

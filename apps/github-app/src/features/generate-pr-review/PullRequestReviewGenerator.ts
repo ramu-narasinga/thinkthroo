@@ -7,7 +7,7 @@ import { ReviewCommentManager } from "@/services/reviews/ReviewCommentManager";
 import { FileReviewer } from "@/services/reviews/FileReviewer";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
 import { ClaudeModel } from "@/services/ai/types";
-import { logger } from "@/lib/logger";
+import { logger } from "@/utils/logger";
 
 export interface PullRequestReviewOptions {
   disableReview?: boolean;
@@ -50,7 +50,7 @@ export class PullRequestReviewGenerator {
 
     // Initialize AI bot
     this.reviewBot = new ClaudeBot({
-      model: ClaudeModel.SONNET_3_5,
+      model: ClaudeModel.SONNET_4_5,
       tokenLimits: {
         maxTokens: 200000,
         responseTokens: 8192,

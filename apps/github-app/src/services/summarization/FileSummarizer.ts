@@ -2,7 +2,7 @@ import type { ClaudeBot } from "@/services/ai/ClaudeBot";
 import type { Prompts } from "@/services/ai/Prompts";
 import type { TemplateData } from "@/services/ai/Prompts";
 import { estimateTokens } from "@/services/ai/TokenCounter";
-import { logger } from "@/lib/logger";
+import { logger } from "@/utils/logger";
 
 export interface SummaryResult {
   filename: string;
@@ -40,7 +40,11 @@ export class FileSummarizer {
     fileDiff: string,
     templateData: TemplateData
   ): Promise<SummaryResult | null> {
-    logger.debug("Summarizing file", { filename });
+    logger.info("Starting file summarization", { 
+      filename,
+      fileContentLength: _fileContent.length,
+      fileDiffLength: fileDiff.length,
+    });
     
     if (fileDiff.length === 0) {
       logger.warn("File diff is empty, skipping summarization", { filename });
@@ -56,6 +60,12 @@ export class FileSummarizer {
       file_diff: fileDiff,
     };
 
+    logger.debug("Template data prepared for file", {
+      filename,
+      hasTitle: !!templateData.title,
+      hasDescription: !!templateData.description,
+    });
+
     // Render prompt based on data
     const summarizePrompt = this.prompts.renderSummarizeFileDiff(
       data,
@@ -64,20 +74,44 @@ export class FileSummarizer {
     
     const tokens = estimateTokens(summarizePrompt);
 
+    logger.debug("Token estimation completed", {
+      filename,
+      tokens,
+      maxTokens: this.options.maxRequestTokens,
+      withinLimit: tokens <= this.options.maxRequestTokens,
+      promptLength: summarizePrompt.length,
+    });
+
     if (tokens > this.options.maxRequestTokens) {
-      logger.info("Diff tokens exceeds limit, skipping file", {
+      logger.warn("Diff tokens exceeds limit, skipping file", {
         filename,
         tokens,
         maxTokens: this.options.maxRequestTokens,
+        exceedBy: tokens - this.options.maxRequestTokens,
       });
       this.summariesFailed.push(`${filename} (diff tokens exceeds limit)`);
       return null;
     }
 
     // Summarize content using Claude
+    logger.debug("Sending summarization request to AI", {
+      filename,
+      promptTokens: tokens,
+      reviewSimpleChanges: this.options.reviewSimpleChanges,
+    });
+
     try {
+      const startTime = Date.now();
       const response = await this.bot.chat(summarizePrompt);
+      const duration = Date.now() - startTime;
       const summarizeResp = response.text;
+
+      logger.info("AI summarization response received", {
+        filename,
+        responseLength: summarizeResp.length,
+        hasResponse: summarizeResp.length > 0,
+        durationMs: duration,
+      });
 
       if (summarizeResp === "") {
         logger.warn("Nothing obtained from AI for summarization", { filename });
@@ -86,6 +120,8 @@ export class FileSummarizer {
       }
 
       if (this.options.reviewSimpleChanges === false) {
+        logger.debug("Checking for triage classification", { filename });
+        
         // Parse the comment to look for triage classification
         // Format is: [TRIAGE]: <NEEDS_REVIEW or APPROVED>
         const triageRegex = /\[TRIAGE\]:\s*(NEEDS_REVIEW|APPROVED)/;
@@ -97,14 +133,27 @@ export class FileSummarizer {
 
           // Remove triage line from the comment
           const summary = summarizeResp.replace(triageRegex, "").trim();
-          logger.debug("File triage classification", { filename, triage, needsReview });
+          logger.info("File triage classification found", { 
+            filename, 
+            triage, 
+            needsReview,
+            summaryLength: summary.length,
+          });
           return {
             filename,
             summary,
             needsReview,
           };
+        } else {
+          logger.debug("No triage classification found in response", { filename });
         }
       }
+
+      logger.info("File summarization completed successfully", {
+        filename,
+        summaryLength: summarizeResp.length,
+        needsReview: true,
+      });
 
       return {
         filename,
@@ -112,9 +161,10 @@ export class FileSummarizer {
         needsReview: true,
       };
     } catch (e: any) {
-      logger.warn("Error from AI during summarization", {
+      logger.error("Error from AI during summarization", {
         filename,
         error: e.message,
+        stack: e.stack,
       });
       this.summariesFailed.push(
         `${filename} (error from AI: ${e as string})})`

@@ -1,10 +1,10 @@
-import "./lib/sentry";
+import "./utils/sentry";
 
 import { Probot } from "probot";
 import { issueGreeting } from "./features/issue-greeting";
 import { generatePullRequestSummary } from "./features/generate-pr-summary";
-import { generatePullRequestReview } from "./features/generate-pr-review";
-import { logger } from "@/lib/logger";
+// import { generatePullRequestReview } from "./features/generate-pr-review";
+import { logger } from "@/utils/logger";
 
 export default (app: Probot) => {
   logger.info("GitHub App initialized", { appName: "think-throo" });
@@ -29,9 +29,12 @@ export default (app: Probot) => {
     }
   });
 
-  app.on("pull_request.opened", async (context) => {
+  app.on(["pull_request.opened", "pull_request.reopened"], async (context) => {
     const pullRequest = context.payload.pull_request;
-    logger.info("Pull request opened event received", {
+    const eventAction = context.payload.action;
+    
+    logger.info("Pull request event received", {
+      action: eventAction,
       owner: context.repo().owner,
       repo: context.repo().repo,
       prNumber: pullRequest.number,
@@ -51,14 +54,15 @@ export default (app: Probot) => {
       });
     }
 
-    try {
-      await generatePullRequestReview(context);
-      logger.info("PR review generation completed", { prNumber: pullRequest.number });
-    } catch (error: any) {
-      logger.error("Failed to generate PR review", {
-        prNumber: pullRequest.number,
-        error: error.message,
-      });
-    }
+    // TODO: Enable PR review on open after testing the summary and refactoring the common code
+    // try {
+    //   await generatePullRequestReview(context);
+    //   logger.info("PR review generation completed", { prNumber: pullRequest.number });
+    // } catch (error: any) {
+    //   logger.error("Failed to generate PR review", {
+    //     prNumber: pullRequest.number,
+    //     error: error.message,
+    //   });
+    // }
   });
 };

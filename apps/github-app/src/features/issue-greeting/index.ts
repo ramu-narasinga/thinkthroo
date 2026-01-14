@@ -2,7 +2,7 @@
 import { ProbotOctokit } from "probot";
 import { issueGreetingBodyText } from "@/services/constants";
 import { IssueDetails } from "@/types/issue";
-import { logger } from "@/lib/logger";
+import { logger } from "@/utils/logger";
 
 export async function issueGreeting(
   octokit: InstanceType<typeof ProbotOctokit>,

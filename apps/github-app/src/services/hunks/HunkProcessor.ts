@@ -1,7 +1,7 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
 import pLimit from "p-limit";
-import { logger } from "@/lib/logger";
+import { logger } from "@/utils/logger";
 
 // Helper types
 export type FileWithHunks = [
@@ -107,9 +107,28 @@ export class HunkProcessor {
     files: any[],
     baseSha: string
   ): Promise<FileWithHunks[]> {
+    logger.info("Starting hunk processing", {
+      filesCount: files.length,
+      baseSha,
+      concurrencyLimit: 5,
+    });
+
+    const startTime = Date.now();
+    let successCount = 0;
+    let failedCount = 0;
+    let newFileCount = 0;
+
     const filteredFiles = await Promise.all(
       files.map((file) =>
         this.concurrencyLimit(async () => {
+          logger.debug("Processing file into hunks", {
+            filename: file.filename,
+            status: file.status,
+            additions: file.additions,
+            deletions: file.deletions,
+            changes: file.changes,
+          });
+
           // Retrieve file contents
           let fileContent = "";
           try {
@@ -130,13 +149,21 @@ export class HunkProcessor {
                     contents.data.content,
                     "base64"
                   ).toString();
+
+                  logger.debug("File content retrieved", {
+                    filename: file.filename,
+                    contentLength: fileContent.length,
+                    encoding: contents.data.encoding,
+                  });
                 }
               }
             }
           } catch (e: any) {
+            newFileCount++;
             logger.debug("Failed to get file contents", {
               filename: file.filename,
               error: e.message,
+              status: e.status,
               note: "This is OK if it's a new file",
             });
           }
@@ -147,7 +174,14 @@ export class HunkProcessor {
           }
 
           const patches: Array<[number, number, string]> = [];
-          for (const patch of this.splitPatch(file.patch)) {
+          const splitPatches = this.splitPatch(file.patch);
+
+          logger.debug("Split patches for file", {
+            filename: file.filename,
+            patchCount: splitPatches.length,
+          });
+
+          for (const patch of splitPatches) {
             const patchLines = this.patchStartEndLine(patch);
             if (patchLines == null) {
               continue;
@@ -175,6 +209,12 @@ ${hunks.oldHunk}
           }
 
           if (patches.length > 0) {
+            successCount++;
+            logger.debug("File processed successfully with hunks", {
+              filename: file.filename,
+              patchesCount: patches.length,
+              contentLength: fileContent.length,
+            });
             return [file.filename, fileContent, fileDiff, patches] as [
               string,
               string,
@@ -182,11 +222,28 @@ ${hunks.oldHunk}
               Array<[number, number, string]>
             ];
           } else {
+            failedCount++;
+            logger.warn("No patches generated for file", {
+              filename: file.filename,
+              hasPatch: !!file.patch,
+              patchLength: file.patch?.length || 0,
+            });
             return null;
           }
         })
       )
     );
+
+    const duration = Date.now() - startTime;
+
+    logger.info("Hunk processing completed", {
+      totalFiles: files.length,
+      successCount,
+      failedCount,
+      newFileCount,
+      durationMs: duration,
+      avgTimePerFile: (duration / files.length).toFixed(2) + 'ms',
+    });
 
     return filteredFiles;
   }

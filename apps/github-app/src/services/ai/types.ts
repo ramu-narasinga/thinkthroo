@@ -2,8 +2,8 @@
  * Claude model identifiers
  */
 export enum ClaudeModel {
-  HAIKU_3_5 = "claude-3-5-haiku-20241022",
-  SONNET_3_5 = "claude-3-5-sonnet-20241022",
+  HAIKU_4_5 = "claude-haiku-4-5-20251001",
+  SONNET_4_5 = "claude-sonnet-4-5-20250929",
 }
 
 /**
@@ -61,20 +61,20 @@ export interface AIOptions {
  * Default token limits for Claude Haiku (summary bot)
  */
 export const HAIKU_TOKEN_LIMITS: TokenLimits = {
-  maxTokens: 200000, // Claude 3.5 Haiku context window
-  responseTokens: 8192, // Max output tokens
-  requestTokens: 4000, // Limit for request to stay within budget
-  knowledgeCutOff: "2024-07",
+  maxTokens: 200000,
+  responseTokens: 64000,
+  requestTokens: 4000,
+  knowledgeCutOff: "2025-02",
 };
 
 /**
  * Default token limits for Claude Sonnet (review bot)
  */
 export const SONNET_TOKEN_LIMITS: TokenLimits = {
-  maxTokens: 200000, // Claude 3.5 Sonnet context window
-  responseTokens: 8192, // Max output tokens
-  requestTokens: 12000, // Higher limit for detailed reviews
-  knowledgeCutOff: "2024-10",
+  maxTokens: 200000,
+  responseTokens: 64000,
+  requestTokens: 12000,
+  knowledgeCutOff: "2025-01",
 };
 
 /**
@@ -83,7 +83,7 @@ export const SONNET_TOKEN_LIMITS: TokenLimits = {
 export function getDefaultAIOptions(): AIOptions {
   return {
     summaryBot: {
-      model: ClaudeModel.HAIKU_3_5,
+      model: ClaudeModel.HAIKU_4_5,
       tokenLimits: HAIKU_TOKEN_LIMITS,
       temperature: 0.0,
       maxRetries: 3,
@@ -91,7 +91,7 @@ export function getDefaultAIOptions(): AIOptions {
       debug: false,
     },
     reviewBot: {
-      model: ClaudeModel.SONNET_3_5,
+      model: ClaudeModel.SONNET_4_5,
       tokenLimits: SONNET_TOKEN_LIMITS,
       temperature: 0.0,
       maxRetries: 3,

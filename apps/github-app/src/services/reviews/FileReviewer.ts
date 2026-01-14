@@ -4,7 +4,7 @@ import { estimateTokens } from "@/services/ai/TokenCounter";
 import { ReviewParser } from "./ReviewParser";
 import type { ReviewCommentManager } from "./ReviewCommentManager";
 import { COMMENT_REPLY_TAG } from "@/services/constants-review";
-import { logger } from "@/lib/logger";
+import { logger } from "@/utils/logger";
 
 export interface ReviewOptions {
   maxRequestTokens: number;

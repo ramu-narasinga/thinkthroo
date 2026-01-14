@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // TODO: implement p-retry?
 import { retry } from "./retry";
 import type { ClaudeBotConfig } from "./types";
-import { logger } from "@/lib/logger";
+import { logger } from "@/utils/logger";
 
 /**
  * Conversation context for maintaining multi-turn conversations
@@ -53,11 +53,23 @@ export class ClaudeBot {
     context?: ConversationContext
   ): Promise<BotResponse> {
     if (!message) {
+      logger.debug("Empty message provided to Claude chat", {
+        model: this.config.model,
+      });
       return {
         text: "",
         context: context || { messages: [] },
       };
     }
+
+    logger.debug("Sending request to Claude API", {
+      model: this.config.model,
+      messageLength: message.length,
+      hasContext: !!context,
+      contextMessagesCount: context?.messages.length || 0,
+      temperature: this.config.temperature ?? 0.0,
+      maxTokens: this.config.tokenLimits.responseTokens,
+    });
 
     const start = Date.now();
 
@@ -73,8 +85,18 @@ export class ClaudeBot {
             },
           ];
 
+          logger.debug("Prepared messages for Claude API", {
+            model: this.config.model,
+            totalMessages: messages.length,
+          });
+
           // Prepare system message
           const systemMessage = this.buildSystemMessage();
+
+          logger.debug("Making Claude API request", {
+            model: this.config.model,
+            systemMessageLength: systemMessage.length,
+          });
 
           const result = await this.client.messages.create({
             model: this.config.model,
@@ -93,12 +115,21 @@ export class ClaudeBot {
               attemptNumber: error.attemptNumber,
               retriesLeft: error.retriesLeft,
               model: this.config.model,
+              error: error.message,
             });
           },
         }
       );
 
       const end = Date.now();
+
+      logger.info("Claude API response received successfully", {
+        responseTimeMs: end - start,
+        model: this.config.model,
+        stopReason: response.stop_reason,
+        inputTokens: response.usage?.input_tokens,
+        outputTokens: response.usage?.output_tokens,
+      });
 
       if (this.config.debug) {
         logger.debug("Claude API response received", {
