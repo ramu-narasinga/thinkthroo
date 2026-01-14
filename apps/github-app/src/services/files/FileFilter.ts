@@ -25,8 +25,8 @@ export class FileFilter {
     // TODO: Implement file ignore logic here
     // https://github.com/coderabbitai/ai-pr-reviewer/blob/d5ec3970b3acc4b9d673e6cd601bf4d3cf043b55/src/review.ts#L149
     
-    const filterSelectedFiles = [];
-    const filterIgnoredFiles = [];
+    const filterSelectedFiles: any[] = [];
+    const filterIgnoredFiles: any[] = [];
     
     for (const file of files) {
       // For now, select all files. Add ignore logic here later.

@@ -12,13 +12,12 @@
     "probot-app"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "probot run ./lib/index.js",
     "test": "vitest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
-    "@logtail/pino": "^0.5.7",
     "@sentry/node": "^10.32.1",
     "p-limit": "^3.1.0",
     "pino": "^10.1.1",
@@ -28,6 +27,7 @@
     "@types/node": "^20.0.0",
     "nock": "^14.0.5",
     "smee-client": "^2.0.0",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.8.3",
     "vitest": "^2.0.0"
   },

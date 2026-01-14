@@ -1,3 +1,5 @@
+import "./lib/sentry";
+
 import { Probot } from "probot";
 import { issueGreeting } from "./features/issue-greeting";
 import { generatePullRequestSummary } from "./features/generate-pr-summary";
