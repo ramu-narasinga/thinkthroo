@@ -1,61 +1,36 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Card, CardContent } from "@thinkthroo/ui/components/card"
 import { Trash2, DollarSign, Github, Users } from "lucide-react"
 import { DataTable } from "@/components/subscription-table/data-table"
-import { getColumns, Payment } from "@/components/subscription-table/columns"
+import { columns } from "@/components/subscription-table/columns"
 import posthog from "posthog-js"
 
 export default function SubscriptionPage() {
-  const [data, setData] = useState<Payment[]>([])
-
-  useEffect(() => {
-    setData([
-     {
-  id: "728ed52f",
-  amount: 100,
-  status: "pending",
-  email: "m@example.com",
-  latestPR: "feat: new button",
-  role: "Developer"
-},
-
-      {
-        id: "45ad8f91",
-        amount: 250,
-        status: "success",
-        email: "john.doe@example.com",
-        latestPR: "Improve dashboard",
-        role: "User",
-      },
-    ])
-  }, [])
+  // Empty invoices for now → "No results"
+  const invoices: any[] = []
 
   const handleDeleteAccount = () => {
-    // PostHog: Track delete account clicked (churn indicator)
-    posthog.capture('delete_account_clicked', {
+    posthog.capture("delete_account_clicked", {
       timestamp: new Date().toISOString(),
-    });
+    })
     alert("Delete Account Clicked")
   }
 
   const handleManageSubscription = () => {
-    // PostHog: Track manage subscription clicked (monetization funnel)
-    posthog.capture('manage_subscription_clicked', {
+    posthog.capture("manage_subscription_clicked", {
       timestamp: new Date().toISOString(),
-    });
+    })
     alert("Manage Subscription Clicked")
   }
 
-  const columns = getColumns(setData)
-
   return (
-    <div className="p-6 space-y-6">
+    // ⬇️ reduced global vertical spacing
+    <div className="p-6 space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4">
+      <div className="flex items-center justify-between pb-2">
         <h1 className="text-2xl font-semibold text-foreground">Subscription</h1>
         <div className="flex gap-2">
           <Button
@@ -97,7 +72,7 @@ export default function SubscriptionPage() {
               </div>
               <p className="text-muted-foreground text-sm">Active</p>
 
-              <div className="mt-4 flex flex-col gap-1 text-sm text-foreground">
+              <div className="mt-3 flex flex-col gap-1 text-sm text-foreground">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   <span>0/1 seat assigned</span>
@@ -112,9 +87,14 @@ export default function SubscriptionPage() {
         </CardContent>
       </Card>
 
-      {/* Data Table */}
-      <div className="pt-4">
-        <DataTable columns={columns} data={data} />
+      {/* Invoices title */}
+      <div className="mt-2">
+        <h2 className="text-lg font-semibold leading-tight">Invoices</h2>
+      </div>
+
+      {/* Invoices Table */}
+      <div>
+        <DataTable columns={columns} data={invoices} />
       </div>
     </div>
   )
