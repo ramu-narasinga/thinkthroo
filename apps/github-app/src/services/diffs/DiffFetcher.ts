@@ -14,7 +14,12 @@ export class DiffFetcher {
   constructor(
     private readonly octokit: Context["octokit"],
     private readonly issueDetails: IssueDetails
-  ) {}
+  ) {
+    logger.debug("DiffFetcher initialized", {
+      owner: issueDetails.owner,
+      repo: issueDetails.repo,
+    });
+  }
 
   async fetchIncrementalDiff(
     baseSha: string,

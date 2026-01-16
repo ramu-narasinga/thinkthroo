@@ -32,9 +32,14 @@ export class PRPreprocessor {
     octokit: Context["octokit"],
     issueDetails: IssueDetails
   ) {
+    logger.debug("PRPreprocessor initialized", {
+      owner: issueDetails.owner,
+      repo: issueDetails.repo,
+    });
     this.diffFetcher = new DiffFetcher(octokit, issueDetails);
     this.fileFilter = new FileFilter();
     this.hunkProcessor = new HunkProcessor(octokit, issueDetails);
+    logger.debug("PRPreprocessor services created");
   }
 
   /**

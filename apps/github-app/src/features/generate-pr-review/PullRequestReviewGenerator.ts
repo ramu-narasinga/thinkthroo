@@ -5,8 +5,10 @@ import { Prompts } from "@/services/ai/Prompts";
 import type { TemplateData } from "@/services/ai/Prompts";
 import { ReviewCommentManager } from "@/services/reviews/ReviewCommentManager";
 import { FileReviewer } from "@/services/reviews/FileReviewer";
+import { FileReviewFilter } from "@/services/reviews/FileReviewFilter";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
-import { ClaudeModel } from "@/services/ai/types";
+import type { SummaryResult } from "@/services/summarization/FileSummarizer";
+import { getDefaultAIOptions, ClaudeModel, type AIOptions } from "@/services/ai/types";
 import { logger } from "@/utils/logger";
 
 export interface PullRequestReviewOptions {
@@ -16,57 +18,92 @@ export interface PullRequestReviewOptions {
   maxFiles?: number;
   maxRequestTokens?: number;
   debug?: boolean;
+  enableSummaryFiltering?: boolean;
+  summaries?: SummaryResult[];
 }
 
-/**
- * Orchestrates AI-powered PR code reviews
- */
 export class PullRequestReviewGenerator {
-  private readonly defaultOptions: Required<PullRequestReviewOptions> = {
+  private readonly defaultOptions: Omit<Required<PullRequestReviewOptions>, 'summaries'> = {
     disableReview: false,
     reviewCommentLGTM: false,
     maxConcurrency: 5,
     maxFiles: 50,
     maxRequestTokens: 10000,
     debug: false,
+    enableSummaryFiltering: false,
   };
 
   private readonly preprocessor: PRPreprocessor;
   private readonly reviewBot: ClaudeBot;
   private readonly prompts: Prompts;
-  private readonly options: Required<PullRequestReviewOptions>;
+  private readonly fileReviewFilter: FileReviewFilter;
+  private readonly options: PullRequestReviewOptions;
+  private readonly aiOptions: AIOptions;
 
   constructor(
     private readonly context: Context<"pull_request.opened" | "pull_request.synchronize">,
     options: PullRequestReviewOptions = {}
   ) {
+    const prNumber = context.payload.pull_request.number;
+    logger.info("Initializing PullRequestReviewGenerator", {
+      prNumber,
+      providedOptions: Object.keys(options),
+      event: context.name,
+    });
+
     this.options = { ...this.defaultOptions, ...options };
-    const opts = this.options;
+
+    logger.debug("Merged options", {
+      prNumber,
+      options: this.options,
+    });
 
     const issueDetails = context.issue();
     const octokit = context.octokit;
 
-    this.preprocessor = new PRPreprocessor(octokit, issueDetails);
-
-    // Initialize AI bot
-    this.reviewBot = new ClaudeBot({
-      model: ClaudeModel.SONNET_4_5,
-      tokenLimits: {
-        maxTokens: 200000,
-        responseTokens: 8192,
-        requestTokens: opts.maxRequestTokens,
-        knowledgeCutOff: "2024-10",
-      },
-      temperature: 0.05,
-      debug: opts.debug,
+    logger.debug("Creating service instances", {
+      prNumber,
+      owner: issueDetails.owner,
+      repo: issueDetails.repo,
     });
 
-    this.prompts = new Prompts();
-  }
+    this.preprocessor = new PRPreprocessor(octokit, issueDetails);
+    this.fileReviewFilter = new FileReviewFilter();
 
-  /**
-   * Generate and post AI review comments
-   */
+    this.aiOptions = getDefaultAIOptions();
+
+    logger.debug("AI options configured", {
+      prNumber,
+      reviewBotModel: this.aiOptions.reviewBot.model,
+      maxRetries: this.aiOptions.reviewBot.maxRetries,
+      requestTokens: this.aiOptions.reviewBot.tokenLimits.requestTokens,
+      responseTokens: this.aiOptions.reviewBot.tokenLimits.responseTokens,
+    });
+
+    try {
+      this.reviewBot = new ClaudeBot(this.aiOptions.reviewBot);
+      logger.info("Review bot initialized successfully", {
+        prNumber,
+        model: ClaudeModel.SONNET_4_5,
+      });
+    } catch (e: any) {
+      logger.error("Failed to create review bot", {
+        prNumber,
+        error: e.message,
+        stack: e.stack,
+      });
+      throw e;
+    }
+
+    this.prompts = new Prompts();
+
+    logger.info("PullRequestReviewGenerator initialized successfully", {
+      prNumber,
+      owner: issueDetails.owner,
+      repo: issueDetails.repo,
+    });
+  }
+  
   async generate(): Promise<void> {
     const startTime = Date.now();
     const opts = this.options;
@@ -108,7 +145,37 @@ export class PullRequestReviewGenerator {
       return;
     }
 
-    logger.info("Files to review", { prNumber: pullNumber, fileCount: filesAndChanges.length });
+    // Step 1.5: Apply summary-based filtering if enabled
+    let filesToReview = filesAndChanges;
+    let reviewsSkipped: string[] = [];
+
+    if (opts.enableSummaryFiltering && opts.summaries) {
+      logger.debug("Applying summary-based filtering", {
+        prNumber: pullNumber,
+        totalFiles: filesAndChanges.length,
+        summariesCount: opts.summaries.length,
+      });
+
+      const filterResult = this.fileReviewFilter.filter(filesAndChanges, opts.summaries);
+      filesToReview = filterResult.filesToReview;
+      reviewsSkipped = filterResult.reviewsSkipped;
+
+      logger.info("Summary-based filtering complete", {
+        prNumber: pullNumber,
+        originalFiles: filesAndChanges.length,
+        filesToReview: filesToReview.length,
+        reviewsSkipped: reviewsSkipped.length,
+      });
+    } else {
+      logger.debug("Summary-based filtering disabled", { prNumber: pullNumber });
+    }
+
+    if (filesToReview.length === 0) {
+      logger.info("No files need review after filtering", { prNumber: pullNumber });
+      return;
+    }
+
+    logger.info("Files to review", { prNumber: pullNumber, fileCount: filesToReview.length });
 
     // Step 2: Initialize review-specific services
     const reviewCommentManager = new ReviewCommentManager(
@@ -120,9 +187,9 @@ export class PullRequestReviewGenerator {
       this.prompts,
       reviewCommentManager,
       {
-        maxRequestTokens: opts.maxRequestTokens,
-        reviewCommentLGTM: opts.reviewCommentLGTM,
-        debug: opts.debug,
+        maxRequestTokens: this.aiOptions.reviewBot.tokenLimits.requestTokens,
+        reviewCommentLGTM: opts.reviewCommentLGTM ?? false,
+        debug: opts.debug ?? false,
       }
     );
 
@@ -143,18 +210,20 @@ export class PullRequestReviewGenerator {
     // Step 4: Review files with concurrency control
     logger.info("Starting AI review of files", {
       prNumber: pullNumber,
-      concurrency: opts.maxConcurrency,
-      maxFiles: opts.maxFiles,
+      concurrency: opts.maxConcurrency ?? 5,
+      maxFiles: opts.maxFiles ?? 50,
     });
 
-    const openaiConcurrencyLimit = pLimit(opts.maxConcurrency);
+    const claudeConcurrencyLimit = pLimit(opts.maxConcurrency ?? 5);
     const reviewPromises = [];
     const skippedFiles: string[] = [];
+    // FIXME: What happens if there's more than 50 files?x
+    const maxFiles = opts.maxFiles ?? 50;
 
-    for (const [filename, fileContent, _fileDiff, patches] of filesAndChanges) {
-      if (opts.maxFiles <= 0 || reviewPromises.length < opts.maxFiles) {
+    for (const [filename, fileContent, _fileDiff, patches] of filesToReview) {
+      if (maxFiles <= 0 || reviewPromises.length < maxFiles) {
         reviewPromises.push(
-          openaiConcurrencyLimit(async () =>
+          claudeConcurrencyLimit(async () =>
             fileReviewer.reviewFile(
               filename,
               fileContent,
@@ -236,11 +305,21 @@ ${
 }
 ${
   reviewsFailed.length > 0
-    ? `
-<details>
+    ? `<details>
 <summary>Files not reviewed due to errors (${reviewsFailed.length})</summary>
 
 * ${reviewsFailed.join('\n* ')}
+
+</details>
+`
+    : ''
+}
+${
+  reviewsSkipped.length > 0
+    ? `<details>
+<summary>Files skipped from review due to trivial changes (${reviewsSkipped.length})</summary>
+
+* ${reviewsSkipped.join('\n* ')}
 
 </details>
 `
@@ -259,13 +338,16 @@ ${
 <details>
 <summary>Tips</summary>
 
-### Chat with CodeArc Bot
-- Reply on review comments left by this bot to ask follow-up questions.
-- The bot analyzes your codebase architecture and provides focused feedback.
+### Chat with ThinkThroo
+- Reply on review comments left by this bot to ask follow-up questions. A review comment is a comment on a diff or a file.
+- Invite the bot into a review comment chain by tagging the bot in a reply.
 
 ### Code suggestions
-- Review suggestions carefully before committing since line number ranges may need adjustment.
-- You can edit comments and manually tweak suggestions if needed.
+- The bot may make code suggestions, but please review them carefully before committing since the line number ranges may be misaligned.
+- You can edit the comment made by the bot and manually tweak the suggestion if it is slightly off.
+
+### Pausing incremental reviews
+- Add \`@thinkthroo: ignore\` anywhere in the PR description to pause further reviews from the bot.
 
 </details>
 `;

@@ -30,12 +30,23 @@ export class HunkProcessor {
   constructor(
     private readonly octokit: Context["octokit"],
     private readonly issueDetails: IssueDetails
-  ) {}
+  ) {
+    logger.debug("HunkProcessor initialized", {
+      owner: issueDetails.owner,
+      repo: issueDetails.repo,
+      concurrencyLimit: 5,
+    });
+  }
 
   private splitPatch(patch: string | null | undefined): string[] {
     if (!patch) {
+      logger.debug("splitPatch received null/undefined patch");
       return [];
     }
+
+    logger.debug("Splitting patch", {
+      patchLength: patch.length,
+    });
 
     const pattern = /(^@@ -(\d+),(\d+) \+(\d+),(\d+) @@).*$/gm;
     const result: string[] = [];
@@ -53,6 +64,12 @@ export class HunkProcessor {
     if (last !== -1) {
       result.push(patch.substring(last));
     }
+
+    logger.debug("Patch split complete", {
+      splitCount: result.length,
+      patchLength: patch.length,
+    });
+
     return result;
   }
 
@@ -60,6 +77,9 @@ export class HunkProcessor {
     const pattern = /@@ -(\d+),(\d+) \+(\d+),(\d+) @@/;
     const match = patch.match(pattern);
     if (!match) {
+      logger.debug("Failed to match patch pattern", {
+        patchPreview: patch.substring(0, 100),
+      });
       return null;
     }
 
@@ -67,6 +87,11 @@ export class HunkProcessor {
     const oldDiff = parseInt(match[2]);
     const newBegin = parseInt(match[3]);
     const newDiff = parseInt(match[4]);
+
+    logger.debug("Parsed patch line numbers", {
+      oldRange: `${oldBegin}-${oldBegin + oldDiff - 1}`,
+      newRange: `${newBegin}-${newBegin + newDiff - 1}`,
+    });
 
     return {
       oldHunk: {

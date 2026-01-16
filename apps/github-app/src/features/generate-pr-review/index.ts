@@ -5,7 +5,7 @@ import { PullRequestReviewGenerator } from "./PullRequestReviewGenerator";
  * Entry point for PR review generation feature
  */
 export async function generatePullRequestReview(
-  context: Context<"pull_request.opened" | "pull_request.synchronize">
+  context: Context<"pull_request.opened" | "pull_request.synchronize" | "pull_request.reopened">
 ): Promise<void> {
   const generator = new PullRequestReviewGenerator(context, {
     disableReview: false,

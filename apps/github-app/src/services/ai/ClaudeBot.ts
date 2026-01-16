@@ -30,7 +30,17 @@ export class ClaudeBot {
   private readonly config: ClaudeBotConfig;
 
   constructor(config: ClaudeBotConfig, apiKey?: string) {
+    logger.debug("Initializing ClaudeBot", {
+      model: config.model,
+      temperature: config.temperature ?? 0.0,
+      maxRetries: config.maxRetries ?? 3,
+      hasSystemMessage: !!config.systemMessage,
+      requestTokens: config.tokenLimits.requestTokens,
+      responseTokens: config.tokenLimits.responseTokens,
+    });
+
     if (!apiKey && !process.env.ANTHROPIC_API_KEY) {
+      logger.error("Anthropic API key not found");
       throw new Error(
         "Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or pass it to the constructor."
       );
@@ -39,6 +49,10 @@ export class ClaudeBot {
     this.config = config;
     this.client = new Anthropic({
       apiKey: apiKey || process.env.ANTHROPIC_API_KEY,
+    });
+
+    logger.info("ClaudeBot initialized successfully", {
+      model: config.model,
     });
   }
 
@@ -178,10 +192,18 @@ export class ClaudeBot {
     const currentDate = new Date().toISOString().split("T")[0];
     const baseMessage = this.config.systemMessage || "";
 
-    return `${baseMessage}
+    const systemMessage = `${baseMessage}
 
 Knowledge cutoff: ${this.config.tokenLimits.knowledgeCutOff}
 Current date: ${currentDate}`;
+
+    logger.debug("System message built", {
+      currentDate,
+      knowledgeCutoff: this.config.tokenLimits.knowledgeCutOff,
+      systemMessageLength: systemMessage.length,
+    });
+
+    return systemMessage;
   }
 
   /**
@@ -192,7 +214,15 @@ Current date: ${currentDate}`;
       (block): block is Anthropic.TextBlock => block.type === "text"
     );
 
-    return textBlocks.map((block) => block.text).join("\n");
+    const extractedText = textBlocks.map((block) => block.text).join("\n");
+
+    logger.debug("Extracted text from Claude response", {
+      textBlockCount: textBlocks.length,
+      totalContentBlocks: response.content.length,
+      extractedTextLength: extractedText.length,
+    });
+
+    return extractedText;
   }
 
   /**
@@ -203,10 +233,19 @@ Current date: ${currentDate}`;
 
     // Remove "with " prefix if present
     if (cleaned.startsWith("with ")) {
+      logger.debug("Removing 'with ' prefix from response");
       cleaned = cleaned.substring(5);
     }
 
-    return cleaned.trim();
+    const trimmed = cleaned.trim();
+
+    logger.debug("Response cleaned", {
+      originalLength: text.length,
+      cleanedLength: trimmed.length,
+      hadPrefix: text.startsWith("with "),
+    });
+
+    return trimmed;
   }
 
   /**

@@ -1,91 +1,1503 @@
-{"level":30,"time":1768413166373,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"action":"reopened","owner":"ramu-narasinga","repo":"thinkthroo","prNumber":97,"prTitle":"70 pr summary test","author":"Tarun-Masapuram","baseBranch":"70-generate-pr-summary","headBranch":"70-pr-summary-test"},"msg":"Pull request event received"}
-{"level":30,"time":1768413166374,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"model":"claude-haiku-4-5-20251001"},"msg":"Summary bot initialized"}
-{"level":30,"time":1768413166374,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"model":"claude-sonnet-4-5-20250929"},"msg":"Review bot initialized"}
-{"level":30,"time":1768413166375,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"pullNumber":97,"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","owner":"ramu-narasinga","repo":"thinkthroo"},"msg":"Fetching existing comment data"}
-{"level":30,"time":1768413166375,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"issueNumber":97,"owner":"ramu-narasinga","repo":"thinkthroo"},"msg":"Fetching comments from GitHub API"}
-{"level":30,"time":1768413167179,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"issueNumber":97,"totalComments":3,"totalPages":1},"msg":"All comments fetched and cached"}
-{"level":30,"time":1768413167179,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","commentId":3750705915,"commentAuthor":"think-throo[bot]","commentCreatedAt":"2026-01-14T17:27:59Z","commentUpdatedAt":"2026-01-14T17:27:59Z","bodyLength":775},"msg":"Comment with tag found"}
-{"level":30,"time":1768413167179,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"pullNumber":97,"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","commentId":3750705915,"commentLength":775},"msg":"Existing comment found"}
-{"level":40,"time":1768413167180,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"summaryLength":775},"msg":"Raw summary not found in comment"}
-{"level":40,"time":1768413167180,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"summaryLength":775},"msg":"Short summary not found in comment"}
-{"level":30,"time":1768413167999,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"pullNumber":97,"totalCommits":2,"commitIds":["3083b59e4ef2d2ddf47a467114a1acc586e7f203","6e4524f9b84948b1e6918f079428a78135f9ee9e"]},"msg":"Successfully fetched all commit IDs"}
-{"level":30,"time":1768413167999,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"baseSha":"3cdaefe45b8f52de95d7b96e11f627867745dcc3","reason":"no existing commit block"},"msg":"No existing review found - will review from base commit"}
-{"level":30,"time":1768413167999,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"reviewStartCommit":"3cdaefe45b8f52de95d7b96e11f627867745dcc3","totalCommits":2,"hasExistingComment":true},"msg":"Determined review start commit"}
-{"level":30,"time":1768413167999,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"baseSha":"3cdaefe45b8f52de95d7b96e11f627867745dcc3","headSha":"6e4524f9b84948b1e6918f079428a78135f9ee9e","reviewStartCommit":"3cdaefe45b8f52de95d7b96e11f627867745dcc3"},"msg":"Starting PR preprocessing"}
-{"level":30,"time":1768413167999,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"baseSha":"3cdaefe45b8f52de95d7b96e11f627867745dcc3","headSha":"6e4524f9b84948b1e6918f079428a78135f9ee9e","reviewStartSha":"3cdaefe45b8f52de95d7b96e11f627867745dcc3","isIncrementalReview":true},"msg":"Starting PR preprocessing"}
-{"level":30,"time":1768413168413,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"baseSha":"3cdaefe45b8f52de95d7b96e11f627867745dcc3","headSha":"6e4524f9b84948b1e6918f079428a78135f9ee9e","filesCount":4,"commitsCount":2,"status":"ahead","aheadBy":2,"behindBy":0},"msg":"Incremental diff fetched successfully"}
-{"level":30,"time":1768413168824,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"baseSha":"3cdaefe45b8f52de95d7b96e11f627867745dcc3","headSha":"6e4524f9b84948b1e6918f079428a78135f9ee9e","filesCount":4,"status":"ahead"},"msg":"Target branch diff fetched successfully"}
-{"level":30,"time":1768413168824,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"incrementalFilesCount":4,"targetBranchFilesCount":4,"commitsCount":2},"msg":"Diffs fetched successfully"}
-{"level":30,"time":1768413168825,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"inputTargetFiles":4,"inputIncrementalFiles":4,"outputChangedFiles":4,"matchPercentage":"100.0%"},"msg":"Changed files filtered"}
-{"level":30,"time":1768413168825,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"changedFilesCount":4,"targetBranchFilesCount":4,"incrementalFilesCount":4},"msg":"Changed files filtered"}
-{"level":30,"time":1768413168825,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"inputFiles":4,"selectedFiles":4,"ignoredFiles":0},"msg":"File ignore rules applied"}
-{"level":30,"time":1768413168825,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"selectedCount":4,"ignoredCount":0,"totalFiles":4},"msg":"File ignore rules applied"}
-{"level":30,"time":1768413168825,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filesCount":4,"baseSha":"3cdaefe45b8f52de95d7b96e11f627867745dcc3","concurrencyLimit":5},"msg":"Starting hunk processing"}
-{"level":30,"time":1768413169299,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"totalFiles":4,"successCount":4,"failedCount":0,"newFileCount":1,"durationMs":474,"avgTimePerFile":"118.50ms"},"msg":"Hunk processing completed"}
-{"level":30,"time":1768413169299,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filesWithHunksCount":4,"nullFilesCount":0,"totalCommits":2},"msg":"PR preprocessing completed successfully"}
-{"level":30,"time":1768413169299,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"filesAndChangesCount":4,"selectedFilesCount":4,"ignoredFilesCount":0,"commitsCount":2},"msg":"PR preprocessing completed successfully"}
-{"level":30,"time":1768413169300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"reviewStartCommit":"3cdaefe45b8f52de95d7b96e11f627867745dcc3","headSha":"6e4524f9b84948b1e6918f079428a78135f9ee9e","messageLength":439,"selectedFilesCount":4,"ignoredFilesCount":0,"totalPatches":5,"hasSelectedFiles":true,"hasIgnoredFiles":false},"msg":"Status message generated"}
-{"level":30,"time":1768413169300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","mode":"replace"},"msg":"Posting in-progress comment to PR"}
-{"level":30,"time":1768413169300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","issueNumber":97},"msg":"Replacing existing comment"}
-{"level":30,"time":1768413169300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","commentId":3750705915,"commentAuthor":"think-throo[bot]","commentCreatedAt":"2026-01-14T17:27:59Z","commentUpdatedAt":"2026-01-14T17:27:59Z","bodyLength":775},"msg":"Comment with tag found"}
-{"level":30,"time":1768413170149,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"target":97,"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","commentId":3750705915,"bodyLength":875},"msg":"Comment updated successfully"}
-{"level":30,"time":1768413170149,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"mode":"replace","tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","issueNumber":97},"msg":"Comment operation completed"}
-{"level":30,"time":1768413170149,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97},"msg":"In-progress comment posted successfully"}
-{"level":30,"time":1768413170149,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"totalFiles":4,"maxConcurrency":6,"maxFiles":0,"reviewSimpleChanges":false},"msg":"Starting file summarization"}
-{"level":30,"time":1768413170149,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"queuedFiles":4,"skippedFiles":0,"totalFiles":4},"msg":"File summarization queue prepared"}
-{"level":30,"time":1768413170149,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"concurrentTasks":4},"msg":"Starting concurrent file summarization"}
-{"level":30,"time":1768413170149,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/experiments/test-pr-feature.ts","fileContentLength":0,"fileDiffLength":3131},"msg":"Starting file summarization"}
-{"level":30,"time":1768413170150,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/experiments/test-pr-feature.ts","includesTriage":true,"promptLength":5538},"msg":"Summarize file diff prompt rendered"}
-{"level":30,"time":1768413170151,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/package.json","fileContentLength":842,"fileDiffLength":549},"msg":"Starting file summarization"}
-{"level":30,"time":1768413170151,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/package.json","includesTriage":true,"promptLength":2956},"msg":"Summarize file diff prompt rendered"}
-{"level":30,"time":1768413170151,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/src/index.ts","fileContentLength":2065,"fileDiffLength":213},"msg":"Starting file summarization"}
-{"level":30,"time":1768413170151,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/src/index.ts","includesTriage":true,"promptLength":2620},"msg":"Summarize file diff prompt rendered"}
-{"level":30,"time":1768413170152,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/src/services/files/FileFilter.ts","fileContentLength":1258,"fileDiffLength":481},"msg":"Starting file summarization"}
-{"level":30,"time":1768413170152,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/src/services/files/FileFilter.ts","includesTriage":true,"promptLength":2888},"msg":"Summarize file diff prompt rendered"}
-{"level":30,"time":1768413171583,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"responseTimeMs":1431,"model":"claude-haiku-4-5-20251001","stopReason":"end_turn","inputTokens":750,"outputTokens":87},"msg":"Claude API response received successfully"}
-{"level":30,"time":1768413171583,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/src/services/files/FileFilter.ts","responseLength":383,"hasResponse":true,"durationMs":1431},"msg":"AI summarization response received"}
-{"level":30,"time":1768413171584,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/src/services/files/FileFilter.ts","triage":"APPROVED","needsReview":false,"summaryLength":363},"msg":"File triage classification found"}
-{"level":30,"time":1768413172012,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"responseTimeMs":1861,"model":"claude-haiku-4-5-20251001","stopReason":"end_turn","inputTokens":866,"outputTokens":102},"msg":"Claude API response received successfully"}
-{"level":30,"time":1768413172012,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/package.json","responseLength":443,"hasResponse":true,"durationMs":1861},"msg":"AI summarization response received"}
-{"level":30,"time":1768413172012,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/package.json","triage":"NEEDS_REVIEW","needsReview":true,"summaryLength":419},"msg":"File triage classification found"}
-{"level":30,"time":1768413172029,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"responseTimeMs":1877,"model":"claude-haiku-4-5-20251001","stopReason":"end_turn","inputTokens":664,"outputTokens":75},"msg":"Claude API response received successfully"}
-{"level":30,"time":1768413172029,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/src/index.ts","responseLength":346,"hasResponse":true,"durationMs":1877},"msg":"AI summarization response received"}
-{"level":30,"time":1768413172030,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/src/index.ts","triage":"NEEDS_REVIEW","needsReview":true,"summaryLength":322},"msg":"File triage classification found"}
-{"level":30,"time":1768413172300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"responseTimeMs":2149,"model":"claude-haiku-4-5-20251001","stopReason":"end_turn","inputTokens":1650,"outputTokens":115},"msg":"Claude API response received successfully"}
-{"level":30,"time":1768413172300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/experiments/test-pr-feature.ts","responseLength":548,"hasResponse":true,"durationMs":2150},"msg":"AI summarization response received"}
-{"level":30,"time":1768413172300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"filename":"apps/github-app/experiments/test-pr-feature.ts","triage":"NEEDS_REVIEW","needsReview":true,"summaryLength":524},"msg":"File triage classification found"}
-{"level":30,"time":1768413172300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"totalTasks":4,"durationMs":2151,"avgTimePerFile":"537.75ms"},"msg":"All file summarizations completed"}
-{"level":30,"time":1768413172300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"successCount":4,"failedCount":0,"skippedCount":0},"msg":"File summarization completed"}
-{"level":30,"time":1768413172300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"totalSummaries":4,"batchSize":10,"expectedBatches":1},"msg":"Starting batch processing of summaries"}
-{"level":30,"time":1768413172300,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"promptLength":2260,"inputSummaryLength":1806},"msg":"Summarize changesets prompt rendered"}
-INFO (http): POST /api/github/webhooks 202 - 9002ms
-INFO (server): POST http://localhost:3000/api/github/webhooks - 202
-{"level":30,"time":1768413176909,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"responseTimeMs":4609,"model":"claude-sonnet-4-5-20250929","stopReason":"end_turn","inputTokens":528,"outputTokens":361},"msg":"Claude API response received successfully"}
-{"level":30,"time":1768413176909,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"batchNumber":1,"hasResponse":true,"responseLength":1635,"durationMs":4609},"msg":"Changeset grouping response received"}
-{"level":30,"time":1768413176909,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"totalBatches":1,"rawSummaryLength":1635},"msg":"Batch processing completed"}
-{"level":30,"time":1768413176909,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"rawSummaryLength":1635,"hasRawSummary":true},"msg":"Generating final PR summary"}
-{"level":30,"time":1768413176909,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"promptLength":1724,"inputSummaryLength":1635},"msg":"Summarize prompt rendered"}
-{"level":30,"time":1768413184657,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"responseTimeMs":7748,"model":"claude-sonnet-4-5-20250929","stopReason":"end_turn","inputTokens":406,"outputTokens":383},"msg":"Claude API response received successfully"}
-{"level":30,"time":1768413184657,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"hasResponse":true,"responseLength":1484,"durationMs":7748},"msg":"Final PR summary generated"}
-{"level":30,"time":1768413184657,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"rawSummaryLength":1635},"msg":"Generating release notes"}
-{"level":30,"time":1768413184657,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"promptLength":1724,"inputSummaryLength":1635},"msg":"Summarize release notes prompt rendered"}
-{"level":30,"time":1768413192988,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"responseTimeMs":8331,"model":"claude-sonnet-4-5-20250929","stopReason":"end_turn","inputTokens":406,"outputTokens":379},"msg":"Claude API response received successfully"}
-{"level":30,"time":1768413192989,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"hasResponse":true,"responseLength":1611,"durationMs":8332},"msg":"Release notes generated"}
-{"level":30,"time":1768413194424,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97},"msg":"PR description updated with release notes"}
-{"level":30,"time":1768413194425,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"rawSummaryLength":1635},"msg":"Generating short summary for context"}
-{"level":30,"time":1768413194425,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"promptLength":2278,"inputSummaryLength":1635},"msg":"Summarize short prompt rendered"}
+{
+    "level": 30,
+    "time": 1768499096793,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "action": "reopened",
+        "owner": "ramu-narasinga",
+        "repo": "thinkthroo",
+        "prNumber": 98,
+        "prTitle": "pr summary test",
+        "author": "ramu-narasinga",
+        "baseBranch": "70-generate-pr-summary",
+        "headBranch": "70-pr-summary-test"
+    },
+    "msg": "Pull request event received"
+}
+{
+    "level": 30,
+    "time": 1768499096793,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "generateSummaries": true,
+        "useSummaryFiltering": true
+    },
+    "msg": "PR Workflow started"
+}
+{
+    "level": 30,
+    "time": 1768499096793,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98
+    },
+    "msg": "Starting summary generation phase"
+}
+{
+    "level": 30,
+    "time": 1768499096794,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "model": "claude-haiku-4-5-20251001"
+    },
+    "msg": "ClaudeBot initialized successfully"
+}
+{
+    "level": 30,
+    "time": 1768499096794,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "model": "claude-haiku-4-5-20251001"
+    },
+    "msg": "Summary bot initialized"
+}
+{
+    "level": 30,
+    "time": 1768499096794,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "model": "claude-sonnet-4-5-20250929"
+    },
+    "msg": "ClaudeBot initialized successfully"
+}
+{
+    "level": 30,
+    "time": 1768499096794,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "model": "claude-sonnet-4-5-20250929"
+    },
+    "msg": "Review bot initialized"
+}
+{
+    "level": 30,
+    "time": 1768499096795,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "pullNumber": 98,
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->",
+        "owner": "ramu-narasinga",
+        "repo": "thinkthroo"
+    },
+    "msg": "Fetching existing comment data"
+}
+{
+    "level": 30,
+    "time": 1768499096795,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "issueNumber": 98,
+        "owner": "ramu-narasinga",
+        "repo": "thinkthroo"
+    },
+    "msg": "Fetching comments from GitHub API"
+}
+{
+    "level": 30,
+    "time": 1768499097749,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "issueNumber": 98,
+        "totalComments": 4,
+        "totalPages": 1
+    },
+    "msg": "All comments fetched and cached"
+}
+{
+    "level": 30,
+    "time": 1768499097749,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "pullNumber": 98,
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->"
+    },
+    "msg": "No existing comment found with tag"
+}
+{
+    "level": 30,
+    "time": 1768499098653,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "pullNumber": 98,
+        "totalCommits": 1,
+        "commitIds": [
+            "6e4524f9b84948b1e6918f079428a78135f9ee9e"
+        ]
+    },
+    "msg": "Successfully fetched all commit IDs"
+}
+{
+    "level": 30,
+    "time": 1768499098654,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "reason": "no existing commit block"
+    },
+    "msg": "No existing review found - will review from base commit"
+}
+{
+    "level": 30,
+    "time": 1768499098654,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "reviewStartCommit": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "totalCommits": 1,
+        "hasExistingComment": false
+    },
+    "msg": "Determined review start commit"
+}
+{
+    "level": 30,
+    "time": 1768499098654,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "headSha": "6e4524f9b84948b1e6918f079428a78135f9ee9e",
+        "reviewStartCommit": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53"
+    },
+    "msg": "Starting PR preprocessing"
+}
+{
+    "level": 30,
+    "time": 1768499098654,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "headSha": "6e4524f9b84948b1e6918f079428a78135f9ee9e",
+        "reviewStartSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "isIncrementalReview": true
+    },
+    "msg": "Starting PR preprocessing"
+}
+{
+    "level": 30,
+    "time": 1768499099136,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "headSha": "6e4524f9b84948b1e6918f079428a78135f9ee9e",
+        "filesCount": 1,
+        "commitsCount": 1,
+        "status": "diverged",
+        "aheadBy": 1,
+        "behindBy": 1
+    },
+    "msg": "Incremental diff fetched successfully"
+}
+{
+    "level": 30,
+    "time": 1768499099682,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "headSha": "6e4524f9b84948b1e6918f079428a78135f9ee9e",
+        "filesCount": 1,
+        "status": "diverged"
+    },
+    "msg": "Target branch diff fetched successfully"
+}
+{
+    "level": 30,
+    "time": 1768499099682,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "incrementalFilesCount": 1,
+        "targetBranchFilesCount": 1,
+        "commitsCount": 1
+    },
+    "msg": "Diffs fetched successfully"
+}
+{
+    "level": 30,
+    "time": 1768499099682,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "inputTargetFiles": 1,
+        "inputIncrementalFiles": 1,
+        "outputChangedFiles": 1,
+        "matchPercentage": "100.0%"
+    },
+    "msg": "Changed files filtered"
+}
+{
+    "level": 30,
+    "time": 1768499099682,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "changedFilesCount": 1,
+        "targetBranchFilesCount": 1,
+        "incrementalFilesCount": 1
+    },
+    "msg": "Changed files filtered"
+}
+{
+    "level": 30,
+    "time": 1768499099682,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "inputFiles": 1,
+        "selectedFiles": 1,
+        "ignoredFiles": 0
+    },
+    "msg": "File ignore rules applied"
+}
+{
+    "level": 30,
+    "time": 1768499099682,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "selectedCount": 1,
+        "ignoredCount": 0,
+        "totalFiles": 1
+    },
+    "msg": "File ignore rules applied"
+}
+{
+    "level": 30,
+    "time": 1768499099683,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filesCount": 1,
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "concurrencyLimit": 5
+    },
+    "msg": "Starting hunk processing"
+}
+{
+    "level": 30,
+    "time": 1768499100091,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "totalFiles": 1,
+        "successCount": 1,
+        "failedCount": 0,
+        "newFileCount": 1,
+        "durationMs": 408,
+        "avgTimePerFile": "408.00ms"
+    },
+    "msg": "Hunk processing completed"
+}
+{
+    "level": 30,
+    "time": 1768499100091,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filesWithHunksCount": 1,
+        "nullFilesCount": 0,
+        "totalCommits": 1
+    },
+    "msg": "PR preprocessing completed successfully"
+}
+{
+    "level": 30,
+    "time": 1768499100091,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "filesAndChangesCount": 1,
+        "selectedFilesCount": 1,
+        "ignoredFilesCount": 0,
+        "commitsCount": 1
+    },
+    "msg": "PR preprocessing completed successfully"
+}
+{
+    "level": 30,
+    "time": 1768499100091,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "reviewStartCommit": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "headSha": "6e4524f9b84948b1e6918f079428a78135f9ee9e",
+        "messageLength": 314,
+        "selectedFilesCount": 1,
+        "ignoredFilesCount": 0,
+        "totalPatches": 1,
+        "hasSelectedFiles": true,
+        "hasIgnoredFiles": false
+    },
+    "msg": "Status message generated"
+}
+{
+    "level": 30,
+    "time": 1768499100091,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "hadExistingMarker": false,
+        "originalLength": 0,
+        "newLength": 550
+    },
+    "msg": "In-progress status added to comment"
+}
+{
+    "level": 30,
+    "time": 1768499100091,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->",
+        "mode": "replace"
+    },
+    "msg": "Posting in-progress comment to PR"
+}
+{
+    "level": 30,
+    "time": 1768499100092,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->",
+        "issueNumber": 98
+    },
+    "msg": "Replacing existing comment"
+}
+{
+    "level": 30,
+    "time": 1768499101112,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "target": 98,
+        "commentId": 3756108691,
+        "commentUrl": "https://github.com/ramu-narasinga/thinkthroo/pull/98#issuecomment-3756108691",
+        "bodyLength": 650
+    },
+    "msg": "Comment created successfully"
+}
+{
+    "level": 30,
+    "time": 1768499101113,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "mode": "replace",
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->",
+        "issueNumber": 98
+    },
+    "msg": "Comment operation completed"
+}
+{
+    "level": 30,
+    "time": 1768499101113,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98
+    },
+    "msg": "In-progress comment posted successfully"
+}
+{
+    "level": 30,
+    "time": 1768499101113,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "totalFiles": 1,
+        "maxConcurrency": 6,
+        "maxFiles": 0,
+        "reviewSimpleChanges": false
+    },
+    "msg": "Starting file summarization"
+}
+{
+    "level": 30,
+    "time": 1768499101113,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "queuedFiles": 1,
+        "skippedFiles": 0,
+        "totalFiles": 1
+    },
+    "msg": "File summarization queue prepared"
+}
+{
+    "level": 30,
+    "time": 1768499101113,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "concurrentTasks": 1
+    },
+    "msg": "Starting concurrent file summarization"
+}
+{
+    "level": 30,
+    "time": 1768499101113,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filename": "apps/github-app/experiments/test-pr-feature.ts",
+        "fileContentLength": 0,
+        "fileDiffLength": 3131
+    },
+    "msg": "Starting file summarization"
+}
+{
+    "level": 30,
+    "time": 1768499101114,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filename": "apps/github-app/experiments/test-pr-feature.ts",
+        "includesTriage": true,
+        "promptLength": 5791
+    },
+    "msg": "Summarize file diff prompt rendered"
+}
+{
+    "level": 30,
+    "time": 1768499103366,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "responseTimeMs": 2252,
+        "model": "claude-haiku-4-5-20251001",
+        "stopReason": "end_turn",
+        "inputTokens": 1717,
+        "outputTokens": 112
+    },
+    "msg": "Claude API response received successfully"
+}
+{
+    "level": 30,
+    "time": 1768499103366,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filename": "apps/github-app/experiments/test-pr-feature.ts",
+        "responseLength": 519,
+        "hasResponse": true,
+        "durationMs": 2252
+    },
+    "msg": "AI summarization response received"
+}
+{
+    "level": 30,
+    "time": 1768499103367,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filename": "apps/github-app/experiments/test-pr-feature.ts",
+        "triage": "NEEDS_REVIEW",
+        "needsReview": true,
+        "summaryLength": 495
+    },
+    "msg": "File triage classification found"
+}
+{
+    "level": 30,
+    "time": 1768499103367,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "totalTasks": 1,
+        "durationMs": 2254,
+        "avgTimePerFile": "2254.00ms"
+    },
+    "msg": "All file summarizations completed"
+}
+{
+    "level": 30,
+    "time": 1768499103367,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "successCount": 1,
+        "failedCount": 0,
+        "skippedCount": 0
+    },
+    "msg": "File summarization completed"
+}
+{
+    "level": 30,
+    "time": 1768499103367,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "totalSummaries": 1,
+        "batchSize": 10,
+        "expectedBatches": 1
+    },
+    "msg": "Starting batch processing of summaries"
+}
+{
+    "level": 30,
+    "time": 1768499103367,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "promptLength": 1002,
+        "inputSummaryLength": 548
+    },
+    "msg": "Summarize changesets prompt rendered"
+}
+{
+    "level": 30,
+    "time": 1768499105547,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "responseTimeMs": 2180,
+        "model": "claude-sonnet-4-5-20250929",
+        "stopReason": "end_turn",
+        "inputTokens": 252,
+        "outputTokens": 121
+    },
+    "msg": "Claude API response received successfully"
+}
+{
+    "level": 30,
+    "time": 1768499105547,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "batchNumber": 1,
+        "hasResponse": true,
+        "responseLength": 552,
+        "durationMs": 2180
+    },
+    "msg": "Changeset grouping response received"
+}
+{
+    "level": 30,
+    "time": 1768499105547,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "totalBatches": 1,
+        "rawSummaryLength": 552
+    },
+    "msg": "Batch processing completed"
+}
+{
+    "level": 30,
+    "time": 1768499105547,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "rawSummaryLength": 552,
+        "hasRawSummary": true
+    },
+    "msg": "Generating final PR summary"
+}
+{
+    "level": 30,
+    "time": 1768499105548,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "promptLength": 641,
+        "inputSummaryLength": 552
+    },
+    "msg": "Summarize prompt rendered"
+}
+INFO (http): POST /api/github/webhooks 202 - 9001ms
+INFO (server): POST http: //localhost:3000/api/github/webhooks - 202
+{
+    "level": 30,
+    "time": 1768499113809,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "responseTimeMs": 8261,
+        "model": "claude-sonnet-4-5-20250929",
+        "stopReason": "end_turn",
+        "inputTokens": 166,
+        "outputTokens": 334
+    },
+    "msg": "Claude API response received successfully"
+}
+{
+    "level": 30,
+    "time": 1768499113809,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "hasResponse": true,
+        "responseLength": 1416,
+        "durationMs": 8262
+    },
+    "msg": "Final PR summary generated"
+}
+{
+    "level": 30,
+    "time": 1768499113809,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "rawSummaryLength": 552
+    },
+    "msg": "Generating release notes"
+}
+{
+    "level": 30,
+    "time": 1768499113809,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "promptLength": 641,
+        "inputSummaryLength": 552
+    },
+    "msg": "Summarize release notes prompt rendered"
+}
+{
+    "level": 30,
+    "time": 1768499121694,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "responseTimeMs": 7885,
+        "model": "claude-sonnet-4-5-20250929",
+        "stopReason": "end_turn",
+        "inputTokens": 166,
+        "outputTokens": 340
+    },
+    "msg": "Claude API response received successfully"
+}
+{
+    "level": 30,
+    "time": 1768499121694,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "hasResponse": true,
+        "responseLength": 1458,
+        "durationMs": 7885
+    },
+    "msg": "Release notes generated"
+}
+{
+    "level": 30,
+    "time": 1768499123233,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98
+    },
+    "msg": "PR description updated with release notes"
+}
+{
+    "level": 30,
+    "time": 1768499123233,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "rawSummaryLength": 552
+    },
+    "msg": "Generating short summary for context"
+}
+{
+    "level": 30,
+    "time": 1768499123234,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "promptLength": 1195,
+        "inputSummaryLength": 552
+    },
+    "msg": "Summarize short prompt rendered"
+}
+INFO (http): POST /api/github/webhooks 200 - 2ms
+INFO (server): POST http: //localhost:3000/api/github/webhooks - 200
+{
+    "level": 30,
+    "time": 1768499128779,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "responseTimeMs": 5545,
+        "model": "claude-sonnet-4-5-20250929",
+        "stopReason": "end_turn",
+        "inputTokens": 294,
+        "outputTokens": 218
+    },
+    "msg": "Claude API response received successfully"
+}
+{
+    "level": 30,
+    "time": 1768499128779,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "shortSummaryLength": 954,
+        "durationMs": 5546
+    },
+    "msg": "Short summary generated"
+}
+{
+    "level": 30,
+    "time": 1768499128779,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "finalResponseLength": 1416,
+        "rawSummaryLength": 552,
+        "shortSummaryLength": 954,
+        "skippedFilesCount": 0,
+        "failedSummariesCount": 0
+    },
+    "msg": "Building final summary comment"
+}
+{
+    "level": 30,
+    "time": 1768499128779,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "totalLength": 3839,
+        "statusMsgLength": 314,
+        "baseSummaryLength": 3523
+    },
+    "msg": "Final summary comment built"
+}
+{
+    "level": 30,
+    "time": 1768499128779,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "commentLength": 3839
+    },
+    "msg": "Final summary comment built"
+}
+{
+    "level": 30,
+    "time": 1768499128779,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "commentLength": 3839,
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->"
+    },
+    "msg": "Posting final summary comment to PR"
+}
+{
+    "level": 30,
+    "time": 1768499128779,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->",
+        "issueNumber": 98
+    },
+    "msg": "Replacing existing comment"
+}
+{
+    "level": 30,
+    "time": 1768499128780,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->",
+        "commentId": 3756108691,
+        "commentAuthor": "think-throo[bot]",
+        "commentCreatedAt": "2026-01-15T17:45:00Z",
+        "commentUpdatedAt": "2026-01-15T17:45:00Z",
+        "bodyLength": 650
+    },
+    "msg": "Comment with tag found"
+}
+{
+    "level": 30,
+    "time": 1768499129786,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "target": 98,
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->",
+        "commentId": 3756108691,
+        "bodyLength": 3939
+    },
+    "msg": "Comment updated successfully"
+}
+{
+    "level": 30,
+    "time": 1768499129787,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "mode": "replace",
+        "tag": "<!-- This is an auto-generated comment: summarize by OSS Think Throo -->",
+        "issueNumber": 98
+    },
+    "msg": "Comment operation completed"
+}
+{
+    "level": 30,
+    "time": 1768499129787,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98
+    },
+    "msg": "Final summary comment posted successfully"
+}
+{
+    "level": 30,
+    "time": 1768499129787,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "summarizedFilesCount": 1,
+        "totalDurationSinceStart": 28674
+    },
+    "msg": "PR summary generation completed successfully"
+}
+{
+    "level": 30,
+    "time": 1768499129787,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "summariesCount": 1
+    },
+    "msg": "Summary generation complete"
+}
+{
+    "level": 30,
+    "time": 1768499129787,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "useSummaryFiltering": true,
+        "hasSummaries": true
+    },
+    "msg": "Starting review generation phase"
+}
+{
+    "level": 30,
+    "time": 1768499129787,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "providedOptions": [
+            "enableSummaryFiltering",
+            "summaries",
+            "maxFiles",
+            "maxConcurrency",
+            "reviewCommentLGTM",
+            "debug"
+        ],
+        "event": "pull_request"
+    },
+    "msg": "Initializing PullRequestReviewGenerator"
+}
+{
+    "level": 30,
+    "time": 1768499129787,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "model": "claude-sonnet-4-5-20250929"
+    },
+    "msg": "ClaudeBot initialized successfully"
+}
+{
+    "level": 30,
+    "time": 1768499129787,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "model": "claude-sonnet-4-5-20250929"
+    },
+    "msg": "Review bot initialized successfully"
+}
+{
+    "level": 30,
+    "time": 1768499129787,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "owner": "ramu-narasinga",
+        "repo": "thinkthroo"
+    },
+    "msg": "PullRequestReviewGenerator initialized successfully"
+}
+{
+    "level": 30,
+    "time": 1768499129788,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "prTitle": "pr summary test",
+        "owner": "ramu-narasinga",
+        "repo": "thinkthroo",
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "headSha": "6e4524f9b84948b1e6918f079428a78135f9ee9e"
+    },
+    "msg": "PR Review Generation Started"
+}
+{
+    "level": 30,
+    "time": 1768499129788,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "headSha": "6e4524f9b84948b1e6918f079428a78135f9ee9e",
+        "isIncrementalReview": false
+    },
+    "msg": "Starting PR preprocessing"
+}
+{
+    "level": 30,
+    "time": 1768499130300,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "headSha": "6e4524f9b84948b1e6918f079428a78135f9ee9e",
+        "filesCount": 1,
+        "commitsCount": 1,
+        "status": "diverged",
+        "aheadBy": 1,
+        "behindBy": 1
+    },
+    "msg": "Incremental diff fetched successfully"
+}
+{
+    "level": 30,
+    "time": 1768499130810,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "headSha": "6e4524f9b84948b1e6918f079428a78135f9ee9e",
+        "filesCount": 1,
+        "status": "diverged"
+    },
+    "msg": "Target branch diff fetched successfully"
+}
+{
+    "level": 30,
+    "time": 1768499130810,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "incrementalFilesCount": 1,
+        "targetBranchFilesCount": 1,
+        "commitsCount": 1
+    },
+    "msg": "Diffs fetched successfully"
+}
+{
+    "level": 30,
+    "time": 1768499130810,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "inputTargetFiles": 1,
+        "inputIncrementalFiles": 1,
+        "outputChangedFiles": 1,
+        "matchPercentage": "100.0%"
+    },
+    "msg": "Changed files filtered"
+}
+{
+    "level": 30,
+    "time": 1768499130810,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "changedFilesCount": 1,
+        "targetBranchFilesCount": 1,
+        "incrementalFilesCount": 1
+    },
+    "msg": "Changed files filtered"
+}
+{
+    "level": 30,
+    "time": 1768499130810,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "inputFiles": 1,
+        "selectedFiles": 1,
+        "ignoredFiles": 0
+    },
+    "msg": "File ignore rules applied"
+}
+{
+    "level": 30,
+    "time": 1768499130810,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "selectedCount": 1,
+        "ignoredCount": 0,
+        "totalFiles": 1
+    },
+    "msg": "File ignore rules applied"
+}
+{
+    "level": 30,
+    "time": 1768499130810,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filesCount": 1,
+        "baseSha": "c59fbd3a61e6ea0ec1fd12cf53d5ba5168643e53",
+        "concurrencyLimit": 5
+    },
+    "msg": "Starting hunk processing"
+}
+{
+    "level": 30,
+    "time": 1768499131220,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "totalFiles": 1,
+        "successCount": 1,
+        "failedCount": 0,
+        "newFileCount": 1,
+        "durationMs": 410,
+        "avgTimePerFile": "410.00ms"
+    },
+    "msg": "Hunk processing completed"
+}
+{
+    "level": 30,
+    "time": 1768499131220,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filesWithHunksCount": 1,
+        "nullFilesCount": 0,
+        "totalCommits": 1
+    },
+    "msg": "PR preprocessing completed successfully"
+}
+{
+    "level": 30,
+    "time": 1768499131220,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "totalFiles": 1,
+        "filesToReview": 1,
+        "reviewsSkipped": 0
+    },
+    "msg": "File review filtering complete"
+}
+{
+    "level": 30,
+    "time": 1768499131220,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "originalFiles": 1,
+        "filesToReview": 1,
+        "reviewsSkipped": 0
+    },
+    "msg": "Summary-based filtering complete"
+}
+{
+    "level": 30,
+    "time": 1768499131220,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "fileCount": 1
+    },
+    "msg": "Files to review"
+}
+{
+    "level": 30,
+    "time": 1768499131221,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "concurrency": 5,
+        "maxFiles": 50
+    },
+    "msg": "Starting AI review of files"
+}
+{
+    "level": 30,
+    "time": 1768499131221,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filename": "apps/github-app/experiments/test-pr-feature.ts",
+        "pullNumber": 98,
+        "patchCount": 1,
+        "fileContentLength": 0
+    },
+    "msg": "Starting file review"
+}
+Error counting tokens: NotFoundError: 404 {
+    "type": "error",
+    "error": {
+        "type": "not_found_error",
+        "message": "model: claude-3-5-sonnet-20241022"
+    },
+    "request_id": "req_011CX9add8d7K1Hw38tEM7RG"
+}
+    at APIError.generate (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/node_modules/@anthropic-ai/sdk/error.js: 50: 20)
+    at Anthropic.makeStatusError (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/node_modules/@anthropic-ai/sdk/core.js: 282: 33)
+    at Anthropic.makeRequest (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/node_modules/@anthropic-ai/sdk/core.js: 326: 30)
+    at process.processTicksAndRejections (node:internal/process/task_queues: 105: 5)
+    at async TokenCounter.countTokens (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/lib/services/ai/TokenCounter.js: 23: 28)
+    at async FileReviewer.reviewFile (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/lib/services/reviews/FileReviewer.js: 58: 22) {
+  status: 404,
+  headers: {
+    'anthropic-organization-id': '11211ae4-d51f-4028-877d-11cdd9a941fe',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '9be72ff28e46ec6a-SIN',
+    connection: 'keep-alive',
+    'content-encoding': 'gzip',
+    'content-type': 'application/json',
+    date: 'Thu,
+        15 Jan 2026 17: 45: 31 GMT',
+    'request-id': 'req_011CX9add8d7K1Hw38tEM7RG',
+    server: 'cloudflare',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'transfer-encoding': 'chunked',
+    'x-envoy-upstream-service-time': '30',
+    'x-robots-tag': 'none',
+    'x-should-retry': 'false'
+    },
+  request_id: 'req_011CX9add8d7K1Hw38tEM7RG',
+  error: {
+    type: 'error',
+    error: {
+      type: 'not_found_error',
+      message: 'model: claude-3-5-sonnet-20241022'
+        },
+    request_id: 'req_011CX9add8d7K1Hw38tEM7RG'
+    }
+}
+Error counting tokens: NotFoundError: 404 {
+    "type": "error",
+    "error": {
+        "type": "not_found_error",
+        "message": "model: claude-3-5-sonnet-20241022"
+    },
+    "request_id": "req_011CX9adetHjFvkEoaaJD3Ap"
+}
+    at APIError.generate (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/node_modules/@anthropic-ai/sdk/error.js: 50: 20)
+    at Anthropic.makeStatusError (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/node_modules/@anthropic-ai/sdk/core.js: 282: 33)
+    at Anthropic.makeRequest (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/node_modules/@anthropic-ai/sdk/core.js: 326: 30)
+    at process.processTicksAndRejections (node:internal/process/task_queues: 105: 5)
+    at async TokenCounter.countTokens (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/lib/services/ai/TokenCounter.js: 23: 28)
+    at async FileReviewer.reviewFile (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/lib/services/reviews/FileReviewer.js: 68: 33) {
+  status: 404,
+  headers: {
+    'anthropic-organization-id': '11211ae4-d51f-4028-877d-11cdd9a941fe',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '9be72ff50b43ec6a-SIN',
+    connection: 'keep-alive',
+    'content-encoding': 'gzip',
+    'content-type': 'application/json',
+    date: 'Thu,
+        15 Jan 2026 17: 45: 31 GMT',
+    'request-id': 'req_011CX9adetHjFvkEoaaJD3Ap',
+    server: 'cloudflare',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'transfer-encoding': 'chunked',
+    'x-envoy-upstream-service-time': '26',
+    'x-robots-tag': 'none',
+    'x-should-retry': 'false'
+    },
+  request_id: 'req_011CX9adetHjFvkEoaaJD3Ap',
+  error: {
+    type: 'error',
+    error: {
+      type: 'not_found_error',
+      message: 'model: claude-3-5-sonnet-20241022'
+        },
+    request_id: 'req_011CX9adetHjFvkEoaaJD3Ap'
+    }
+}
+{
+    "level": 30,
+    "time": 1768499131947,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filename": "apps/github-app/experiments/test-pr-feature.ts",
+        "pullNumber": 98,
+        "patchesToPack": 1,
+        "totalPatches": 1,
+        "finalTokenCount": 1734,
+        "utilizationPercent": "14.4%"
+    },
+    "msg": "Patch packing complete"
+}
+{
+    "level": 30,
+    "time": 1768499132552,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "pullNumber": 98,
+        "totalComments": 2,
+        "pagesRead": 1,
+        "durationMs": 605
+    },
+    "msg": "Review comments fetched and cached"
+}
+Error counting tokens: BadRequestError: 400 {
+    "type": "error",
+    "error": {
+        "type": "invalid_request_error",
+        "message": "messages.0: all messages must have non-empty content except for the optional final assistant message"
+    },
+    "request_id": "req_011CX9adiqRGaxYqdt2P58NA"
+}
+    at APIError.generate (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/node_modules/@anthropic-ai/sdk/error.js: 41: 20)
+    at Anthropic.makeStatusError (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/node_modules/@anthropic-ai/sdk/core.js: 282: 33)
+    at Anthropic.makeRequest (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/node_modules/@anthropic-ai/sdk/core.js: 326: 30)
+    at process.processTicksAndRejections (node:internal/process/task_queues: 105: 5)
+    at async TokenCounter.countTokens (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/lib/services/ai/TokenCounter.js: 23: 28)
+    at async FileReviewer.reviewFile (/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/github-app/lib/services/reviews/FileReviewer.js: 142: 40) {
+  status: 400,
+  headers: {
+    'anthropic-organization-id': '11211ae4-d51f-4028-877d-11cdd9a941fe',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '9be72ffadfc8ec6a-SIN',
+    connection: 'keep-alive',
+    'content-length': '214',
+    'content-type': 'application/json',
+    date: 'Thu,
+        15 Jan 2026 17: 45: 33 GMT',
+    'request-id': 'req_011CX9adiqRGaxYqdt2P58NA',
+    server: 'cloudflare',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'x-envoy-upstream-service-time': '43',
+    'x-robots-tag': 'none',
+    'x-should-retry': 'false'
+    },
+  request_id: 'req_011CX9adiqRGaxYqdt2P58NA',
+  error: {
+    type: 'error',
+    error: {
+      type: 'invalid_request_error',
+      message: 'messages.0: all messages must have non-empty content except for the optional final assistant message'
+        },
+    request_id: 'req_011CX9adiqRGaxYqdt2P58NA'
+    }
+}
+{
+    "level": 30,
+    "time": 1768499133264,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filename": "apps/github-app/experiments/test-pr-feature.ts",
+        "pullNumber": 98,
+        "patchesPacked": 1,
+        "totalTokens": 1734
+    },
+    "msg": "Sending file review request to AI"
+}
+{
+    "level": 30,
+    "time": 1768499145656,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "responseTimeMs": 12392,
+        "model": "claude-sonnet-4-5-20250929",
+        "stopReason": "end_turn",
+        "inputTokens": 1768,
+        "outputTokens": 832
+    },
+    "msg": "Claude API response received successfully"
+}
+{
+    "level": 30,
+    "time": 1768499145657,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "totalReviews": 8,
+        "patchCount": 1,
+        "linesProcessed": 89
+    },
+    "msg": "Review parsing completed"
+}
+{
+    "level": 30,
+    "time": 1768499145657,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filename": "apps/github-app/experiments/test-pr-feature.ts",
+        "pullNumber": 98,
+        "reviewsFound": 8
+    },
+    "msg": "AI review comments parsed"
+}
+{
+    "level": 30,
+    "time": 1768499145658,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "filename": "apps/github-app/experiments/test-pr-feature.ts",
+        "pullNumber": 98,
+        "durationMs": 14437,
+        "reviewCount": 5,
+        "lgtmCount": 3,
+        "failed": false
+    },
+    "msg": "File review completed"
+}
+{
+    "level": 30,
+    "time": 1768499145658,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "reviewedFilesCount": 1,
+        "totalReviewComments": 5,
+        "lgtmComments": 3,
+        "lgtmIncluded": false,
+        "failedFilesCount": 0
+    },
+    "msg": "Review results summary"
+}
+{
+    "level": 30,
+    "time": 1768499145658,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "commentCount": 5
+    },
+    "msg": "Submitting review to GitHub"
+}
+{
+    "level": 30,
+    "time": 1768499147905,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "pullNumber": 98,
+        "commentCount": 5,
+        "durationMs": 2247
+    },
+    "msg": "Review submitted successfully"
+}
+{
+    "level": 30,
+    "time": 1768499147906,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98
+    },
+    "msg": "Review submitted successfully"
+}
+{
+    "level": 30,
+    "time": 1768499147906,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "durationSeconds": 18.12,
+        "reviewedFiles": 1,
+        "totalComments": 5
+    },
+    "msg": "PR Review Generation Complete"
+}
+{
+    "level": 30,
+    "time": 1768499147906,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98,
+        "durationSeconds": 51.11,
+        "hadSummaries": true
+    },
+    "msg": "PR Workflow complete"
+}
+{
+    "level": 30,
+    "time": 1768499147906,
+    "pid": 53467,
+    "hostname": "Ramus-MacBook-Air.local",
+    "payload": {
+        "prNumber": 98
+    },
+    "msg": "PR workflow completed"
+}
 INFO (http): POST /api/github/webhooks 200 - 1ms
-INFO (server): POST http://localhost:3000/api/github/webhooks - 200
-{"level":30,"time":1768413200154,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"responseTimeMs":5729,"model":"claude-sonnet-4-5-20250929","stopReason":"end_turn","inputTokens":534,"outputTokens":295},"msg":"Claude API response received successfully"}
-{"level":30,"time":1768413200154,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"shortSummaryLength":1312,"durationMs":5729},"msg":"Short summary generated"}
-{"level":30,"time":1768413200154,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"finalResponseLength":1484,"rawSummaryLength":1635,"shortSummaryLength":1312,"skippedFilesCount":0,"failedSummariesCount":0},"msg":"Building final summary comment"}
-{"level":30,"time":1768413200155,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"totalLength":5473,"statusMsgLength":439,"baseSummaryLength":5032},"msg":"Final summary comment built"}
-{"level":30,"time":1768413200155,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"commentLength":5473},"msg":"Final summary comment built"}
-{"level":30,"time":1768413200155,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"commentLength":5473,"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->"},"msg":"Posting final summary comment to PR"}
-{"level":30,"time":1768413200155,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","issueNumber":97},"msg":"Replacing existing comment"}
-{"level":30,"time":1768413200155,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","commentId":3750705915,"commentAuthor":"think-throo[bot]","commentCreatedAt":"2026-01-14T17:27:59Z","commentUpdatedAt":"2026-01-14T17:27:59Z","bodyLength":775},"msg":"Comment with tag found"}
-{"level":30,"time":1768413201488,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"target":97,"tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","commentId":3750705915,"bodyLength":5573},"msg":"Comment updated successfully"}
-{"level":30,"time":1768413201488,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"mode":"replace","tag":"<!-- This is an auto-generated comment: summarize by OSS Think Throo -->","issueNumber":97},"msg":"Comment operation completed"}
-{"level":30,"time":1768413201488,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97},"msg":"Final summary comment posted successfully"}
-{"level":30,"time":1768413201488,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97,"summarizedFilesCount":4,"totalDurationSinceStart":31339},"msg":"PR summary generation completed successfully"}
-{"level":30,"time":1768413201488,"pid":590,"hostname":"Ramus-MacBook-Air.local","payload":{"prNumber":97},"msg":"PR summary generation completed"}
+INFO (server): POST http: //localhost:3000/api/github/webhooks - 200
+INFO (http): POST /api/github/webhooks 200 - 2ms
+INFO (server): POST http: //localhost:3000/api/github/webhooks - 200
+INFO (http): POST /api/github/webhooks 200 - 1ms
+INFO (server): POST http: //localhost:3000/api/github/webhooks - 200
+INFO (http): POST /api/github/webhooks 200 - 1ms
+INFO (server): POST http: //localhost:3000/api/github/webhooks - 200
+INFO (http): POST /api/github/webhooks 200 - 2ms
+INFO (server): POST http: //localhost:3000/api/github/webhooks - 200
+INFO (http): POST /api/github/webhooks 200 - 1ms
+INFO (server): POST http: //localhost:3000/api/github/webhooks - 200

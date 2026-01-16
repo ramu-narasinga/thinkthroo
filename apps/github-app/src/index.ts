@@ -2,8 +2,7 @@ import "./utils/sentry";
 
 import { Probot } from "probot";
 import { issueGreeting } from "./features/issue-greeting";
-import { generatePullRequestSummary } from "./features/generate-pr-summary";
-// import { generatePullRequestReview } from "./features/generate-pr-review";
+import { PRWorkflowOrchestrator } from "./features/pr-workflow";
 import { logger } from "@/utils/logger";
 
 export default (app: Probot) => {
@@ -29,7 +28,7 @@ export default (app: Probot) => {
     }
   });
 
-  app.on(["pull_request.opened", "pull_request.reopened"], async (context) => {
+  app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
     const pullRequest = context.payload.pull_request;
     const eventAction = context.payload.action;
     
@@ -45,24 +44,26 @@ export default (app: Probot) => {
     });
 
     try {
-      await generatePullRequestSummary(context);
-      logger.info("PR summary generation completed", { prNumber: pullRequest.number });
+      const orchestrator = new PRWorkflowOrchestrator(context);
+      
+      await orchestrator.execute({
+        generateSummaries: true,
+        useSummaryFiltering: true,
+        reviewOptions: {
+          maxFiles: 50,
+          maxConcurrency: 5,
+          reviewCommentLGTM: false,
+          debug: false,
+        },
+      });
+      
+      logger.info("PR workflow completed", { prNumber: pullRequest.number });
     } catch (error: any) {
-      logger.error("Failed to generate PR summary", {
+      logger.error("Failed to complete PR workflow", {
         prNumber: pullRequest.number,
         error: error.message,
+        stack: error.stack,
       });
     }
-
-    // TODO: Enable PR review on open after testing the summary and refactoring the common code
-    // try {
-    //   await generatePullRequestReview(context);
-    //   logger.info("PR review generation completed", { prNumber: pullRequest.number });
-    // } catch (error: any) {
-    //   logger.error("Failed to generate PR review", {
-    //     prNumber: pullRequest.number,
-    //     error: error.message,
-    //   });
-    // }
   });
 };

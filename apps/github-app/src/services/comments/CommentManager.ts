@@ -564,7 +564,7 @@ ${finalTag}`;
       });
 
       let body = pull.body || "";
-      const tag = "<!-- This is an auto-generated comment: release notes by OSS Think Throo -->";
+      const tag = "<!-- This is an auto-generated comment: release notes by OSS ThinkThroo -->";
 
       // Check if release notes already exist
       const tagIndex = body.indexOf(tag);
@@ -573,7 +573,7 @@ ${finalTag}`;
         body = `${body}\n\n---\n\n${message}\n${tag}`;
       } else {
         // Replace existing release notes
-        const endTag = "<!-- end of auto-generated comment: release notes by OSS Think Throo -->";
+        const endTag = "<!-- end of auto-generated comment: release notes by OSS ThinkThroo -->";
         const endIndex = body.indexOf(endTag);
         if (endIndex !== -1) {
           body = body.substring(0, tagIndex) + `${message}\n${tag}` + body.substring(endIndex + endTag.length);
@@ -622,9 +622,9 @@ ${SHORT_SUMMARY_END_TAG}
 ---
 
 <details>
-<summary>Uplevel your code reviews with Think Throo</summary>
+<summary>Uplevel your code reviews with ThinkThroo</summary>
 
-### Think Throo
+### ThinkThroo
 
 If you like this project, please support us by starring the repository. This tool uses advanced AI context and superior noise reduction to provide high-quality code reviews.
 

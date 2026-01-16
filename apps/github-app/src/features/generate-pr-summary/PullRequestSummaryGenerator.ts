@@ -5,7 +5,7 @@ import {
 import { CommentManager } from "@/services/comments/CommentManager";
 import { CommitAnalyzer } from "@/services/commits/CommitAnalyzer";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
-import { FileSummarizer } from "@/services/summarization/FileSummarizer";
+import { FileSummarizer, type SummaryResult } from "@/services/summarization/FileSummarizer";
 import { ClaudeBot } from "@/services/ai/ClaudeBot";
 import { Prompts } from "@/services/ai/Prompts";
 import type { TemplateData } from "@/services/ai/Prompts";
@@ -34,10 +34,8 @@ export class PullRequestSummaryGenerator {
     this.commitAnalyzer = new CommitAnalyzer(octokit, issueDetails);
     this.preprocessor = new PRPreprocessor(octokit, issueDetails);
 
-    // Initialize AI options
     this.aiOptions = getDefaultAIOptions();
 
-    // Initialize AI bots with proper error handling
     try {
       this.summaryBot = new ClaudeBot(this.aiOptions.summaryBot);
       logger.info("Summary bot initialized", { model: ClaudeModel.HAIKU_4_5 });
@@ -74,7 +72,7 @@ export class PullRequestSummaryGenerator {
     );
   }
 
-  async generate(): Promise<void> {
+  async generate(): Promise<SummaryResult[]> {
     const pullRequest = this.context.payload.pull_request;
     const pullNumber = pullRequest.number;
 
@@ -134,7 +132,7 @@ export class PullRequestSummaryGenerator {
         headSha: pullRequest.head.sha,
         reviewStartCommit,
       });
-      return;
+      return [];
     }
 
     const { filesAndChanges, filterResult, commits } = preprocessResult;
@@ -150,12 +148,12 @@ export class PullRequestSummaryGenerator {
     // Step 4: Validate commits
     if (commits.length === 0) {
       logger.warn("Skipping PR summary: no commits found", { prNumber: pullNumber });
-      return;
+      return [];
     }
 
     if (filesAndChanges.length === 0) {
       logger.warn("Skipping PR summary: no files to review", { prNumber: pullNumber });
-      return;
+      return [];
     }
 
     // Step 5: Generate status message
@@ -452,7 +450,7 @@ export class PullRequestSummaryGenerator {
       if (releaseNotesResponse.text === "") {
         logger.warn("Release notes: nothing obtained from AI", { prNumber: pullNumber });
       } else {
-        let message = "### Summary by Think Throo Bot\n\n";
+        let message = "### Summary by ThinkThroo Bot\n\n";
         message += releaseNotesResponse.text;
         
         logger.debug("Updating PR description with release notes", {
@@ -544,5 +542,8 @@ export class PullRequestSummaryGenerator {
       summarizedFilesCount: summaries.length,
       totalDurationSinceStart: Date.now() - startTime,
     });
+
+    // Return summaries for use in review filtering
+    return summaries;
   }
 }
