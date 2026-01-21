@@ -84,7 +84,7 @@ export async function countTokens(
   model?: string
 ): Promise<number> {
   const counter = getTokenCounter();
-  return counter.countTokens(text, model);
+  return counter.countTokens(text, model!);
 }
 
 /**

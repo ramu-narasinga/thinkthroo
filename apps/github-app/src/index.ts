@@ -66,4 +66,11 @@ export default (app: Probot) => {
       });
     }
   });
+
+  app.on("marketplace_purchase.purchased", async (context) => {
+    logger.info("Marketplace purchase event received", {
+      action: "purchased",
+      accountId: context.payload.marketplace_purchase.account.id,
+    });
+  });
 };
