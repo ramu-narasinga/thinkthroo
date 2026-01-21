@@ -58,35 +58,22 @@ export function ModuleCard({ module, categorySlug }: ModuleCardProps) {
               {totalChapters} chapters • {totalLessons} lessons
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4" />
-            <span>{totalDuration} min</span>
-          </div>
+          {/* Duration removed as requested */}
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium">{progress}%</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
+        {/* Progress bar and percentage removed as requested */}
 
         <div className="flex items-center gap-2 pt-2">
           <Button asChild className="flex-1">
             <Link href={`/${categorySlug}/${module.slug}${lessonQuery}`}>
 
               <PlayCircle className="mr-2 h-4 w-4" />
-              {progress === 0 ? "Start" : progress === 100 ? "Review" : "Resume"}
+              {"View"}
             </Link>
           </Button>
         </div>
 
-        {nextLesson && progress > 0 && progress < 100 && (
-          <p className="text-xs text-muted-foreground">
-            Next: {nextLesson.title} ({nextLesson.duration})
-          </p>
-        )}
+        {/* Next lesson info removed as requested */}
       </CardContent>
     </Card>
   )

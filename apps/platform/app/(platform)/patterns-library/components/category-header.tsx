@@ -35,21 +35,14 @@ export function CategoryHeader({ category }: CategoryHeaderProps) {
                 {category.title}
               </h1>
             </div>
-            <p className="text-muted-foreground">
-              {totalModules} modules • {totalLessons} lessons
-            </p>
+            
           </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground mb-1">
-              Overall Progress
-            </p>
-            <p className="text-2xl font-bold">{progress}%</p>
-          </div>
+          {/* Progress percentage removed as requested */}
         </div>
-        <Progress value={progress} className="mt-4 h-2" />
+        {/* Progress bar removed as requested */}
       </div>
 
-      <div className="px-6">
+      {/* <div className="px-6">
         <Tabs value="modules">
           <TabsList>
             <TabsTrigger value="modules" className="cursor-pointer">Modules</TabsTrigger>
@@ -57,7 +50,7 @@ export function CategoryHeader({ category }: CategoryHeaderProps) {
             <TabsTrigger value="resources" className="cursor-pointer">Resources</TabsTrigger>
           </TabsList>
         </Tabs>
-      </div>
+      </div> */}
     </div>
   );
 }

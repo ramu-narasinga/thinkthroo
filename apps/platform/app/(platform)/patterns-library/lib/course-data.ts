@@ -1,3 +1,29 @@
+// Returns the progress percentage for a module
+export function getModuleProgress(module: Module): number {
+  const totalLessons = module.chapters.reduce(
+    (acc, ch) => acc + ch.lessons.length,
+    0
+  );
+  const completedLessons = module.chapters.reduce(
+    (acc, ch) => acc + ch.lessons.filter((l) => l.completed).length,
+    0
+  );
+  return totalLessons > 0
+    ? Math.round((completedLessons / totalLessons) * 100)
+    : 0;
+}
+
+// Returns the next incomplete lesson in a module, or null if all are complete
+export function getNextLesson(module: Module): Lesson | null {
+  for (const chapter of module.chapters) {
+    for (const lesson of chapter.lessons) {
+      if (!lesson.completed) {
+        return lesson;
+      }
+    }
+  }
+  return null;
+}
 export interface Lesson {
   id: string
   title: string
