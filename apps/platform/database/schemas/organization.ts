@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, unique, pgPolicy } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, unique, pgPolicy, boolean, numeric } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { profiles } from './user';
 
@@ -12,6 +12,9 @@ export const organizations = pgTable('organizations', {
   reposUrl: text('repos_url'),
   userId: uuid('user_id')
     .references(() => profiles.userId, { onDelete: 'cascade' }),
+  isPersonal: boolean('is_personal').default(true).notNull(),
+  creditBalance: numeric('credit_balance', { precision: 10, scale: 2 }).default('10.00').notNull(),
+  currentPlanName: text('current_plan_name'),
   lastFetched: timestamp('last_fetched', { withTimezone: true, mode: 'string' }).defaultNow(),
 }, (table) => [
   unique('organizations_github_org_id_user_id_key').on(table.githubOrgId, table.userId),

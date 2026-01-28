@@ -9,3 +9,4 @@ export * from './file';
 export * from './rag';
 export * from './challenge';
 export * from './payment';
+export * from './credit';
