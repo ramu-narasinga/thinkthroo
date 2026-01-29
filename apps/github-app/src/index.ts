@@ -3,6 +3,7 @@ import "./utils/sentry";
 import { Probot } from "probot";
 import { issueGreeting } from "./features/issue-greeting";
 import { PRWorkflowOrchestrator } from "./features/pr-workflow";
+import { MarketplaceService } from "./services/marketplace/MarketplaceService";
 import { logger } from "@/utils/logger";
 
 export default (app: Probot) => {
@@ -67,10 +68,33 @@ export default (app: Probot) => {
     }
   });
 
-  app.on("marketplace_purchase.purchased", async (context) => {
-    logger.info("Marketplace purchase event received", {
-      action: "purchased",
-      accountId: context.payload.marketplace_purchase.account.id,
-    });
-  });
+  app.on(
+    ["marketplace_purchase.purchased", "marketplace_purchase.changed", "marketplace_purchase.cancelled"],
+    async (context) => {
+      logger.info("Marketplace purchase event received", {
+        action: context.payload.action,
+        accountId: context.payload.marketplace_purchase.account.id,
+        accountLogin: context.payload.marketplace_purchase.account.login,
+        planName: context.payload.marketplace_purchase.plan.name,
+      });
+
+      try {
+
+        const marketplaceService = new MarketplaceService();
+
+        await marketplaceService.handleMarketplacePurchase(context);
+        logger.info("Marketplace purchase handled successfully", {
+          action: context.payload.action,
+          accountId: context.payload.marketplace_purchase.account.id,
+        });
+      } catch (error: any) {
+        logger.error("Failed to handle marketplace purchase", {
+          action: context.payload.action,
+          accountId: context.payload.marketplace_purchase.account.id,
+          error: error.message,
+          stack: error.stack,
+        });
+      }
+    }
+  );
 };

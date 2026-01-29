@@ -15,11 +15,7 @@
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "npm@9.6.7",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@9.0.0",
   "dependencies": {
     "@calcom/embed-react": "^1.5.2",
     "thinkthroo": "^0.0.8"
