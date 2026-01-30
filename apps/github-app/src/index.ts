@@ -1,7 +1,7 @@
 import "./utils/sentry";
 
 import { Probot } from "probot";
-import { issueGreeting } from "./features/issue-greeting";
+import { greetIssue } from "./features/issue-greeting";
 import { PRWorkflowOrchestrator } from "./features/pr-workflow";
 import { MarketplaceService } from "./services/marketplace/MarketplaceService";
 import { logger } from "@/utils/logger";
@@ -18,7 +18,7 @@ export default (app: Probot) => {
     });
 
     try {
-      await issueGreeting(context.octokit, issueDetails);
+      await greetIssue(context);
       logger.info("Issue greeting completed", { issueNumber: issueDetails.issue_number });
     } catch (error: any) {
       logger.error("Failed to post issue greeting", {

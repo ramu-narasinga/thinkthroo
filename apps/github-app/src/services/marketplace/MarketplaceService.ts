@@ -14,12 +14,22 @@ import type {
  * - Process marketplace purchase, change, and cancellation events
  * - Record purchase history in database
  * - Update organization plan information
+ * - Manage credit allocation for Free and Pro plans
  * 
- * Note: Initial 10 credits are given on signup via database trigger,
- * not during marketplace purchase.
+ * Pricing Model:
+ * - Free: 10 credits ($0/month) - Plan ID 1
+ * - Pro: 500 credits ($29/month) - Plan ID 2
+ * 
+ * Note: Initial 10 credits are given on signup via database trigger.
  */
 export class MarketplaceService {
   private db: SupabaseService;
+
+  // Plan credit allocation
+  private readonly PLAN_CREDITS: Record<string, number> = {
+    'Free': 10,
+    'Pro': 500,
+  };
 
   constructor() {
     this.db = SupabaseService.getInstance();
@@ -53,7 +63,7 @@ export class MarketplaceService {
     try {
       // Find the organization by GitHub account ID
       const organization = await this.findOrganizationByGithubId(
-        account.id.toString()
+        account.login.toString()
       );
 
       if (!organization) {
@@ -74,15 +84,22 @@ export class MarketplaceService {
         previousPlan: previous_marketplace_purchase?.plan,
       });
 
-      // Add credits for purchased plan
+      // Handle credit allocation based on action
       if (action === "purchased") {
+        // New purchase - add plan credits
         await this.addPlanCredits(organization.id, plan);
+      } else if (action === "changed") {
+        // Plan change (upgrade/downgrade) - set credits to new plan amount
+        await this.setPlanCredits(organization.id, plan, previous_marketplace_purchase?.plan);
+      } else if (action === "cancelled") {
+        // Cancellation - reset to Free tier credits
+        await this.resetToFreeTier(organization.id);
       }
 
       // Update organization's current plan
       await this.updateOrganizationPlan(
         organization.id,
-        action === "cancelled" ? null : plan.name
+        action === "cancelled" ? "Free" : plan.name
       );
 
       logger.info("Marketplace purchase processed successfully", {
@@ -216,8 +233,9 @@ export class MarketplaceService {
 
   /**
    * Add credits based on purchased plan
-   * Conversion: plan price (cents) / 100 = USD, then USD * 10 = credits
-   * E.g., $5/month plan = 50 credits
+   * Uses fixed credit amounts for Free and Pro plans
+   * - Free: 10 credits
+   * - Pro: 500 credits
    */
   private async addPlanCredits(
     organizationId: string,
@@ -229,16 +247,14 @@ export class MarketplaceService {
       monthlyPriceInCents: plan.monthly_price_in_cents,
     });
 
-    // Calculate credits: price in USD * 10
-    // E.g., $5.00 = 500 cents = 50 credits
-    const priceInUSD = plan.monthly_price_in_cents / 100;
-    const creditsToAdd = priceInUSD * 10;
+    // Get fixed credit amount for plan
+    const creditsToAdd = this.PLAN_CREDITS[plan.name] || 0;
 
     if (creditsToAdd <= 0) {
-      logger.warn("Plan has zero or negative price, skipping credit addition", {
+      logger.warn("Plan has zero credits or unknown plan, skipping credit addition", {
         organizationId,
         planName: plan.name,
-        monthlyPriceInCents: plan.monthly_price_in_cents,
+        availablePlans: Object.keys(this.PLAN_CREDITS),
       });
       return;
     }
@@ -289,7 +305,6 @@ export class MarketplaceService {
         planName: plan.name,
         planId: plan.id,
         monthlyPriceInCents: plan.monthly_price_in_cents,
-        priceInUSD,
         creditsAdded: creditsToAdd,
       }),
     });
@@ -308,6 +323,174 @@ export class MarketplaceService {
       creditsAdded: creditsToAdd,
       previousBalance: currentBalance,
       newBalance,
+    });
+  }
+
+  /**
+   * Set credits to new plan amount when plan changes (upgrade/downgrade)
+   * - Upgrade (Free → Pro): Set to 500 credits
+   * - Downgrade (Pro → Free): Set to 10 credits
+   */
+  private async setPlanCredits(
+    organizationId: string,
+    newPlan: { id: number; name: string; monthly_price_in_cents: number },
+    previousPlan?: { id: number; name: string; monthly_price_in_cents: number }
+  ): Promise<void> {
+    logger.debug("Setting plan credits for plan change", {
+      organizationId,
+      newPlanName: newPlan.name,
+      previousPlanName: previousPlan?.name,
+    });
+
+    const newCredits = this.PLAN_CREDITS[newPlan.name] || 0;
+
+    if (newCredits <= 0) {
+      logger.warn("Unknown plan for credit adjustment", {
+        organizationId,
+        planName: newPlan.name,
+      });
+      return;
+    }
+
+    const client = this.db.getClient();
+
+    // Get current balance
+    const { data: org, error: orgError } = await client
+      .from("organizations")
+      .select("credit_balance")
+      .eq("id", organizationId)
+      .single();
+
+    if (orgError || !org) {
+      logger.error("Failed to get organization for credit adjustment", {
+        organizationId,
+        error: orgError?.message,
+      });
+      throw orgError || new Error("Organization not found");
+    }
+
+    const currentBalance = parseFloat(org.credit_balance);
+
+    // Update balance to new plan amount
+    const { error: updateError } = await client
+      .from("organizations")
+      .update({ credit_balance: newCredits.toFixed(2) })
+      .eq("id", organizationId);
+
+    if (updateError) {
+      logger.error("Failed to update credit balance for plan change", {
+        organizationId,
+        error: updateError.message,
+      });
+      throw updateError;
+    }
+
+    // Record transaction
+    const transactionType = newCredits > currentBalance ? "plan_upgrade" : "plan_downgrade";
+    const creditDifference = newCredits - currentBalance;
+
+    const { error: txError } = await client.from("credit_transactions").insert({
+      organization_id: organizationId,
+      transaction_type: transactionType,
+      amount: creditDifference.toFixed(2),
+      balance_after: newCredits.toFixed(2),
+      reference_type: "marketplace_purchase",
+      reference_id: newPlan.id.toString(),
+      metadata: JSON.stringify({
+        action: "changed",
+        previousPlanName: previousPlan?.name,
+        newPlanName: newPlan.name,
+        previousBalance: currentBalance,
+        newBalance: newCredits,
+      }),
+    });
+
+    if (txError) {
+      logger.error("Failed to record plan change transaction", {
+        organizationId,
+        error: txError.message,
+      });
+      throw txError;
+    }
+
+    logger.info("Plan credits adjusted for plan change", {
+      organizationId,
+      previousPlan: previousPlan?.name,
+      newPlan: newPlan.name,
+      previousBalance: currentBalance,
+      newBalance: newCredits,
+      difference: creditDifference,
+    });
+  }
+
+  /**
+   * Reset credits to Free tier amount when plan is cancelled
+   */
+  private async resetToFreeTier(organizationId: string): Promise<void> {
+    logger.debug("Resetting to Free tier", { organizationId });
+
+    const freeTierCredits = this.PLAN_CREDITS['Free'];
+    const client = this.db.getClient();
+
+    // Get current balance
+    const { data: org, error: orgError } = await client
+      .from("organizations")
+      .select("credit_balance")
+      .eq("id", organizationId)
+      .single();
+
+    if (orgError || !org) {
+      logger.error("Failed to get organization for cancellation", {
+        organizationId,
+        error: orgError?.message,
+      });
+      throw orgError || new Error("Organization not found");
+    }
+
+    const currentBalance = parseFloat(org.credit_balance);
+
+    // Update balance to Free tier amount
+    const { error: updateError } = await client
+      .from("organizations")
+      .update({ credit_balance: freeTierCredits.toFixed(2) })
+      .eq("id", organizationId);
+
+    if (updateError) {
+      logger.error("Failed to reset credits to Free tier", {
+        organizationId,
+        error: updateError.message,
+      });
+      throw updateError;
+    }
+
+    // Record transaction
+    const { error: txError } = await client.from("credit_transactions").insert({
+      organization_id: organizationId,
+      transaction_type: "plan_cancelled",
+      amount: (freeTierCredits - currentBalance).toFixed(2),
+      balance_after: freeTierCredits.toFixed(2),
+      reference_type: "marketplace_purchase",
+      reference_id: null,
+      metadata: JSON.stringify({
+        action: "cancelled",
+        previousBalance: currentBalance,
+        newBalance: freeTierCredits,
+        resetToFreeTier: true,
+      }),
+    });
+
+    if (txError) {
+      logger.error("Failed to record cancellation transaction", {
+        organizationId,
+        error: txError.message,
+      });
+      throw txError;
+    }
+
+    logger.info("Credits reset to Free tier", {
+      organizationId,
+      previousBalance: currentBalance,
+      newBalance: freeTierCredits,
     });
   }
 }
