@@ -92,8 +92,8 @@ const data = {
   navSecondary: [],
   codearc: [
     {
-      name: "Dashboard",
-      url: "/dashboard",
+      name: "Analytics",
+      url: "/analytics",
       icon: LayoutDashboard,
     },
     {
@@ -108,6 +108,11 @@ const data = {
     },
   ],
   learn: [
+    {
+      name: "Dashboard",
+      url: "/learn/dashboard",
+      icon: LayoutDashboard,
+    },
     {
       name: "Codebase Architecture",
       url: "/architecture",
@@ -153,7 +158,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         {/* <NavMain items={data.navMain} /> */}
-        <NavProjects projects={data.codearc} label="CodeArc" />
+        <NavProjects projects={data.codearc} label="" />
         <NavProjects projects={data.learn} label="Learn" />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
