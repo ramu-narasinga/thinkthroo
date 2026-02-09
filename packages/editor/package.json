@@ -58,7 +58,7 @@
     "@types/katex": "^0.16.7",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@thinkthroo/tsconfig": "*",
+    "@thinkthroo/tsconfig": "workspace:*",
     "tsup": "^8.3.5",
     "typescript": "^5.7.3"
   },

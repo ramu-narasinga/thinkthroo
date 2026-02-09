@@ -12,19 +12,29 @@
     "probot-app"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "probot run ./lib/index.js",
+    "dev": "npm run build && concurrently \"tsc --watch --preserveWatchOutput\" \"tsc-alias --watch\" \"nodemon --delay 2 --watch lib ./lib/index.js\"",
     "test": "vitest"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@sentry/node": "^10.32.1",
+    "@supabase/supabase-js": "^2.48.1",
+    "p-limit": "^3.1.0",
+    "pino": "^10.1.1",
     "probot": "^13.4.5"
   },
   "devDependencies": {
+    "@types/minimatch": "^5.1.2",
     "@types/node": "^20.0.0",
+    "concurrently": "^9.1.0",
     "nock": "^14.0.5",
+    "nodemon": "^3.1.9",
     "smee-client": "^2.0.0",
-    "vitest": "^2.0.0",
-    "typescript": "^5.8.3"
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.8.3",
+    "vitest": "^2.0.0"
   },
   "overrides": {
     "@types/pg": "8.15.1"

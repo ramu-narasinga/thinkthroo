@@ -17,8 +17,13 @@
     "noFallthroughCasesInSwitch": true,
 
     "moduleResolution": "Node16",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"]
+    },
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
   },
   "include": ["src/"],
   "compileOnSave": false
