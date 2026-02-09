@@ -1,5 +1,5 @@
-import { CategoryHeader } from "@/app/(platform)/architecture/components/category-header"
-import { ModuleCard } from "@/app/(platform)/architecture/components/module-card"
+import { CategoryHeader } from "@/app/(platform)/patterns-library/components/category-header"
+import { ModuleCard } from "@/app/(platform)/patterns-library/components/module-card"
 import { courseData } from "./lib/course-data"
 
 const category = courseData[0]
