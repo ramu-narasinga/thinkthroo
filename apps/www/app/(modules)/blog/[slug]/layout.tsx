@@ -1,14 +1,15 @@
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import React, { ReactNode } from "react";
-import { getBlogTree } from "@/lib/blog-tree";
+import { DocsLayout } from "fumadocs-ui/layouts/docs"
+import React, { ReactNode } from "react"
+import { getBlogTree } from "@/lib/blog-tree"
+import { BlogTocPromo } from "@/components/interfaces/blog/blogtocpromo"
 
 export default async function Layout({ children }: { children: ReactNode }) {
-  // Fetch cached blog tree - uses React cache() to deduplicate within render
-  const tree = await getBlogTree();
+  const tree = await getBlogTree()
 
   return (
     <DocsLayout tree={tree}>
+      <BlogTocPromo />
       {children}
     </DocsLayout>
-  );
+  )
 }

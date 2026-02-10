@@ -27,7 +27,7 @@
     "@radix-ui/react-tabs": "^1.1.0",
     "@sanity/image-url": "^1.1.0",
     "@supabase/ssr": "^0.6.1",
-    "@thinkthroo/ui": "*",
+    "@thinkthroo/ui": "workspace:*",
     "@types/mdx": "^2.0.13",
     "@vercel/analytics": "^1.2.2",
     "class-variance-authority": "^0.7.0",

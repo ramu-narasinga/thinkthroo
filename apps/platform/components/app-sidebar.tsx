@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   BookMarked,
   Bot,
@@ -9,10 +9,10 @@ import {
   LifeBuoy,
   PieChart,
   SquareTerminal,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavProjects } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
+import { NavProjects } from "@/components/nav-projects";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -20,7 +20,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-} from "@thinkthroo/ui/components/sidebar"
+} from "@thinkthroo/ui/components/sidebar";
 import { SidebarOptInForm } from "./tokens-usage";
 import { OrgSwitcher } from "./org-switcher";
 
@@ -46,17 +46,17 @@ const data = {
         {
           title: "Dashboard",
           url: "/dashboard",
-          icon: LayoutDashboard
+          icon: LayoutDashboard,
         },
         {
           title: "Repositories",
           url: "/repositories",
-          icon: BookMarked
+          icon: BookMarked,
         },
         {
           title: "Subscription",
           url: "/subscription",
-          icon: DollarSign
+          icon: DollarSign,
         },
       ],
     },
@@ -69,22 +69,22 @@ const data = {
         {
           title: "Codebase Architecture",
           url: "#",
-          icon: BookMarked
+          icon: BookMarked,
         },
         {
           title: "Production Grade Projects",
           url: "#",
-          icon: BookMarked
+          icon: BookMarked,
         },
         {
           title: "Challenges",
           url: "#",
-          icon: BookMarked
+          icon: BookMarked,
         },
         {
           title: "Leaderboard",
           url: "#",
-          icon: BookMarked
+          icon: BookMarked,
         },
       ],
     },
@@ -92,8 +92,8 @@ const data = {
   navSecondary: [],
   codearc: [
     {
-      name: "Dashboard",
-      url: "/dashboard",
+      name: "Analytics",
+      url: "/analytics",
       icon: LayoutDashboard,
     },
     {
@@ -109,6 +109,11 @@ const data = {
   ],
   learn: [
     {
+      name: "Dashboard",
+      url: "/learn/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
       name: "Codebase Architecture",
       url: "/architecture",
       icon: LayoutDashboard,
@@ -118,8 +123,13 @@ const data = {
       url: "/production-grade-projects",
       icon: BookMarked,
     },
+    {
+      name: "Patterns Library",
+      url: "/patterns-library",
+      icon: BookMarked,
+    },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -148,7 +158,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         {/* <NavMain items={data.navMain} /> */}
-        <NavProjects projects={data.codearc} label="CodeArc" />
+        <NavProjects projects={data.codearc} label="" />
         <NavProjects projects={data.learn} label="Learn" />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
@@ -157,5 +167,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

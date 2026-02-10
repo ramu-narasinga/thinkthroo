@@ -26,38 +26,42 @@ export function LoginForm({
       action: "initiated",
     });
 
-    // PostHog: Track login with GitHub clicked
-    posthog.capture('login_with_github_clicked', {
-      provider: 'github',
+    posthog.capture("login_with_github_clicked", {
+      provider: "github",
       timestamp: new Date().toISOString(),
     });
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+    <div
+      className={cn(
+        "min-h-screen w-full flex items-center justify-center bg-gray-100 dark:bg-gray-900",
+        className
+      )}
+      {...props}
+    >
+      <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
           <CardDescription>
             You&apos;ll be taken to GitHub to authenticate.
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form>
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-3">
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  formAction={login}
-                  onClick={handleLoginClick}
-                >
-                  Login with Github
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                formAction={login}
+                onClick={handleLoginClick}
+              >
+                Login with GitHub
+              </Button>
 
               {error && (
-                <p className="text-sm text-red-600">
+                <p className="text-sm text-red-600 text-center">
                   {decodeURIComponent(error)}
                 </p>
               )}
