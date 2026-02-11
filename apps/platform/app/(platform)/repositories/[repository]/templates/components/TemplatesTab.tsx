@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@thinkthroo/ui/compone
 
 export default function TemplatesTab() {
   return (
-    <div className="flex flex-col gap-6">
-        <Card className="w-full max-w-md mx-auto">
+    <div className="flex flex-col gap-6 items-start">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Start from Scratch</CardTitle>
           </CardHeader>
@@ -13,7 +13,7 @@ export default function TemplatesTab() {
             This is the first template card.
           </CardContent>
         </Card>
-        <Card className="w-full max-w-md mx-auto">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Start with the Templates</CardTitle>
           </CardHeader>
