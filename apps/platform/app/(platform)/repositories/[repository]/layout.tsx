@@ -9,6 +9,7 @@ const tabs = [
   { label: "Codebase Architecture", value: "architecture" },
   { label: "Reviews", value: "reviews" },
   { label: "General", value: "general" },
+  { label: "Templates", value: "templates" },
 ];
 
 export default function RepositoryDetailLayout({
