@@ -1,18 +1,21 @@
-export default function DashboardPage() {
+import { CategoryHeader } from "@/app/(platform)/production-grade-projects/components/category-header"
+import { ModuleCard } from "@/app/(platform)/production-grade-projects/components/module-card"
+import { courseData } from "./lib/course-data"
+
+const category = courseData[0]
+const categorySlug = category.slug
+
+export default function ProductionGradeProjectsPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-8">
-      <div className="max-w-2xl text-center space-y-4">
-        <h1 className="text-3xl font-bold">🚧 Major Migration in Progress</h1>
-        <p className="text-lg text-muted-foreground">
-          We&apos;re building a powerful GitHub app to enforce codebase architecture rules automatically.
-        </p>
-        <p className="text-muted-foreground">
-          You&apos;ll be notified as soon as the new features are available.
-        </p>
-        <p className="text-sm text-muted-foreground mt-6">
-          Thank you for your patience!
-        </p>
-      </div>
+    <div className="page">
+      <CategoryHeader category={category} />
+          <main className="flex-1 overflow-y-auto p-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {category.modules.map((module) => (
+                <ModuleCard key={module.id} module={module} categorySlug={categorySlug} />
+              ))}
+            </div>
+          </main>
     </div>
   )
 }
