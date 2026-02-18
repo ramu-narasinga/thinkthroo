@@ -10,20 +10,20 @@ export default function ModulePage({
   searchParams: { lesson?: string }
 }) {
   const category = courseData.find(c => c.slug === "production-grade-projects")
-  const module = category?.modules.find(
+  const pgpModule = category?.modules.find(
     m => m.slug === params.module
   )
 
-  if (!category || !module) notFound()
+  if (!category || !pgpModule) notFound()
 
   const activeLessonId =
     searchParams.lesson ??
-    module.chapters[0]?.lessons[0]?.id
+    pgpModule.chapters[0]?.lessons[0]?.id
 
   return (
     <ModulePageClient
       category={category}
-      module={module}
+      module={pgpModule}
       activeLessonId={activeLessonId}
     />
   )
