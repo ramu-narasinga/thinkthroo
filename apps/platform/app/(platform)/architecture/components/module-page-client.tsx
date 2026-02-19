@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react"
 import { CourseSidebar } from "@/app/(platform)/architecture/components/course-sidebar"
 import { LessonContent } from "@/app/(platform)/architecture/components/lesson-content"
-import type { Category, Module, Lesson, Chapter } from "@/lib/course-data"
+import type { Category, Module, Lesson, Chapter } from "@/app/(platform)/architecture/lib/course-data"
 
 interface ModulePageClientProps {
   category: Category

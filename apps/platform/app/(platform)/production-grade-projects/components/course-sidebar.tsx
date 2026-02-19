@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ChevronRight, FileText, PlayCircle, HelpCircle, Check, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Module, Chapter, Lesson } from "@/lib/course-data"
+import type { Module, Chapter, Lesson } from "@/app/(platform)/production-grade-projects/lib/course-data"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@thinkthroo/ui/components/collapsible"
 import { Button } from "@thinkthroo/ui/components/button"
 
