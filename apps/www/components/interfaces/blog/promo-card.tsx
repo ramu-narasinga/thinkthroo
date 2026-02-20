@@ -3,27 +3,29 @@ import { Button } from "@thinkthroo/ui/components/button"
 
 export function PromoCard() {
   return (
-    <Card className="rounded-lg bg-muted/30">
-      <CardContent className="p-6 space-y-4">
+    <Card className="rounded-lg bg-muted/30 py-0">
+      <CardContent className="p-4 space-x-2 space-y-2">
         <h4 className="text-lg font-semibold leading-tight">
-          Get 10% off Think Throo
+          Your PR Reviews Are Missing Architecture Violations
         </h4>
 
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Trusted by OpenAI, Sonos, Adobe and more.  
-          Use this promo code when signing up.
-        </p>
+          Think Throo catches violations in every PR using AI + your architecture rules.</p>
 
         <div className="flex items-center gap-3 pt-2">
-          <code className="rounded-md bg-muted px-3 py-1.5 text-sm font-mono">
-            THINKBLOG10
-          </code>
 
-          <Button
+          <Button className="cursor-pointer"
             size="sm"
-            onClick={() => navigator.clipboard.writeText("THINKBLOG10")}
+            onClick={() =>
+              window.open(
+                "https://app.thinkthroo.com/repositories",
+                "_blank",
+                "noopener,noreferrer"
+              )
+            }
+
           >
-            Copy
+            Install Think Throo
           </Button>
         </div>
       </CardContent>
