@@ -15,9 +15,9 @@ export function BlogTocPromo() {
     wrapper.setAttribute("data-blog-promo", "true")
     wrapper.className = "mt-4"
 
-    toc.appendChild(wrapper)
+    toc.insertBefore(wrapper, toc.firstChild)
 
-    createRoot(wrapper).render(<PromoCard />)
+    createRoot(wrapper).render(<div className="mb-4"><PromoCard /></div>)
   }, [])
 
   return null
