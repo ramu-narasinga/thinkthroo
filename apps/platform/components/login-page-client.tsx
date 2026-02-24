@@ -57,11 +57,10 @@ export function LoginPageClient({ error }: { error?: string }) {
           <div className="relative z-20 flex-1 flex items-center justify-center overflow-hidden">
             <div className="max-w-xl text-center">
               <p className="text-4xl font-bold text-black leading-tight">
-                Cut Code Review Time & Bugs in Half Instantly.
+                AI Code Review that Enforces Codebase Architecture
               </p>
               <p className="mt-4 text-base text-gray-500">
-                Supercharge your team to ship faster with the most advanced AI
-                code reviews.
+                Stop AI slop from reaching your main branch. Think Throo enforces proven architecture patterns, catching violations before they compound into technical debt.
               </p>
             </div>
           </div>
