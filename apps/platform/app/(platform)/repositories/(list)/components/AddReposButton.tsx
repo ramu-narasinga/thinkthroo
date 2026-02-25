@@ -20,7 +20,7 @@ export function AddReposButton() {
   return (
     <Button
       onClick={handleClick}
-      className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 cursor-pointer"
+      className="bg-[#7000FF] text-white px-4 py-2 rounded hover:bg-[#7000FF]/90 cursor-pointer"
     >
       + Add Repositories
     </Button>
