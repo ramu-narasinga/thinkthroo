@@ -9,7 +9,7 @@ import "@/styles/globals.css";
 import "@/styles/prosemirror.css";
 
 export const metadata: Metadata = {
-  title: "CodeArc | Think Throo",
+  title: "Think Throo",
   description: "Enforce codebase architecture using AI.",
   icons: {
     icon: "/favicon.ico",
