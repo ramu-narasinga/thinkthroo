@@ -4,6 +4,7 @@ import { Probot } from "probot";
 import { greetIssue } from "./features/issue-greeting";
 import { PRWorkflowOrchestrator } from "./features/pr-workflow";
 import { MarketplaceService } from "./services/marketplace/MarketplaceService";
+import { InviteGateService } from "./services/invite/InviteGateService";
 import { logger } from "@/utils/logger";
 
 export default (app: Probot) => {
@@ -45,6 +46,31 @@ export default (app: Probot) => {
     });
 
     try {
+      // Invite gate: check if the PR author is on the invite list
+      const prAuthor = pullRequest.user?.login;
+      const repoOwner = context.repo().owner;
+
+      // Check both the PR author and the repo owner (org)
+      const authorAllowed = prAuthor ? await InviteGateService.isAllowed(prAuthor) : false;
+      const ownerAllowed = await InviteGateService.isAllowed(repoOwner);
+
+      if (!authorAllowed && !ownerAllowed) {
+        logger.info("PR author/owner not on invite list, skipping AI review", {
+          prNumber: pullRequest.number,
+          prAuthor,
+          repoOwner,
+        });
+
+        // Post a comment on the PR explaining the invite-only restriction
+        await context.octokit.issues.createComment({
+          ...context.repo(),
+          issue_number: pullRequest.number,
+          body: InviteGateService.buildNotInvitedComment(prAuthor || repoOwner),
+        });
+
+        return;
+      }
+
       const orchestrator = new PRWorkflowOrchestrator(context);
       
       await orchestrator.execute({
