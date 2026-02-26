@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Shield } from "lucide-react";
 
 /**
@@ -12,13 +13,13 @@ export function InviteOnlyTopBanner() {
         <span>
           <strong>Invite-Only Early Access</strong> — Think Throo GitHub App
           is currently invite-only.{" "}
-          <a
-            href="mailto:ramu@thinkthroo.com"
+          <Link
+            href="/request-access"
             className="font-medium underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-200"
           >
-            Email ramu@thinkthroo.com
-          </a>{" "}
-          to request access.
+            Request access here
+          </Link>
+          .
         </span>
       </div>
     </div>

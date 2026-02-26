@@ -13,11 +13,11 @@ export function InviteOnlyBanner() {
       <p className="text-amber-700 dark:text-amber-400">
         <span className="font-semibold text-amber-800 dark:text-amber-300">Invite-Only Early Access</span>
         {" — "}
-        Think Throo GitHub App AI features (PR reviews, architecture checks) are currently in <strong>invite-only</strong> mode. To request access, email{" "}
+        Think Throo GitHub App AI features (PR reviews, architecture checks) are currently in <strong>invite-only</strong> mode.{" "}
         <a
-          href="mailto:ramu@thinkthroo.com"
+          href="https://thinkthroo.com/request-access"
           className="font-medium underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-200"
-        >ramu@thinkthroo.com</a> with your GitHub username.
+        >Request access here</a>.
       </p>
     </div>
   );
