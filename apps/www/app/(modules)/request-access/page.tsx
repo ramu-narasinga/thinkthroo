@@ -7,19 +7,39 @@ export default function RequestAccessPage() {
   const [formState, setFormState] = useState<"idle" | "submitting" | "success">(
     "idle"
   );
+  const [serverError, setServerError] = useState<string | null>(null);
   const [githubUsername, setGithubUsername] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormState("submitting");
+    setServerError(null);
 
-    // TODO: Wire up to an API endpoint or email service
-    // For now, simulate a successful submission
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/request-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          github_login: githubUsername,
+          email,
+          note: message || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setServerError(data.error ?? "Something went wrong. Please try again.");
+        setFormState("idle");
+        return;
+      }
+
       setFormState("success");
-    }, 1000);
+    } catch {
+      setServerError("Network error. Please check your connection and try again.");
+      setFormState("idle");
+    }
   }
 
   if (formState === "success") {
@@ -57,6 +77,11 @@ export default function RequestAccessPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="w-full space-y-5">
+          {serverError && (
+            <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+              {serverError}
+            </div>
+          )}
           {/* GitHub Username */}
           <div className="space-y-2">
             <label
