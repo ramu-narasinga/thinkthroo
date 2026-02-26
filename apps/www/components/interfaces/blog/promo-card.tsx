@@ -55,7 +55,7 @@ export function PromoCard() {
               )
             }
           >
-            Install Think Throo
+            Try it for free
           </Button>
         </div>
       </CardContent>
