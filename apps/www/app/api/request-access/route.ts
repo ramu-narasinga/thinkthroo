@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { SlackNotifier } from "@/lib/slack";
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,6 +42,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Fire Slack notification (non-blocking, errors are swallowed internally)
+    await SlackNotifier.accessRequested(github_login.trim(), email.trim(), note?.trim());
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (err) {

@@ -1,6 +1,7 @@
 import { Context } from "probot";
 import { logger } from "@/utils/logger";
 import { SupabaseService } from "@/services/database/SupabaseService";
+import { SlackNotifier } from "@/utils/slack";
 import type {
   MarketplacePurchasePayload,
   PurchaseRecordData,
@@ -107,6 +108,13 @@ export class MarketplaceService {
         action,
         planName: plan.name,
       });
+
+      await SlackNotifier.marketplacePurchase(
+        action,
+        account.login,
+        plan.name,
+        plan.monthly_price_in_cents
+      );
     } catch (error: any) {
       logger.error("Failed to process marketplace purchase", {
         error: error.message,
