@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
 import { createClient } from "@/utils/supabase/server";
+import { SlackNotifier } from "@/lib/slack";
 
 export async function signup(formData: FormData) {
   const supabase = await createClient();
@@ -52,6 +53,9 @@ export async function signup(formData: FormData) {
       level: "info",
       data: { email: data.email },
     });
+
+    // Fire Slack notification (non-blocking, errors are swallowed internally)
+    await SlackNotifier.newSignup(data.email);
 
     revalidatePath("/", "layout");
     redirect("/");

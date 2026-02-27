@@ -6,9 +6,29 @@ import { PRWorkflowOrchestrator } from "./features/pr-workflow";
 import { MarketplaceService } from "./services/marketplace/MarketplaceService";
 import { InviteGateService } from "./services/invite/InviteGateService";
 import { logger } from "@/utils/logger";
+import { SlackNotifier } from "@/utils/slack";
 
 export default (app: Probot) => {
   logger.info("GitHub App initialized", { appName: "think-throo" });
+
+  app.on("installation.created", async (context) => {
+    const { account, repositories } = context.payload;
+    logger.info("App installed", {
+      accountLogin: account.login,
+      accountType: account.type,
+      repoCount: repositories?.length ?? 0,
+    });
+    await SlackNotifier.appInstalled(account.login, account.type, repositories?.length ?? 0);
+  });
+
+  app.on("installation.deleted", async (context) => {
+    const { account } = context.payload;
+    logger.info("App uninstalled", {
+      accountLogin: account.login,
+      accountType: account.type,
+    });
+    await SlackNotifier.appUninstalled(account.login, account.type);
+  });
 
   app.on("issues.opened", async (context) => {
     const issueDetails = context.issue();
