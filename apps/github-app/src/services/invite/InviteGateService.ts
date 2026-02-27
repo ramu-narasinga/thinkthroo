@@ -69,8 +69,7 @@ export class InviteGateService {
       `Your account (\`${githubLogin}\`) is not on the invite list, so AI-powered reviews ` +
         `(PR summaries, architecture checks, etc.) have been skipped for this pull request.`,
       ``,
-      `**Want access?** Send an email to **ramu@thinkthroo.com** with your GitHub username ` +
-        `to request an invite.`,
+      `**Want access?** [Request access here](https://thinkthroo.com/request-access).`,
       ``,
       `---`,
       `*This check is temporary while we control usage during the early access phase.*`,

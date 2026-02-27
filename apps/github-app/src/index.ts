@@ -12,7 +12,8 @@ export default (app: Probot) => {
   logger.info("GitHub App initialized", { appName: "think-throo" });
 
   app.on("installation.created", async (context) => {
-    const { account, repositories } = context.payload;
+    const { installation, repositories } = context.payload;
+    const account = installation.account;
     logger.info("App installed", {
       accountLogin: account.login,
       accountType: account.type,
@@ -22,7 +23,8 @@ export default (app: Probot) => {
   });
 
   app.on("installation.deleted", async (context) => {
-    const { account } = context.payload;
+    const { installation } = context.payload;
+    const account = installation.account;
     logger.info("App uninstalled", {
       accountLogin: account.login,
       accountType: account.type,
