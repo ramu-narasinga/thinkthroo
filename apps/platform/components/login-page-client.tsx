@@ -45,7 +45,7 @@ export function LoginPageClient({ error }: { error?: string }) {
 
           <div className="relative z-20 flex items-center text-lg font-medium text-black">
             <Image
-              src="/logo1/logo.svg"
+              src="/tt purple.svg"
               alt="Logo"
               width={32}
               height={32}

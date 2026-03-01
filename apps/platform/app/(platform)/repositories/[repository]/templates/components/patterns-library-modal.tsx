@@ -139,7 +139,7 @@ export function TemplateDialog({ open, onOpenChange }: TemplateDialogProps) {
               </div>
 
               <div className="flex justify-center">
-                <Button className="!w-[150px] bg-black hover:bg-zinc-800 text-white rounded-xl px-10 py-2">
+                <Button className="!w-[150px] bg-[#7000FF] hover:bg-[#7000FF]/90 text-white rounded-xl px-10 py-2">
                   <PlayCircle className="mr-2 h-4 w-4" />
                   Import
                 </Button>
