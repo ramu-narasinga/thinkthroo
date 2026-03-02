@@ -1,13 +1,41 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Play } from "lucide-react"
 import { useUmami } from "@/hooks/use-umami"
 import posthog from "posthog-js"
 
 export function HowItWorks() {
   const [activeStep, setActiveStep] = useState(1)
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
   const { track } = useUmami();
+
+  // Start animation only when the section scrolls into view
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.2 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // Auto-advance steps every 4 seconds once visible; resets timer on manual click
+  useEffect(() => {
+    if (!isVisible) return
+    const interval = setInterval(() => {
+      setActiveStep((prev) => (prev === 4 ? 1 : prev + 1))
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [activeStep, isVisible])
 
   const steps = [
     {
@@ -37,7 +65,7 @@ export function HowItWorks() {
   ]
 
   return (
-    <section id="how-it-works" className="relative w-full py-20 lg:py-32 bg-gradient-to-b from-background to-secondary/5">
+    <section ref={sectionRef} id="how-it-works" className="relative w-full py-20 lg:py-32 bg-gradient-to-b from-background to-secondary/5">
       {/* Background grid pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,black_0%,transparent_80%)]"></div>
@@ -75,7 +103,7 @@ export function HowItWorks() {
                 className="w-full text-left"
               >
                 <div
-                  className={`p-6 rounded-lg border transition-all duration-300 cursor-pointer group ${
+                  className={`p-6 rounded-lg border ${isVisible ? "transition-all duration-700" : ""} cursor-pointer group ${
                     activeStep === step.number
                       ? "border-primary/50 bg-primary/5 shadow-lg shadow-primary/10"
                       : "border-border/50 bg-card/50 hover:border-primary/30 hover:bg-card/70"
@@ -85,7 +113,7 @@ export function HowItWorks() {
                     {/* Step number badge */}
                     <div className="flex-shrink-0">
                       <div
-                        className={`flex items-center justify-center w-10 h-10 rounded-lg font-semibold text-sm transition-all duration-300 ${
+                        className={`flex items-center justify-center w-10 h-10 rounded-lg font-semibold text-sm ${isVisible ? "transition-all duration-700" : ""} ${
                           activeStep === step.number
                             ? "bg-primary text-primary-foreground"
                             : "bg-primary/20 text-primary group-hover:bg-primary/30"
@@ -97,7 +125,7 @@ export function HowItWorks() {
 
                     {/* Step content */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                      <h3 className={`text-lg font-semibold text-foreground mb-2 group-hover:text-primary ${isVisible ? "transition-colors duration-700" : ""}`}>
                         {step.title}
                       </h3>
                       <p className="text-muted-foreground leading-relaxed text-sm">{step.description}</p>
