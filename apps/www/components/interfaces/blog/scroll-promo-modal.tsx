@@ -75,15 +75,15 @@ export function ScrollPromoModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>🔥 Wait!</DialogTitle>
+          <DialogTitle>Want to implement best practices at your company?</DialogTitle>
           <DialogDescription>
-            Check out our AI code review tool before you continue reading.
+            We built an AI code review tool to help your team adopt best practices inspired by the patterns used in top open-source projects.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-4">
+        <div className="mt-4 flex justify-center">
           <Button
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-white cursor-pointer"
+            className="w-1/2 flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-white cursor-pointer"
             size="sm"
             onClick={() =>
               window.open(
@@ -93,7 +93,7 @@ export function ScrollPromoModal() {
               )
             }
           >
-            Try it for free
+            Get Started for free
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>

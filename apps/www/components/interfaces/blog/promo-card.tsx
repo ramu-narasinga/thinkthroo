@@ -3,27 +3,24 @@
 import { useState } from "react"
 import { Card, CardContent } from "@thinkthroo/ui/components/card"
 import { Button } from "@thinkthroo/ui/components/button"
+import { ArrowRight } from "lucide-react"
 
 const promoMessages = [
   {
-    heading: "Your PR Reviews Are Missing Architecture Violations",
-    body: "Think Throo catches violations in every PR using AI + your architecture rules.",
+    heading: "Need help implementing best practices at your company?",
+    body: "We've studied how the best open-source codebases are built. We help teams adopt the same patterns to reduce tech debt and ship with confidence.",
   },
   {
-    heading: "Stop Architecture Decay Before It Starts",
-    body: "Think Throo enforces your architecture rules on every pull request automatically.",
+    heading: "Keep Your Entire Team Aligned on Architecture",
+    body: "We built a GitHub app that reviews every PR against architecture rules inspired by large OSS codebases, so your team stays consistent without manual reviews.",
   },
   {
-    heading: "Your Team Is Drifting From Your Architecture",
-    body: "Think Throo keeps every contributor aligned with your codebase architecture on every PR.",
+    heading: "Your Codebase Deserves Consistent Patterns",
+    body: "After studying patterns across large open-source projects, we help teams implement the same best practices, and enforce them with an automated PR reviewer.",
   },
   {
-    heading: "Catch Architecture Violations, Not Just Bugs",
-    body: "Think Throo reviews every PR against your architecture rules — so you don't have to.",
-  },
-  {
-    heading: "Architecture Rules Without the Manual Review",
-    body: "Think Throo automates architecture validation using AI so your standards are always enforced.",
+    heading: "Reduce Tech Debt Before It Piles Up",
+    body: "We help teams define consistent architecture rules inspired by OSS and enforce them on every PR with a GitHub app, so best practices stick across the whole team.",
   },
 ]
 
@@ -55,7 +52,8 @@ export function PromoCard() {
               )
             }
           >
-            Try it for free
+            Get Started for Free
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       </CardContent>
