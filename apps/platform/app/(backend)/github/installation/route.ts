@@ -10,7 +10,7 @@ export async function GET() {
 
   // Fetch from your public.users table
   const { data: appUser, error: userError } = await supabase
-    .from('users')
+    .from('profiles')
     .select('id')
     .eq('email', user.email)
     .single()
@@ -19,7 +19,7 @@ export async function GET() {
     return new Response('User not found', { status: 404 })
 
   const { data: installation, error: installError } = await supabase
-    .from('user_installations')
+    .from('installations')
     .select('*')
     .eq('user_id', appUser.id)
     .single()
