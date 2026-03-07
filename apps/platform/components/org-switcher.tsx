@@ -1,8 +1,10 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Building2, ChevronsUpDown, Plus, RefreshCw } from "lucide-react"
 import { useOrganizations } from "@/hooks/useOrganizations"
 import { useUmamiTracking } from "@/hooks/useUmamiTracking"
+import { createClient } from "@/utils/supabase/client"
 import Image from "next/image"
 
 import {
@@ -27,6 +29,14 @@ export function OrgSwitcher() {
 
   const { isMobile } = useSidebar()
   const { trackEvent } = useUmamiTracking()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsAuthenticated(!!user)
+    })
+  }, [])
   
   const {
     organizations,
@@ -35,6 +45,24 @@ export function OrgSwitcher() {
     setActiveOrg,
     syncFromGitHub,
   } = useOrganizations()
+
+  if (!isAuthenticated) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" disabled className="cursor-default opacity-100">
+            <div className="flex aspect-square size-10 items-center justify-center rounded-lg">
+              <Image src="/logo1/logo.svg" alt="Think Throo" width={28} height={28} />
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-semibold">Think Throo</span>
+              <span className="truncate text-xs text-muted-foreground">AI Code Review</span>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
 
   return (
     <SidebarMenu>
