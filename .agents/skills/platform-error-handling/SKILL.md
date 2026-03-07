@@ -1,0 +1,267 @@
+---
+name: platform-error-handling
+description: Error handling guide for the `apps/platform` workspace. Use when adding error boundaries, catching API/tRPC errors, showing error toasts, capturing exceptions with Sentry, logging with Pino, or wiring instrumentation. Triggers on any task involving error handling, error tracking, logging, or user-facing error feedback.
+---
+
+# Platform — Error Handling
+
+The platform uses three complementary layers for error handling:
+
+1. **Sentry** — automatic and manual exception capture + structured logging
+2. **`sonner` toasts** — user-facing feedback for action failures
+3. **Next.js error boundaries** — catch and recover from render-time errors
+
+---
+
+## 1. Sentry — Error Tracking
+
+Sentry is initialised in three files, covering every Next.js runtime:
+
+| File | Runtime |
+|---|---|
+| `instrumentation-client.ts` | Browser (client-side) |
+| `sentry.server.config.ts` | Node.js server |
+| `sentry.edge.config.ts` | Edge runtime (middleware, edge routes) |
+| `instrumentation.ts` | Bootstraps the correct config at startup via `register()` |
+
+**Do not add an additional `Sentry.init()` call anywhere else.**  The `instrumentation.ts` hook is the single entry point that selects the right config at runtime:
+
+```typescript
+// instrumentation.ts
+export async function register() {
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    await import("./sentry.server.config");
+  }
+  if (process.env.NEXT_RUNTIME === "edge") {
+    await import("./sentry.edge.config");
+  }
+}
+
+// Automatically capture all Next.js request errors → Sentry
+export const onRequestError = Sentry.captureRequestError;
+```
+
+---
+
+## 2. Capturing Exceptions Manually
+
+Use `Sentry.captureException()` inside every `catch` block in hooks and async actions. Always attach `tags` (for filtering in Sentry) and `contexts` (for debugging detail):
+
+```typescript
+import * as Sentry from '@sentry/nextjs';
+
+try {
+  await someAsyncOperation();
+} catch (error: any) {
+  Sentry.captureException(error, {
+    tags: {
+      hook: 'useDocumentMutations',   // which hook/module
+      action: 'create',               // which action failed
+    },
+    contexts: {
+      document: {                     // domain-specific debug data
+        name: input.name,
+        repository_id: input.repositoryId,
+      },
+    },
+  });
+  console.error('[useDocumentMutations] Create error:', error);
+  throw error; // re-throw if the caller needs to handle it
+}
+```
+
+---
+
+## 3. Structured Logging with Sentry Logger
+
+Before and after important operations, emit structured log entries using `Sentry.logger`. This creates a breadcrumb trail in Sentry alongside the exception.
+
+```typescript
+// Before the operation — info breadcrumb
+Sentry.addBreadcrumb({
+  category: 'document',
+  message: `Creating ${input.type}`,
+  level: 'info',
+  data: { name: input.name, repository_id: input.repositoryId },
+});
+Sentry.logger.info(
+  Sentry.logger.fmt`Creating document: ${input.name}`,
+  { name: input.name, timestamp: new Date().toISOString() }
+);
+
+// On success — info
+Sentry.logger.info(
+  Sentry.logger.fmt`Document created: ${document.id}`,
+  { document_id: document.id, timestamp: new Date().toISOString() }
+);
+
+// On failure — error
+Sentry.logger.error(
+  Sentry.logger.fmt`Failed to create document: ${input.name} - ${error?.message}`,
+  { error_message: error?.message, timestamp: new Date().toISOString() }
+);
+```
+
+Use `Sentry.logger.fmt` template literal tag for interpolated strings — never build strings manually.
+
+---
+
+## 4. Server-Side Logging with Pino
+
+For server-only code (tRPC routers, server services, API routes) use the `pino` logger from `@/lib/logger`:
+
+```typescript
+import { pino } from '@/lib/logger';
+
+pino.info({ userId, action: 'syncFromGitHub' }, 'Starting GitHub sync');
+pino.error({ err, userId }, 'GitHub sync failed');
+```
+
+Pino is **not** available in client components. Use `console.error` + `Sentry.captureException` on the client.
+
+---
+
+## 5. User-Facing Error Notifications with `sonner`
+
+Show `toast.error()` immediately after catching an error in hooks or mutation handlers. Show `toast.success()` on successful operations.
+
+```typescript
+import { toast } from 'sonner';
+
+try {
+  await documentClientService.create(input);
+  toast.success('Document created successfully');
+} catch (error: any) {
+  toast.error(error?.message || 'Failed to create document');
+}
+```
+
+Rules:
+- Always provide a fallback string (`|| 'Failed to …'`) — never rely on a raw error message only.
+- Prefer specific messages over generic ones (`'Failed to delete document'` not `'Something went wrong'`).
+- Do not show `toast.error` and `throw error` simultaneously without intent — if you re-throw, the caller is responsible for the toast.
+
+---
+
+## 6. Error Boundaries
+
+### Global error boundary
+
+`app/global-error.tsx` is the top-level catch-all. It captures the error with Sentry and renders a generic page. **Do not edit this file** unless changing the global fallback UI.
+
+```tsx
+// app/global-error.tsx  ← do not duplicate this pattern elsewhere
+"use client";
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
+export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+  // ...
+}
+```
+
+### Route-level error boundary
+
+For localized error recovery within a page or feature, add an `error.tsx` file next to the relevant `page.tsx` in the App Router. Use the shared `ErrorCapture` component for a consistent fallback UI:
+
+```tsx
+// app/(platform)/some-feature/error.tsx
+"use client";
+import ErrorCapture from '@/components/Error';
+
+export default function FeatureError({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  return <ErrorCapture error={error} reset={reset} />;
+}
+```
+
+The `ErrorCapture` component (`components/Error.tsx`) renders an error message and a "Try again" button that calls `reset()` to re-render the segment.
+
+**Place error boundaries close to where errors occur** — avoid relying solely on `global-error.tsx`. Routes, complex data-fetching pages, and feature panels should each have their own `error.tsx`.
+
+---
+
+## 7. Complete Hook Error Handling Pattern
+
+This is the full pattern to follow in any async hook or mutation:
+
+```typescript
+import * as Sentry from '@sentry/nextjs';
+import { toast } from 'sonner';
+import posthog from 'posthog-js';
+
+const handleCreate = async (input: CreateInput) => {
+  // 1. Add a breadcrumb before the operation
+  Sentry.addBreadcrumb({
+    category: 'document',
+    message: 'Creating document',
+    level: 'info',
+    data: { name: input.name },
+  });
+
+  try {
+    const result = await someService.create(input);
+
+    // 2. Success toast
+    toast.success('Created successfully');
+
+    // 3. (Optional) PostHog analytics event
+    posthog.capture('document_created', { name: input.name });
+
+    return result;
+  } catch (error: any) {
+    // 4. Capture exception with context
+    Sentry.captureException(error, {
+      tags: { hook: 'useMyHook', action: 'create' },
+      contexts: { input: { name: input.name } },
+    });
+
+    // 5. Structured error log
+    Sentry.logger.error(
+      Sentry.logger.fmt`Create failed: ${error?.message}`,
+      { error_message: error?.message, timestamp: new Date().toISOString() }
+    );
+
+    // 6. Error toast (user feedback)
+    toast.error(error?.message || 'Failed to create');
+
+    // 7. PostHog exception tracking
+    posthog.captureException(error);
+
+    // 8. Console for local dev
+    console.error('[useMyHook] Create error:', error);
+  }
+};
+```
+
+---
+
+## 8. What Goes Where
+
+| Scenario | Tool |
+|---|---|
+| Unhandled render error (any component tree) | `app/global-error.tsx` + Sentry (automatic) |
+| Route/feature segment error with recovery | Route-level `error.tsx` + `ErrorCapture` component |
+| Async action / mutation failure (client) | `Sentry.captureException` + `toast.error` |
+| Pre/post operation tracing | `Sentry.addBreadcrumb` + `Sentry.logger.info` |
+| Server-side operational logging | `pino` from `@/lib/logger` |
+| Auth server action failures | `Sentry.captureException` with `tags.action` |
+| All request-level server errors | `onRequestError = Sentry.captureRequestError` (auto via `instrumentation.ts`) |
+
+---
+
+## 9. Rules
+
+- **Never swallow errors silently** — every `catch` must either call `Sentry.captureException` or re-throw.
+- **Always add `tags.hook` and `tags.action`** to `captureException` so errors are filterable in Sentry.
+- **Never call `Sentry.init()` outside** the three designated config files (`instrumentation-client.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`).
+- **Use `toast.error` for user-visible failures** — do not `alert()` or log-only.
+- **Use `pino` on the server, `Sentry.logger` on the client** — never `console.log` in production paths.
