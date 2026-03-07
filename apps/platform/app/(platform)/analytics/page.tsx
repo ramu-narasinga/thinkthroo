@@ -1,5 +1,6 @@
 "use client";
 
+import PrivatePageGuard from "@/components/private-page-guard";
 import {
   Table,
   TableHeader,
@@ -30,6 +31,7 @@ const weeklyMetrics = [
 
 export default function AnalyticsPage() {
   return (
+    <PrivatePageGuard>
     <div className="p-8 space-y-6">
       {/* PRs merged graph */}
       <div className="bg-muted rounded-xl p-6">
@@ -98,5 +100,6 @@ export default function AnalyticsPage() {
         </Table>
       </div>
     </div>
+    </PrivatePageGuard>
   );
 }

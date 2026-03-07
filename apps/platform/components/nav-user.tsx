@@ -74,7 +74,23 @@ export function NavUser() {
     router.push("/login")
   }
 
-  if (!user) return null // could replace with skeleton
+  if (!user) return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton size="lg" asChild>
+          <a href="/login" className="flex items-center gap-3">
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarFallback className="rounded-lg bg-muted text-muted-foreground">?</AvatarFallback>
+            </Avatar>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">Login with GitHub</span>
+              <span className="truncate text-xs text-muted-foreground">Click to sign in</span>
+            </div>
+          </a>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  )
 
   return (
     <SidebarMenu>

@@ -21,7 +21,7 @@ export function Hero() {
         AI Code Review that Enforces Codebase Architecture
       </PageHeaderHeading>
       <PageHeaderDescription>
-        Stop AI slop from reaching your main branch. CodeArc enforces proven
+        Stop AI slop from reaching your main branch. Think Throo enforces proven
         architecture patterns, catching violations before they compound into
         technical debt.
       </PageHeaderDescription>

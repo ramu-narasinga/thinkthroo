@@ -46,6 +46,9 @@ importers:
         specifier: ^13.4.5
         version: 13.4.7
     devDependencies:
+      '@types/minimatch':
+        specifier: ^5.1.2
+        version: 5.1.2
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.30
@@ -6519,9 +6522,8 @@ packages:
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
 
-  '@types/minimatch@6.0.0':
-    resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
-    deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
+  '@types/minimatch@5.1.2':
+    resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
 
   '@types/minimist@1.2.5':
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
@@ -20666,7 +20668,7 @@ snapshots:
 
   '@types/glob@7.2.0':
     dependencies:
-      '@types/minimatch': 6.0.0
+      '@types/minimatch': 5.1.2
       '@types/node': 20.19.30
 
   '@types/hast@2.3.10':
@@ -20737,9 +20739,7 @@ snapshots:
 
   '@types/mdx@2.0.13': {}
 
-  '@types/minimatch@6.0.0':
-    dependencies:
-      minimatch: 9.0.0
+  '@types/minimatch@5.1.2': {}
 
   '@types/minimist@1.2.5': {}
 
@@ -20819,7 +20819,7 @@ snapshots:
 
   '@types/react-is@19.2.0':
     dependencies:
-      '@types/react': 18.3.27
+      '@types/react': 19.2.10
 
   '@types/react@18.3.27':
     dependencies:

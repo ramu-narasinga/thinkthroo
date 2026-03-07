@@ -1,3 +1,3 @@
-import handler from "../../../src/handler";
+import handler from "../../../lib/handler";
 
 export default handler;

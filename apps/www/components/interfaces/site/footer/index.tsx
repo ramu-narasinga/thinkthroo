@@ -20,12 +20,12 @@ export const Footer = () => {
                     <div className="flex items-center space-x-4">
                         <Image
                             alt="Think Throo"
-                            src="/logo.svg"
+                            src="/"
                             className="h-7"
                             height={24}
                             width={24}
                         />
-                        <div className="text-gray-900 font-semibold">Think Throo</div>
+                        <div className="text-gray-900 font-semibold"></div>
                     </div>
                 </div>
 

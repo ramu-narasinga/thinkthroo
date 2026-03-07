@@ -24,6 +24,33 @@ export function getNextLesson(module: Module): Lesson | null {
   }
   return null;
 }
+
+export function getCategoryProgress(category: Category): number {
+  const totalLessons = category.modules.reduce(
+    (acc, m) =>
+      acc +
+      m.chapters.reduce(
+        (chAcc, ch) => chAcc + ch.lessons.length,
+        0
+      ),
+    0
+  );
+
+  const completedLessons = category.modules.reduce(
+    (acc, m) =>
+      acc +
+      m.chapters.reduce(
+        (chAcc, ch) =>
+          chAcc + ch.lessons.filter((l) => l.completed).length,
+        0
+      ),
+    0
+  );
+
+  return totalLessons > 0
+    ? Math.round((completedLessons / totalLessons) * 100)
+    : 0;
+}
 export interface Lesson {
   id: string
   title: string

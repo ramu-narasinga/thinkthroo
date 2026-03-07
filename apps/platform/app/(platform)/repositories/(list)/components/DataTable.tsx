@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, type ReactElement } from "react";
 import { useState } from "react";
 import { useUmami } from "@/hooks/use-umami";
 import { Button } from "@thinkthroo/ui/components/button";
@@ -161,4 +161,4 @@ DataTable.displayName = "DataTable";
 
 export default DataTable as <TData, TValue>(
   props: DataTableProps<TData, TValue>
-) => JSX.Element;
+) => ReactElement;

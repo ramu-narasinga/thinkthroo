@@ -1,6 +1,6 @@
 "use client";
 
-import { type Category, getCategoryProgress } from "@/lib/course-data";
+import { type Category, getCategoryProgress } from "@/app/(platform)/architecture/lib/course-data";
 import { Progress } from "@thinkthroo/ui/components/progress";
 import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs";
 import { BookOpen, Code2 } from "lucide-react";

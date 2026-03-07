@@ -92,14 +92,14 @@ const data = {
   navSecondary: [],
   codearc: [
     {
-      name: "Analytics",
-      url: "/analytics",
-      icon: LayoutDashboard,
-    },
-    {
       name: "Repositories",
       url: "/repositories",
       icon: BookMarked,
+    },
+    {
+      name: "Analytics",
+      url: "/analytics",
+      icon: LayoutDashboard,
     },
     {
       name: "Subscription",

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
 
 export default function HomePage() {
-  redirect('/dashboard') // or wherever your platform content is
+  redirect('/patterns-library')
 }
