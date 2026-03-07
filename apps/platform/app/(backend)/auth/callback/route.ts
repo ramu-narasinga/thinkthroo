@@ -15,7 +15,7 @@ export async function GET(request: Request) {
       if (user) {
         const github = user.user_metadata?.user_name || user.user_metadata?.preferred_username || 'unknown'
         const email = user.email ?? 'unknown'
-        await SlackNotifier.newLogin(github, email)
+        void SlackNotifier.newLogin(github, email)
       }
       return NextResponse.redirect(`${origin}${next}`)
     }
