@@ -66,7 +66,7 @@ export const SlackNotifier = {
       ],
     }),
 
-  newLogin: (github: string, email: string) =>
+  newLogin: (github: string, userId: string) =>
     sendSlackNotification({
       text: `:wave: *New Login*`,
       attachments: [
@@ -74,7 +74,7 @@ export const SlackNotifier = {
           color: "#4A90D9",
           fields: [
             { title: "GitHub", value: github, short: true },
-            { title: "Email", value: email, short: true },
+            { title: "User ID", value: userId, short: true },
           ],
           footer: "Think Throo Platform",
           ts: Math.floor(Date.now() / 1000),
