@@ -65,4 +65,20 @@ export const SlackNotifier = {
         },
       ],
     }),
+
+  newLogin: (github: string, email: string) =>
+    sendSlackNotification({
+      text: `:wave: *New Login*`,
+      attachments: [
+        {
+          color: "#4A90D9",
+          fields: [
+            { title: "GitHub", value: github, short: true },
+            { title: "Email", value: email, short: true },
+          ],
+          footer: "Think Throo Platform",
+          ts: Math.floor(Date.now() / 1000),
+        },
+      ],
+    }),
 };
