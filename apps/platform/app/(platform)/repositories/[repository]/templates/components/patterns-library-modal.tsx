@@ -9,6 +9,7 @@ import {
 } from "@thinkthroo/ui/components/dialog";
 import { BookOpen, PlayCircle } from "lucide-react";
 import { Button } from "@thinkthroo/ui/components/button";
+import { Pagination } from "@thinkthroo/ui/components/pagination";
 
 type TemplateDialogProps = {
   open: boolean;
@@ -119,56 +120,41 @@ export function TemplateDialog({ open, onOpenChange }: TemplateDialogProps) {
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
-          {currentTemplates.map((template, index) => (
-            <div
-              key={index}
-              className="flex flex-col p-6 border rounded-2xl bg-white shadow-sm hover:border-black transition-colors"
-            >
-              <h4 className="text-lg font-bold mb-2">{template.title}</h4>
-
-              <p className="text-sm text-gray-500 mb-6 flex-grow">
-                {template.description}
-              </p>
-
-              <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
-                <span className="flex items-center gap-1">
-                  <BookOpen className="w-4 h-4" />
-                  {template.chapters} chapters
-                </span>
-                <span>• {template.lessons} lessons</span>
+          {currentTemplates.map((template, index) => {
+            const globalIndex = startIndex + index;
+            return (
+              <div
+                key={`${globalIndex}-${template.title}`}
+                className="flex flex-col p-6 border rounded-2xl bg-white shadow-sm hover:border-black transition-colors"
+              >
+                <h4 className="text-lg font-bold mb-2">{template.title}</h4>
+                <p className="text-sm text-gray-500 mb-6 flex-grow">
+                  {template.description}
+                </p>
+                <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    {template.chapters} chapters
+                  </span>
+                  <span>• {template.lessons} lessons</span>
+                </div>
+                <div className="flex justify-center">
+                  <Button className="!w-[150px] bg-black hover:bg-zinc-800 text-white rounded-xl px-10 py-2">
+                    <PlayCircle className="mr-2 h-4 w-4" />
+                    Import
+                  </Button>
+                </div>
               </div>
-
-              <div className="flex justify-center">
-                <Button className="!w-[150px] bg-black hover:bg-zinc-800 text-white rounded-xl px-10 py-2">
-                  <PlayCircle className="mr-2 h-4 w-4" />
-                  Import
-                </Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Pagination */}
-        <div className="flex items-center justify-between pb-4">
-          <Button
-            variant="outline"
-            disabled={page === 1}
-            onClick={() => setPage((prev) => prev - 1)}
-          >
-            Previous
-          </Button>
-
-          <p className="text-sm text-gray-500">
-            Page {page} of {totalPages}
-          </p>
-
-          <Button
-            variant="outline"
-            disabled={page === totalPages}
-            onClick={() => setPage((prev) => prev + 1)}
-          >
-            Next
-          </Button>
+        <div className="flex justify-center pb-4">
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
         </div>
       </DialogContent>
     </Dialog>
