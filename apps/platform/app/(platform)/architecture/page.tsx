@@ -38,16 +38,25 @@ const category = courseData[0]
 export default async function ArchitecturePage() {
   const architectureModules: SanityModule[] = await sanityClient.fetch(ARCHITECTURE_MODULES_QUERY)
 
+  const totalLessons = architectureModules.reduce(
+    (sum, m) => sum + (m.lessonCount ?? 0),
+    0
+  )
+
   return (
     <div className="page">
-      <CategoryHeader category={category} />
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {architectureModules.map((module) => (
-                <ModuleCard key={module.slug} module={module} />
-              ))}
-            </div>
-          </main>
+      <CategoryHeader
+        category={category}
+        totalLessons={totalLessons}
+        totalModules={architectureModules.length}
+      />
+      <main className="flex-1 overflow-y-auto p-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {architectureModules.map((module) => (
+            <ModuleCard key={module.slug} module={module} />
+          ))}
+        </div>
+      </main>
     </div>
   )
 }

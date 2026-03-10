@@ -7,7 +7,7 @@ export interface SanityLesson extends SanityDocument {
   title: string;
   description?: string;
   slug: string;
-  body: unknown;
+  body: string | null;
   order: number;
 }
 
@@ -73,6 +73,59 @@ export async function fetchChaptersByModuleSlug(
 ): Promise<SanityChapter[]> {
   return sanityClient.fetch<SanityChapter[]>(
     CHAPTERS_BY_MODULE_QUERY,
+    { slug: moduleSlug },
+    { next: { revalidate: 30 } }
+  );
+}
+
+// ── Production Grade Projects ─────────────────────────────────────────
+
+const PGP_LESSON_BY_SLUG_QUERY = `
+  *[
+    _type == "productionGradeProjects" &&
+    slug.current == $slug
+  ][0] {
+    _id,
+    _type,
+    title,
+    description,
+    "slug": slug.current,
+    body,
+    order
+  }
+`;
+
+export async function fetchPGPLessonBySlug(slug: string): Promise<SanityLesson> {
+  return sanityClient.fetch<SanityLesson>(
+    PGP_LESSON_BY_SLUG_QUERY,
+    { slug },
+    { next: { revalidate: 30 } }
+  );
+}
+
+const PGP_CHAPTERS_BY_MODULE_QUERY = `
+  *[
+    _type == "chapter" &&
+    $slug in module[]->slug
+  ] | order(order asc) {
+    title,
+    order,
+    "lessons": *[
+      _type == "productionGradeProjects" &&
+      ^._id in chapter[]._ref
+    ] | order(order asc) {
+      title,
+      "slug": slug.current,
+      order
+    }
+  }
+`;
+
+export async function fetchPGPChaptersByModuleSlug(
+  moduleSlug: string
+): Promise<SanityChapter[]> {
+  return sanityClient.fetch<SanityChapter[]>(
+    PGP_CHAPTERS_BY_MODULE_QUERY,
     { slug: moduleSlug },
     { next: { revalidate: 30 } }
   );

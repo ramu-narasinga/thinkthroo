@@ -44,6 +44,7 @@ export function SanityLessonContent({
       setLoading(false)
     }
   }
+
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-4xl mx-auto p-8">

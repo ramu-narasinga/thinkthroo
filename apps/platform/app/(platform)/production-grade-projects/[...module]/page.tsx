@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation"
-import { fetchChaptersByModuleSlug, fetchLessonBySlug } from "@/lib/lesson"
-import { SanityModulePageClient } from "@/app/(platform)/architecture/components/sanity-module-page-client"
+import { fetchPGPChaptersByModuleSlug, fetchPGPLessonBySlug } from "@/lib/lesson"
+import { SanityModulePageClient } from "@/app/(platform)/production-grade-projects/components/sanity-module-page-client"
 
-// URL shape: /architecture/[moduleSlug]/[chapterSlug]/[lessonSlug]
+// URL shape: /production-grade-projects/[moduleSlug]/[chapterSlug]/[lessonSlug]
 //   segments[0] = moduleSlug  (required)
 //   segments[1] = chapterSlug (optional – used for display only)
 //   segments[2] = lessonSlug  (optional)
@@ -19,7 +19,7 @@ export default async function ModulePage({
   if (!moduleSlug) notFound()
 
   // Fetch sidebar data
-  const chapters = await fetchChaptersByModuleSlug(moduleSlug)
+  const chapters = await fetchPGPChaptersByModuleSlug(moduleSlug)
   if (!chapters || chapters.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center p-8 text-center">
@@ -39,7 +39,7 @@ export default async function ModulePage({
     )
   }
 
-  const lesson = await fetchLessonBySlug(targetSlug)
+  const lesson = await fetchPGPLessonBySlug(targetSlug)
   if (!lesson) notFound()
 
   // Find the chapter that owns this lesson for the initial state
@@ -47,8 +47,6 @@ export default async function ModulePage({
     chapters.find((ch) => ch.lessons.some((l) => l.slug === targetSlug)) ??
     chapters[0]
 
-  // Use the module slug as the title fallback; CMS can provide a real title
-  // via a separate query if needed.
   const moduleTitle = moduleSlug
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))

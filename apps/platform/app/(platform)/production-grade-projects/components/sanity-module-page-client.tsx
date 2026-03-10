@@ -2,12 +2,12 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { SanityCourseSidebar } from "@/app/(platform)/architecture/components/sanity-course-sidebar"
-import { SanityLessonContent } from "@/app/(platform)/architecture/components/sanity-lesson-content"
+import { SanityCourseSidebar } from "@/app/(platform)/production-grade-projects/components/sanity-course-sidebar"
+import { SanityLessonContent } from "@/app/(platform)/production-grade-projects/components/sanity-lesson-content"
 import type { SanityLesson, SanityChapter, SanityChapterLesson } from "@/lib/lesson"
 import { courseProgressClient } from "@/service/courseProgress/client"
 
-const COURSE_SLUG = "architecture"
+const COURSE_SLUG = "production-grade-projects"
 
 interface SanityModulePageClientProps {
   moduleSlug: string
@@ -71,7 +71,7 @@ export function SanityModulePageClient({
     // Optimistically update the URL without a full navigation
     const chapterSegment = chapter.title.replace(/\//g, "-")
     router.replace(
-      `/architecture/${moduleSlug}/${chapterSegment}/${lessonRef.slug}`,
+      `/production-grade-projects/${moduleSlug}/${chapterSegment}/${lessonRef.slug}`,
       { scroll: false }
     )
 
@@ -85,7 +85,7 @@ export function SanityModulePageClient({
 
     // Fetch the full lesson body client-side
     const res = await fetch(
-      `/api/architecture/lesson?slug=${lessonRef.slug}`
+      `/api/production-grade-projects/lesson?slug=${lessonRef.slug}`
     )
     if (res.ok) {
       const lesson: SanityLesson = await res.json()
