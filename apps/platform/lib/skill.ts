@@ -21,13 +21,26 @@ export interface SanitySkill {
   publishedAt: string | null;
 }
 
+// ── Skill Item Types (individual skill docs within a module) ──────────
+
+export interface SanitySkillItem {
+  title: string;
+  /** slug.current */
+  slug: string;
+  body: string | null;
+  publishedAt: string | null;
+}
+
 // ── Queries ────────────────────────────────────────────────────────────
 
 const SKILLS_LIST_QUERY = `
-  *[_type == "skill"] | order(publishedAt desc) {
+  *[
+    _type == "module" &&
+    "Skills" in categories[]->title
+  ] | order(title asc) {
     title,
     description,
-    "slug": slug.current,
+    "slug": slug,
     repoUrl,
     skillsCount,
     tags[]->{title},
@@ -36,10 +49,14 @@ const SKILLS_LIST_QUERY = `
 `;
 
 const SKILL_BY_SLUG_QUERY = `
-  *[_type == "skill" && slug.current == $slug][0] {
+  *[
+    _type == "module" &&
+    "Skills" in categories[]->title &&
+    slug == $slug
+  ][0] {
     title,
     description,
-    "slug": slug.current,
+    "slug": slug,
     repoUrl,
     skillsCount,
     tags[]->{title},
@@ -73,4 +90,48 @@ export async function fetchSkillBySlug(slug: string): Promise<SanitySkill | null
 export function buildInstallCommand(repoUrl: string | null, skillSlug: string): string {
   if (!repoUrl) return `npx skills add --skill ${skillSlug}`;
   return `npx skills add ${repoUrl} --skill ${skillSlug}`;
+}
+
+// ── Skill item queries (individual `skill` docs within a module) ──────
+
+const SKILL_ITEMS_BY_MODULE_QUERY = `
+  *[
+    _type == "skill" &&
+    $moduleSlug in module[]->slug
+  ] | order(title asc) {
+    title,
+    "slug": slug.current,
+    body,
+    publishedAt
+  }
+`;
+
+const SKILL_ITEM_BY_SLUG_QUERY = `
+  *[_type == "skill" && slug.current == $slug][0] {
+    title,
+    "slug": slug.current,
+    body,
+    publishedAt
+  }
+`;
+
+export async function fetchSkillItemsByModuleSlug(
+  moduleSlug: string
+): Promise<SanitySkillItem[]> {
+  const result = await sanityClient.fetch<SanitySkillItem[] | null>(
+    SKILL_ITEMS_BY_MODULE_QUERY,
+    { moduleSlug },
+    { next: { revalidate: 60 } }
+  );
+  return result ?? [];
+}
+
+export async function fetchSkillItemBySlug(
+  slug: string
+): Promise<SanitySkillItem | null> {
+  return sanityClient.fetch<SanitySkillItem | null>(
+    SKILL_ITEM_BY_SLUG_QUERY,
+    { slug },
+    { next: { revalidate: 30 } }
+  );
 }
