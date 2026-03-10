@@ -1,3 +1,28 @@
+// ── Sanity CMS types ──────────────────────────────────────────────────
+export interface SanityTag {
+  title: string
+}
+
+export interface SanityFirstLesson {
+  lessonSlug: string
+}
+
+export interface SanityFirstChapter {
+  chapterSlug: string
+  lesson: SanityFirstLesson | null
+}
+
+export interface SanityModule {
+  title: string
+  description: string
+  slug: string
+  tags: SanityTag[]
+  chapterCount: number
+  lessonCount: number
+  chapter: SanityFirstChapter | null
+}
+// ─────────────────────────────────────────────────────────────────────
+
 export interface Lesson {
   id: string
   title: string

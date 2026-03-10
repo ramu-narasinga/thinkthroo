@@ -28,7 +28,7 @@ apps/platform/
 │       ├── dashboard/
 │       ├── installation-success/
 │       ├── learn/
-│       ├── patterns-library/
+│       ├── skills-library/
 │       ├── production-grade-projects/
 │       ├── repositories/
 │       └── subscription/

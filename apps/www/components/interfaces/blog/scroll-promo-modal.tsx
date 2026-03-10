@@ -87,7 +87,7 @@ export function ScrollPromoModal() {
             size="sm"
             onClick={() =>
               window.open(
-                "https://app.thinkthroo.com/patterns-library",
+                "https://app.thinkthroo.com/skills-library",
                 "_blank",
                 "noopener,noreferrer"
               )

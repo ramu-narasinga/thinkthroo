@@ -2,12 +2,19 @@ import { notFound } from "next/navigation"
 import { fetchPGPChaptersByModuleSlug, fetchPGPLessonBySlug } from "@/lib/lesson"
 import { SanityModulePageClient } from "@/app/(platform)/production-grade-projects/components/sanity-module-page-client"
 
+// URL shape: /production-grade-projects/[moduleSlug]/[chapterSlug]/[lessonSlug]
+//   segments[0] = moduleSlug  (required)
+//   segments[1] = chapterSlug (optional – used for display only)
+//   segments[2] = lessonSlug  (optional)
+
 export default async function ModulePage({
   params,
 }: {
-  params: Promise<{ module: string }>
+  params: Promise<{ module: string[] }>
 }) {
-  const { module: moduleSlug } = await params
+  const { module: segments } = await params
+  const moduleSlug = segments[0]
+  const lessonSlug = segments.length > 1 ? segments[segments.length - 1] : undefined
 
   if (!moduleSlug) notFound()
 
@@ -21,8 +28,8 @@ export default async function ModulePage({
     )
   }
 
-  // Resolve which lesson to show (first lesson of the first chapter)
-  const targetSlug = chapters[0]?.lessons[0]?.slug
+  // Resolve which lesson to show
+  const targetSlug = lessonSlug ?? chapters[0]?.lessons[0]?.slug
 
   if (!targetSlug) {
     return (
@@ -35,7 +42,10 @@ export default async function ModulePage({
   const lesson = await fetchPGPLessonBySlug(targetSlug)
   if (!lesson) notFound()
 
-  const initialChapter = chapters[0]
+  // Find the chapter that owns this lesson for the initial state
+  const initialChapter =
+    chapters.find((ch) => ch.lessons.some((l) => l.slug === targetSlug)) ??
+    chapters[0]
 
   const moduleTitle = moduleSlug
     .split("-")

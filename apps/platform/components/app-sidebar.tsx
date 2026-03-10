@@ -124,8 +124,8 @@ const data = {
       icon: BookMarked,
     },
     {
-      name: "Patterns Library",
-      url: "/patterns-library",
+      name: "Skills Library",
+      url: "/skills-library",
       icon: BookMarked,
     },
   ],
