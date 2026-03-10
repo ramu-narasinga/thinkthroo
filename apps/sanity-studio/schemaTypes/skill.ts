@@ -31,6 +31,13 @@ export default defineType({
       type: 'string',
     }),
     defineField({
+      name: 'module',
+      title: 'Module',
+      description: 'The module (Skills category) this skill belongs to',
+      type: 'array',
+      of: [{type: 'reference', to: {type: 'module'}}],
+    }),
+    defineField({
       name: 'tags',
       title: 'Tags',
       type: 'array',
