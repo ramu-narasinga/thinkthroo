@@ -83,9 +83,9 @@ export interface Category {
 
 export const courseData: Category[] = [
   {
-    id: "patterns-library",              // 🔥 changed
-    title: "Patterns Library",           // 🔥 changed
-    slug: "patterns-library",            // 🔥 changed
+    id: "skills-library",
+    title: "Skills Library",
+    slug: "skills-library",
     modules: [
       {
         id: "api-layer",

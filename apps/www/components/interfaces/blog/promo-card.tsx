@@ -46,7 +46,7 @@ export function PromoCard() {
             size="sm"
             onClick={() =>
               window.open(
-                "https://app.thinkthroo.com/repositories",
+                "https://app.thinkthroo.com/skills-library",
                 "_blank",
                 "noopener,noreferrer"
               )

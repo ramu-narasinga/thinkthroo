@@ -1,6 +1,6 @@
 "use client"
 
-import type { Chapter, Lesson } from "@/app/(platform)/patterns-library/lib/course-data"
+import type { Chapter, Lesson } from "@/app/(platform)/skills-library/lib/course-data"
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Separator } from "@thinkthroo/ui/components/separator"
