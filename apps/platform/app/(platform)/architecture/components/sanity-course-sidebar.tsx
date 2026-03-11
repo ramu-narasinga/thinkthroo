@@ -21,31 +21,31 @@ export function SanityCourseSidebar({
   completedLessonSlugs = new Set(),
   onSelectLesson,
 }: SanityCourseSidebarProps) {
-  const [openChapters, setOpenChapters] = React.useState<number[]>(
-    chapters.length > 0 ? [chapters[0].order] : []
+  const [openChapters, setOpenChapters] = React.useState<string[]>(
+    chapters.length > 0 ? [chapters[0].title] : []
   )
 
-  const toggleChapter = (order: number) => {
+  const toggleChapter = (title: string) => {
     setOpenChapters((prev) =>
-      prev.includes(order) ? prev.filter((o) => o !== order) : [...prev, order]
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
     )
   }
 
   return (
-    <div className="w-80 border-r border-border bg-background overflow-y-auto">
+    <div className="w-80 border-r border-border bg-background overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-sm">{moduleTitle}</h3>
       </div>
 
       <div className="py-2">
         {chapters.map((chapter) => {
-          const isOpen = openChapters.includes(chapter.order)
+          const isOpen = openChapters.includes(chapter.title)
 
           return (
             <Collapsible
-              key={chapter.order}
+              key={chapter.title}
               open={isOpen}
-              onOpenChange={() => toggleChapter(chapter.order)}
+              onOpenChange={() => toggleChapter(chapter.title)}
             >
               <CollapsibleTrigger asChild>
                 <button className="w-full flex items-center gap-2 px-4 py-2 hover:bg-accent text-left">
