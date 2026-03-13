@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronRight, FileText, CheckCircle2 } from "lucide-react"
+import { ChevronRight, FileText, CheckCircle2, PanelLeftClose, PanelLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { type SanityChapter, type SanityChapterLesson } from "@/lib/lesson"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@thinkthroo/ui/components/collapsible"
@@ -24,6 +24,7 @@ export function SanityCourseSidebar({
   const [openChapters, setOpenChapters] = React.useState<number[]>(
     chapters.length > 0 ? [chapters[0].order] : []
   )
+  const [sidebarOpen, setSidebarOpen] = React.useState(true)
 
   const toggleChapter = (order: number) => {
     setOpenChapters((prev) =>
@@ -31,20 +32,43 @@ export function SanityCourseSidebar({
     )
   }
 
+  if (!sidebarOpen) {
+    return (
+      <div className="w-10 border-r border-border bg-background flex flex-col items-center pt-3 shrink-0">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          title="Open sidebar"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </button>
+      </div>
+    )
+  }
+
   return (
-    <div className="w-80 border-r border-border bg-background overflow-y-auto">
-      <div className="p-4 border-b border-border">
+    <div className="w-80 border-r border-border bg-background overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none] shrink-0">
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <h3 className="font-semibold text-sm">{moduleTitle}</h3>
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(false)}
+          className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          title="Close sidebar"
+        >
+          <PanelLeftClose className="h-4 w-4" />
+        </button>
       </div>
 
       <div className="py-2">
         {chapters.map((chapter) => {
-          const isOpen = openChapters.includes(chapter.order)
+          const isChapterOpen = openChapters.includes(chapter.order)
 
           return (
             <Collapsible
               key={chapter.order}
-              open={isOpen}
+              open={isChapterOpen}
               onOpenChange={() => toggleChapter(chapter.order)}
             >
               <CollapsibleTrigger asChild>
@@ -52,7 +76,7 @@ export function SanityCourseSidebar({
                   <ChevronRight
                     className={cn(
                       "h-4 w-4 text-muted-foreground transition-transform",
-                      isOpen && "rotate-90"
+                      isChapterOpen && "rotate-90"
                     )}
                   />
                   <div className="flex-1 min-w-0">
