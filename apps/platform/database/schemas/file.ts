@@ -88,6 +88,9 @@ export const documents = pgTable(
       onDelete: 'set null',
     }),
 
+    // Indexing status for RAG: 'draft' = not indexed, 'published' = indexed/chunked
+    status: text('status', { enum: ['draft', 'published'] }).default('draft').notNull(),
+
     // Timestamps
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow(),

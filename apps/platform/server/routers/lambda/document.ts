@@ -121,6 +121,7 @@ export const documentRouter = router({
         content: z.string().optional(),
         editorData: z.record(z.any()).optional(),
         metadata: z.record(z.any()).optional(),
+        status: z.enum(['draft', 'published']).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

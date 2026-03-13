@@ -3,6 +3,8 @@ import { authedProcedure, router } from "@/lib/trpc/lambda";
 import { serverDatabase } from "@/lib/trpc/lambda/middleware";
 import { ChunkModel } from "@/database/models/chunk";
 import { ChunkService } from "@/service/chunk";
+import { EmbeddingService } from "@/service/embedding";
+import { SemanticSearchSchema } from "@/types/rag";
 
 const chunkProcedure = authedProcedure
   .use(serverDatabase)
@@ -13,19 +15,9 @@ const chunkProcedure = authedProcedure
 
     return opts.next({
       ctx: {
-        // aiInfraRepos: new AiInfraRepos(
-        //   ctx.serverDB,
-        //   ctx.userId,
-        //   aiProvider as Record<string, ProviderConfig>,
-        // ),
-        // asyncTaskModel: new AsyncTaskModel(ctx.serverDB, ctx.userId),
         chunkModel: new ChunkModel(ctx.serverDB, ctx.userId),
         chunkService: new ChunkService(ctx.serverDB, ctx.userId),
-        // documentModel: new DocumentModel(ctx.serverDB, ctx.userId),
-        // documentService: new DocumentService(ctx.serverDB, ctx.userId),
-        // embeddingModel: new EmbeddingModel(ctx.serverDB, ctx.userId),
-        // fileModel: new FileModel(ctx.serverDB, ctx.userId),
-        // messageModel: new MessageModel(ctx.serverDB, ctx.userId),
+        embeddingService: new EmbeddingService(),
       },
     });
   });
@@ -52,11 +44,48 @@ export const chunkRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const asyncTaskId = await ctx.chunkService.asyncParseFileToChunks(
-        // input.id,
-        // ctx.jwtPayload,
-        // input.skipExist
+        input.id,
+        input.skipExist,
       );
 
       return { id: asyncTaskId, success: true };
+    }),
+  getChunkCount: chunkProcedure
+    .input(
+      z.object({
+        fileId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const count = await ctx.chunkModel.countByFileId(input.fileId);
+      return { count };
+    }),
+
+  semanticSearch: chunkProcedure
+    .input(
+      z.object({
+        query: z.string(),
+        fileIds: z.array(z.string()).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const embedding = await ctx.embeddingService.embedQuery(input.query);
+      return ctx.chunkModel.semanticSearch({
+        embedding,
+        fileIds: input.fileIds,
+        query: input.query,
+      });
+    }),
+
+  semanticSearchForChat: chunkProcedure
+    .input(SemanticSearchSchema)
+    .mutation(async ({ ctx, input }) => {
+      const queryText = input.rewriteQuery || input.userQuery;
+      const embedding = await ctx.embeddingService.embedQuery(queryText);
+      return ctx.chunkModel.semanticSearchForChat({
+        embedding,
+        fileIds: input.fileIds,
+        query: queryText,
+      });
     }),
 });

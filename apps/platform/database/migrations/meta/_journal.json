@@ -85,6 +85,13 @@
       "when": 1773120855326,
       "tag": "0011_mature_ted_forrester",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1773292775291,
+      "tag": "0012_bumpy_dagger",
+      "breakpoints": true
     }
   ]
 }

@@ -13,6 +13,7 @@ export interface UpdateDocumentInput {
   name?: string;
   content?: string;
   editorData?: Record<string, any>;
+  status?: 'draft' | 'published';
 }
 
 /**
