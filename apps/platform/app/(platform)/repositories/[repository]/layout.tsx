@@ -55,7 +55,7 @@ export default function RepositoryDetailLayout({
         </Tabs>
 
         {/* Tab Content */}
-        <div className="mt-4 h-[92.5%]">{children}</div>
+        <div className="mt-4">{children}</div>
       </div>
     </PrivatePageGuard>
   );
