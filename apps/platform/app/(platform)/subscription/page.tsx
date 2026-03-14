@@ -1,8 +1,8 @@
-"use client"
+import { redirect } from "next/navigation"
 
-import { useState } from "react"
-import PrivatePageGuard from "@/components/private-page-guard"
-import { Button } from "@thinkthroo/ui/components/button"
+export default function SubscriptionPage() {
+  redirect("/account/billing")
+}
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Card, CardContent } from "@thinkthroo/ui/components/card"
 import { Separator } from "@thinkthroo/ui/components/separator"

@@ -4,11 +4,13 @@ import * as React from "react";
 import {
   BookMarked,
   Bot,
+  CreditCard,
   DollarSign,
   LayoutDashboard,
   LifeBuoy,
   PieChart,
   SquareTerminal,
+  Users,
 } from "lucide-react";
 
 import { NavProjects } from "@/components/nav-projects";
@@ -101,10 +103,17 @@ const data = {
       url: "/analytics",
       icon: LayoutDashboard,
     },
+  ],
+  account: [
     {
-      name: "Subscription",
-      url: "/subscription",
-      icon: DollarSign,
+      name: "Billing",
+      url: "/account/billing",
+      icon: CreditCard,
+    },
+    {
+      name: "Members",
+      url: "/account/members",
+      icon: Users,
     },
   ],
   learn: [
@@ -159,6 +168,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {/* <NavMain items={data.navMain} /> */}
         <NavProjects projects={data.codearc} label="" />
+        <NavProjects projects={data.account} label="Account" />
         <NavProjects projects={data.learn} label="Learn" />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
