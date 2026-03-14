@@ -1,11 +1,12 @@
-"use client"
+import { redirect } from "next/navigation"
 
-import { useState } from "react"
-import PrivatePageGuard from "@/components/private-page-guard"
-import { Button } from "@thinkthroo/ui/components/button"
+export default function SubscriptionPage() {
+  redirect("/account/billing")
+}
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Card, CardContent } from "@thinkthroo/ui/components/card"
-import { Trash2, DollarSign, Github, Users } from "lucide-react"
+import { Separator } from "@thinkthroo/ui/components/separator"
+import { Check } from "lucide-react"
 import { DataTable } from "@/components/subscription-table/data-table"
 import { columns } from "@/components/subscription-table/columns"
 import DeleteOrganizationModal from "@/components/delete-organization-modal"
@@ -22,13 +23,6 @@ export default function SubscriptionPage() {
     setOpenDelete(true)
   }
 
-  const handleManageSubscription = () => {
-    posthog.capture("manage_subscription_clicked", {
-      timestamp: new Date().toISOString(),
-    })
-    alert("Manage Subscription Clicked")
-  }
-
   return (
     <PrivatePageGuard>
     <>
@@ -38,60 +32,54 @@ export default function SubscriptionPage() {
           <h1 className="text-2xl font-semibold text-foreground">
             Subscription
           </h1>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={handleDeleteAccount}
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete Account
-            </Button>
-
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={handleManageSubscription}
-            >
-              <DollarSign className="w-4 h-4" />
-              Manage Subscription
-            </Button>
-          </div>
         </div>
 
-        {/* Subscription Card */}
+        {/* Plan */}
+        <h2 className="text-lg font-semibold">Plan</h2>
+
+        {/* Current Plan */}
         <Card>
           <CardContent className="flex items-center justify-between p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-muted rounded-full p-2">
-                <Github className="w-8 h-8 text-foreground" />
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-base">Code Quality - Open Source plan</span>
+                <Badge variant="outline">Current</Badge>
               </div>
+              <p className="text-sm text-muted-foreground mt-1">Free</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">Users</p>
+              <p className="text-base font-medium">1</p>
+            </div>
+          </CardContent>
+        </Card>
 
+        {/* Upgrade to Pro */}
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-lg">
-                    ramu-narasinga
-                  </span>
-                  <Badge
-                    variant="outline"
-                    className="text-orange-600 border-orange-600 bg-orange-100"
-                  >
-                    Free
+                  <span className="font-semibold text-base">Upgrade to Pro plan</span>
+                  <Badge variant="outline" className="text-foreground border-foreground">
+                    Suggested
                   </Badge>
                 </div>
-                <p className="text-muted-foreground text-sm">Active</p>
-
-                <div className="mt-3 flex flex-col gap-1 text-sm text-foreground">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    <span>0/1 seat assigned</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4" />
-                    <span>Renewal on Jul 26, 2025</span>
-                  </div>
-                </div>
+                <p className="text-sm text-muted-foreground mt-1">$15 per user/month, billed monthly</p>
               </div>
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" className="text-sm font-medium">View all plans</Button>
+                <Button className="bg-black hover:bg-black/80 text-white">Upgrade now</Button>
+              </div>
+            </div>
+            <Separator />
+            <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Code review for private repos</span></div>
+              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Summaries and diagrams of code changes</span></div>
+              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Line by line code reviews</span></div>
+              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Limited security scans for 10 repos</span></div>
+              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Security scans done biweekly</span></div>
+              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Custom review rules</span></div>
             </div>
           </CardContent>
         </Card>
