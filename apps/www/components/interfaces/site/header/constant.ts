@@ -1,11 +1,11 @@
 export const MENU = [
   { 
     name: "How It Works", 
-    href: "#how-it-works" 
+    href: "/#how-it-works" 
   },
   { 
     name: "Production-Grade Projects", 
-    href: "#production-grade-projects" 
+    href: "/#production-grade-projects" 
   },
   {
     name: "Pricing",
