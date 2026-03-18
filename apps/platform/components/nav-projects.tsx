@@ -22,7 +22,7 @@ export function NavProjects({
   projects: {
     name: string
     url: string
-    icon: LucideIcon
+    icon?: LucideIcon
   }[],
   label: string
 }) {
@@ -47,7 +47,7 @@ export function NavProjects({
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild isActive={pathname === item.url}>
               <Link href={item.url} onClick={() => handleNavClick(item.name, item.url)}>
-                <item.icon />
+                {item.icon && <item.icon />}
                 <span>{item.name}</span>
               </Link>
             </SidebarMenuButton>

@@ -7,8 +7,6 @@ import {
   CreditCard,
   DollarSign,
   LayoutDashboard,
-  LifeBuoy,
-  PieChart,
   SquareTerminal,
   Users,
 } from "lucide-react";
@@ -116,6 +114,12 @@ const data = {
       icon: Users,
     },
   ],
+  integrations: [
+    {
+      name: "Slack",
+      url: "/integrations/slack",
+    },
+  ],
   learn: [
     {
       name: "Dashboard",
@@ -145,33 +149,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          {/* <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="text-sidebar-primary-foreground flex aspect-square size-10 items-center justify-center rounded-lg">
-                  <Image
-                    src="/logo.svg"
-                    alt="CodeArc Logo"
-                    width={35}
-                    height={35}
-                    className="object-contain"
-                  />
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem> */}
           <SidebarMenuItem>
             <OrgSwitcher />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
-        {/* <NavMain items={data.navMain} /> */}
         <NavProjects projects={data.codearc} label="" />
         <NavProjects projects={data.account} label="Account" />
+        <NavProjects projects={data.integrations} label="Integrations" />
         <NavProjects projects={data.learn} label="Learn" />
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarOptInForm />
         <NavUser />
