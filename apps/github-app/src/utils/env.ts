@@ -13,4 +13,7 @@ export const env = {
   
   /** Node environment */
   NODE_ENV: process.env.NODE_ENV || "development",
+
+  /** Slack Incoming Webhook URL for operational notifications */
+  SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
 } as const;

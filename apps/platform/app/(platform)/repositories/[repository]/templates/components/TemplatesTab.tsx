@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@thinkthroo/ui/components/card";
-import { TemplateDialog } from "./patterns-library-modal";
+import { TemplateDialog } from "./skills-library-modal";
 
 export default function TemplatesTab() {
   const [open, setOpen] = useState(false);

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { AppSidebar } from "@/components/app-sidebar";
+import { InviteOnlyBanner } from "@/components/invite-only-banner";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -65,6 +66,7 @@ export default function PlatformLayout({
           </div>
         </header>
         <div className="h-full p-4 pt-0">
+          <InviteOnlyBanner />
           {children}
         </div>
       </SidebarInset>

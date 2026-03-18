@@ -4,6 +4,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import * as Sentry from '@sentry/nextjs';
 import { Button } from "@thinkthroo/ui/components/button";
 import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs";
+import PrivatePageGuard from "@/components/private-page-guard";
 
 const tabs = [
   { label: "Codebase Architecture", value: "architecture" },
@@ -39,21 +40,23 @@ export default function RepositoryDetailLayout({
   };
 
   return (
-    <div className="h-full px-6 space-y-2">
+    <PrivatePageGuard>
+      <div className="h-full px-6 space-y-2">
 
-      {/* Tab Navigation */}
-      <Tabs value={currentTab} onValueChange={handleTabChange}>
-        <TabsList>
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+        {/* Tab Navigation */}
+        <Tabs value={currentTab} onValueChange={handleTabChange}>
+          <TabsList>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
-      {/* Tab Content */}
-      <div className="mt-4 h-[92.5%]">{children}</div>
-    </div>
+        {/* Tab Content */}
+        <div className="mt-4 h-[92.5%]">{children}</div>
+      </div>
+    </PrivatePageGuard>
   );
 }

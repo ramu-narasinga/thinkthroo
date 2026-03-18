@@ -64,6 +64,27 @@
       "when": 1769621322085,
       "tag": "0008_noisy_the_anarchist",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1772041735210,
+      "tag": "0009_tough_giant_girl",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1773112839231,
+      "tag": "0010_sparkling_kree",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1773120855326,
+      "tag": "0011_mature_ted_forrester",
+      "breakpoints": true
     }
   ]
 }

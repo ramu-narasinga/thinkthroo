@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import PrivatePageGuard from "@/components/private-page-guard"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Card, CardContent } from "@thinkthroo/ui/components/card"
@@ -29,6 +30,7 @@ export default function SubscriptionPage() {
   }
 
   return (
+    <PrivatePageGuard>
     <>
       <div className="p-6 space-y-4">
         {/* Header */}
@@ -105,5 +107,6 @@ export default function SubscriptionPage() {
         onClose={() => setOpenDelete(false)}
       />
     </>
+    </PrivatePageGuard>
   )
 }

@@ -1,12 +1,24 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import * as Sentry from '@sentry/nextjs';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useDocuments } from '../hooks/useDocuments';
 import { useDocumentMutations } from '../hooks/useDocumentMutations';
-import { FileTree } from './FileTree';
-import EditorPanel from './EditorPanel';
+
+const FileTree = dynamic(() => import('./FileTree').then((m) => m.FileTree), {
+  loading: () => <div className="w-56 shrink-0 border-r border-slate-200 h-full" />,
+});
+
+const EditorPanel = dynamic(() => import('./EditorPanel'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
+      Loading editor…
+    </div>
+  ),
+});
 import {
   CreateDocumentModal,
   RenameDocumentModal,

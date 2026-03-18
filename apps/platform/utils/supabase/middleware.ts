@@ -44,19 +44,9 @@ export async function updateSession(request: NextRequest) {
     user
   } = data;
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/signup") &&
-    !request.nextUrl.pathname.startsWith("/auth") &&
-    !request.nextUrl.pathname.startsWith("/api/github/callback")
-  ) {
-    console.log(JSON.stringify(request.nextUrl, null, 2));
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
+  // The platform is public. The 4 private pages (/repositories, /analytics,
+  // /subscription, /dashboard) handle their own auth via PrivatePageGuard —
+  // unauthenticated visitors see blurred content with a login widget.
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:

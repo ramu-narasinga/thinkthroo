@@ -14,6 +14,7 @@ import privacy from './privacy'
 import terms from './terms'
 import refund from './refund'
 import challenges from './challenge'
+import skill from './skill'
 
 export const schemaTypes = [
     post, 
@@ -31,5 +32,6 @@ export const schemaTypes = [
     tag,
     terms,
     privacy,
-    refund
+    refund,
+    skill,
 ]
