@@ -59,7 +59,7 @@ export function FileTree({
 
   if (!sidebarOpen) {
     return (
-      <aside className="w-10 border-r h-full flex flex-col items-center pt-3 bg-white shrink-0" style={{ minHeight: 'calc(100vh - 160px)' }}>
+      <aside className="w-10 border-r h-full flex flex-col items-center pt-3 bg-white shrink-0">
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}
@@ -73,7 +73,7 @@ export function FileTree({
   }
 
   return (
-    <aside className="w-80 border-r px-3 py-4 bg-white flex flex-col gap-3 shrink-0" style={{ minHeight: 'calc(100vh - 160px)' }}>
+    <aside className="w-80 border-r px-3 py-4 bg-white flex flex-col gap-3" style={{ minHeight: 'calc(100vh - 160px)' }}>
       {/* Header with actions */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Architecture</h3>

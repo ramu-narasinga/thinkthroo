@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { ChevronLeft, ChevronRight, Check } from "lucide-react"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Separator } from "@thinkthroo/ui/components/separator"
-import ReactMarkdown from "react-markdown"
+import ReactMarkdownLib from "react-markdown"
+const ReactMarkdown = ReactMarkdownLib as unknown as React.FC<{ children: string }>
 import type { SanityLesson, SanityChapter } from "@/lib/lesson"
 
 interface SanityLessonContentProps {
@@ -45,7 +46,7 @@ export function SanityLessonContent({
     }
   }
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
       <div className="max-w-4xl mx-auto p-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
