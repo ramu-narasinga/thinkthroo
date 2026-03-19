@@ -21,14 +21,32 @@ export function SanityCourseSidebar({
   completedLessonSlugs = new Set(),
   onSelectLesson,
 }: SanityCourseSidebarProps) {
-  const [openChapters, setOpenChapters] = React.useState<number[]>(
-    chapters.length > 0 ? [chapters[0].order] : []
+  const [openChapters, setOpenChapters] = React.useState<string[]>(
+    chapters.length > 0 ? [chapters[0].title] : []
   )
   const [sidebarOpen, setSidebarOpen] = React.useState(true)
 
-  const toggleChapter = (order: number) => {
+  const [isOpen, setIsOpen] = React.useState(true)
+
+  const toggleChapter = (title: string) => {
     setOpenChapters((prev) =>
-      prev.includes(order) ? prev.filter((o) => o !== order) : [...prev, order]
+      prev.includes(title)
+        ? prev.filter((t) => t !== title)
+        : [...prev, title]
+    )
+  }
+
+  if (!isOpen) {
+    return (
+      <div className="w-10 border-r border-border bg-background flex flex-col items-center pt-3 shrink-0">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          title="Open sidebar"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </button>
+      </div>
     )
   }
 
@@ -82,11 +100,13 @@ export function SanityCourseSidebar({
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{chapter.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {chapter.lessons.length} {chapter.lessons.length === 1 ? "lesson" : "lessons"}
+                      {chapter.lessons.length}{" "}
+                      {chapter.lessons.length === 1 ? "lesson" : "lessons"}
                     </p>
                   </div>
                 </button>
               </CollapsibleTrigger>
+
               <CollapsibleContent>
                 <div className="ml-6 border-l border-border">
                   {chapter.lessons.map((lesson) => {
@@ -107,7 +127,13 @@ export function SanityCourseSidebar({
                         ) : (
                           <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                         )}
-                        <p className={cn("text-sm truncate", isCompleted && "text-muted-foreground line-through")}>
+
+                        <p
+                          className={cn(
+                            "text-sm truncate",
+                            isCompleted && "text-muted-foreground line-through"
+                          )}
+                        >
                           {lesson.title}
                         </p>
                       </button>
