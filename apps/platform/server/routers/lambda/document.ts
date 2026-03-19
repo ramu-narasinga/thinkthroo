@@ -4,6 +4,7 @@ import { serverDatabase } from '@/lib/trpc/lambda/middleware';
 import { DocumentService } from '@/server/service/document';
 import { eq, and, or } from 'drizzle-orm';
 import { repositories } from '@/database/schemas';
+import { pineconeService } from '@/service/pinecone';
 
 const documentProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
   const { ctx } = opts;
@@ -140,6 +141,34 @@ export const documentRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.documentService.delete(input.id);
+      return { success: true };
+    }),
+
+  /**
+   * Publish a document to Pinecone.
+   * Fetches the document's markdown content, upserts it into Pinecone
+   * under namespace=userId, then marks the document as published.
+   */
+  publish: documentProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const doc = await ctx.documentService.getById(input.id);
+      if (!doc) throw new Error('Document not found');
+      if (!doc.content) throw new Error('Document has no content to publish');
+
+      await pineconeService.publishDocument(
+        ctx.userId,
+        doc.id,
+        doc.content,
+        { name: doc.name, repositoryId: doc.repositoryId },
+      );
+
+      await ctx.documentService.update(input.id, { status: 'published' });
+
       return { success: true };
     }),
 });

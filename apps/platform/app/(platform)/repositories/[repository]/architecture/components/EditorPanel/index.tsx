@@ -13,8 +13,9 @@ import {
   handleCommandNavigation,
   handleImageDrop,
   handleImagePaste,
+  getAllContent,
 } from "@thinkthroo/editor";
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { defaultExtensions } from "./extensions";
 import { ColorSelector } from "./selectors/color-selector";
@@ -30,7 +31,6 @@ import { uploadFn } from "./image-upload";
 import { TextButtons } from "./selectors/text-buttons";
 import { slashCommand, suggestionItems } from "./slash-command";
 
-import hljs from "highlight.js";
 import posthog from "posthog-js";
 import { Button } from "@thinkthroo/ui/components/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thinkthroo/ui/components/tooltip";
@@ -50,11 +50,7 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
   const document = useDocumentStore(documentByIdSelector(documentId));
   const fetchDocumentById = useDocumentStore((s) => s.fetchDocumentById);
   const internal_updateSingleDocument = useDocumentStore((s) => s.internal_updateSingleDocument);
-  const updateDocument = useDocumentStore((s) => s.updateDocument);
   const publishFile = useFileStore((s) => s.publishFile);
-  const fetchChunkCount = useFileStore((s) => s.fetchChunkCount);
-  const isChunking = useFileStore(fileManagerSelectors.isCreatingFileParseTask(documentId));
-  const chunkCount = useFileStore(fileManagerSelectors.chunkCountSelector(documentId));
 
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'Saving…' | 'Saved'>('Saved');
@@ -130,33 +126,23 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
     return defaultEditorContent;
   }, [document, defaultEditorContent]);
 
-  //Apply Codeblock Highlighting on the HTML from editor.getHTML()
-  const highlightCodeblocks = useCallback((content: string) => {
-    const doc = new DOMParser().parseFromString(content, "text/html");
-    doc.querySelectorAll("pre code").forEach((el) => {
-      // https://highlightjs.readthedocs.io/en/latest/api.html?highlight=highlightElement#highlightelement
-      hljs.highlightElement(el as HTMLElement);
-    });
-    return new XMLSerializer().serializeToString(doc);
-  }, []);
-
   const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
     if (!document) return;
     
     const json = editor.getJSON();
     setCharsCount(editor.storage.characterCount.words());
-    const htmlContent = highlightCodeblocks(editor.getHTML());
+    const markdownContent = getAllContent(editor);
     
     // Update store immediately (optimistic update)
     internal_updateSingleDocument(document.id, {
-      content: htmlContent,
+      content: markdownContent,
       editorData: json,
     });
     
     // Then save to API
     try {
       const updatePayload: UpdateDocumentInput = {
-        content: htmlContent,
+        content: markdownContent,
         editorData: json,
       };
       // If content was edited while status was 'published', persist the revert to draft
@@ -186,13 +172,6 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
     setLastSavedAt(null);
     setCharsCount(undefined);
   }, [document?.id]);
-
-  // Load existing chunk count when a published document is opened
-  useEffect(() => {
-    if (document?.status === 'published') {
-      fetchChunkCount(documentId);
-    }
-  }, [documentId, document?.status, fetchChunkCount]);
 
   if (isLoading || !document) {
     return (
@@ -232,32 +211,6 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
           </div>
         )}
 
-        {/* Chunking status badge */}
-        {isChunking && (
-          <div className="rounded-lg bg-purple-100 text-purple-700 px-2 py-1 text-sm font-medium select-none animate-pulse">
-            Chunking…
-          </div>
-        )}
-
-        {/* Chunk count badge — shown once indexing completes */}
-        {!isChunking && chunkCount > 0 && (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1 rounded-lg bg-purple-100 text-purple-700 px-2 py-1 text-sm font-medium select-none cursor-default">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                  {chunkCount}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                {chunkCount} chunk{chunkCount !== 1 ? 's' : ''} indexed
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-
         <div className={charsCount ? "rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground" : "hidden"}>
           {charsCount} Words
         </div>
@@ -270,8 +223,9 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
             onClick={async () => {
               setIsPublishing(true);
               try {
-                await updateDocument(documentId, { status: 'published' });
-                publishFile(documentId);
+                await publishFile(documentId);
+                // Optimistically reflect published status in the store
+                internal_updateSingleDocument(documentId, { status: 'published' });
               } finally {
                 setIsPublishing(false);
               }
