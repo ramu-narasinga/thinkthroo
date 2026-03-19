@@ -7,6 +7,7 @@ import {
   CreditCard,
   DollarSign,
   LayoutDashboard,
+  MessageSquare,
   SquareTerminal,
   Users,
 } from "lucide-react";
@@ -114,12 +115,6 @@ const data = {
       icon: Users,
     },
   ],
-  integrations: [
-    {
-      name: "Slack",
-      url: "/integrations/slack",
-    },
-  ],
   learn: [
     {
       name: "Dashboard",
@@ -140,6 +135,13 @@ const data = {
       name: "Skills Library",
       url: "/skills-library",
       icon: BookMarked,
+    },
+  ],
+  integrations: [
+    {
+      name: "Slack",
+      url: "/integrations/slack",
+      icon: MessageSquare,
     },
   ],
 };
