@@ -16,7 +16,6 @@ export function LoginPageClient({ error }: { error?: string }) {
   }, [trackEvent]);
 
   return (
-<<<<<<< HEAD
     <div className="flex h-screen w-full bg-gray-100 dark:bg-gray-900 overflow-hidden">
       {/* Mobile view image */}
       <div className="md:hidden w-full">
@@ -61,42 +60,19 @@ export function LoginPageClient({ error }: { error?: string }) {
                 AI Code Review that Enforces Codebase Architecture
               </p>
               <p className="mt-4 text-base text-gray-500">
-                Stop AI slop from reaching your main branch. Think Throo enforces proven architecture patterns, catching violations before they compound into technical debt.
+                Stop AI slop from reaching your main branch. Think Throo enforces
+                proven architecture patterns, catching violations before they
+                compound into technical debt.
               </p>
             </div>
           </div>
-=======
-    <div className="flex min-h-screen w-full bg-gray-100 dark:bg-gray-900">
-      {/* Left hero section - only on lg+ */}
-      <div className="relative hidden lg:flex flex-col w-1/2 bg-white p-8 border-r border-gray-300 overflow-hidden">
-        <div className="flex items-center text-lg font-medium text-black">
-          <Image
-            src="/logo1/logo.svg"
-            alt="Logo"
-            width={32}
-            height={32}
-            className="mr-2"
-          />
-          Think Throo
->>>>>>> eda3e8f63b8f12e1ddc0a14aa06254cdef1adfcb
         </div>
 
-        <div className="flex-1 flex items-center justify-center">
-          <div className="max-w-xl text-center">
-            <p className="text-4xl font-bold text-black leading-tight">
-              AI Code Review that Enforces Codebase Architecture
-            </p>
-            <p className="mt-4 text-base text-gray-500">
-              Stop AI slop from reaching your main branch. Think Throo enforces proven architecture patterns, catching violations before they compound into technical debt.
-            </p>
+        {/* Login form */}
+        <div className="flex items-center justify-center p-6">
+          <div className="w-full max-w-sm">
+            <LoginForm error={error} />
           </div>
-        </div>
-      </div>
-
-      {/* Login form - always visible at all viewport sizes */}
-      <div className="flex flex-1 items-center justify-center p-6">
-        <div className="w-full max-w-sm">
-          <LoginForm error={error} />
         </div>
       </div>
     </div>
