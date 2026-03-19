@@ -1,38 +1,13 @@
 type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
-  logo: (props: IconProps) => (
-    <svg
-      width="224"
-      height="216"
-      viewBox="0 0 224 216"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <ellipse cx="112" cy="108" rx="112" ry="108" fill="white" />
-      <circle cx="112.5" cy="108.5" r="87.5" fill="black" />
-      <circle cx="112" cy="108" r="72" fill="white" />
-      <circle cx="112" cy="108" r="63" fill="black" />
-      <line x1="112" y1="15" x2="112" y2="39" stroke="white" strokeWidth="8" />
-      <line
-        x1="112"
-        y1="180"
-        x2="112"
-        y2="204"
-        stroke="white"
-        strokeWidth="8"
-      />
-      <line
-        x1="180"
-        y1="104"
-        x2="204"
-        y2="104"
-        stroke="white"
-        strokeWidth="8"
-      />
-      <line x1="19" y1="104" x2="43" y2="104" stroke="white" strokeWidth="8" />
-    </svg>
+  // eslint-disable-next-line @next/next/no-img-element
+  logo: ({ className }: { className?: string }) => (
+    <img
+      src="/tt purple.svg"
+      alt="Think Throo logo"
+      className={className}
+    />
   ),
   tag: (props: IconProps) => (
     <svg

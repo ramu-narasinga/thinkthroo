@@ -40,7 +40,7 @@ export function SidebarOptInForm() {
           <form>
             <div className="grid gap-2.5">
               <Button
-                className="cursor-pointer bg-sidebar-primary text-sidebar-primary-foreground w-full shadow-none"
+                className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary hover:brightness-110 hover:scale-[1.02] transition-all w-full shadow-none"
                 size="sm"
                 onClick={() => setOpen(true)} // ✅ ADD
                 type="button"

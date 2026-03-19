@@ -24,6 +24,7 @@ export function SanityCourseSidebar({
   const [openChapters, setOpenChapters] = React.useState<string[]>(
     chapters.length > 0 ? [chapters[0].title] : []
   )
+  const [sidebarOpen, setSidebarOpen] = React.useState(true)
 
   const [isOpen, setIsOpen] = React.useState(true)
 
@@ -49,13 +50,28 @@ export function SanityCourseSidebar({
     )
   }
 
+  if (!sidebarOpen) {
+    return (
+      <div className="w-10 border-r border-border bg-background flex flex-col items-center pt-3 shrink-0">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          title="Open sidebar"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="w-80 border-r border-border bg-background overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none] shrink-0">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h3 className="font-semibold text-sm">{moduleTitle}</h3>
         <button
           type="button"
-          onClick={() => setIsOpen(false)}
+          onClick={() => setSidebarOpen(false)}
           className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
           title="Close sidebar"
         >

@@ -42,7 +42,7 @@ const TEMPLATE_OPTIONS = [
     lessons: 2,
   },
 
-  // repeat same content to make 12 (3 pages)
+  // repeated for pagination demo
   {
     title: "API Layer",
     description: "Learn how to structure and implement a robust API layer in...",
@@ -122,15 +122,18 @@ export function TemplateDialog({ open, onOpenChange }: TemplateDialogProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
           {currentTemplates.map((template, index) => {
             const globalIndex = startIndex + index;
+
             return (
               <div
                 key={`${globalIndex}-${template.title}`}
                 className="flex flex-col p-6 border rounded-2xl bg-white shadow-sm hover:border-black transition-colors"
               >
                 <h4 className="text-lg font-bold mb-2">{template.title}</h4>
+
                 <p className="text-sm text-gray-500 mb-6 flex-grow">
                   {template.description}
                 </p>
+
                 <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
                   <span className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
@@ -138,6 +141,7 @@ export function TemplateDialog({ open, onOpenChange }: TemplateDialogProps) {
                   </span>
                   <span>• {template.lessons} lessons</span>
                 </div>
+
                 <div className="flex justify-center">
                   <Button className="!w-[150px] bg-black hover:bg-zinc-800 text-white rounded-xl px-10 py-2">
                     <PlayCircle className="mr-2 h-4 w-4" />

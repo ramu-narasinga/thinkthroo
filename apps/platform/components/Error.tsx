@@ -10,7 +10,7 @@ export default function ErrorCapture({ error, reset }: ErrorCaptureProps) {
       <p className="text-gray-600">{error.message}</p>
       <button
         onClick={reset}
-        className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        className="rounded-md bg-[#7000FF] px-4 py-2 text-white hover:bg-[#7000FF]/90"
       >
         Try again
       </button>
