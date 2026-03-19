@@ -13,6 +13,8 @@ export class IssueGreetingService {
    */
   async greet(): Promise<void> {
     const issueDetails = this.context.issue();
+    // Get the username of the issue creator
+    const username = this.context.payload.issue.user.login;
 
     logger.debug("Posting issue greeting comment", {
       owner: issueDetails.owner,
@@ -21,9 +23,11 @@ export class IssueGreetingService {
     });
 
     try {
+      // Replace @{user} with the actual username
+      const personalizedBody = issueGreetingBodyText.replace("@{user}", `@${username}`);
       const result = await this.context.octokit.issues.createComment({
         ...issueDetails,
-        body: issueGreetingBodyText,
+        body: personalizedBody,
       });
 
       logger.info("Issue greeting posted successfully", {

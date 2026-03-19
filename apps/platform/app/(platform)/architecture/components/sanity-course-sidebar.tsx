@@ -24,7 +24,11 @@ export function SanityCourseSidebar({
   const [openChapters, setOpenChapters] = React.useState<string[]>(
     chapters.length > 0 ? [chapters[0].title] : []
   )
+<<<<<<< 174-slack-notify
   const [isOpen, setIsOpen] = React.useState(true)
+=======
+  const [sidebarOpen, setSidebarOpen] = React.useState(true)
+>>>>>>> main
 
   const toggleChapter = (title: string) => {
     setOpenChapters((prev) =>
@@ -46,13 +50,32 @@ export function SanityCourseSidebar({
     )
   }
 
+  if (!sidebarOpen) {
+    return (
+      <div className="w-10 border-r border-border bg-background flex flex-col items-center pt-3 shrink-0">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          title="Open sidebar"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="w-80 border-r border-border bg-background overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none] shrink-0">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h3 className="font-semibold text-sm">{moduleTitle}</h3>
         <button
           type="button"
+<<<<<<< 174-slack-notify
           onClick={() => setIsOpen(false)}
+=======
+          onClick={() => setSidebarOpen(false)}
+>>>>>>> main
           className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
           title="Close sidebar"
         >
@@ -62,6 +85,7 @@ export function SanityCourseSidebar({
 
       <div className="py-2">
         {chapters.map((chapter) => {
+<<<<<<< 174-slack-notify
           const isChapterOpen = openChapters.includes(chapter.title)
 
           return (
@@ -69,6 +93,15 @@ export function SanityCourseSidebar({
               key={chapter.title}
               open={isChapterOpen}
               onOpenChange={() => toggleChapter(chapter.title)}
+=======
+          const isChapterOpen = openChapters.includes(chapter.order)
+
+          return (
+            <Collapsible
+              key={chapter.order}
+              open={isChapterOpen}
+              onOpenChange={() => toggleChapter(chapter.order)}
+>>>>>>> main
             >
               <CollapsibleTrigger asChild>
                 <button className="w-full flex items-center gap-2 px-4 py-2 hover:bg-accent text-left">
