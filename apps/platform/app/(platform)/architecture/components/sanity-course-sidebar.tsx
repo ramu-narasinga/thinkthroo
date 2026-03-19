@@ -81,13 +81,13 @@ export function SanityCourseSidebar({
 
       <div className="py-2">
         {chapters.map((chapter) => {
-          const isChapterOpen = openChapters.includes(chapter.order)
+          const isChapterOpen = openChapters.includes(chapter.title)
 
           return (
             <Collapsible
-              key={chapter.order}
+              key={chapter.title}
               open={isChapterOpen}
-              onOpenChange={() => toggleChapter(chapter.order)}
+              onOpenChange={() => toggleChapter(chapter.title)}
             >
               <CollapsibleTrigger asChild>
                 <button className="w-full flex items-center gap-2 px-4 py-2 hover:bg-accent text-left">
