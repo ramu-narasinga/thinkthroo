@@ -102,6 +102,16 @@ const data = {
       url: "/analytics",
       icon: LayoutDashboard,
     },
+    {
+      name: "Integrations",
+      url: "/integrations",
+      icon: MessageSquare,
+    },
+    {
+      name: "Account",
+      url: "/account",
+      icon: Users,
+    },
   ],
   account: [
     {
@@ -159,8 +169,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         <NavProjects projects={data.codearc} label="" />
-        <NavProjects projects={data.account} label="Account" />
-        <NavProjects projects={data.integrations} label="Integrations" />
         <NavProjects projects={data.learn} label="Learn" />
       </SidebarContent>
 
