@@ -51,6 +51,40 @@ class PineconeService {
     const index = this.client.index(this.indexName);
     await index.namespace(userId).deleteOne(documentId);
   };
+
+  /**
+   * Query Pinecone for architecture rule chunks relevant to a given code snippet.
+   * - namespace = userId
+   * - filters by repositoryId metadata field
+   * - uses integrated embedding model (query text → vector automatically)
+   */
+  queryDocuments = async (
+    userId: string,
+    repositoryId: string,
+    queryText: string,
+    topK: number = 5,
+  ): Promise<Array<{ id: string; score: number; text: string; name: string }>> => {
+    const index = this.client.index(this.indexName);
+
+    const results = await index.namespace(userId).searchRecords({
+      query: {
+        topK,
+        inputs: { text: queryText },
+        filter: { repositoryId: { $eq: repositoryId } },
+      },
+      fields: ['chunk_text', 'name'],
+    });
+
+    return results.result.hits.map((hit) => {
+      const fields = hit.fields as Record<string, unknown> | undefined;
+      return {
+        id: hit._id,
+        score: hit._score,
+        text: (fields?.chunk_text as string) ?? '',
+        name: (fields?.name as string) ?? '',
+      };
+    });
+  };
 }
 
 export const pineconeService = new PineconeService();
