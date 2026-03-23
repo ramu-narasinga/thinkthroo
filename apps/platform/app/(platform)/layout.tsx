@@ -52,7 +52,7 @@ export default function PlatformLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="h-svh overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
@@ -65,7 +65,7 @@ export default function PlatformLayout({
             </Breadcrumb>
           </div>
         </header>
-        <div className="h-full p-4 pt-0">
+        <div className="flex-1 min-h-0 overflow-y-auto flex flex-col p-4 pt-0" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
           <InviteOnlyBanner />
           {children}
         </div>

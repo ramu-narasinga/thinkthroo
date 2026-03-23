@@ -67,7 +67,7 @@ export function BuyCreditsModal({
           </div>
         </div>
 
-        <Button className="w-full">
+        <Button className="w-full hover:bg-primary hover:brightness-110 hover:scale-[1.02] transition-all">
           Buy USD ${credits.toFixed(2)} credits
         </Button>
 

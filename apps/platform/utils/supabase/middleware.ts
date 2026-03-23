@@ -35,14 +35,19 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: DO NOT REMOVE auth.getUser()
 
-  const {
-    data,
-    error
-  } = await supabase.auth.getUser();
-
-  const {
-    user
-  } = data;
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (err: unknown) {
+    // Ignore aborted requests (e.g. Next.js cancels middleware fetch when
+    // the navigation is superseded). Any real auth errors surface via the
+    // session cookie on the next request.
+    if (err instanceof Error && err.name === "AbortError") {
+      return supabaseResponse;
+    }
+    throw err;
+  }
 
   // The platform is public. The 4 private pages (/repositories, /analytics,
   // /subscription, /dashboard) handle their own auth via PrivatePageGuard —

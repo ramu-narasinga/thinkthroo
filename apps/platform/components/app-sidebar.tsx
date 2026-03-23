@@ -4,11 +4,12 @@ import * as React from "react";
 import {
   BookMarked,
   Bot,
+  CreditCard,
   DollarSign,
   LayoutDashboard,
-  LifeBuoy,
-  PieChart,
+  MessageSquare,
   SquareTerminal,
+  Users,
 } from "lucide-react";
 
 import { NavProjects } from "@/components/nav-projects";
@@ -102,9 +103,26 @@ const data = {
       icon: LayoutDashboard,
     },
     {
-      name: "Subscription",
-      url: "/subscription",
-      icon: DollarSign,
+      name: "Integrations",
+      url: "/integrations",
+      icon: MessageSquare,
+    },
+    {
+      name: "Account",
+      url: "/account",
+      icon: Users,
+    },
+  ],
+  account: [
+    {
+      name: "Billing",
+      url: "/account/billing",
+      icon: CreditCard,
+    },
+    {
+      name: "Members",
+      url: "/account/members",
+      icon: Users,
     },
   ],
   learn: [
@@ -129,6 +147,13 @@ const data = {
       icon: BookMarked,
     },
   ],
+  integrations: [
+    {
+      name: "Slack",
+      url: "/integrations/slack",
+      icon: MessageSquare,
+    },
+  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -136,32 +161,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          {/* <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="text-sidebar-primary-foreground flex aspect-square size-10 items-center justify-center rounded-lg">
-                  <Image
-                    src="/logo.svg"
-                    alt="CodeArc Logo"
-                    width={35}
-                    height={35}
-                    className="object-contain"
-                  />
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem> */}
           <SidebarMenuItem>
             <OrgSwitcher />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
-        {/* <NavMain items={data.navMain} /> */}
         <NavProjects projects={data.codearc} label="" />
         <NavProjects projects={data.learn} label="Learn" />
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarOptInForm />
         <NavUser />

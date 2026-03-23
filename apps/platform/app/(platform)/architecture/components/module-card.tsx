@@ -94,7 +94,7 @@ export function ModuleCard({ module }: ModuleCardProps) {
           </div>
         </div>
 
-        {tags.length > 0 && (
+        {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag, index) => (
               <Badge key={index} variant="secondary" className="flex items-center gap-1 text-xs">
