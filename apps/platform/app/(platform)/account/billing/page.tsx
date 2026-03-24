@@ -10,11 +10,13 @@ import { Check } from "lucide-react"
 import { DataTable } from "@/components/subscription-table/data-table"
 import { columns } from "@/components/subscription-table/columns"
 import DeleteOrganizationModal from "@/components/delete-organization-modal"
+import ChangeSubscriptionPlanModal from "@/components/change-subscription-plan-modal"
 import posthog from "posthog-js"
 
 export default function BillingPage() {
   const invoices: any[] = []
   const [openDelete, setOpenDelete] = useState(false)
+  const [openPlans, setOpenPlans] = useState(false)
 
   const handleDeleteAccount = () => {
     posthog.capture("delete_account_clicked", {
@@ -68,8 +70,8 @@ export default function BillingPage() {
                 <p className="text-sm text-muted-foreground mt-1">$15 per user/month, billed monthly</p>
               </div>
               <div className="flex items-center gap-3">
-                <Button variant="ghost" className="text-sm font-medium">View all plans</Button>
-                <Button className="bg-black hover:bg-black/80 text-white">Upgrade now</Button>
+                <Button variant="ghost" className="text-sm font-medium" onClick={() => setOpenPlans(true)}>View all plans</Button>
+                <Button className="bg-black hover:bg-black/80 text-white" onClick={() => setOpenPlans(true)}>Upgrade now</Button>
               </div>
             </div>
             <Separator />
@@ -93,6 +95,12 @@ export default function BillingPage() {
       <DeleteOrganizationModal
         open={openDelete}
         onClose={() => setOpenDelete(false)}
+      />
+
+      {/* Change Subscription Plan Modal */}
+      <ChangeSubscriptionPlanModal
+        open={openPlans}
+        onClose={() => setOpenPlans(false)}
       />
     </>
     </PrivatePageGuard>
