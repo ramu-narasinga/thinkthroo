@@ -1,12 +1,14 @@
 import type { Context } from "probot";
 import { PullRequestSummaryGenerator } from "../generate-pr-summary/PullRequestSummaryGenerator";
 import { PullRequestReviewGenerator } from "../generate-pr-review/PullRequestReviewGenerator";
+import { ArchitectureReviewGenerator } from "../architecture-review/ArchitectureReviewGenerator";
 import type { SummaryResult } from "@/services/summarization/FileSummarizer";
 import { logger } from "@/utils/logger";
 
 export interface PRWorkflowOptions {
   generateSummaries?: boolean;
   useSummaryFiltering?: boolean;
+  enableArchitectureReview?: boolean;
   reviewOptions?: {
     reviewCommentLGTM?: boolean;
     maxConcurrency?: number;
@@ -61,6 +63,30 @@ export class PRWorkflowOrchestrator {
     });
 
     await reviewGenerator.generate();
+
+    // Step 3: Architecture review (if enabled)
+    if (options.enableArchitectureReview !== false) {
+      logger.info("Starting architecture review phase", { prNumber: pullNumber });
+
+      const shortSummary = (summaries ?? [])
+        .map((s) => `${s.filename}: ${s.summary}`)
+        .join("\n");
+
+      try {
+        const architectureReviewGenerator = new ArchitectureReviewGenerator(
+          this.context,
+          { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50 }
+        );
+        await architectureReviewGenerator.generate(shortSummary);
+        logger.info("Architecture review phase complete", { prNumber: pullNumber });
+      } catch (error: any) {
+        // Architecture review failure should not break the overall PR workflow
+        logger.error("Architecture review failed, continuing", {
+          prNumber: pullNumber,
+          error: error.message,
+        });
+      }
+    }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info("PR Workflow complete", {

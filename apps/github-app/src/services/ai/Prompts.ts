@@ -13,6 +13,7 @@ export interface TemplateData {
   comment?: string;
   comment_chain?: string;
   diff?: string;
+  architecture_rules?: string;
   [key: string]: string | undefined;
 }
 
@@ -185,6 +186,105 @@ Please review this change.
 
 22-22:
 There's a syntax error in the add function.
+\`\`\`diff
+-    retrn z
++    return z
+\`\`\`
+---
+24-25:
+LGTM!
+---
+
+## Changes made to \`$filename\` for your review
+
+$patches
+`;
+
+  architectureReviewFileDiff = `## GitHub PR Title
+
+\`$title\` 
+
+## Description
+
+\`\`\`
+$description
+\`\`\`
+
+## Summary of changes
+
+\`\`\`
+$short_summary
+\`\`\`
+
+## Architecture Rules
+
+The following rules define the required architecture for this codebase.
+They were written by the team and stored as documentation.
+
+\`\`\`
+$architecture_rules
+\`\`\`
+
+## IMPORTANT Instructions
+
+Input: New hunks annotated with line numbers and old hunks (replaced code). Hunks represent incomplete code fragments.
+Additional Context: PR title, description, summaries and architecture rules above.
+Task: Review new hunks **only** for violations of the architecture rules provided above.
+Output: Review comments in markdown with exact line number ranges in new hunks. Start and end line numbers must be within the same hunk. For single-line comments, start=end line number. Must use example response format below.
+Use fenced code blocks using the relevant language identifier where applicable.
+Don't annotate code snippets with line numbers. Format and indent code correctly.
+Do not use \`suggestion\` code blocks.
+For fixes, use \`diff\` code blocks, marking changes with \`+\` or \`-\`. The line number range for comments with fix snippets must exactly match the range to replace in the new hunk.
+
+- Do NOT comment on general code quality, style, bugs, or anything not covered by the architecture rules.
+- Do NOT provide general feedback, summaries, explanations of changes, or praise.
+- ONLY comment when the code in the hunk directly violates one of the architecture rules listed above.
+- For each violation, cite the specific rule that is being violated.
+- If a hunk does not violate any architecture rule, you MUST respond with \`LGTM!\` for that line range.
+
+## Example
+
+### Example changes
+
+---new_hunk---
+\`\`\`
+  z = x / y
+    return z
+
+20: def add(x, y):
+21:     z = x + y
+22:     retrn z
+23: 
+24: def multiply(x, y):
+25:     return x * y
+
+def subtract(x, y):
+  z = x - y
+\`\`\`
+  
+---old_hunk---
+\`\`\`
+  z = x / y
+    return z
+
+def add(x, y):
+    return x + y
+
+def subtract(x, y):
+    z = x - y
+\`\`\`
+
+---comment_chains---
+\`\`\`
+Please review this change.
+\`\`\`
+
+---end_change_section---
+
+### Example response
+
+22-22:
+Violates rule: "All functions must return early on error before performing logic."
 \`\`\`diff
 -    retrn z
 +    return z
@@ -417,5 +517,9 @@ $comment
 
   renderReviewFileDiff(data: TemplateData): string {
     return this.render(this.reviewFileDiff, data);
+  }
+
+  renderArchitectureReviewFileDiff(data: TemplateData): string {
+    return this.render(this.architectureReviewFileDiff, data);
   }
 }

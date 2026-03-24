@@ -35,3 +35,5 @@ export const issueGreetingBodyText =
 export const COMMENT_REPLY_TAG = '<!-- This is an auto-generated reply by OSS ThinkThroo -->'
 
 export const REVIEW_TAG = '<!-- This is an auto-generated review: review by OSS ThinkThroo -->'
+
+export const ARCHITECTURE_REVIEW_TAG = '<!-- This is an auto-generated architecture review by OSS ThinkThroo -->'

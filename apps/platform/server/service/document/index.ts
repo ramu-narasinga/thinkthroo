@@ -17,6 +17,7 @@ export interface UpdateDocumentInput {
   content?: string;
   editorData?: Record<string, any>;
   metadata?: Record<string, any>;
+  status?: 'draft' | 'published';
 }
 
 export class DocumentService {
@@ -146,6 +147,11 @@ export class DocumentService {
     // Handle metadata
     if (input.metadata !== undefined) {
       updateData.metadata = input.metadata;
+    }
+
+    // Handle status
+    if (input.status !== undefined) {
+      updateData.status = input.status;
     }
 
     const updated = await this.documentModel.update(id, updateData);

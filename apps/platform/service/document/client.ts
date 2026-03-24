@@ -13,6 +13,7 @@ export interface UpdateDocumentInput {
   name?: string;
   content?: string;
   editorData?: Record<string, any>;
+  status?: 'draft' | 'published';
 }
 
 /**
@@ -79,6 +80,14 @@ export class DocumentClientService {
    */
   delete = async (id: string): Promise<void> => {
     await lambdaClient.document.delete.mutate({ id });
+  };
+
+  /**
+   * Publish a document — indexes its markdown content to Pinecone
+   * and marks the document status as 'published'.
+   */
+  publish = async (id: string): Promise<void> => {
+    await lambdaClient.document.publish.mutate({ id });
   };
 }
 

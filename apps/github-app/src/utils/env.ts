@@ -16,4 +16,10 @@ export const env = {
 
   /** Slack Incoming Webhook URL for operational notifications */
   SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
+
+  /** Platform API base URL — used to query architecture rules from Pinecone */
+  PLATFORM_API_URL: process.env.PLATFORM_API_URL,
+
+  /** Shared secret sent as x-internal-secret header to the platform API */
+  PLATFORM_API_SECRET: process.env.PLATFORM_API_SECRET,
 } as const;

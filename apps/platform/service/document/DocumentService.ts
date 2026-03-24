@@ -16,6 +16,7 @@ export interface UpdateDocumentInput {
   content?: string;
   editorData?: Record<string, any>;
   metadata?: Record<string, any>;
+  status?: 'draft' | 'published';
 }
 
 export class DocumentService {
