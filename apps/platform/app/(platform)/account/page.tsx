@@ -13,12 +13,14 @@ import { DataTable as MembersTable } from "@/components/members-table/data-table
 import { columns as memberColumns } from "@/components/members-table/columns"
 import type { Member } from "@/components/members-table/columns"
 import DeleteOrganizationModal from "@/components/delete-organization-modal"
+import ChangeSubscriptionPlanModal from "@/components/change-subscription-plan-modal"
 import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs"
 import posthog from "posthog-js"
 
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState<"billing" | "members">("billing")
   const [openDelete, setOpenDelete] = useState(false)
+  const [openPlans, setOpenPlans] = useState(false)
   const invoices: any[] = []
   const members: Member[] = []
 
@@ -80,8 +82,8 @@ export default function AccountPage() {
                       <p className="text-sm text-muted-foreground mt-1">$15 per user/month, billed monthly</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Button variant="ghost" className="text-sm font-medium">View all plans</Button>
-                      <Button className="bg-black hover:bg-black/80 text-white">Upgrade now</Button>
+                      <Button variant="ghost" className="text-sm font-medium" onClick={() => setOpenPlans(true)}>View all plans</Button>
+                      <Button className="bg-black hover:bg-black/80 text-white" onClick={() => setOpenPlans(true)}>Upgrade now</Button>
                     </div>
                   </div>
                   <Separator />
@@ -110,6 +112,11 @@ export default function AccountPage() {
         <DeleteOrganizationModal
           open={openDelete}
           onClose={() => setOpenDelete(false)}
+        />
+
+        <ChangeSubscriptionPlanModal
+          open={openPlans}
+          onClose={() => setOpenPlans(false)}
         />
       </>
     </PrivatePageGuard>
