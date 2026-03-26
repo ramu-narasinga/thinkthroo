@@ -9,13 +9,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@thinkthroo/ui/components/dialog"
-import { ArrowRight } from "lucide-react"
 import { Button } from "@thinkthroo/ui/components/button"
+import { Input } from "@thinkthroo/ui/components/input"
 
 export function ScrollPromoModal() {
   const pathname = usePathname()
 
   const [open, setOpen] = useState(false)
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Use refs so the scroll listener never goes stale and doesn't need re-registration
   const readyRef = useRef(false)
@@ -25,6 +29,9 @@ export function ScrollPromoModal() {
   // Reset on every blog navigation
   useEffect(() => {
     setOpen(false)
+    setEmail("")
+    setSubmitted(false)
+    setError(null)
     readyRef.current = false
     hasTriggeredRef.current = false
 
@@ -71,32 +78,87 @@ export function ScrollPromoModal() {
     // No dependency on hasTriggered — the ref keeps the listener accurate without re-registration
   }, [])
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+
+    const trimmed = email.trim()
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setError("Please enter a valid email address.")
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch("/api/blog-subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      })
+
+      if (res.status === 409) {
+        setSubmitted(true)
+        return
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data?.error ?? "Something went wrong. Please try again.")
+        return
+      }
+
+      setSubmitted(true)
+    } catch {
+      setError("Something went wrong. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Want to implement best practices at your company?</DialogTitle>
-          <DialogDescription>
-            We built an AI code review tool to help your team adopt best practices inspired by the patterns used in top open-source projects.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-sm text-center">
+        {submitted ? (
+          <div className="py-6 flex flex-col items-center gap-3">
+            <p className="text-2xl">🎉</p>
+            <DialogTitle className="text-xl font-semibold">You&apos;re in!</DialogTitle>
+            <DialogDescription>
+              We&apos;ll send new articles straight to your inbox.
+            </DialogDescription>
+            <Button className="mt-2" onClick={() => setOpen(false)}>
+              Close
+            </Button>
+          </div>
+        ) : (
+          <>
+            <DialogHeader className="items-center text-center gap-1">
+              <DialogTitle className="text-xl font-semibold leading-snug">
+                Be the first to read new articles
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                Enter your email and get new articles from Thinkthroo delivered
+                straight to your inbox.
+              </DialogDescription>
+            </DialogHeader>
 
-        <div className="mt-4 flex justify-center">
-          <Button
-            className="w-1/2 flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-white cursor-pointer"
-            size="sm"
-            onClick={() =>
-              window.open(
-                "https://app.thinkthroo.com/skills-library",
-                "_blank",
-                "noopener,noreferrer"
-              )
-            }
-          >
-            Get Started for free
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+            <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
+              <Input
+                type="email"
+                placeholder="Enter your email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                required
+              />
+              {error && (
+                <p className="text-xs text-destructive text-left">{error}</p>
+              )}
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? "Subscribing…" : "Subscribe"}
+              </Button>
+            </form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )
