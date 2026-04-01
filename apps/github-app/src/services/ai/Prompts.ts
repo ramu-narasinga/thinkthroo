@@ -360,7 +360,33 @@ $comment
 \`\`\`
 `;
 
-  constructor(summarize = "", summarizeReleaseNotes = "") {
+  constructor(
+    summarize = `Your task is to produce a concise, categorized summary of the PR changes.
+
+Classify the changes into only the categories that apply from this list:
+- New Features
+- Bug Fixes
+- Refactoring
+- Chores
+- Performance
+- Documentation
+- Breaking Changes
+
+Rules:
+- Write 1–2 short bullet points per applicable category only.
+- Each bullet must describe a concrete change, not a general statement.
+- Do not repeat the same change across multiple categories.
+- Do not exceed 10 bullets in total.
+- Do not add a preamble, closing remarks, or any text outside the category blocks.
+- If a category has no changes, omit it entirely.
+
+Output format:
+
+**<Category>:**
+- <change>
+`,
+    summarizeReleaseNotes = ""
+  ) {
     this.summarize = summarize;
     this.summarizeReleaseNotes = summarizeReleaseNotes;
   }
