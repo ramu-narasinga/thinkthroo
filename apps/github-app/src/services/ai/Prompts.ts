@@ -385,7 +385,22 @@ Output format:
 **<Category>:**
 - <change>
 `,
-    summarizeReleaseNotes = ""
+    summarizeReleaseNotes = `Your task is to write a short, human-readable summary of the PR suitable for a changelog or release notes.
+
+Rules:
+- Classify changes using only the applicable categories: New Features, Bug Fixes, Refactoring, Chores, Performance, Documentation, Breaking Changes.
+- Write 1–2 bullet points per applicable category only.
+- Each bullet must be concrete and specific — no vague statements.
+- Do not exceed 8 bullets total.
+- Do not add a preamble, analysis, recommendations, or closing remarks.
+- Do not add risk assessments, impact ratings, or review suggestions.
+- If a category has no changes, omit it entirely.
+
+Output format:
+
+**<Category>:**
+- <change>
+`
   ) {
     this.summarize = summarize;
     this.summarizeReleaseNotes = summarizeReleaseNotes;
