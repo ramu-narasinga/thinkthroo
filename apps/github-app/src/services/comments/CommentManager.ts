@@ -8,7 +8,6 @@ import {
   IN_PROGRESS_START_TAG,
   IN_PROGRESS_END_TAG,
   COMMENT_TAG,
-  COMMENT_GREETING,
 } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
@@ -510,9 +509,7 @@ ${commentBody}`;
       issueNumber: this.issueDetails.issue_number,
     });
 
-    const body = `${COMMENT_GREETING}
-
-${message}
+    const body = `${message}
 
 ${finalTag}`;
 
@@ -520,7 +517,6 @@ ${finalTag}`;
       mode,
       tag: finalTag,
       bodyLength: body.length,
-      hasGreeting: body.includes(COMMENT_GREETING),
       hasTag: body.includes(finalTag),
     });
 
