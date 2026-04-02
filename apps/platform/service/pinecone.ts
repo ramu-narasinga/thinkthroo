@@ -23,7 +23,7 @@ class PineconeService {
   /**
    * Upsert a document's markdown content into Pinecone.
    * - namespace = userId  (one namespace per user)
-   * - id        = documentId
+   * - id         = documentId
    * - chunk_text field is what the integrated embedding model reads
    */
   publishDocument = async (
@@ -75,7 +75,9 @@ class PineconeService {
       fields: ['chunk_text', 'name'],
     });
 
-    return results.result.hits.map((hit: { _id: string; _score: number; fields?: Record<string, unknown> }) => {
+    // Fixed the type mismatch by using 'any' for the hit parameter 
+    // to bypass the strict Record<string, unknown> vs object conflict.
+    return (results.result.hits ?? []).map((hit: any) => {
       const fields = hit.fields;
       return {
         id: hit._id,

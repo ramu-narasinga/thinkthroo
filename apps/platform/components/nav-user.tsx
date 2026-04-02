@@ -10,6 +10,7 @@ import {
   Bell,
   ChevronsUpDown,
   CreditCard,
+  Github,
   LogOut,
   Sparkles,
 } from "lucide-react"
@@ -80,7 +81,9 @@ export function NavUser() {
         <SidebarMenuButton size="lg" asChild>
           <a href="/login" className="flex items-center gap-3">
             <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarFallback className="rounded-lg bg-muted text-muted-foreground">?</AvatarFallback>
+              <AvatarFallback className="rounded-lg bg-muted text-muted-foreground">
+                <Github className="size-4" />
+              </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">Login with GitHub</span>

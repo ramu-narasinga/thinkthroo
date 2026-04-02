@@ -50,7 +50,7 @@ export function OrgSwitcher() {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" disabled className="cursor-default opacity-100">
+          <SidebarMenuButton size="lg" className="cursor-default opacity-100">
             <div className="flex aspect-square size-10 items-center justify-center rounded-lg">
               <Image src="/logo1/logo.svg" alt="Think Throo" width={28} height={28} />
             </div>
