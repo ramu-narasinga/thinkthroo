@@ -75,8 +75,8 @@ class PineconeService {
       fields: ['chunk_text', 'name'],
     });
 
-    return results.result.hits.map((hit) => {
-      const fields = hit.fields as Record<string, unknown> | undefined;
+    return results.result.hits.map((hit: { _id: string; _score: number; fields?: Record<string, unknown> }) => {
+      const fields = hit.fields;
       return {
         id: hit._id,
         score: hit._score,
