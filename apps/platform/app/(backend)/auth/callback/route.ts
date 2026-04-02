@@ -5,7 +5,7 @@ import { SlackNotifier } from '@/lib/slack'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/patterns-library'
+  const next = searchParams.get('next') ?? '/repositories'
 
   if (code) {
     const supabase = await createClient()
