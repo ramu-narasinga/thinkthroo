@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc && tsc-alias",
     "start": "probot run ./lib/index.js",
-    "dev": "npm run build && concurrently \"tsc --watch --preserveWatchOutput\" \"tsc-alias --watch\" \"nodemon --delay 2 --watch lib ./lib/index.js\"",
+    "dev": "npm run build && concurrently \"tsc --watch --preserveWatchOutput\" \"tsc-alias --watch\" \"nodemon --delay 2 --watch lib --exec 'probot run ./lib/index.js'\"",
     "test": "vitest"
   },
   "dependencies": {

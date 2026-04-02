@@ -1,6 +1,6 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
-import { COMMENT_GREETING, COMMENT_TAG } from "@/services/constants";
+import { COMMENT_TAG } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
 /**
@@ -47,9 +47,7 @@ export class ReviewCommentManager {
       currentBufferSize: this.reviewCommentsBuffer.length,
     });
 
-    message = `${COMMENT_GREETING}
-
-${message}
+    message = `${message}
 
 ${COMMENT_TAG}`;
     this.reviewCommentsBuffer.push({
