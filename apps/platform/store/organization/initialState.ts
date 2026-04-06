@@ -7,6 +7,9 @@ export interface OrganizationItem {
   apiUrl?: string;
   reposUrl?: string;
   lastFetched?: string;
+  currentPlanName?: string;
+  creditBalance?: string;
+  paddleCustomerId?: string;
 }
 
 export interface OrganizationStoreState {

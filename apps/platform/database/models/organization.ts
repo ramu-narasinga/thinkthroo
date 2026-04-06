@@ -20,6 +20,7 @@ export interface UpdateOrganizationItem {
   apiUrl?: string;
   reposUrl?: string;
   lastFetched?: string;
+  paddleCustomerId?: string;
 }
 
 export class OrganizationModel {
@@ -112,6 +113,9 @@ export class OrganizationModel {
         apiUrl: organizations.apiUrl,
         reposUrl: organizations.reposUrl,
         lastFetched: organizations.lastFetched,
+        currentPlanName: organizations.currentPlanName,
+        creditBalance: organizations.creditBalance,
+        paddleCustomerId: organizations.paddleCustomerId,
       })
       .from(organizations)
       .where(eq(organizations.userId, this.userId))

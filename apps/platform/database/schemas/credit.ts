@@ -1,7 +1,8 @@
-import { pgTable, uuid, text, timestamp, integer, numeric, pgPolicy, foreignKey } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, numeric, pgPolicy } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { organizations } from './organization';
 
+// Kept for future GitHub Marketplace listing (requires 100 installs before applying)
 export const marketplacePurchases = pgTable('marketplace_purchases', {
   id: uuid().defaultRandom().primaryKey().notNull(),
   githubAccountId: text('github_account_id').notNull(),
@@ -24,8 +25,8 @@ export const marketplacePurchases = pgTable('marketplace_purchases', {
     to: ['authenticated'],
     using: sql`(
       EXISTS (
-        SELECT 1 FROM organizations 
-        WHERE organizations.id = marketplace_purchases.organization_id 
+        SELECT 1 FROM organizations
+        WHERE organizations.id = ${table.organizationId}
         AND organizations.user_id = auth.uid()
       )
     )`,
@@ -37,11 +38,15 @@ export const creditTransactions = pgTable('credit_transactions', {
   organizationId: uuid('organization_id')
     .references(() => organizations.id, { onDelete: 'cascade' })
     .notNull(),
-  transactionType: text('transaction_type').notNull(), // 'initial_bonus', 'purchase', 'ai_usage', 'refund', 'adjustment'
-  amount: numeric({ precision: 10, scale: 2 }).notNull(), // positive = credit, negative = debit
+  // 'subscription_grant' | 'topup_purchase' | 'ai_usage' | 'refund' | 'adjustment'
+  transactionType: text('transaction_type').notNull(),
+  // positive = credit added, negative = credit deducted
+  amount: numeric({ precision: 10, scale: 2 }).notNull(),
   balanceAfter: numeric('balance_after', { precision: 10, scale: 2 }).notNull(),
-  referenceType: text('reference_type'), // 'marketplace_purchase', 'pr_review', 'manual'
-  referenceId: text('reference_id'), // PR number, purchase ID, etc.
+  // 'paddle_subscription' | 'paddle_topup' | 'pr_review' | 'manual'
+  referenceType: text('reference_type'),
+  // PR number, Paddle transaction ID, etc.
+  referenceId: text('reference_id'),
   metadata: text(), // JSON stringified additional data
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
@@ -51,8 +56,8 @@ export const creditTransactions = pgTable('credit_transactions', {
     to: ['authenticated'],
     using: sql`(
       EXISTS (
-        SELECT 1 FROM organizations 
-        WHERE organizations.id = credit_transactions.organization_id 
+        SELECT 1 FROM organizations
+        WHERE organizations.id = ${table.organizationId}
         AND organizations.user_id = auth.uid()
       )
     )`,
@@ -66,7 +71,7 @@ export const aiUsageLogs = pgTable('ai_usage_logs', {
     .notNull(),
   repositoryFullName: text('repository_full_name').notNull(),
   prNumber: integer('pr_number').notNull(),
-  modelName: text('model_name').notNull(), // 'claude-sonnet-3.5', 'gpt-4', etc.
+  modelName: text('model_name').notNull(),
   inputTokens: integer('input_tokens').notNull(),
   outputTokens: integer('output_tokens').notNull(),
   totalTokens: integer('total_tokens').notNull(),
@@ -81,8 +86,37 @@ export const aiUsageLogs = pgTable('ai_usage_logs', {
     to: ['authenticated'],
     using: sql`(
       EXISTS (
-        SELECT 1 FROM organizations 
-        WHERE organizations.id = ai_usage_logs.organization_id 
+        SELECT 1 FROM organizations
+        WHERE organizations.id = ${table.organizationId}
+        AND organizations.user_id = auth.uid()
+      )
+    )`,
+  }),
+]);
+
+// One-time credit bundle purchases via Paddle (separate from subscriptions)
+export const creditTopups = pgTable('credit_topups', {
+  id: uuid().defaultRandom().primaryKey().notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id, { onDelete: 'cascade' })
+    .notNull(),
+  // Paddle transaction ID for the one-time purchase
+  paddleTransactionId: text('paddle_transaction_id').notNull().unique(),
+  creditsAdded: numeric('credits_added', { precision: 10, scale: 2 }).notNull(),
+  amountUsd: numeric('amount_usd', { precision: 10, scale: 2 }).notNull(),
+  // 'completed' | 'refunded'
+  status: text('status').notNull().default('completed'),
+  creditTransactionId: uuid('credit_transaction_id').references(() => creditTransactions.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+  pgPolicy('Enable read access for users to their credit topups', {
+    as: 'permissive',
+    for: 'select',
+    to: ['authenticated'],
+    using: sql`(
+      EXISTS (
+        SELECT 1 FROM organizations
+        WHERE organizations.id = ${table.organizationId}
         AND organizations.user_id = auth.uid()
       )
     )`,

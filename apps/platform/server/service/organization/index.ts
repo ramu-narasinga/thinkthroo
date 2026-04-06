@@ -1,3 +1,6 @@
+import { and, eq } from 'drizzle-orm';
+import { Paddle, Environment } from '@paddle/paddle-node-sdk';
+import { subscriptions } from '@/database/schemas';
 import { OrganizationModel } from '@/database/models/organization';
 import { ThinkThrooDatabase } from '@/database/type';
 
@@ -88,5 +91,46 @@ export class OrganizationService {
    */
   async delete(id: string) {
     return this.organizationModel.delete(id);
+  }
+
+  async setPaddleCustomerId(id: string, paddleCustomerId: string) {
+    return this.organizationModel.update(id, { paddleCustomerId });
+  }
+
+  async cancelSubscription(orgId: string) {
+    const sub = await this.db.query.subscriptions.findFirst({
+      where: and(
+        eq(subscriptions.organizationId, orgId),
+        eq(subscriptions.subscriptionStatus, 'active')
+      ),
+    });
+
+    if (!sub) {
+      throw new Error('No active subscription found for this organization');
+    }
+
+    const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
+      environment: process.env.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
+    });
+    const updated = await paddle.subscriptions.cancel(sub.subscriptionId, {
+      effectiveFrom: 'next_billing_period',
+    });
+
+    const scheduledChangeJson = updated.scheduledChange
+      ? JSON.stringify(updated.scheduledChange)
+      : null;
+
+    await this.db
+      .update(subscriptions)
+      .set({
+        subscriptionStatus: updated.status,
+        scheduledChange: scheduledChangeJson,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(subscriptions.subscriptionId, sub.subscriptionId));
+
+    return {
+      effectiveAt: (updated.scheduledChange as any)?.effectiveAt ?? null,
+    };
   }
 }

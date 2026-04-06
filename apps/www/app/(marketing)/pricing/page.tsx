@@ -26,7 +26,7 @@ export default function PricingPage() {
       </div>
 
       {/* Toggle */}
-      <Tabs defaultValue="monthly" className="max-w-4xl mx-auto">
+      <Tabs defaultValue="monthly" className="max-w-3xl mx-auto">
         <div className="flex justify-center mb-10">
           <TabsList>
             <TabsTrigger value="monthly">Monthly</TabsTrigger>
@@ -65,24 +65,25 @@ function PricingGrid({ billing }: { billing: "monthly" | "yearly" }) {
   const prices = {
     free: "₹0",
     pro: billing === "monthly" ? "₹999" : "₹9,999",
-    enterprise: "Custom",
   }
 
   return (
-    <div className="grid md:grid-cols-3 gap-8">
+    <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
       {/* FREE */}
-      <Card>
+      <Card className="flex flex-col">
         <CardHeader>
           <CardTitle>Free</CardTitle>
           <CardDescription>For individuals & OSS</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           <p className="text-3xl font-bold">{prices.free}</p>
           <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
-            <li>✔ Basic architecture checks</li>
-            <li>✔ GitHub PR comments</li>
-            <li>✖ Team rules</li>
-            <li>✖ CI enforcement</li>
+            <li>✔ Unlimited public and private repositories</li>
+            <li>✔ PR Summarization</li>
+            <li>✔ Slack Integration</li>
+            <li>✔ PR Analytics</li>
+            <li>✔ Skills Library</li>
+            <li>✔ OSS codebase architecture guides for inspiration</li>
           </ul>
         </CardContent>
         <CardFooter>
@@ -93,7 +94,7 @@ function PricingGrid({ billing }: { billing: "monthly" | "yearly" }) {
       </Card>
 
       {/* PRO */}
-      <Card className="relative border-primary">
+      <Card className="relative border-primary flex flex-col">
         <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
           Most Popular
         </Badge>
@@ -101,18 +102,20 @@ function PricingGrid({ billing }: { billing: "monthly" | "yearly" }) {
           <CardTitle>Pro</CardTitle>
           <CardDescription>For growing teams</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           <p className="text-3xl font-bold">
             {prices.pro}
             <span className="text-sm text-muted-foreground">
-              /{billing === "monthly" ? "mo" : "yr"}
+              /{billing === "monthly" ? "mo" : "yr"}/developer
             </span>
           </p>
           <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
-            <li>✔ All Free features</li>
-            <li>✔ Enforced architecture rules</li>
-            <li>✔ CI blocking on violations</li>
-            <li>✔ Up to 10 developers</li>
+            <li>✔ Everything in Free</li>
+            <li>✔ Define codebase architecture rules</li>
+            <li>✔ RAG enforced architecture review on every PR</li>
+            <li>✔ Line by line code reviews</li>
+            <li>✔ Architecture violation scores reported via Slack</li>
+            <li>✔ Access to Production Grade Projects course</li>
           </ul>
         </CardContent>
         <CardFooter>
@@ -120,27 +123,7 @@ function PricingGrid({ billing }: { billing: "monthly" | "yearly" }) {
         </CardFooter>
       </Card>
 
-      {/* ENTERPRISE */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Enterprise</CardTitle>
-          <CardDescription>For large organizations</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-bold">{prices.enterprise}</p>
-          <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
-            <li>✔ Everything in Pro</li>
-            <li>✔ Unlimited developers</li>
-            <li>✔ Custom rules & policies</li>
-            <li>✔ Priority support</li>
-          </ul>
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full" variant="outline">
-            Book a Demo
-          </Button>
-        </CardFooter>
-      </Card>
+
     </div>
   )
 }

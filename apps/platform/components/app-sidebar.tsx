@@ -59,6 +59,11 @@ const data = {
           url: "/subscription",
           icon: DollarSign,
         },
+        {
+          title: "Pricing",
+          url: "/pricing",
+          icon: CreditCard,
+        },
       ],
     },
     {
