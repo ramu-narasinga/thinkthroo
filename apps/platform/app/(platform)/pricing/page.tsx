@@ -1,11 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Loader2, Zap, BookOpen, GitPullRequest, Shield, Database } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Switch } from "@thinkthroo/ui/components/switch"
 import { Separator } from "@thinkthroo/ui/components/separator"
+import { PricingFeatureList } from "@thinkthroo/ui/components/pricing-feature-list"
+import { CreditBundleGrid } from "@thinkthroo/ui/components/credit-bundle-grid"
+import { freeFeatures, proFeatures, creditBundles, pricing } from "@thinkthroo/ui/lib/pricing"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import PrivatePageGuard from "@/components/private-page-guard"
@@ -13,32 +16,6 @@ import { BuyCreditsModal } from "@/components/buy-credits-modal"
 import { usePaddle } from "@/hooks/usePaddle"
 import { useOrganizationStore } from "@/store/organization"
 import { organizationClientService } from "@/service/organization"
-
-const freeFeatures = [
-  { icon: GitPullRequest, text: "Architecture validation for public repos" },
-  { icon: BookOpen, text: "Up to 3 architecture rule files" },
-  { icon: Database, text: "3 Pinecone namespace docs (RAG context)" },
-  { icon: Zap, text: "10 free credits on signup" },
-  { icon: Shield, text: "Community support" },
-]
-
-const proFeatures = [
-  { icon: GitPullRequest, text: "Architecture validation for private repos" },
-  { icon: BookOpen, text: "Up to 20 architecture rule files" },
-  { icon: Database, text: "20 Pinecone namespace docs (RAG context)" },
-  { icon: Zap, text: "500 credits / month (renews with billing)" },
-  { icon: Shield, text: "PR comment feedback with line-level context" },
-  { icon: Check, text: "Custom architecture rules via markdown" },
-  { icon: Check, text: "RAG-powered review — scoped to your rules only" },
-  { icon: Check, text: "Priority support" },
-]
-
-const creditBundles = [
-  { label: "50 credits", dollars: 5, description: "~5 small PRs" },
-  { label: "100 credits", dollars: 10, description: "~10 small PRs" },
-  { label: "250 credits", dollars: 25, description: "~25 small PRs" },
-  { label: "500 credits", dollars: 50, description: "Best value" },
-]
 
 export default function PricingPage() {
   const [billedYearly, setBilledYearly] = useState(false)
@@ -187,14 +164,7 @@ export default function PricingPage() {
               </Button>
             )}
 
-            <ul className="space-y-3">
-              {freeFeatures.map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-start gap-2 text-sm">
-                  <Icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <span>{text}</span>
-                </li>
-              ))}
-            </ul>
+            <PricingFeatureList features={freeFeatures} />
           </div>
 
           {/* Pro */}
@@ -210,11 +180,11 @@ export default function PricingPage() {
                 )}
               </div>
               <p className="text-3xl font-bold">
-                {billedYearly ? "$42" : "$49"}
-                <span className="text-base font-normal text-muted-foreground"> / month</span>
+                {billedYearly ? pricing.yearly.amount : pricing.monthly.amount}
+                <span className="text-base font-normal text-muted-foreground"> {pricing.monthly.label}</span>
               </p>
               {billedYearly && (
-                <p className="text-sm text-green-600 font-medium mt-0.5">$504 billed yearly</p>
+                <p className="text-sm text-green-600 font-medium mt-0.5">{pricing.yearly.note}</p>
               )}
             </div>
 
@@ -231,14 +201,7 @@ export default function PricingPage() {
               {loading ? "Opening checkout…" : currentPlan === "pro" ? "Current plan" : "Upgrade to Pro"}
             </Button>
 
-            <ul className="space-y-3">
-              {proFeatures.map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-start gap-2 text-sm">
-                  <Icon className="w-4 h-4 text-[#7000FF] mt-0.5 shrink-0" />
-                  <span>{text}</span>
-                </li>
-              ))}
-            </ul>
+            <PricingFeatureList features={proFeatures} iconColor="text-[#7000FF]" />
           </div>
         </div>
 
@@ -285,18 +248,7 @@ export default function PricingPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {creditBundles.map((bundle) => (
-              <div
-                key={bundle.dollars}
-                className="rounded-lg border border-border p-4 flex flex-col gap-2 items-center text-center"
-              >
-                <p className="font-semibold text-sm">{bundle.label}</p>
-                <p className="text-2xl font-bold">${bundle.dollars}</p>
-                <p className="text-xs text-muted-foreground">{bundle.description}</p>
-              </div>
-            ))}
-          </div>
+          <CreditBundleGrid bundles={creditBundles} />
 
           <Button
             variant="outline"

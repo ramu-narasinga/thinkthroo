@@ -10,6 +10,9 @@ import {
 } from "@thinkthroo/ui/components/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@thinkthroo/ui/components/tabs"
 import { Separator } from "@thinkthroo/ui/components/separator"
+import { PricingFeatureList } from "@thinkthroo/ui/components/pricing-feature-list"
+import { CreditBundleGrid } from "@thinkthroo/ui/components/credit-bundle-grid"
+import { freeFeatures, proFeatures, creditBundles, pricing } from "@thinkthroo/ui/lib/pricing"
 import Link from "next/link"
 
 export default function PricingPage() {
@@ -45,6 +48,16 @@ export default function PricingPage() {
         </TabsContent>
       </Tabs>
 
+      {/* Credit top-ups */}
+      <div className="max-w-3xl mx-auto mt-14 space-y-4">
+        <h2 className="text-xl font-semibold">Credit top-ups</h2>
+        <p className="text-sm text-muted-foreground">
+          Each PR review costs credits based on token usage. Buy a one-time top-up — no
+          subscription required. 1 credit = $0.10 USD.
+        </p>
+        <CreditBundleGrid bundles={creditBundles} />
+      </div>
+
       <Separator className="my-20" />
 
       {/* FAQ teaser */}
@@ -62,10 +75,7 @@ export default function PricingPage() {
 }
 
 function PricingGrid({ billing }: { billing: "monthly" | "yearly" }) {
-  const prices = {
-    free: "₹0",
-    pro: billing === "monthly" ? "₹999" : "₹9,999",
-  }
+  const priceInfo = billing === "monthly" ? pricing.monthly : pricing.yearly
 
   return (
     <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
@@ -76,19 +86,14 @@ function PricingGrid({ billing }: { billing: "monthly" | "yearly" }) {
           <CardDescription>For individuals & OSS</CardDescription>
         </CardHeader>
         <CardContent className="flex-1">
-          <p className="text-3xl font-bold">{prices.free}</p>
-          <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
-            <li>✔ Unlimited public and private repositories</li>
-            <li>✔ PR Summarization</li>
-            <li>✔ Slack Integration</li>
-            <li>✔ PR Analytics</li>
-            <li>✔ Skills Library</li>
-            <li>✔ OSS codebase architecture guides for inspiration</li>
-          </ul>
+          <p className="text-3xl font-bold">$0 <span className="text-base font-normal text-muted-foreground">{pricing.monthly.label}</span></p>
+          <div className="mt-6">
+            <PricingFeatureList features={freeFeatures} />
+          </div>
         </CardContent>
         <CardFooter>
-          <Button className="w-full" variant="outline">
-            Get Started
+          <Button className="w-full" variant="outline" asChild>
+            <Link href="/sign-up">Get Started</Link>
           </Button>
         </CardFooter>
       </Card>
@@ -104,26 +109,22 @@ function PricingGrid({ billing }: { billing: "monthly" | "yearly" }) {
         </CardHeader>
         <CardContent className="flex-1">
           <p className="text-3xl font-bold">
-            {prices.pro}
-            <span className="text-sm text-muted-foreground">
-              /{billing === "monthly" ? "mo" : "yr"}/developer
-            </span>
+            {priceInfo.amount}
+            <span className="text-base font-normal text-muted-foreground"> {priceInfo.label}</span>
           </p>
-          <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
-            <li>✔ Everything in Free</li>
-            <li>✔ Define codebase architecture rules</li>
-            <li>✔ RAG enforced architecture review on every PR</li>
-            <li>✔ Line by line code reviews</li>
-            <li>✔ Architecture violation scores reported via Slack</li>
-            <li>✔ Access to Production Grade Projects course</li>
-          </ul>
+          {billing === "yearly" && (
+            <p className="text-sm text-green-600 font-medium mt-0.5">{pricing.yearly.note}</p>
+          )}
+          <div className="mt-6">
+            <PricingFeatureList features={proFeatures} iconColor="text-primary" />
+          </div>
         </CardContent>
         <CardFooter>
-          <Button className="w-full">Start Pro</Button>
+          <Button className="w-full" asChild>
+            <Link href="/sign-up">Start Pro</Link>
+          </Button>
         </CardFooter>
       </Card>
-
-
     </div>
   )
 }
