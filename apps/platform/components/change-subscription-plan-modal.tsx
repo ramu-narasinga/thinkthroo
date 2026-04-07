@@ -220,11 +220,11 @@ export default function ChangeSubscriptionPlanModal({ open, onClose }: Props) {
                 )}
               </div>
               <p className="text-2xl font-bold">
-                {billedYearly ? "$39" : "$49"}
+                {billedYearly ? "$42" : "$49"}
                 <span className="text-sm font-normal text-muted-foreground"> / month</span>
               </p>
               {billedYearly && (
-                <p className="text-xs text-green-600 font-medium mt-0.5">$470 billed yearly (~20% off)</p>
+                <p className="text-xs text-green-600 font-medium mt-0.5">$504 billed yearly (~14% off)</p>
               )}
               <div className="flex items-center gap-2 mt-2">
                 <Switch checked={billedYearly} onCheckedChange={setBilledYearly} />

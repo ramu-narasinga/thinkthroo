@@ -128,7 +128,7 @@ export default function PricingPage() {
           <Switch checked={billedYearly} onCheckedChange={setBilledYearly} />
           <span className={cn("text-sm", billedYearly && "font-semibold")}>
             Yearly
-            <span className="ml-1.5 text-xs text-green-600 font-medium">Save ~20%</span>
+            <span className="ml-1.5 text-xs text-green-600 font-medium">Save ~14%</span>
           </span>
         </div>
 
@@ -210,11 +210,11 @@ export default function PricingPage() {
                 )}
               </div>
               <p className="text-3xl font-bold">
-                {billedYearly ? "$39" : "$49"}
+                {billedYearly ? "$42" : "$49"}
                 <span className="text-base font-normal text-muted-foreground"> / month</span>
               </p>
               {billedYearly && (
-                <p className="text-sm text-green-600 font-medium mt-0.5">$470 billed yearly</p>
+                <p className="text-sm text-green-600 font-medium mt-0.5">$504 billed yearly</p>
               )}
             </div>
 
