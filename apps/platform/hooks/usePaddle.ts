@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { initializePaddle, type Paddle, type CheckoutEventsData } from '@paddle/paddle-js';
+import { initializePaddle, type Paddle, type CheckoutEventsData, type PaddleEventData } from '@paddle/paddle-js';
 
 export type { CheckoutEventsData };
 
@@ -37,7 +37,7 @@ export function usePaddle(
       initPromise = initializePaddle({
         token,
         environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
-        eventCallback: (event) => {
+        eventCallback: (event: PaddleEventData) => {
           if (event.name === 'checkout.completed') {
             callbackRef.current?.(event.data as CheckoutEventsData);
           }
@@ -45,12 +45,12 @@ export function usePaddle(
             closedRef.current?.();
           }
         },
-      }).then((instance) => {
+      }).then((instance: Paddle | undefined) => {
         if (instance) paddleInstance = instance;
       });
     }
 
-    initPromise.then(() => {
+    initPromise!.then(() => {
       if (paddleInstance) setPaddle(paddleInstance);
     });
   }, []);
