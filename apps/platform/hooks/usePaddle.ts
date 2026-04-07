@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { initializePaddle, type Paddle, type CheckoutEventsData, type PaddleEventData } from '@paddle/paddle-js';
 
 export type { CheckoutEventsData };
@@ -9,17 +9,19 @@ export type { CheckoutEventsData };
 let paddleInstance: Paddle | null = null;
 let initPromise: Promise<void> | null = null;
 
+// Module-level refs so they survive component remounts and always reflect the
+// latest callbacks — the Paddle eventCallback closes over these, not per-render values.
+const callbackRef: { current: ((data: CheckoutEventsData) => void) | undefined } = { current: undefined };
+const closedRef: { current: (() => void) | undefined } = { current: undefined };
+
 export function usePaddle(
   onPaymentSuccess?: (data: CheckoutEventsData) => void,
   onCheckoutClosed?: () => void,
 ) {
   const [paddle, setPaddle] = useState<Paddle | null>(paddleInstance);
 
-  // Always keep the refs current so the eventCallback never closes over stale functions.
-  const callbackRef = useRef(onPaymentSuccess);
+  // Update module-level refs on every render so eventCallback always has fresh handlers.
   callbackRef.current = onPaymentSuccess;
-
-  const closedRef = useRef(onCheckoutClosed);
   closedRef.current = onCheckoutClosed;
 
   useEffect(() => {

@@ -168,22 +168,22 @@ export default function BillingPage() {
         {/* Architecture storage section */}
         <div className="space-y-4">
           <div>
-            <h2 className="text-xl font-semibold">Architecture storage (Pinecone)</h2>
+            <h2 className="text-xl font-semibold">Architecture storage</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Each organisation gets a private Pinecone namespace. Your architecture rule files are
-              indexed there — only your rules are used when reviewing PRs (no cross-org leakage).
+              Each repository gets its own private vector index. Your rules are stored and scoped
+              to your org — no cross-org leakage, ever.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-lg border border-border p-4 space-y-1">
               <p className="font-medium text-sm">Free</p>
-              <p className="text-2xl font-bold">3 <span className="text-base font-normal text-muted-foreground">architecture files</span></p>
-              <p className="text-xs text-muted-foreground">Enough for small projects with focused rules</p>
+              <p className="text-2xl font-bold">1 <span className="text-base font-normal text-muted-foreground">public repository</span></p>
+              <p className="text-xs text-muted-foreground">Rules are stored, but no RAG review runs</p>
             </div>
             <div className="rounded-lg border-2 border-[#7000FF] p-4 space-y-1">
               <p className="font-medium text-sm text-[#7000FF]">Pro</p>
-              <p className="text-2xl font-bold">20 <span className="text-base font-normal text-muted-foreground">architecture files</span></p>
-              <p className="text-xs text-muted-foreground">Full coverage for large monorepos and teams</p>
+              <p className="text-2xl font-bold">Unlimited <span className="text-base font-normal text-muted-foreground">repositories</span></p>
+              <p className="text-xs text-muted-foreground">RAG runs on every PR across all connected repos</p>
             </div>
           </div>
         </div>

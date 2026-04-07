@@ -22,17 +22,17 @@ export type CreditBundle = {
 export const freeFeatures: PricingFeature[] = [
   { icon: Zap, text: "50 free credits on signup — no card required" },
   { icon: GitPullRequest, text: "Automated PR summaries (up to 5 / month)" },
-  { icon: BookOpen, text: "Define up to 3 architecture rules" },
-  { icon: Database, text: "Public repositories only" },
+  { icon: Database, text: "1 public repository" },
+  { icon: BookOpen, text: "Architecture rules — no RAG review" },
   { icon: Shield, text: "Community support" },
 ]
 
 export const proFeatures: PricingFeature[] = [
   { icon: Zap, text: "500 credits / month — renews automatically" },
   { icon: GitPullRequest, text: "Unlimited automated PR summaries" },
-  { icon: Database, text: "RAG-powered violation comments on every PR" },
-  { icon: BookOpen, text: "Unlimited architecture rules via markdown" },
-  { icon: Check, text: "Private repository support" },
+  { icon: Database, text: "Unlimited repositories (public & private)" },
+  { icon: BookOpen, text: "Architecture rules indexed per repo" },
+  { icon: Check, text: "RAG-powered violation comments on every PR" },
   { icon: Check, text: "Analytics dashboard" },
   { icon: Check, text: "Slack digest & team reports" },
   { icon: Check, text: "Top-up credits anytime at $0.10 / credit" },
