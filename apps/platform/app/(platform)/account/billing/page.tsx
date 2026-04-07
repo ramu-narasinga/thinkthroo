@@ -1,54 +1,29 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Loader2, Zap, BookOpen, GitPullRequest, Shield, Database } from "lucide-react"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Switch } from "@thinkthroo/ui/components/switch"
 import { Separator } from "@thinkthroo/ui/components/separator"
+import { PricingFeatureList } from "@thinkthroo/ui/components/pricing-feature-list"
+import { CreditBundleGrid } from "@thinkthroo/ui/components/credit-bundle-grid"
+import { freeFeatures, proFeatures, creditBundles, pricing } from "@thinkthroo/ui/lib/pricing"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import PrivatePageGuard from "@/components/private-page-guard"
 import { BuyCreditsModal } from "@/components/buy-credits-modal"
+import { DowngradeModal } from "@/components/downgrade-modal"
 import { usePaddle } from "@/hooks/usePaddle"
 import { useOrganizationStore } from "@/store/organization"
 import { organizationClientService } from "@/service/organization"
 import { DataTable } from "@/components/subscription-table/data-table"
 import { columns } from "@/components/subscription-table/columns"
 
-const freeFeatures = [
-  { icon: GitPullRequest, text: "Architecture validation for public repos" },
-  { icon: BookOpen, text: "Up to 3 architecture rule files" },
-  { icon: Database, text: "3 Pinecone namespace docs (RAG context)" },
-  { icon: Zap, text: "10 free credits on signup" },
-  { icon: Shield, text: "Community support" },
-]
-
-const proFeatures = [
-  { icon: GitPullRequest, text: "Architecture validation for private repos" },
-  { icon: BookOpen, text: "Up to 20 architecture rule files" },
-  { icon: Database, text: "20 Pinecone namespace docs (RAG context)" },
-  { icon: Zap, text: "500 credits / month (renews with billing)" },
-  { icon: Shield, text: "PR comment feedback with line-level context" },
-  { icon: Check, text: "Custom architecture rules via markdown" },
-  { icon: Check, text: "RAG-powered review — scoped to your rules only" },
-  { icon: Check, text: "Priority support" },
-]
-
-const creditBundles = [
-  { label: "50 credits", dollars: 5, description: "~5 small PRs" },
-  { label: "100 credits", dollars: 10, description: "~10 small PRs" },
-  { label: "250 credits", dollars: 25, description: "~25 small PRs" },
-  { label: "500 credits", dollars: 50, description: "Best value" },
-]
-
 export default function BillingPage() {
   const invoices: any[] = []
   const [billedYearly, setBilledYearly] = useState(false)
   const [loading, setLoading] = useState(false)
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
-  const [confirming, setConfirming] = useState(false)
-  const [downgrading, setDowngrading] = useState(false)
+  const [downgradeOpen, setDowngradeOpen] = useState(false)
 
   const activeOrgId = useOrganizationStore((s) => s.activeOrgId)
   const activeOrg = useOrganizationStore((s) =>
@@ -93,27 +68,8 @@ export default function BillingPage() {
     }
   }
 
-  async function handleDowngrade() {
-    if (!activeOrgId) return
-    setDowngrading(true)
-    try {
-      const result = await organizationClientService.cancelSubscription(activeOrgId)
-      await fetchOrganizations()
-      const dateStr = result?.effectiveAt
-        ? new Date(result.effectiveAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-        : "end of billing period"
-      toast.success(`Subscription cancelled. You'll stay on Pro until ${dateStr}.`)
-      setConfirming(false)
-    } catch {
-      toast.error("Failed to cancel subscription. Please try again.")
-    } finally {
-      setDowngrading(false)
-    }
-  }
-
   return (
-    <PrivatePageGuard>
-      <div className="p-6 max-w-5xl mx-auto space-y-10">
+    <div className="max-w-5xl space-y-10">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Billing</h1>
@@ -156,48 +112,17 @@ export default function BillingPage() {
               <Button variant="outline" disabled className="w-full cursor-not-allowed text-muted-foreground">
                 Current plan
               </Button>
-            ) : confirming ? (
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground text-center">
-                  Your Pro access continues until end of billing period.
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1 text-sm"
-                    onClick={() => setConfirming(false)}
-                    disabled={downgrading}
-                  >
-                    Keep Pro
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="flex-1 text-sm"
-                    onClick={handleDowngrade}
-                    disabled={downgrading}
-                  >
-                    {downgrading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm downgrade"}
-                  </Button>
-                </div>
-              </div>
             ) : (
               <Button
                 variant="outline"
                 className="w-full border-destructive text-destructive hover:bg-destructive/5"
-                onClick={() => setConfirming(true)}
+                onClick={() => setDowngradeOpen(true)}
               >
                 Downgrade to Free
               </Button>
             )}
 
-            <ul className="space-y-3">
-              {freeFeatures.map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-start gap-2 text-sm">
-                  <Icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <span>{text}</span>
-                </li>
-              ))}
-            </ul>
+            <PricingFeatureList features={freeFeatures} />
           </div>
 
           {/* Pro */}
@@ -213,11 +138,11 @@ export default function BillingPage() {
                 )}
               </div>
               <p className="text-3xl font-bold">
-                {billedYearly ? "$42" : "$49"}
-                <span className="text-base font-normal text-muted-foreground"> / month</span>
+                {billedYearly ? pricing.yearly.amount : pricing.monthly.amount}
+                <span className="text-base font-normal text-muted-foreground"> {pricing.monthly.label}</span>
               </p>
               {billedYearly && (
-                <p className="text-sm text-green-600 font-medium mt-0.5">$504 billed yearly</p>
+                <p className="text-sm text-green-600 font-medium mt-0.5">{pricing.yearly.note}</p>
               )}
             </div>
 
@@ -234,14 +159,7 @@ export default function BillingPage() {
               {loading ? "Opening checkout…" : currentPlan === "pro" ? "Current plan" : "Upgrade to Pro"}
             </Button>
 
-            <ul className="space-y-3">
-              {proFeatures.map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-start gap-2 text-sm">
-                  <Icon className="w-4 h-4 text-[#7000FF] mt-0.5 shrink-0" />
-                  <span>{text}</span>
-                </li>
-              ))}
-            </ul>
+            <PricingFeatureList features={proFeatures} iconColor="text-[#7000FF]" />
           </div>
         </div>
 
@@ -287,18 +205,7 @@ export default function BillingPage() {
               </p>
             )}
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {creditBundles.map((bundle) => (
-              <div
-                key={bundle.dollars}
-                className="rounded-lg border border-border p-4 flex flex-col gap-2 items-center text-center"
-              >
-                <p className="font-semibold text-sm">{bundle.label}</p>
-                <p className="text-2xl font-bold">${bundle.dollars}</p>
-                <p className="text-xs text-muted-foreground">{bundle.description}</p>
-              </div>
-            ))}
-          </div>
+          <CreditBundleGrid bundles={creditBundles} />
           <Button
             variant="outline"
             className="border-[#7000FF] text-[#7000FF] hover:bg-[#7000FF]/5"
@@ -321,7 +228,7 @@ export default function BillingPage() {
         </div>
 
         <BuyCreditsModal open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
-      </div>
-    </PrivatePageGuard>
+        <DowngradeModal open={downgradeOpen} onOpenChange={setDowngradeOpen} />
+    </div>
   )
 }
