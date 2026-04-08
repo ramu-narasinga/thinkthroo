@@ -10,6 +10,8 @@ export interface OrganizationItem {
   currentPlanName?: string;
   creditBalance?: string;
   paddleCustomerId?: string;
+  prsReviewed?: number;
+  docStorageUsedMB?: number;
 }
 
 export interface OrganizationStoreState {

@@ -43,7 +43,10 @@ export default function BillingPage() {
       toast.success("You're now on Pro! 500 credits have been added to your account.")
       setLoading(false)
     },
-    () => setLoading(false),
+    () => {
+      console.log("Checkout closed without completion")
+      setLoading(false)
+    },
   )
 
   const monthlyPriceId = process.env.NEXT_PUBLIC_PADDLE_PRO_MONTHLY_PRICE_ID

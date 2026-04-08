@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { initializePaddle, type Paddle, type CheckoutEventsData, type PaddleEventData } from '@paddle/paddle-js';
 
 export type { CheckoutEventsData };
@@ -9,10 +9,12 @@ export type { CheckoutEventsData };
 let paddleInstance: Paddle | null = null;
 let initPromise: Promise<void> | null = null;
 
-// Module-level refs so they survive component remounts and always reflect the
-// latest callbacks — the Paddle eventCallback closes over these, not per-render values.
-const callbackRef: { current: ((data: CheckoutEventsData) => void) | undefined } = { current: undefined };
-const closedRef: { current: (() => void) | undefined } = { current: undefined };
+// Sets of per-instance refs — supports multiple usePaddle consumers on the same page
+// (e.g. BillingPage + BuyCreditsModal) without them trampling each other's callbacks.
+type SuccessRef = React.MutableRefObject<((data: CheckoutEventsData) => void) | undefined>;
+type ClosedRef = React.MutableRefObject<(() => void) | undefined>;
+const successRefs = new Set<SuccessRef>();
+const closedRefs = new Set<ClosedRef>();
 
 export function usePaddle(
   onPaymentSuccess?: (data: CheckoutEventsData) => void,
@@ -20,18 +22,27 @@ export function usePaddle(
 ) {
   const [paddle, setPaddle] = useState<Paddle | null>(paddleInstance);
 
-  // Update module-level refs on every render so eventCallback always has fresh handlers.
+  // Per-instance refs — always current, never shared between consumers.
+  const callbackRef = useRef(onPaymentSuccess);
+  const closedRef = useRef(onCheckoutClosed);
   callbackRef.current = onPaymentSuccess;
   closedRef.current = onCheckoutClosed;
 
   useEffect(() => {
+    // Register this instance's refs so the eventCallback dispatches to all mounted consumers.
+    successRefs.add(callbackRef);
+    closedRefs.add(closedRef);
+
     const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
     if (!token) return;
 
     // Already initialized — expose the instance directly, no second init needed.
     if (paddleInstance) {
       setPaddle(paddleInstance);
-      return;
+      return () => {
+        successRefs.delete(callbackRef);
+        closedRefs.delete(closedRef);
+      };
     }
 
     // First caller kicks off initialization; subsequent callers share the same promise.
@@ -41,10 +52,10 @@ export function usePaddle(
         environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
         eventCallback: (event: PaddleEventData) => {
           if (event.name === 'checkout.completed') {
-            callbackRef.current?.(event.data as CheckoutEventsData);
+            successRefs.forEach((ref) => ref.current?.(event.data as CheckoutEventsData));
           }
           if (event.name === 'checkout.closed') {
-            closedRef.current?.();
+            closedRefs.forEach((ref) => ref.current?.());
           }
         },
       }).then((instance: Paddle | undefined) => {
@@ -55,6 +66,12 @@ export function usePaddle(
     initPromise!.then(() => {
       if (paddleInstance) setPaddle(paddleInstance);
     });
+
+    return () => {
+      successRefs.delete(callbackRef);
+      closedRefs.delete(closedRef);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return paddle;
