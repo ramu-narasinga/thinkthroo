@@ -10,6 +10,7 @@ import {
 import { Button } from "@thinkthroo/ui/components/button"
 import { Input } from "@thinkthroo/ui/components/input"
 import { toast } from "sonner"
+import { inviteClientService } from "@/service/invite"
 
 type Props = {
   open: boolean
@@ -33,13 +34,15 @@ export function InviteMemberModal({ open, onOpenChange }: Props) {
 
     setLoading(true)
     try {
-      // TODO: wire up the invite API call here
+      await inviteClientService.sendInvite({ fullName, email })
       toast.success(`Invite sent to ${email}`)
       setFullName("")
       setEmail("")
       onOpenChange(false)
-    } catch {
-      toast.error("Failed to send invite")
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to send invite"
+      toast.error(message)
+      console.error("[InviteMemberModal] sendInvite error:", err)
     } finally {
       setLoading(false)
     }
