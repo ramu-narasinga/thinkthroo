@@ -14,11 +14,6 @@ const PLAN_CREDIT_MAX: Record<string, number> = {
   pro: 500,
 }
 
-const PLAN_PRS_MAX: Record<string, number | null> = {
-  free: 5,
-  pro: null, // unlimited
-}
-
 const PLAN_DOC_STORAGE_MB: Record<string, number> = {
   free: 25,
   pro: 250,
@@ -31,7 +26,6 @@ export function SidebarOptInForm() {
   const activeOrg = useOrganizationStore(organizationSelectors.activeOrg) as OrganizationItem | undefined
   const creditBalance = Number(activeOrg?.creditBalance ?? "0")
   const planName = activeOrg?.currentPlanName ?? "free"
-  const prsReviewed = activeOrg?.prsReviewed ?? 0
   const docStorageUsedMB = activeOrg?.docStorageUsedMB ?? 0
 
   return (
@@ -40,8 +34,6 @@ export function SidebarOptInForm() {
         planName={planName}
         creditBalance={creditBalance}
         creditMax={PLAN_CREDIT_MAX[planName] ?? 50}
-        prsReviewed={prsReviewed}
-        prsMax={PLAN_PRS_MAX[planName] ?? 5}
         docStorageUsedMB={docStorageUsedMB}
         docStorageMaxMB={PLAN_DOC_STORAGE_MB[planName] ?? 25}
         isPro={planName === "pro"}

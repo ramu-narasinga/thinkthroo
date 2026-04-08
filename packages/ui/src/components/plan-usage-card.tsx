@@ -10,10 +10,6 @@ export interface PlanUsageCardProps {
   creditBalance: number
   /** Max credits for this plan */
   creditMax: number
-  /** PRs reviewed this billing period */
-  prsReviewed: number
-  /** Max PRs for this plan — null means unlimited */
-  prsMax: number | null
   /** Current doc storage used in MB */
   docStorageUsedMB: number
   /** Max doc storage for this plan in MB */
@@ -57,8 +53,6 @@ export function PlanUsageCard({
   planName,
   creditBalance,
   creditMax,
-  prsReviewed,
-  prsMax,
   docStorageUsedMB,
   docStorageMaxMB,
   isPro,
@@ -66,12 +60,7 @@ export function PlanUsageCard({
   onUpgrade,
 }: PlanUsageCardProps) {
   const creditPercent = Math.min(100, (creditBalance / Math.max(creditMax, 1)) * 100)
-  const prsPercent = prsMax == null ? 100 : Math.min(100, (prsReviewed / Math.max(prsMax, 1)) * 100)
   const docPercent = Math.min(100, (docStorageUsedMB / Math.max(docStorageMaxMB, 1)) * 100)
-
-  const prsLabel = prsMax == null
-    ? `${prsReviewed} / Unlimited`
-    : `${prsReviewed} / ${prsMax}`
 
   const docLabel = `${formatMB(docStorageUsedMB)} / ${formatMB(docStorageMaxMB)}`
 
@@ -91,12 +80,6 @@ export function PlanUsageCard({
             label="Credits remaining"
             value={`${creditBalance.toLocaleString()} / ${creditMax.toLocaleString()}`}
             progressPercent={creditPercent}
-          />
-          <StatRow
-            label="PRs reviewed"
-            value={prsLabel}
-            progressPercent={prsPercent}
-            unlimited={prsMax == null}
           />
           <StatRow
             label="Doc storage"

@@ -7,6 +7,7 @@ import { Switch } from "@thinkthroo/ui/components/switch"
 import { Separator } from "@thinkthroo/ui/components/separator"
 import { PricingFeatureList } from "@thinkthroo/ui/components/pricing-feature-list"
 import { CreditBundleGrid } from "@thinkthroo/ui/components/credit-bundle-grid"
+import { ArchitectureStorageGrid } from "@thinkthroo/ui/components/architecture-storage-grid"
 import { freeFeatures, proFeatures, creditBundles, pricing } from "@thinkthroo/ui/lib/pricing"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -177,18 +178,7 @@ export default function BillingPage() {
               to your org — no cross-org leakage, ever.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="rounded-lg border border-border p-4 space-y-1">
-              <p className="font-medium text-sm">Free</p>
-              <p className="text-2xl font-bold">1 <span className="text-base font-normal text-muted-foreground">public repository</span></p>
-              <p className="text-xs text-muted-foreground">Rules are stored, but no RAG review runs</p>
-            </div>
-            <div className="rounded-lg border-2 border-[#7000FF] p-4 space-y-1">
-              <p className="font-medium text-sm text-[#7000FF]">Pro</p>
-              <p className="text-2xl font-bold">Unlimited <span className="text-base font-normal text-muted-foreground">repositories</span></p>
-              <p className="text-xs text-muted-foreground">RAG runs on every PR across all connected repos</p>
-            </div>
-          </div>
+          <ArchitectureStorageGrid />
         </div>
 
         <Separator />
