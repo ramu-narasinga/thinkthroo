@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand/vanilla';
 import { OrganizationStore } from '../../store';
-import { OrganizationItem } from '../../initialState';
+import { InvoiceItem, OrganizationItem } from '../../initialState';
 import { createClient } from '@/utils/supabase/client';
 import { organizationClientService } from '@/service/organization';
 
@@ -24,6 +24,21 @@ export interface OrganizationAction {
    * Internal: update organizations list
    */
   internal_updateOrganizations: (organizations: OrganizationItem[]) => void;
+
+  /**
+   * Complete a Paddle checkout: persist the customer ID then refresh org data
+   */
+  completePaddleCheckout: (orgId: string, customerId: string) => Promise<void>;
+
+  /**
+   * Cancel the active subscription via Paddle
+   */
+  cancelSubscription: (orgId: string) => Promise<{ effectiveAt?: string }>;
+
+  /**
+   * Fetch invoices (Paddle transactions) for an org
+   */
+  fetchInvoices: (orgId: string) => Promise<void>;
 }
 
 export const createOrganizationSlice: StateCreator<
@@ -87,5 +102,27 @@ export const createOrganizationSlice: StateCreator<
 
   internal_updateOrganizations: (organizations) => {
     set({ organizations }, false, 'internal_updateOrganizations');
+  },
+
+  completePaddleCheckout: async (orgId, customerId) => {
+    await organizationClientService.setPaddleCustomerId(orgId, customerId);
+    await get().fetchOrganizations();
+  },
+
+  cancelSubscription: async (orgId) => {
+    const result = await organizationClientService.cancelSubscription(orgId);
+    await get().fetchOrganizations();
+    return result ?? {};
+  },
+
+  fetchInvoices: async (orgId) => {
+    set({ isInvoicesLoading: true }, false, 'fetchInvoices/start');
+    try {
+      const invoices: InvoiceItem[] = await organizationClientService.getInvoices(orgId);
+      set({ invoices, isInvoicesLoading: false }, false, 'fetchInvoices/success');
+    } catch (error) {
+      console.error('[OrganizationStore] Error fetching invoices:', error);
+      set({ isInvoicesLoading: false }, false, 'fetchInvoices/error');
+    }
   },
 });

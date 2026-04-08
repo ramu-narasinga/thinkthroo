@@ -11,6 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { RefreshCw, Settings } from "lucide-react"
+import { InviteMemberModal } from "@/components/members-table/invite-member-modal"
 
 import {
   Table,
@@ -43,6 +44,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [lastUpdated] = React.useState<Date>(new Date())
+  const [inviteOpen, setInviteOpen] = React.useState(false)
 
   const table = useReactTable({
     data,
@@ -126,9 +128,10 @@ export function DataTable<TData, TValue>({
         </Select>
 
         <div className="ml-auto flex items-center gap-2">
-          <Button size="sm" className="gap-1.5">
+          <Button size="sm" className="gap-1.5" onClick={() => setInviteOpen(true)}>
             + Invite Member
           </Button>
+          <InviteMemberModal open={inviteOpen} onOpenChange={setInviteOpen} />
           <Button variant="outline" size="icon" className="h-9 w-9">
             <Settings className="w-4 h-4" />
           </Button>

@@ -77,4 +77,27 @@ export const organizationRouter = router({
     .mutation(async ({ ctx, input }) => {
       return ctx.organizationService.delete(input.id);
     }),
+
+  setPaddleCustomerId: organizationProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        paddleCustomerId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.organizationService.setPaddleCustomerId(input.id, input.paddleCustomerId);
+    }),
+
+  cancelSubscription: organizationProcedure
+    .input(z.object({ orgId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.organizationService.cancelSubscription(input.orgId);
+    }),
+
+  getInvoices: organizationProcedure
+    .input(z.object({ orgId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.organizationService.getInvoices(input.orgId);
+    }),
 });

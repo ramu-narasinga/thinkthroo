@@ -14,7 +14,12 @@ export const organizations = pgTable('organizations', {
     .references(() => profiles.userId, { onDelete: 'cascade' }),
   isPersonal: boolean('is_personal').default(true).notNull(),
   creditBalance: numeric('credit_balance', { precision: 10, scale: 2 }).default('10.00').notNull(),
-  currentPlanName: text('current_plan_name'),
+  // 'free' | 'pro'
+  currentPlanName: text('current_plan_name').default('free').notNull(),
+  // Cached Paddle customer ID to avoid extra lookups on checkout
+  paddleCustomerId: text('paddle_customer_id'),
+  // Populated for yearly subscriptions; used to handle expiry edge cases
+  planExpiresAt: timestamp('plan_expires_at', { withTimezone: true, mode: 'string' }),
   lastFetched: timestamp('last_fetched', { withTimezone: true, mode: 'string' }).defaultNow(),
 }, (table) => [
   unique('organizations_github_org_id_user_id_key').on(table.githubOrgId, table.userId),

@@ -1,3 +1,6 @@
+import { and, eq } from 'drizzle-orm';
+import { Paddle, Environment } from '@paddle/paddle-node-sdk';
+import { subscriptions } from '@/database/schemas';
 import { OrganizationModel } from '@/database/models/organization';
 import { ThinkThrooDatabase } from '@/database/type';
 
@@ -88,5 +91,87 @@ export class OrganizationService {
    */
   async delete(id: string) {
     return this.organizationModel.delete(id);
+  }
+
+  async setPaddleCustomerId(id: string, paddleCustomerId: string) {
+    return this.organizationModel.update(id, { paddleCustomerId });
+  }
+
+  async getInvoices(orgId: string) {
+    const org = await this.organizationModel.findById(orgId);
+    if (!org?.paddleCustomerId) return [];
+
+    const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
+      environment: process.env.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
+    });
+
+    // Collect transactions first
+    const txList: any[] = [];
+    for await (const tx of paddle.transactions.list({ customerId: [org.paddleCustomerId], perPage: 20 })) {
+      txList.push(tx as any);
+      if (txList.length >= 20) break;
+    }
+
+    // Parallel-fetch invoice PDF URLs for transactions that have an invoice
+    const invoiceUrlMap = new Map<string, string>();
+    await Promise.all(
+      txList
+        .filter((tx: any) => tx.invoiceId)
+        .map(async (tx: any) => {
+          try {
+            const pdf = await paddle.transactions.getInvoicePDF(tx.id);
+            if (pdf?.url) invoiceUrlMap.set(tx.id, pdf.url);
+          } catch {
+            // PDF not available — skip silently
+          }
+        })
+    );
+
+    return txList.map((tx: any) => ({
+      id: tx.id as string,
+      date: (tx.billedAt ?? tx.createdAt ?? '') as string,
+      description: (tx.items?.[0]?.price?.description ?? tx.items?.[0]?.price?.name ?? 'Purchase') as string,
+      total: (tx.details?.totals?.grandTotal ?? '0') as string,
+      currency: (tx.currencyCode ?? 'USD') as string,
+      status: (tx.status ?? 'unknown') as string,
+      invoiceUrl: invoiceUrlMap.get(tx.id) ?? null,
+    }));
+  }
+
+  async cancelSubscription(orgId: string) {
+    const sub = await this.db.query.subscriptions.findFirst({
+      where: and(
+        eq(subscriptions.organizationId, orgId),
+        eq(subscriptions.subscriptionStatus, 'active')
+      ),
+    });
+
+    if (!sub) {
+      throw new Error('No active subscription found for this organization');
+    }
+
+    const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
+      environment: process.env.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
+    });
+    const updated = await paddle.subscriptions.cancel(sub.subscriptionId, {
+      effectiveFrom: 'next_billing_period',
+    });
+
+    const scheduledChangeJson = updated.scheduledChange
+      ? JSON.stringify(updated.scheduledChange)
+      : null;
+
+    await this.db
+      .update(subscriptions)
+      .set({
+        subscriptionStatus: updated.status,
+        scheduledChange: scheduledChangeJson,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(subscriptions.subscriptionId, sub.subscriptionId));
+
+    return {
+      effectiveAt: (updated.scheduledChange as any)?.effectiveAt ?? null,
+    };
   }
 }

@@ -24,6 +24,7 @@ import {
 } from "@thinkthroo/ui/components/sidebar";
 import { SidebarOptInForm } from "./tokens-usage";
 import { OrgSwitcher } from "./org-switcher";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const data = {
   user: {
@@ -58,6 +59,11 @@ const data = {
           title: "Subscription",
           url: "/subscription",
           icon: DollarSign,
+        },
+        {
+          title: "Pricing",
+          url: "/pricing",
+          icon: CreditCard,
         },
       ],
     },
@@ -157,6 +163,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  useCurrentUser()
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>

@@ -22,6 +22,10 @@ export class OrganizationClientService {
       apiUrl: org.apiUrl ?? undefined,
       reposUrl: org.reposUrl ?? undefined,
       lastFetched: org.lastFetched ?? undefined,
+      currentPlanName: org.currentPlanName ?? undefined,
+      creditBalance: org.creditBalance ?? undefined,
+      paddleCustomerId: org.paddleCustomerId ?? undefined,
+      docStorageUsedMB: (org as any).docStorageUsedMB ?? undefined,
     }));
   };
 
@@ -53,6 +57,18 @@ export class OrganizationClientService {
    */
   delete = async (id: string) => {
     return lambdaClient.organization.delete.mutate({ id });
+  };
+
+  setPaddleCustomerId = async (id: string, paddleCustomerId: string) => {
+    return lambdaClient.organization.setPaddleCustomerId.mutate({ id, paddleCustomerId });
+  };
+
+  cancelSubscription = async (orgId: string) => {
+    return lambdaClient.organization.cancelSubscription.mutate({ orgId });
+  };
+
+  getInvoices = async (orgId: string) => {
+    return lambdaClient.organization.getInvoices.query({ orgId });
   };
 }
 

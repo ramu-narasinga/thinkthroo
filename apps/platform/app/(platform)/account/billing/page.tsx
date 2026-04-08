@@ -1,108 +1,239 @@
 "use client"
 
-import { useState } from "react"
-import PrivatePageGuard from "@/components/private-page-guard"
+import { useState, useEffect } from "react"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
-import { Card, CardContent } from "@thinkthroo/ui/components/card"
+import { Switch } from "@thinkthroo/ui/components/switch"
 import { Separator } from "@thinkthroo/ui/components/separator"
-import { Check } from "lucide-react"
-import { DataTable } from "@/components/subscription-table/data-table"
-import { columns } from "@/components/subscription-table/columns"
-import DeleteOrganizationModal from "@/components/delete-organization-modal"
-import ChangeSubscriptionPlanModal from "@/components/change-subscription-plan-modal"
-import posthog from "posthog-js"
+import { PricingFeatureList } from "@thinkthroo/ui/components/pricing-feature-list"
+import { CreditBundleGrid } from "@thinkthroo/ui/components/credit-bundle-grid"
+import { ArchitectureStorageGrid } from "@thinkthroo/ui/components/architecture-storage-grid"
+import { freeFeatures, proFeatures, creditBundles, pricing } from "@thinkthroo/ui/lib/pricing"
+import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+import { BuyCreditsModal } from "@/components/buy-credits-modal"
+import { DowngradeModal } from "./components/downgrade-modal"
+import { usePaddle } from "@/hooks/usePaddle"
+import { useOrganizationStore } from "@/store/organization"
+import { organizationSelectors } from "@/store/organization/selectors"
+import { useUserStore } from "@/store/user"
+import { userSelectors } from "@/store/user/selectors"
+import { DataTable } from "./components/subscription-table/data-table"
+import { columns } from "./components/subscription-table/columns"
 
 export default function BillingPage() {
-  const invoices: any[] = []
-  const [openDelete, setOpenDelete] = useState(false)
-  const [openPlans, setOpenPlans] = useState(false)
+  const [billedYearly, setBilledYearly] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
+  const [downgradeOpen, setDowngradeOpen] = useState(false)
 
-  const handleDeleteAccount = () => {
-    posthog.capture("delete_account_clicked", {
-      timestamp: new Date().toISOString(),
-    })
-    setOpenDelete(true)
+  const activeOrgId = useOrganizationStore(organizationSelectors.activeOrgId)
+  const activeOrg = useOrganizationStore(organizationSelectors.activeOrg)
+  const completePaddleCheckout = useOrganizationStore((s) => s.completePaddleCheckout)
+  const currentPlan = useOrganizationStore(organizationSelectors.currentPlanName)
+  const creditBalance = useOrganizationStore(organizationSelectors.creditBalance)
+  const userEmail = useUserStore(userSelectors.email)
+  const invoices = useOrganizationStore(organizationSelectors.invoices)
+  const isInvoicesLoading = useOrganizationStore(organizationSelectors.isInvoicesLoading)
+  const fetchInvoices = useOrganizationStore((s) => s.fetchInvoices)
+
+  useEffect(() => {
+    if (!activeOrgId) return
+    fetchInvoices(activeOrgId)
+  }, [activeOrgId, fetchInvoices])
+
+  const paddle = usePaddle(
+    async (data) => {
+      const customerId = (data as any)?.customer?.id
+      if (customerId && activeOrgId) {
+        await completePaddleCheckout(activeOrgId, customerId)
+      }
+      toast.success("You're now on Pro! 500 credits have been added to your account.")
+      setLoading(false)
+    },
+    () => {
+      console.log("Checkout closed without completion")
+      setLoading(false)
+    },
+  )
+
+  const monthlyPriceId = process.env.NEXT_PUBLIC_PADDLE_PRO_MONTHLY_PRICE_ID
+  const yearlyPriceId = process.env.NEXT_PUBLIC_PADDLE_PRO_YEARLY_PRICE_ID
+  const priceId = billedYearly ? yearlyPriceId : monthlyPriceId
+
+  function handleUpgrade() {
+    if (!paddle || !priceId || !activeOrgId) {
+      toast.error("Checkout unavailable — missing configuration")
+      return
+    }
+    setLoading(true)
+    try {
+      paddle.Checkout.open({
+        items: [{ priceId, quantity: 1 }],
+        customer: userEmail ? { email: userEmail } : undefined,
+        customData: { organizationId: activeOrgId },
+        settings: { displayMode: "overlay", theme: "light", locale: "en" },
+      })
+    } catch {
+      toast.error("Failed to open checkout")
+      setLoading(false)
+    }
   }
 
   return (
-    <PrivatePageGuard>
-    <>
-      <div className="p-6 space-y-4">
+    <div className="max-w-5xl space-y-10">
         {/* Header */}
-        <div className="flex items-center justify-between pb-2">
-          <h1 className="text-2xl font-semibold text-foreground">
-            Billing
-          </h1>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold">Billing</h1>
+          <p className="text-muted-foreground">
+            Simple, usage-based pricing. Upgrade or top-up credits any time.
+          </p>
+          {currentPlan === "pro" && (
+            <Badge className="bg-[#7000FF] text-white">You are on Pro</Badge>
+          )}
         </div>
 
-        {/* Plan */}
-        <h2 className="text-lg font-semibold">Plan</h2>
+        {/* Yearly toggle */}
+        <div className="flex items-center gap-3">
+          <span className={cn("text-sm", !billedYearly && "font-semibold")}>Monthly</span>
+          <Switch checked={billedYearly} onCheckedChange={setBilledYearly} />
+          <span className={cn("text-sm", billedYearly && "font-semibold")}>
+            Yearly
+            <span className="ml-1.5 text-xs text-green-600 font-medium">Save ~14%</span>
+          </span>
+        </div>
 
-        {/* Current Plan */}
-        <Card>
-          <CardContent className="flex items-center justify-between p-6">
+        {/* Plan cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Free */}
+          <div className="rounded-xl border border-border p-6 flex flex-col gap-5">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-base">Code Quality - Open Source plan</span>
-                <Badge variant="outline">Current</Badge>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-lg">Free</span>
+                {currentPlan === "free" && (
+                  <Badge variant="outline" className="text-xs">Current plan</Badge>
+                )}
               </div>
-              <p className="text-sm text-muted-foreground mt-1">Free</p>
+              <p className="text-3xl font-bold">
+                $0
+                <span className="text-base font-normal text-muted-foreground"> / month</span>
+              </p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Users</p>
-              <p className="text-base font-medium">1</p>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Upgrade to Pro */}
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-base">Upgrade to Pro plan</span>
-                  <Badge variant="outline" className="text-foreground border-foreground">
-                    Suggested
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">$15 per user/month, billed monthly</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" className="text-sm font-medium" onClick={() => setOpenPlans(true)}>View all plans</Button>
-                <Button className="bg-black hover:bg-black/80 text-white" onClick={() => setOpenPlans(true)}>Upgrade now</Button>
-              </div>
+            {currentPlan === "free" ? (
+              <Button variant="outline" disabled className="w-full cursor-not-allowed text-muted-foreground">
+                Current plan
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full border-destructive text-destructive hover:bg-destructive/5"
+                onClick={() => setDowngradeOpen(true)}
+              >
+                Downgrade to Free
+              </Button>
+            )}
+
+            <PricingFeatureList features={freeFeatures} />
+          </div>
+
+          {/* Pro */}
+          <div className="rounded-xl border-2 border-[#7000FF] p-6 flex flex-col gap-5 relative">
+            <div className="absolute -top-3 left-6">
+              <Badge className="bg-[#7000FF] text-white text-xs">Most popular</Badge>
             </div>
-            <Separator />
-            <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Code review for private repos</span></div>
-              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Summaries and diagrams of code changes</span></div>
-              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Line by line code reviews</span></div>
-              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Limited security scans for 10 repos</span></div>
-              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Security scans done biweekly</span></div>
-              <div className="flex items-center gap-2"><Check className="w-4 h-4 text-foreground" /><span>Custom review rules</span></div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-lg">Pro</span>
+                {currentPlan === "pro" && (
+                  <Badge variant="outline" className="text-xs">Current plan</Badge>
+                )}
+              </div>
+              <p className="text-3xl font-bold">
+                {billedYearly ? pricing.yearly.amount : pricing.monthly.amount}
+                <span className="text-base font-normal text-muted-foreground"> {pricing.monthly.label}</span>
+              </p>
+              {billedYearly && (
+                <p className="text-sm text-green-600 font-medium mt-0.5">{pricing.yearly.note}</p>
+              )}
             </div>
-          </CardContent>
-        </Card>
+
+            <Button
+              className={cn(
+                "w-full font-semibold transition-all",
+                currentPlan === "pro"
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : "bg-[#7000FF] text-white hover:bg-[#7000FF]/90 hover:brightness-110 hover:scale-[1.02]"
+              )}
+              disabled={loading || currentPlan === "pro"}
+              onClick={handleUpgrade}
+            >
+              {loading ? "Opening checkout…" : currentPlan === "pro" ? "Current plan" : "Upgrade to Pro"}
+            </Button>
+
+            <PricingFeatureList features={proFeatures} iconColor="text-[#7000FF]" />
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Architecture storage section */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold">Architecture storage</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Each repository gets its own private vector index. Your rules are stored and scoped
+              to your org — no cross-org leakage, ever.
+            </p>
+          </div>
+          <ArchitectureStorageGrid />
+        </div>
+
+        <Separator />
+
+        {/* Credit top-up section */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold">Credit top-ups</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Each PR review costs credits based on token usage. If you run out mid-month, buy a
+              one-time top-up — no subscription required. 1 credit = $0.10 USD.
+            </p>
+            {activeOrg && (
+              <p className="text-sm mt-2">
+                Your current balance:{" "}
+                <span className="font-semibold">{creditBalance.toFixed(0)} credits</span>
+              </p>
+            )}
+          </div>
+          <CreditBundleGrid bundles={creditBundles} />
+          <Button
+            variant="outline"
+            className="border-[#7000FF] text-[#7000FF] hover:bg-[#7000FF]/5"
+            onClick={() => setBuyCreditsOpen(true)}
+          >
+            Buy credits
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Custom amount: enter any value between $5 and $100 using the buy credits dialog.
+            10 credits are added per $1 spent.
+          </p>
+        </div>
+
+        <Separator />
 
         {/* Invoices */}
-        <h2 className="text-lg font-semibold">Invoices</h2>
-        <DataTable columns={columns} data={invoices} />
-      </div>
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Invoices</h2>
+          {isInvoicesLoading ? (
+            <p className="text-sm text-muted-foreground">Loading invoices…</p>
+          ) : (
+            <DataTable columns={columns} data={invoices} />
+          )}
+        </div>
 
-      {/* Delete Confirmation Modal */}
-      <DeleteOrganizationModal
-        open={openDelete}
-        onClose={() => setOpenDelete(false)}
-      />
-
-      {/* Change Subscription Plan Modal */}
-      <ChangeSubscriptionPlanModal
-        open={openPlans}
-        onClose={() => setOpenPlans(false)}
-      />
-    </>
-    </PrivatePageGuard>
+        <BuyCreditsModal open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
+        <DowngradeModal open={downgradeOpen} onOpenChange={setDowngradeOpen} />
+    </div>
   )
 }

@@ -7,4 +7,18 @@ export const organizationSelectors = {
     s.organizations.find((org) => org.id === s.activeOrgId),
   isSyncing: (s: OrganizationStore) => s.isSyncing,
   isFirstFetchFinished: (s: OrganizationStore) => s.isOrganizationsFirstFetchFinished,
+  creditBalance: (s: OrganizationStore) => {
+    const org = s.organizations.find((o) => o.id === s.activeOrgId);
+    return Number(org?.creditBalance ?? '0');
+  },
+  currentPlanName: (s: OrganizationStore) => {
+    const org = s.organizations.find((o) => o.id === s.activeOrgId);
+    return org?.currentPlanName ?? 'free';
+  },
+  isPro: (s: OrganizationStore) => {
+    const org = s.organizations.find((o) => o.id === s.activeOrgId);
+    return (org?.currentPlanName ?? 'free') === 'pro';
+  },
+  invoices: (s: OrganizationStore) => s.invoices,
+  isInvoicesLoading: (s: OrganizationStore) => s.isInvoicesLoading,
 };
