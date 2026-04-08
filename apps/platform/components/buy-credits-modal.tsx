@@ -13,6 +13,8 @@ import { toast } from "sonner"
 import { usePaddle } from "@/hooks/usePaddle"
 import { useOrganizationStore } from "@/store/organization"
 import { organizationClientService } from "@/service/organization"
+import { useUserStore } from "@/store/user"
+import { userSelectors } from "@/store/user/selectors"
 
 
 export function BuyCreditsModal({
@@ -27,6 +29,7 @@ export function BuyCreditsModal({
 
   const activeOrgId = useOrganizationStore((s) => s.activeOrgId)
   const fetchOrganizations = useOrganizationStore((s) => s.fetchOrganizations)
+  const userEmail = useUserStore(userSelectors.email)
 
   const paddle = usePaddle(
     async (data) => {
@@ -58,6 +61,7 @@ export function BuyCreditsModal({
     try {
       paddle.Checkout.open({
         items: [{ priceId, quantity: dollars }],
+        customer: userEmail ? { email: userEmail } : undefined,
         customData: { organizationId: activeOrgId },
         settings: { displayMode: "overlay", theme: "light", locale: "en" },
       })

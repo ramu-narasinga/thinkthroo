@@ -25,6 +25,7 @@ export class OrganizationClientService {
       currentPlanName: org.currentPlanName ?? undefined,
       creditBalance: org.creditBalance ?? undefined,
       paddleCustomerId: org.paddleCustomerId ?? undefined,
+      docStorageUsedMB: (org as any).docStorageUsedMB ?? undefined,
     }));
   };
 

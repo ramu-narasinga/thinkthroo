@@ -24,6 +24,16 @@ export interface OrganizationAction {
    * Internal: update organizations list
    */
   internal_updateOrganizations: (organizations: OrganizationItem[]) => void;
+
+  /**
+   * Complete a Paddle checkout: persist the customer ID then refresh org data
+   */
+  completePaddleCheckout: (orgId: string, customerId: string) => Promise<void>;
+
+  /**
+   * Cancel the active subscription via Paddle
+   */
+  cancelSubscription: (orgId: string) => Promise<{ effectiveAt?: string }>;
 }
 
 export const createOrganizationSlice: StateCreator<
@@ -87,5 +97,16 @@ export const createOrganizationSlice: StateCreator<
 
   internal_updateOrganizations: (organizations) => {
     set({ organizations }, false, 'internal_updateOrganizations');
+  },
+
+  completePaddleCheckout: async (orgId, customerId) => {
+    await organizationClientService.setPaddleCustomerId(orgId, customerId);
+    await get().fetchOrganizations();
+  },
+
+  cancelSubscription: async (orgId) => {
+    const result = await organizationClientService.cancelSubscription(orgId);
+    await get().fetchOrganizations();
+    return result ?? {};
   },
 });

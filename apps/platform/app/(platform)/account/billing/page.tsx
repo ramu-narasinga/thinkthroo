@@ -12,12 +12,14 @@ import { freeFeatures, proFeatures, creditBundles, pricing } from "@thinkthroo/u
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { BuyCreditsModal } from "@/components/buy-credits-modal"
-import { DowngradeModal } from "@/components/downgrade-modal"
+import { DowngradeModal } from "./components/downgrade-modal"
 import { usePaddle } from "@/hooks/usePaddle"
 import { useOrganizationStore } from "@/store/organization"
-import { organizationClientService } from "@/service/organization"
-import { DataTable } from "@/components/subscription-table/data-table"
-import { columns } from "@/components/subscription-table/columns"
+import { organizationSelectors } from "@/store/organization/selectors"
+import { useUserStore } from "@/store/user"
+import { userSelectors } from "@/store/user/selectors"
+import { DataTable } from "./components/subscription-table/data-table"
+import { columns } from "./components/subscription-table/columns"
 
 export default function BillingPage() {
   const invoices: any[] = []
@@ -26,21 +28,19 @@ export default function BillingPage() {
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
   const [downgradeOpen, setDowngradeOpen] = useState(false)
 
-  const activeOrgId = useOrganizationStore((s) => s.activeOrgId)
-  const activeOrg = useOrganizationStore((s) =>
-    s.organizations.find((o) => o.id === s.activeOrgId)
-  )
-  const fetchOrganizations = useOrganizationStore((s) => s.fetchOrganizations)
-  const currentPlan = activeOrg?.currentPlanName ?? "free"
-  const creditBalance = activeOrg?.creditBalance ?? "0"
+  const activeOrgId = useOrganizationStore(organizationSelectors.activeOrgId)
+  const activeOrg = useOrganizationStore(organizationSelectors.activeOrg)
+  const completePaddleCheckout = useOrganizationStore((s) => s.completePaddleCheckout)
+  const currentPlan = useOrganizationStore(organizationSelectors.currentPlanName)
+  const creditBalance = useOrganizationStore(organizationSelectors.creditBalance)
+  const userEmail = useUserStore(userSelectors.email)
 
   const paddle = usePaddle(
     async (data) => {
       const customerId = (data as any)?.customer?.id
       if (customerId && activeOrgId) {
-        await organizationClientService.setPaddleCustomerId(activeOrgId, customerId)
+        await completePaddleCheckout(activeOrgId, customerId)
       }
-      await fetchOrganizations()
       toast.success("You're now on Pro! 500 credits have been added to your account.")
       setLoading(false)
     },
@@ -63,6 +63,7 @@ export default function BillingPage() {
     try {
       paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
+        customer: userEmail ? { email: userEmail } : undefined,
         customData: { organizationId: activeOrgId },
         settings: { displayMode: "overlay", theme: "light", locale: "en" },
       })
@@ -194,7 +195,7 @@ export default function BillingPage() {
             {activeOrg && (
               <p className="text-sm mt-2">
                 Your current balance:{" "}
-                <span className="font-semibold">{Number(creditBalance).toFixed(0)} credits</span>
+                <span className="font-semibold">{creditBalance.toFixed(0)} credits</span>
               </p>
             )}
           </div>

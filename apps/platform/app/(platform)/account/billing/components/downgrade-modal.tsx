@@ -12,7 +12,7 @@ import {
 import { Button } from "@thinkthroo/ui/components/button"
 import { toast } from "sonner"
 import { useOrganizationStore } from "@/store/organization"
-import { organizationClientService } from "@/service/organization"
+import { organizationSelectors } from "@/store/organization/selectors"
 
 export function DowngradeModal({
   open,
@@ -23,15 +23,14 @@ export function DowngradeModal({
 }) {
   const [downgrading, setDowngrading] = useState(false)
 
-  const activeOrgId = useOrganizationStore((s) => s.activeOrgId)
-  const fetchOrganizations = useOrganizationStore((s) => s.fetchOrganizations)
+  const activeOrgId = useOrganizationStore(organizationSelectors.activeOrgId)
+  const cancelSubscription = useOrganizationStore((s) => s.cancelSubscription)
 
   async function handleConfirm() {
     if (!activeOrgId) return
     setDowngrading(true)
     try {
-      const result = await organizationClientService.cancelSubscription(activeOrgId)
-      await fetchOrganizations()
+      const result = await cancelSubscription(activeOrgId)
       const dateStr = result?.effectiveAt
         ? new Date(result.effectiveAt).toLocaleDateString("en-US", {
             month: "long",
