@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Switch } from "@thinkthroo/ui/components/switch"
@@ -22,7 +22,6 @@ import { DataTable } from "./components/subscription-table/data-table"
 import { columns } from "./components/subscription-table/columns"
 
 export default function BillingPage() {
-  const invoices: any[] = []
   const [billedYearly, setBilledYearly] = useState(false)
   const [loading, setLoading] = useState(false)
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
@@ -34,6 +33,14 @@ export default function BillingPage() {
   const currentPlan = useOrganizationStore(organizationSelectors.currentPlanName)
   const creditBalance = useOrganizationStore(organizationSelectors.creditBalance)
   const userEmail = useUserStore(userSelectors.email)
+  const invoices = useOrganizationStore(organizationSelectors.invoices)
+  const isInvoicesLoading = useOrganizationStore(organizationSelectors.isInvoicesLoading)
+  const fetchInvoices = useOrganizationStore((s) => s.fetchInvoices)
+
+  useEffect(() => {
+    if (!activeOrgId) return
+    fetchInvoices(activeOrgId)
+  }, [activeOrgId, fetchInvoices])
 
   const paddle = usePaddle(
     async (data) => {
@@ -218,7 +225,11 @@ export default function BillingPage() {
         {/* Invoices */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Invoices</h2>
-          <DataTable columns={columns} data={invoices} />
+          {isInvoicesLoading ? (
+            <p className="text-sm text-muted-foreground">Loading invoices…</p>
+          ) : (
+            <DataTable columns={columns} data={invoices} />
+          )}
         </div>
 
         <BuyCreditsModal open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />

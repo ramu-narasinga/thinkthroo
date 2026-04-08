@@ -66,6 +66,10 @@ export class OrganizationClientService {
   cancelSubscription = async (orgId: string) => {
     return lambdaClient.organization.cancelSubscription.mutate({ orgId });
   };
+
+  getInvoices = async (orgId: string) => {
+    return lambdaClient.organization.getInvoices.query({ orgId });
+  };
 }
 
 export const organizationClientService = new OrganizationClientService();

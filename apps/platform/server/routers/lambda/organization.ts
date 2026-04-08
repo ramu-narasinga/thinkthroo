@@ -94,4 +94,10 @@ export const organizationRouter = router({
     .mutation(async ({ ctx, input }) => {
       return ctx.organizationService.cancelSubscription(input.orgId);
     }),
+
+  getInvoices: organizationProcedure
+    .input(z.object({ orgId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.organizationService.getInvoices(input.orgId);
+    }),
 });

@@ -97,6 +97,47 @@ export class OrganizationService {
     return this.organizationModel.update(id, { paddleCustomerId });
   }
 
+  async getInvoices(orgId: string) {
+    const org = await this.organizationModel.findById(orgId);
+    if (!org?.paddleCustomerId) return [];
+
+    const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
+      environment: process.env.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
+    });
+
+    // Collect transactions first
+    const txList: any[] = [];
+    for await (const tx of paddle.transactions.list({ customerId: [org.paddleCustomerId], perPage: 20 })) {
+      txList.push(tx as any);
+      if (txList.length >= 20) break;
+    }
+
+    // Parallel-fetch invoice PDF URLs for transactions that have an invoice
+    const invoiceUrlMap = new Map<string, string>();
+    await Promise.all(
+      txList
+        .filter((tx: any) => tx.invoiceId)
+        .map(async (tx: any) => {
+          try {
+            const pdf = await paddle.transactions.getInvoicePDF(tx.id);
+            if (pdf?.url) invoiceUrlMap.set(tx.id, pdf.url);
+          } catch {
+            // PDF not available — skip silently
+          }
+        })
+    );
+
+    return txList.map((tx: any) => ({
+      id: tx.id as string,
+      date: (tx.billedAt ?? tx.createdAt ?? '') as string,
+      description: (tx.items?.[0]?.price?.description ?? tx.items?.[0]?.price?.name ?? 'Purchase') as string,
+      total: (tx.details?.totals?.grandTotal ?? '0') as string,
+      currency: (tx.currencyCode ?? 'USD') as string,
+      status: (tx.status ?? 'unknown') as string,
+      invoiceUrl: invoiceUrlMap.get(tx.id) ?? null,
+    }));
+  }
+
   async cancelSubscription(orgId: string) {
     const sub = await this.db.query.subscriptions.findFirst({
       where: and(
