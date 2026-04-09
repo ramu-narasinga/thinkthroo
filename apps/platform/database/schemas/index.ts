@@ -11,5 +11,6 @@ export * from './challenge';
 export * from './payment';
 export * from './credit';
 export * from './invite';
+export * from './teamInvitation';
 export * from './courseProgress';
 export * from './skillStats';
