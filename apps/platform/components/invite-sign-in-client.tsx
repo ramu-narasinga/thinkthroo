@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { createClient } from "@/utils/supabase/client";
 import { Button } from "@thinkthroo/ui/components/button";
 import { Input } from "@thinkthroo/ui/components/input";
-import { toast } from "sonner";
 
 export function InviteSignInClient({ email: initialEmail }: { email: string }) {
   const [email, setEmail] = useState(initialEmail);
@@ -13,31 +11,7 @@ export function InviteSignInClient({ email: initialEmail }: { email: string }) {
   const [sent, setSent] = useState(false);
 
   async function handleSendLink() {
-    if (!email.trim()) {
-      toast.error("Email is required");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/account/billing`,
-        },
-      });
-
-      if (error) throw error;
-
-      setSent(true);
-      toast.success("Sign-in link sent! Check your inbox.");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to send sign-in link";
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
+    window.location.href = `https://app.thinkthroo.com/login`;
   }
 
   return (

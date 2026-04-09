@@ -15,7 +15,7 @@ export class InviteService {
 
   async sendInvite({ fullName, email }: { fullName: string; email: string }) {
     const { data, error } = await resend.emails.send({
-      from: 'Think Throo <onboarding@resend.dev>',
+      from: 'Think Throo <invite@thinkthroo.com>',
       to: [email],
       subject: "You've been invited to join a team on Think Throo",
       html: `
@@ -24,7 +24,7 @@ export class InviteService {
           <p>You've been invited to join a team on <strong>Think Throo</strong>.</p>
           <p>Click the button below to accept the invitation and get started.</p>
           <a
-          href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://app.thinkthroo.com'}/invite?email=${encodeURIComponent(email)}"
+          href="https://app.thinkthroo.com/login"
             style="display:inline-block;padding:12px 24px;background:#7c3aed;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;"
           >
             Accept Invitation
