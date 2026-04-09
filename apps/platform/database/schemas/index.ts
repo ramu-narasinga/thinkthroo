@@ -13,3 +13,4 @@ export * from './credit';
 export * from './invite';
 export * from './courseProgress';
 export * from './skillStats';
+export * from './review';

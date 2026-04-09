@@ -4,6 +4,7 @@ import { PullRequestReviewGenerator } from "../generate-pr-review/PullRequestRev
 import { ArchitectureReviewGenerator } from "../architecture-review/ArchitectureReviewGenerator";
 import type { SummaryResult } from "@/services/summarization/FileSummarizer";
 import { CreditService } from "@/services/credits/CreditService";
+import { ReviewService } from "@/services/reviews/ReviewService";
 import type { BotAccumulatedUsage } from "@/services/ai/types";
 import { logger } from "@/utils/logger";
 
@@ -136,6 +137,8 @@ export class PRWorkflowOrchestrator {
         ...(architectureReviewGenerator?.getAccumulatedUsage() ?? []),
       ];
 
+      let creditsDeducted = 0;
+
       try {
         const creditService = new CreditService();
         const result = await creditService.deductCredits(
@@ -146,6 +149,7 @@ export class PRWorkflowOrchestrator {
         );
 
         if (result.success) {
+          creditsDeducted = result.creditsDeducted ?? 0;
           logger.info("Credits deducted for PR workflow", {
             prNumber: pullNumber,
             creditsDeducted: result.creditsDeducted,
@@ -160,6 +164,33 @@ export class PRWorkflowOrchestrator {
       } catch (err: any) {
         // Credit deduction failure must never crash the PR workflow
         logger.error("Credit deduction failed", {
+          prNumber: pullNumber,
+          error: err.message,
+        });
+      }
+
+      // Step 5: Persist the review summary for the platform dashboard
+      try {
+        const finalSummaryText = summaryGenerator?.getFinalSummary() ?? "";
+        const summaryPoints = ReviewService.parseSummaryPoints(finalSummaryText);
+
+        if (summaryPoints.length > 0) {
+          const reviewService = new ReviewService();
+          await reviewService.saveReview({
+            installationId,
+            repositoryFullName,
+            prNumber: pullNumber,
+            prTitle: this.context.payload.pull_request.title,
+            summaryPoints,
+            creditsDeducted,
+          });
+          logger.info("PR review summary saved to platform", { prNumber: pullNumber });
+        } else {
+          logger.info("No summary points to save, skipping review persistence", { prNumber: pullNumber });
+        }
+      } catch (err: any) {
+        // Review save failure must never crash the PR workflow
+        logger.error("PR review save failed", {
           prNumber: pullNumber,
           error: err.message,
         });

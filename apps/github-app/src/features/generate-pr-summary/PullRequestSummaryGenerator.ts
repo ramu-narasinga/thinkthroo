@@ -25,6 +25,7 @@ export class PullRequestSummaryGenerator {
   private readonly prompts: Prompts;
   private readonly fileSummarizer: FileSummarizer;
   private readonly aiOptions: AIOptions;
+  private finalSummary = '';
 
   constructor(private readonly context: Context<"pull_request">) {
     const issueDetails = context.issue();
@@ -543,8 +544,18 @@ export class PullRequestSummaryGenerator {
       totalDurationSinceStart: Date.now() - startTime,
     });
 
+    this.finalSummary = summarizeFinalResponse;
+
     // Return summaries for use in review filtering
     return summaries;
+  }
+
+  /**
+   * Returns the final categorized summary text produced by the AI.
+   * Only populated after generate() has completed.
+   */
+  getFinalSummary(): string {
+    return this.finalSummary;
   }
 
   /**
