@@ -35,4 +35,15 @@ export const reviewRouter = router({
         creditsDeducted: Number(r.creditsDeducted),
       }));
     }),
+
+  getArchitectureResults: reviewProcedure
+    .input(z.object({ prReviewId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const rows = await ctx.reviewModel.getArchitectureResults(input.prReviewId);
+      return rows.map((r) => ({
+        ...r,
+        violations: JSON.parse(r.violations) as { startLine: number; endLine: number; comment: string }[],
+        docReferences: JSON.parse(r.docReferences) as { name: string; excerpt: string; documentId: string | null }[],
+      }));
+    }),
 });

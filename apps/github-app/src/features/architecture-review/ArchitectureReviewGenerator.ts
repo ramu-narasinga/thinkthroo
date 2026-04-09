@@ -17,6 +17,19 @@ export interface ArchitectureReviewOptions {
   maxFiles?: number;
 }
 
+export interface ArchitectureDocReference {
+  name: string;
+  excerpt: string;
+}
+
+export interface ArchitectureFileResult {
+  filename: string;
+  violationCount: number;
+  score: number;
+  violations: ReviewComment[];
+  docReferences: ArchitectureDocReference[];
+}
+
 interface FileViolations {
   filename: string;
   violations: ReviewComment[];
@@ -29,6 +42,7 @@ export class ArchitectureReviewGenerator {
   private readonly architectureService: ArchitectureService;
   private readonly reviewParser: ReviewParser;
   private readonly options: Required<ArchitectureReviewOptions>;
+  private fileResults: ArchitectureFileResult[] = [];
 
   constructor(
     private readonly context: Context<
@@ -55,6 +69,10 @@ export class ArchitectureReviewGenerator {
       maxConcurrency: this.options.maxConcurrency,
       maxFiles: this.options.maxFiles,
     });
+  }
+
+  getFileResults(): ArchitectureFileResult[] {
+    return this.fileResults;
   }
 
   async generate(shortSummary = ""): Promise<void> {
@@ -166,8 +184,9 @@ export class ArchitectureReviewGenerator {
 
     // Query Pinecone for relevant architecture rules using the file diff as context
     let rules: string;
+    let ruleChunks: Awaited<ReturnType<typeof this.architectureService.queryRules>> = [];
     try {
-      const ruleChunks = await this.architectureService.queryRules(
+      ruleChunks = await this.architectureService.queryRules(
         installationId,
         repositoryFullName,
         fileDiff || filename
@@ -242,6 +261,17 @@ export class ArchitectureReviewGenerator {
         `**Architecture Violation**\n\n${violation.comment}`
       );
     }
+
+    // Accumulate file result for platform persistence
+    // Score = % of rules that were not violated, clamped to [0, 100]
+    const score = ruleChunks.length > 0
+      ? Math.max(0, Math.round(100 * (1 - violations.length / ruleChunks.length)))
+      : 100;
+    const docReferences: ArchitectureDocReference[] = ruleChunks.map((chunk) => ({
+      name: chunk.name,
+      excerpt: chunk.text.slice(0, 200),
+    }));
+    this.fileResults.push({ filename, violationCount: violations.length, score, violations, docReferences });
 
     return violations;
   }

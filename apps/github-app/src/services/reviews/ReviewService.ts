@@ -1,5 +1,6 @@
 import { env } from "@/utils/env";
 import { logger } from "@/utils/logger";
+import type { ArchitectureFileResult } from "@/features/architecture-review/ArchitectureReviewGenerator";
 
 export interface SaveReviewResult {
   success: boolean;
@@ -41,6 +42,7 @@ export class ReviewService {
     repositoryFullName: string;
     prNumber: number;
     prTitle: string;
+    prAuthor: string;
     summaryPoints: string[];
     creditsDeducted: number;
   }): Promise<SaveReviewResult> {
@@ -74,6 +76,40 @@ export class ReviewService {
         error: err.message,
       });
       return { success: false };
+    }
+  }
+
+  async saveArchitectureResults(params: {
+    prReviewId: string;
+    repositoryFullName: string;
+    installationId: string;
+    fileResults: ArchitectureFileResult[];
+  }): Promise<void> {
+    const url = `${this.baseUrl}/api/reviews/architecture/save`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-secret": this.secret,
+        },
+        body: JSON.stringify(params),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        logger.warn("Architecture results save failed", {
+          status: response.status,
+          body: text,
+          prReviewId: params.prReviewId,
+        });
+      }
+    } catch (err: any) {
+      logger.warn("Architecture results save request threw an error", {
+        prReviewId: params.prReviewId,
+        error: err.message,
+      });
     }
   }
 }

@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
     repositoryFullName?: string;
     prNumber?: number;
     prTitle?: string;
+    prAuthor?: string;
     summaryPoints?: string[];
     creditsDeducted?: number;
   };
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { installationId, repositoryFullName, prNumber, prTitle, summaryPoints, creditsDeducted } = body;
+  const { installationId, repositoryFullName, prNumber, prTitle, prAuthor, summaryPoints, creditsDeducted } = body;
 
   if (
     !installationId ||
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
       repositoryFullName,
       prNumber,
       prTitle,
+      prAuthor: prAuthor ?? '',
       summaryPoints: JSON.stringify(summaryPoints),
       creditsDeducted: String(creditsDeducted ?? 0),
     })

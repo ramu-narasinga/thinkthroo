@@ -120,4 +120,20 @@ export class DocumentModel {
 
     return result[0];
   };
+
+  /**
+   * Find a document UUID by name within a repository, scoped to this user.
+   * Used to resolve architecture doc references from the bot.
+   */
+  getIdByName = async (repositoryId: string, name: string): Promise<string | null> => {
+    const doc = await this.db.query.documents.findFirst({
+      where: and(
+        eq(documents.userId, this.userId),
+        eq(documents.repositoryId, repositoryId),
+        eq(documents.name, name),
+      ),
+      columns: { id: true },
+    });
+    return doc?.id ?? null;
+  };
 }

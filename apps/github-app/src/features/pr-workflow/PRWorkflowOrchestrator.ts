@@ -173,18 +173,35 @@ export class PRWorkflowOrchestrator {
       try {
         const finalSummaryText = summaryGenerator?.getFinalSummary() ?? "";
         const summaryPoints = ReviewService.parseSummaryPoints(finalSummaryText);
+        const prAuthor = this.context.payload.pull_request.user.login;
 
         if (summaryPoints.length > 0) {
           const reviewService = new ReviewService();
-          await reviewService.saveReview({
+          const saveResult = await reviewService.saveReview({
             installationId,
             repositoryFullName,
             prNumber: pullNumber,
             prTitle: this.context.payload.pull_request.title,
+            prAuthor,
             summaryPoints,
             creditsDeducted,
           });
           logger.info("PR review summary saved to platform", { prNumber: pullNumber });
+
+          // Step 6: Persist architecture file results if we have them
+          const fileResults = architectureReviewGenerator?.getFileResults() ?? [];
+          if (saveResult.success && saveResult.reviewId && fileResults.length > 0) {
+            await reviewService.saveArchitectureResults({
+              prReviewId: saveResult.reviewId,
+              repositoryFullName,
+              installationId,
+              fileResults,
+            });
+            logger.info("Architecture file results saved to platform", {
+              prNumber: pullNumber,
+              fileCount: fileResults.length,
+            });
+          }
         } else {
           logger.info("No summary points to save, skipping review persistence", { prNumber: pullNumber });
         }
