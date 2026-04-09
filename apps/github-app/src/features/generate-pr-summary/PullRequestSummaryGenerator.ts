@@ -9,7 +9,7 @@ import { FileSummarizer, type SummaryResult } from "@/services/summarization/Fil
 import { ClaudeBot } from "@/services/ai/ClaudeBot";
 import { Prompts } from "@/services/ai/Prompts";
 import type { TemplateData } from "@/services/ai/Prompts";
-import { getDefaultAIOptions, ClaudeModel, type AIOptions } from "@/services/ai/types";
+import { getDefaultAIOptions, ClaudeModel, type AIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
 import pLimit from "p-limit";
 import { logger } from "@/utils/logger";
 
@@ -545,5 +545,15 @@ export class PullRequestSummaryGenerator {
 
     // Return summaries for use in review filtering
     return summaries;
+  }
+
+  /**
+   * Returns the accumulated AI token usage across both bots used in this generator.
+   */
+  getAccumulatedUsage(): BotAccumulatedUsage[] {
+    return [
+      this.summaryBot.getAccumulatedUsage(),
+      this.reviewBot.getAccumulatedUsage(),
+    ];
   }
 }

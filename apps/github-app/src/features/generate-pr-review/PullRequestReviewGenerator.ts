@@ -8,7 +8,7 @@ import { FileReviewer } from "@/services/reviews/FileReviewer";
 import { FileReviewFilter } from "@/services/reviews/FileReviewFilter";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
 import type { SummaryResult } from "@/services/summarization/FileSummarizer";
-import { getDefaultAIOptions, ClaudeModel, type AIOptions } from "@/services/ai/types";
+import { getDefaultAIOptions, ClaudeModel, type AIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
 import { logger } from "@/utils/logger";
 
 export interface PullRequestReviewOptions {
@@ -381,5 +381,12 @@ ${
       reviewedFiles: reviewedFiles.length,
       totalComments: totalReviews,
     });
+  }
+
+  /**
+   * Returns the accumulated AI token usage for this generator's review bot.
+   */
+  getAccumulatedUsage(): BotAccumulatedUsage[] {
+    return [this.reviewBot.getAccumulatedUsage()];
   }
 }

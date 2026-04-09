@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 // TODO: implement p-retry?
 import { retry } from "./retry";
-import type { ClaudeBotConfig } from "./types";
+import type { BotAccumulatedUsage, ClaudeBotConfig } from "./types";
 import { logger } from "@/utils/logger";
 
 /**
@@ -28,6 +28,7 @@ export interface BotResponse {
 export class ClaudeBot {
   private readonly client: Anthropic;
   private readonly config: ClaudeBotConfig;
+  private accumulatedUsage: BotAccumulatedUsage;
 
   constructor(config: ClaudeBotConfig, apiKey?: string) {
     logger.debug("Initializing ClaudeBot", {
@@ -47,6 +48,7 @@ export class ClaudeBot {
     }
 
     this.config = config;
+    this.accumulatedUsage = { model: config.model, inputTokens: 0, outputTokens: 0 };
     this.client = new Anthropic({
       apiKey: apiKey || process.env.ANTHROPIC_API_KEY,
     });
@@ -136,6 +138,9 @@ export class ClaudeBot {
       );
 
       const end = Date.now();
+
+      this.accumulatedUsage.inputTokens += response.usage?.input_tokens ?? 0;
+      this.accumulatedUsage.outputTokens += response.usage?.output_tokens ?? 0;
 
       logger.info("Claude API response received successfully", {
         responseTimeMs: end - start,
@@ -253,6 +258,13 @@ Current date: ${currentDate}`;
    */
   getModel(): string {
     return this.config.model;
+  }
+
+  /**
+   * Get accumulated token usage across all chat() calls on this instance
+   */
+  getAccumulatedUsage(): BotAccumulatedUsage {
+    return { ...this.accumulatedUsage };
   }
 
   /**

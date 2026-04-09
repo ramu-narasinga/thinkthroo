@@ -8,7 +8,7 @@ import { ReviewParser } from "@/services/reviews/ReviewParser";
 import type { ReviewComment } from "@/services/reviews/ReviewParser";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
 import { ArchitectureService } from "@/services/architecture/ArchitectureService";
-import { getDefaultAIOptions } from "@/services/ai/types";
+import { getDefaultAIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
 import { ARCHITECTURE_REVIEW_TAG, COMMENT_GREETING } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
@@ -305,5 +305,12 @@ ${ARCHITECTURE_REVIEW_TAG}`;
         error: error.message,
       });
     }
+  }
+
+  /**
+   * Returns the accumulated AI token usage for this generator's review bot.
+   */
+  getAccumulatedUsage(): BotAccumulatedUsage[] {
+    return [this.reviewBot.getAccumulatedUsage()];
   }
 }

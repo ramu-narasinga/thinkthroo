@@ -22,4 +22,10 @@ export const env = {
 
   /** Shared secret sent as x-internal-secret header to the platform API */
   PLATFORM_API_SECRET: process.env.PLATFORM_API_SECRET,
+
+  /**
+   * Markup multiplier applied on top of raw Anthropic cost when deducting credits.
+   * 1 = no markup (passthrough), 3 = 3× (67% margin). Defaults to 3.
+   */
+  AI_MARKUP_MULTIPLIER: Number(process.env.AI_MARKUP_MULTIPLIER ?? 3),
 } as const;
