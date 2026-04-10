@@ -9,6 +9,7 @@ import type { ReviewComment } from "@/services/reviews/ReviewParser";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
 import { ArchitectureService } from "@/services/architecture/ArchitectureService";
 import { getDefaultAIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
+import { calculateCostUsd, calculateCredits } from "@/services/ai/pricing";
 import { ARCHITECTURE_REVIEW_TAG, COMMENT_GREETING } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
@@ -28,6 +29,7 @@ export interface ArchitectureFileResult {
   score: number;
   violations: ReviewComment[];
   docReferences: ArchitectureDocReference[];
+  creditsDeducted: number;
 }
 
 interface FileViolations {
@@ -228,9 +230,17 @@ export class ArchitectureReviewGenerator {
     const prompt = this.prompts.renderArchitectureReviewFileDiff(templateData);
 
     let response: string;
+    let fileCredits = 0;
     try {
+      const usageBefore = this.reviewBot.getAccumulatedUsage();
       const botResponse = await this.reviewBot.chat(prompt);
+      const usageAfter = this.reviewBot.getAccumulatedUsage();
       response = botResponse.text;
+
+      const deltaInput = usageAfter.inputTokens - usageBefore.inputTokens;
+      const deltaOutput = usageAfter.outputTokens - usageBefore.outputTokens;
+      const costUsd = calculateCostUsd(usageAfter.model, deltaInput, deltaOutput);
+      fileCredits = calculateCredits(costUsd);
     } catch (error: any) {
       logger.error("Claude architecture review call failed", {
         filename,
@@ -271,7 +281,7 @@ export class ArchitectureReviewGenerator {
       name: chunk.name,
       excerpt: chunk.text.slice(0, 200),
     }));
-    this.fileResults.push({ filename, violationCount: violations.length, score, violations, docReferences });
+    this.fileResults.push({ filename, violationCount: violations.length, score, violations, docReferences, creditsDeducted: fileCredits });
 
     return violations;
   }

@@ -31,6 +31,7 @@ export class ReviewClientService {
       score: r.score,
       violations: r.violations,
       docReferences: r.docReferences,
+      creditsDeducted: r.creditsDeducted,
     }));
   };
 }

@@ -39,6 +39,7 @@ export class ReviewModel {
         score: prArchitectureFileResults.score,
         violations: prArchitectureFileResults.violations,
         docReferences: prArchitectureFileResults.docReferences,
+        creditsDeducted: prArchitectureFileResults.creditsDeducted,
       })
       .from(prArchitectureFileResults)
       .innerJoin(prReviews, eq(prReviews.id, prArchitectureFileResults.prReviewId))

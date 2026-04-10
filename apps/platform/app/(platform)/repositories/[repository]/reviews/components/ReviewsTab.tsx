@@ -5,8 +5,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowUpDown, ArrowDown, GitPullRequest,
-  ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
-  User, AlertTriangle, FileText,
+  ChevronLeft, ChevronRight,
+  User, FileText,
 } from "lucide-react";
 import { Button } from "@thinkthroo/ui/components/button";
 import { useReviewStore } from "@/store/review";
@@ -79,16 +79,29 @@ function ArchitecturePanel({ prReviewId, repoName }: { prReviewId: string; repoN
           <tr>
             <th className="px-3 py-2 font-medium text-muted-foreground">File</th>
             <th className="px-3 py-2 font-medium text-muted-foreground w-16 text-center">Score</th>
-            <th className="px-3 py-2 font-medium text-muted-foreground w-20 text-center">Violations</th>
+            <th className="px-3 py-2 font-medium text-muted-foreground">Violations</th>
             <th className="px-3 py-2 font-medium text-muted-foreground">Doc References</th>
+            <th className="px-3 py-2 font-medium text-muted-foreground w-20 text-right">Credits</th>
           </tr>
         </thead>
         <tbody className="divide-y">
           {results.map((file: ArchitectureFileResult) => (
-            <tr key={file.id} className="hover:bg-slate-50/60">
+            <tr key={file.id} className="hover:bg-slate-50/60 align-top">
               <td className="px-3 py-2 font-mono text-xs break-all">{file.filename}</td>
               <td className="px-3 py-2 text-center"><ScoreBadge score={file.score} /></td>
-              <td className="px-3 py-2 text-center text-muted-foreground">{file.violationCount}</td>
+              <td className="px-3 py-2">
+                <span className="text-muted-foreground text-xs font-medium">{file.violationCount}</span>
+                {file.violations.length > 0 && (
+                  <ul className="mt-1 space-y-0.5">
+                    {file.violations.map((v, i) => (
+                      <li key={i} className="text-xs text-muted-foreground leading-snug">
+                        <span className="text-slate-500">L{v.startLine}–{v.endLine}:</span>{" "}
+                        {v.comment.split("\n")[0]}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </td>
               <td className="px-3 py-2">
                 {file.docReferences.length === 0 ? (
                   <span className="text-muted-foreground text-xs">—</span>
@@ -115,6 +128,9 @@ function ArchitecturePanel({ prReviewId, repoName }: { prReviewId: string; repoN
                   </div>
                 )}
               </td>
+              <td className="px-3 py-2 text-right text-xs text-muted-foreground whitespace-nowrap">
+                {file.creditsDeducted.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -137,22 +153,10 @@ export function ReviewsTab() {
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(1);
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   React.useEffect(() => {
     fetchReviews(repositoryFullName);
   }, [repositoryFullName, fetchReviews]);
-
-  // Auto-expand all rows once loaded
-  React.useEffect(() => {
-    if (reviews.length > 0) {
-      setExpanded((prev) => {
-        const next = { ...prev };
-        reviews.forEach((r) => { if (!(r.id in next)) next[r.id] = true; });
-        return next;
-      });
-    }
-  }, [reviews]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -290,21 +294,7 @@ export function ReviewsTab() {
                 </div>
               </div>
 
-              {/* Architecture panel toggle */}
-              <button
-                type="button"
-                onClick={() => setExpanded((prev) => ({ ...prev, [review.id]: !prev[review.id] }))}
-                className="mt-3 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-              >
-                {expanded[review.id]
-                  ? <><ChevronUp className="h-3.5 w-3.5" /> Hide architecture report</>
-                  : <><ChevronDown className="h-3.5 w-3.5" /> Show architecture report</>
-                }
-              </button>
-
-              {expanded[review.id] && (
-                <ArchitecturePanel prReviewId={review.id} repoName={repoName} />
-              )}
+              <ArchitecturePanel prReviewId={review.id} repoName={repoName} />
             </div>
           ))}
         </div>

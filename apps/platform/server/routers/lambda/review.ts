@@ -44,6 +44,7 @@ export const reviewRouter = router({
         ...r,
         violations: JSON.parse(r.violations) as { startLine: number; endLine: number; comment: string }[],
         docReferences: JSON.parse(r.docReferences) as { name: string; excerpt: string; documentId: string | null }[],
+        creditsDeducted: Number(r.creditsDeducted),
       }));
     }),
 });

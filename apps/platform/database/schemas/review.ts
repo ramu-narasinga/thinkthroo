@@ -40,6 +40,7 @@ export const prArchitectureFileResults = pgTable('pr_architecture_file_results',
   score: integer('score').notNull().default(100),
   violations: text('violations').notNull().default('[]'), // JSON: {startLine,endLine,comment}[]
   docReferences: text('doc_references').notNull().default('[]'), // JSON: {name,excerpt,documentId}[]
+  creditsDeducted: numeric('credits_deducted', { precision: 10, scale: 4 }).notNull().default('0'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
   pgPolicy('Enable read access for users to their architecture file results', {

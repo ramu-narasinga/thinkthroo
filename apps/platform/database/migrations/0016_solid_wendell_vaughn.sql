@@ -1,0 +1,1 @@
+ALTER TABLE "pr_architecture_file_results" ADD COLUMN "credits_deducted" numeric(10, 4) DEFAULT '0' NOT NULL;

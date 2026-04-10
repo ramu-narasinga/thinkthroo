@@ -17,6 +17,7 @@ export interface ArchitectureFileResult {
   score: number;
   violations: ArchitectureViolation[];
   docReferences: ArchitectureDocRef[];
+  creditsDeducted: number;
 }
 
 export interface ReviewItem {

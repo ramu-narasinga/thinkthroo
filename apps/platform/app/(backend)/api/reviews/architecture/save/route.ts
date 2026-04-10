@@ -14,6 +14,7 @@ interface FileResult {
   score: number;
   violations: { startLine: number; endLine: number; comment: string }[];
   docReferences: DocReference[];
+  creditsDeducted?: number;
 }
 
 export async function POST(req: NextRequest) {
@@ -95,6 +96,7 @@ export async function POST(req: NextRequest) {
         score: file.score,
         violations: JSON.stringify(file.violations),
         docReferences: JSON.stringify(resolvedRefs),
+        creditsDeducted: String(file.creditsDeducted ?? 0),
       };
     }),
   );
