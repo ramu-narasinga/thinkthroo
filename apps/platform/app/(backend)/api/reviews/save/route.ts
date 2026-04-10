@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq, and } from 'drizzle-orm';
 import { serverDB } from '@/database';
 import { installations, organizations, prReviews } from '@/database/schemas';
+import { notifyPrReview } from '@/service/slack/channel';
 
 export async function POST(req: NextRequest) {
   const secret = req.headers.get('x-internal-secret');
@@ -17,6 +18,7 @@ export async function POST(req: NextRequest) {
     prAuthor?: string;
     summaryPoints?: string[];
     creditsDeducted?: number;
+    hasArchitectureResults?: boolean;
   };
 
   try {
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { installationId, repositoryFullName, prNumber, prTitle, prAuthor, summaryPoints, creditsDeducted } = body;
+  const { installationId, repositoryFullName, prNumber, prTitle, prAuthor, summaryPoints, creditsDeducted, hasArchitectureResults } = body;
 
   if (
     !installationId ||
@@ -77,6 +79,26 @@ export async function POST(req: NextRequest) {
       creditsDeducted: String(creditsDeducted ?? 0),
     })
     .returning({ id: prReviews.id });
+
+  // Only send Slack notification for PR-only reviews (no architecture results coming)
+  if (!hasArchitectureResults) {
+    try {
+      const slackStatus = await notifyPrReview(serverDB, org.id, {
+        repositoryFullName,
+        prNumber,
+        prTitle,
+        prAuthor: prAuthor ?? '',
+        summaryPoints,
+      });
+
+      await serverDB
+        .update(prReviews)
+        .set({ slackStatus })
+        .where(eq(prReviews.id, review.id));
+    } catch (err) {
+      console.error('[ReviewSave] Slack notification error:', err);
+    }
+  }
 
   return NextResponse.json({ success: true, reviewId: review.id });
 }

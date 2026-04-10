@@ -177,6 +177,7 @@ export class PRWorkflowOrchestrator {
 
         if (summaryPoints.length > 0) {
           const reviewService = new ReviewService();
+          const fileResults = architectureReviewGenerator?.getFileResults() ?? [];
           const saveResult = await reviewService.saveReview({
             installationId,
             repositoryFullName,
@@ -185,11 +186,11 @@ export class PRWorkflowOrchestrator {
             prAuthor,
             summaryPoints,
             creditsDeducted,
+            hasArchitectureResults: fileResults.length > 0,
           });
           logger.info("PR review summary saved to platform", { prNumber: pullNumber });
 
           // Step 6: Persist architecture file results if we have them
-          const fileResults = architectureReviewGenerator?.getFileResults() ?? [];
           if (saveResult.success && saveResult.reviewId && fileResults.length > 0) {
             await reviewService.saveArchitectureResults({
               prReviewId: saveResult.reviewId,

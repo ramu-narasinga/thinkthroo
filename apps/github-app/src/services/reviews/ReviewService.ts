@@ -45,6 +45,7 @@ export class ReviewService {
     prAuthor: string;
     summaryPoints: string[];
     creditsDeducted: number;
+    hasArchitectureResults: boolean;
   }): Promise<SaveReviewResult> {
     const url = `${this.baseUrl}/api/reviews/save`;
 

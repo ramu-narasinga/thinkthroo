@@ -6,7 +6,7 @@ import { PlanUsageCard } from "@thinkthroo/ui/components/plan-usage-card"
 
 import { useOrganizationStore } from "@/store/organization"
 import { organizationSelectors } from "@/store/organization/selectors"
-import { PLAN_CREDIT_MAX, PLAN_DOC_STORAGE_MB } from "@/const/pricing"
+import { PLAN_DOC_STORAGE_MB } from "@/const/pricing"
 import { BuyCreditsModal } from "./buy-credits-modal"
 
 export function SidebarOptInForm() {
@@ -24,7 +24,6 @@ export function SidebarOptInForm() {
       <PlanUsageCard
         planName={planName}
         creditBalance={creditBalance}
-        creditMax={PLAN_CREDIT_MAX[planName] ?? 50}
         docStorageUsedMB={docStorageUsedMB}
         docStorageMaxMB={PLAN_DOC_STORAGE_MB[planName] ?? 25}
         isPro={isPro}

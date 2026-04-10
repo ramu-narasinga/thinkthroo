@@ -8,8 +8,6 @@ export interface PlanUsageCardProps {
   planName: string
   /** Current credit balance */
   creditBalance: number
-  /** Max credits for this plan */
-  creditMax: number
   /** Current doc storage used in MB */
   docStorageUsedMB: number
   /** Max doc storage for this plan in MB */
@@ -27,41 +25,16 @@ function formatMB(mb: number): string {
   return `${mb % 1 === 0 ? mb : mb.toFixed(1)} MB`
 }
 
-interface StatRowProps {
-  label: string
-  value: string
-  progressPercent: number
-  unlimited?: boolean
-}
-
-function StatRow({ label, value, progressPercent, unlimited }: StatRowProps) {
-  return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium tabular-nums">{value}</span>
-      </div>
-      <Progress
-        value={unlimited ? 100 : progressPercent}
-        className={`h-1.5 ${unlimited ? "opacity-30" : ""}`}
-      />
-    </div>
-  )
-}
-
 export function PlanUsageCard({
   planName,
   creditBalance,
-  creditMax,
   docStorageUsedMB,
   docStorageMaxMB,
   isPro,
   onBuyCredits,
   onUpgrade,
 }: PlanUsageCardProps) {
-  const creditPercent = Math.min(100, (creditBalance / Math.max(creditMax, 1)) * 100)
   const docPercent = Math.min(100, (docStorageUsedMB / Math.max(docStorageMaxMB, 1)) * 100)
-
   const docLabel = `${formatMB(docStorageUsedMB)} / ${formatMB(docStorageMaxMB)}`
 
   return (
@@ -74,18 +47,18 @@ export function PlanUsageCard({
       </CardHeader>
 
       <CardContent className="px-4 space-y-4">
-        {/* Stats with progress bars */}
         <div className="space-y-3">
-          <StatRow
-            label="Credits remaining"
-            value={`${creditBalance.toLocaleString()} / ${creditMax.toLocaleString()}`}
-            progressPercent={creditPercent}
-          />
-          <StatRow
-            label="Doc storage"
-            value={docLabel}
-            progressPercent={docPercent}
-          />
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Credits</span>
+            <span className="font-medium tabular-nums">{creditBalance.toLocaleString()}</span>
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Doc storage</span>
+              <span className="font-medium tabular-nums">{docLabel}</span>
+            </div>
+            <Progress value={docPercent} className="h-1.5" />
+          </div>
         </div>
 
         {/* CTA */}

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and } from 'drizzle-orm';
 import { serverDB } from '@/database';
-import { installations, repositories, prArchitectureFileResults, documents } from '@/database/schemas';
+import { installations, repositories, prArchitectureFileResults, documents, prReviews } from '@/database/schemas';
+import { notifyPrReview } from '@/service/slack/channel';
 
 interface DocReference {
   name: string;
@@ -102,6 +103,53 @@ export async function POST(req: NextRequest) {
   );
 
   await serverDB.insert(prArchitectureFileResults).values(rows);
+
+  // Send combined Slack notification (PR summary + architecture results)
+  try {
+    const [review] = await serverDB
+      .select({
+        organizationId: prReviews.organizationId,
+        repositoryFullName: prReviews.repositoryFullName,
+        prNumber: prReviews.prNumber,
+        prTitle: prReviews.prTitle,
+        prAuthor: prReviews.prAuthor,
+        summaryPoints: prReviews.summaryPoints,
+      })
+      .from(prReviews)
+      .where(eq(prReviews.id, prReviewId))
+      .limit(1);
+
+    if (review) {
+      const parsedSummary = (() => {
+        try {
+          return JSON.parse(review.summaryPoints as string) as string[];
+        } catch {
+          return [];
+        }
+      })();
+
+      const slackStatus = await notifyPrReview(serverDB, review.organizationId, {
+        repositoryFullName: review.repositoryFullName,
+        prNumber: review.prNumber,
+        prTitle: review.prTitle,
+        prAuthor: review.prAuthor ?? '',
+        summaryPoints: parsedSummary,
+        fileResults: fileResults.map((f) => ({
+          filename: f.filename,
+          violationCount: f.violationCount,
+          score: f.score,
+        })),
+      });
+
+      // Update slack status on the PR review
+      await serverDB
+        .update(prReviews)
+        .set({ slackStatus })
+        .where(eq(prReviews.id, prReviewId));
+    }
+  } catch (err) {
+    console.error('[ArchitectureSave] Slack notification error:', err);
+  }
 
   return NextResponse.json({ success: true });
 }
