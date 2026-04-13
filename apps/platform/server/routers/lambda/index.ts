@@ -6,6 +6,7 @@ import { courseProgressRouter } from './courseProgress';
 import { reviewRouter } from './review';
 import { analyticsRouter } from './analytics';
 import { slackRouter } from './slack';
+import { inviteRouter } from './invite';
 
 export const lambdaRouter = router({
   document: documentRouter,
@@ -15,4 +16,5 @@ export const lambdaRouter = router({
   review: reviewRouter,
   analytics: analyticsRouter,
   slack: slackRouter,
+  invite: inviteRouter,
 });export type LambdaRouter = typeof lambdaRouter;
