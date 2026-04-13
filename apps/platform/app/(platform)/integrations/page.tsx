@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PrivatePageGuard from "@/components/private-page-guard";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ interface SlackIntegration {
   isActive: boolean;
 }
 
-export default function IntegrationsPage() {
+function IntegrationsContent() {
   const searchParams = useSearchParams();
   const activeOrg = useOrganizationStore(organizationSelectors.activeOrg);
   const [slackIntegration, setSlackIntegration] =
@@ -229,5 +229,13 @@ export default function IntegrationsPage() {
         </div>
       </div>
     </PrivatePageGuard>
+  );
+}
+
+export default function IntegrationsPage() {
+  return (
+    <Suspense>
+      <IntegrationsContent />
+    </Suspense>
   );
 }
