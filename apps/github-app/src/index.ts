@@ -1,4 +1,6 @@
-import "./utils/sentry";
+import { initPostHogLogs } from "./utils/posthog-logs";
+
+initPostHogLogs();
 
 import { Probot } from "probot";
 import { greetIssue } from "./features/issue-greeting";
@@ -101,7 +103,6 @@ export default (app: Probot) => {
         reviewOptions: {
           maxFiles: 50,
           maxConcurrency: 5,
-          reviewCommentLGTM: false,
           debug: false,
         },
       });

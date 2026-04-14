@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import * as Sentry from '@sentry/nextjs';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useDocuments } from '../hooks/useDocuments';
 import { useDocumentMutations } from '../hooks/useDocumentMutations';
@@ -79,17 +78,9 @@ export default function ArchitectureTab() {
         const repo = await documentClientService.getRepositoryIdByName(repositoryName);
         setRepositoryId(repo.id);
         setRepoError(null);
-        Sentry.logger.info(
-          Sentry.logger.fmt`Fetched repositoryId for ${repositoryName}`,
-          { repositoryName, repositoryId: repo.id, timestamp: new Date().toISOString() }
-        );
       } catch (error) {
         console.error('[ArchitectureTab] Error fetching repository:', error);
         setRepoError(error instanceof Error ? error.message : 'Failed to load repository');
-        Sentry.logger.error(
-          Sentry.logger.fmt`Error fetching repositoryId for ${repositoryName}: ${error instanceof Error ? error.message : error}`,
-          { repositoryName, error_message: error instanceof Error ? error.message : String(error), timestamp: new Date().toISOString() }
-        );
       } finally {
         setIsLoadingRepo(false);
       }

@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import * as Sentry from '@sentry/nextjs';
 
 const ArchitectureTab = dynamic(() => import('./components/ArchitectureTab'), {
   loading: () => (
@@ -12,9 +11,5 @@ const ArchitectureTab = dynamic(() => import('./components/ArchitectureTab'), {
 });
 
 export default function ArchitecturePage() {
-  Sentry.logger.info(
-    Sentry.logger.fmt`Architecture page loaded`,
-    { timestamp: new Date().toISOString() }
-  );
   return <ArchitectureTab />;
 }

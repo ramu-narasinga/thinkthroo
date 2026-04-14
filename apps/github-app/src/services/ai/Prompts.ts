@@ -234,7 +234,7 @@ For fixes, use \`diff\` code blocks, marking changes with \`+\` or \`-\`. The li
 - Do NOT provide general feedback, summaries, explanations of changes, or praise.
 - ONLY comment when the code in the hunk directly violates one of the architecture rules listed above.
 - For each violation, cite the specific rule that is being violated.
-- If a hunk does not violate any architecture rule, you MUST respond with \`LGTM!\` for that line range.
+- If a hunk does not violate any architecture rule, do NOT output anything for that line range.
 
 ## Example
 
@@ -283,9 +283,6 @@ Violates rule: "All functions must return early on error before performing logic
 -    retrn z
 +    return z
 \`\`\`
----
-24-25:
-LGTM!
 ---
 
 ## Changes made to \`$filename\` for your review

@@ -1,5 +1,6 @@
 import pino from "pino";
-import * as Sentry from "@sentry/node";
+import { SeverityNumber, type AnyValueMap } from "@opentelemetry/api-logs";
+import { getPostHogLogger } from "./posthog-logs";
 import { env } from "./env";
 
 // Console stream for terminal output
@@ -13,39 +14,34 @@ const pinoLogger = pino(
   consoleStream
 );
 
-/**
- * Logger that outputs to console via Pino and sends to Sentry Logs
- * - Console: via Pino (formatted terminal output)
- * - Sentry Logs: via Sentry.logger API (appears in Sentry Logs view, not Issues)
- */
 export const logger = {
   info: (msg: string, obj?: Record<string, unknown>) => {
     pinoLogger.info(obj || {}, msg);
-    Sentry.logger.info(msg, obj);
+    getPostHogLogger().emit({ severityText: "info", severityNumber: SeverityNumber.INFO, body: msg, attributes: obj as AnyValueMap });
   },
 
   warn: (msg: string, obj?: Record<string, unknown>) => {
     pinoLogger.warn(obj || {}, msg);
-    Sentry.logger.warn(msg, obj);
+    getPostHogLogger().emit({ severityText: "warn", severityNumber: SeverityNumber.WARN, body: msg, attributes: obj as AnyValueMap });
   },
 
   error: (msg: string, obj?: Record<string, unknown>) => {
     pinoLogger.error(obj || {}, msg);
-    Sentry.logger.error(msg, obj);
+    getPostHogLogger().emit({ severityText: "error", severityNumber: SeverityNumber.ERROR, body: msg, attributes: obj as AnyValueMap });
   },
 
   debug: (msg: string, obj?: Record<string, unknown>) => {
     pinoLogger.debug(obj || {}, msg);
-    Sentry.logger.debug(msg, obj);
+    getPostHogLogger().emit({ severityText: "debug", severityNumber: SeverityNumber.DEBUG, body: msg, attributes: obj as AnyValueMap });
   },
 
   trace: (msg: string, obj?: Record<string, unknown>) => {
     pinoLogger.trace(obj || {}, msg);
-    Sentry.logger.trace(msg, obj);
+    getPostHogLogger().emit({ severityText: "trace", severityNumber: SeverityNumber.TRACE, body: msg, attributes: obj as AnyValueMap });
   },
 
   fatal: (msg: string, obj?: Record<string, unknown>) => {
     pinoLogger.fatal(obj || {}, msg);
-    Sentry.logger.fatal(msg, obj);
+    getPostHogLogger().emit({ severityText: "fatal", severityNumber: SeverityNumber.FATAL, body: msg, attributes: obj as AnyValueMap });
   },
 };

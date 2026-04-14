@@ -8,14 +8,12 @@ import { logger } from "@/utils/logger";
 
 export interface ReviewOptions {
   maxRequestTokens: number;
-  reviewCommentLGTM: boolean;
   debug: boolean;
 }
 
 export interface ReviewResult {
   filename: string;
   reviewCount: number;
-  lgtmCount: number;
   failed: boolean;
   reason?: string;
 }
@@ -35,7 +33,6 @@ export class FileReviewer {
   ) {
     logger.debug("FileReviewer initialized", {
       maxRequestTokens: options.maxRequestTokens,
-      reviewCommentLGTM: options.reviewCommentLGTM,
       debug: options.debug,
     });
     this.reviewParser = new ReviewParser();
@@ -66,7 +63,6 @@ export class FileReviewer {
     const result: ReviewResult = {
       filename,
       reviewCount: 0,
-      lgtmCount: 0,
       failed: false,
     };
 
@@ -259,17 +255,6 @@ export class FileReviewer {
         });
 
         for (const review of reviews) {
-          // Check for LGTM
-          if (!this.options.reviewCommentLGTM && this.reviewParser.isLGTM(review.comment)) {
-            logger.debug("LGTM comment detected, skipping", {
-              filename,
-              pullNumber,
-              lineRange: `${review.startLine}-${review.endLine}`,
-            });
-            result.lgtmCount += 1;
-            continue;
-          }
-
           try {
             logger.debug("Buffering review comment", {
               filename,
@@ -321,7 +306,6 @@ export class FileReviewer {
       pullNumber,
       durationMs: duration,
       reviewCount: result.reviewCount,
-      lgtmCount: result.lgtmCount,
       failed: result.failed,
       reason: result.reason,
     });

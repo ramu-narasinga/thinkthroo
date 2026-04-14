@@ -5,9 +5,6 @@ export const env = {
   /** Log level - "trace" | "debug" | "info" | "warn" | "error" | "fatal" */
   LOG_LEVEL: process.env.LOG_LEVEL || "info",
   
-  /** Sentry DSN for error tracking and log transport */
-  SENTRY_DSN: process.env.SENTRY_DSN,
-  
   /** Anthropic API key for Claude */
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   
@@ -28,4 +25,7 @@ export const env = {
    * 1 = no markup (passthrough), 3 = 3× (67% margin). Defaults to 3.
    */
   AI_MARKUP_MULTIPLIER: Number(process.env.AI_MARKUP_MULTIPLIER ?? 3),
+
+  /** PostHog project token (phc_...) for sending logs via OpenTelemetry */
+  POSTHOG_PROJECT_TOKEN: process.env.POSTHOG_PROJECT_TOKEN,
 } as const;

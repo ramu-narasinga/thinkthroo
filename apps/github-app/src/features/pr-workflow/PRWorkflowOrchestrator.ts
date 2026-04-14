@@ -19,7 +19,6 @@ export interface PRWorkflowOptions {
   useSummaryFiltering?: boolean;
   enableArchitectureReview?: boolean;
   reviewOptions?: {
-    reviewCommentLGTM?: boolean;
     maxConcurrency?: number;
     maxFiles?: number;
     debug?: boolean;

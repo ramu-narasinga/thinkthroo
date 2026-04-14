@@ -16,3 +16,5 @@ export * from './courseProgress';
 export * from './skillStats';
 export * from './review';
 export * from './slackIntegration';
+export * from './repositorySettings';
+export * from './organizationSettings';

@@ -13,7 +13,6 @@ import { logger } from "@/utils/logger";
 
 export interface PullRequestReviewOptions {
   disableReview?: boolean;
-  reviewCommentLGTM?: boolean;
   maxConcurrency?: number;
   maxFiles?: number;
   maxRequestTokens?: number;
@@ -26,7 +25,6 @@ export interface PullRequestReviewOptions {
 export class PullRequestReviewGenerator {
   private readonly defaultOptions: Omit<Required<PullRequestReviewOptions>, 'summaries' | 'reviewStartSha'> = {
     disableReview: false,
-    reviewCommentLGTM: false,
     maxConcurrency: 5,
     maxFiles: 50,
     maxRequestTokens: 10000,
@@ -190,7 +188,6 @@ export class PullRequestReviewGenerator {
       reviewCommentManager,
       {
         maxRequestTokens: this.aiOptions.reviewBot.tokenLimits.requestTokens,
-        reviewCommentLGTM: opts.reviewCommentLGTM ?? false,
         debug: opts.debug ?? false,
       }
     );
@@ -244,7 +241,6 @@ export class PullRequestReviewGenerator {
 
     // Step 5: Analyze results
     const totalReviews = results.reduce((sum: number, r) => sum + r.reviewCount, 0);
-    const totalLGTMs = results.reduce((sum: number, r) => sum + r.lgtmCount, 0);
     const failedFiles = results.filter((r) => r.failed);
     const reviewedFiles = results.filter((r) => !r.failed);
     const reviewsFailed = fileReviewer.getReviewsFailed();
@@ -253,8 +249,6 @@ export class PullRequestReviewGenerator {
       prNumber: pullNumber,
       reviewedFilesCount: reviewedFiles.length,
       totalReviewComments: totalReviews,
-      lgtmComments: totalLGTMs,
-      lgtmIncluded: opts.reviewCommentLGTM,
       failedFilesCount: failedFiles.length,
     });
 
@@ -328,10 +322,9 @@ ${
     : ''
 }
 <details>
-<summary>Review comments generated (${totalReviews + totalLGTMs})</summary>
+<summary>Review comments generated (${totalReviews})</summary>
 
 * Review: ${totalReviews}
-* LGTM: ${totalLGTMs}
 
 </details>
 

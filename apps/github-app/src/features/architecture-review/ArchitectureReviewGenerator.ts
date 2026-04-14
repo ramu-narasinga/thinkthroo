@@ -257,14 +257,10 @@ export class ArchitectureReviewGenerator {
     }
 
     // Parse Claude's response
-    const reviewComments = this.reviewParser.parse(response, patches);
-    const violations = reviewComments.filter(
-      (c) => !this.reviewParser.isLGTM(c.comment)
-    );
+    const violations = this.reviewParser.parse(response, patches);
 
     logger.info("Architecture review parsed", {
       filename,
-      totalComments: reviewComments.length,
       violations: violations.length,
     });
 

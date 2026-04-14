@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams, usePathname, useRouter } from "next/navigation";
-import * as Sentry from '@sentry/nextjs';
 import { Button } from "@thinkthroo/ui/components/button";
 import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs";
 import PrivatePageGuard from "@/components/private-page-guard";
@@ -26,15 +25,6 @@ export default function RepositoryDetailLayout({
   const currentTab = pathname.split("/").pop();
 
   const handleTabChange = (value: string) => {
-    Sentry.logger.info(
-      Sentry.logger.fmt`Repository tab changed to ${value}`,
-      {
-        repository,
-        new_tab: value,
-        prev_tab: currentTab,
-        timestamp: new Date().toISOString(),
-      }
-    );
     router.push(`/repositories/${repository}/${value}`);
   };
 
