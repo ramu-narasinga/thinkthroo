@@ -26,6 +26,7 @@ export class PullRequestSummaryGenerator {
   private readonly fileSummarizer: FileSummarizer;
   private readonly aiOptions: AIOptions;
   private finalSummary = '';
+  private reviewStartCommit = '';
 
   constructor(private readonly context: Context<"pull_request">) {
     const issueDetails = context.issue();
@@ -104,6 +105,7 @@ export class PullRequestSummaryGenerator {
       pullRequest.base.sha,
       pullRequest.head.sha
     );
+    this.reviewStartCommit = reviewStartCommit;
     
     logger.info("Determined review start commit", { 
       prNumber: pullNumber, 
@@ -556,6 +558,14 @@ export class PullRequestSummaryGenerator {
    */
   getFinalSummary(): string {
     return this.finalSummary;
+  }
+
+  /**
+   * Returns the commit SHA from which the incremental review started.
+   * Only populated after generate() has completed.
+   */
+  getReviewStartCommit(): string {
+    return this.reviewStartCommit;
   }
 
   /**

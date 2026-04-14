@@ -20,10 +20,11 @@ export interface PullRequestReviewOptions {
   debug?: boolean;
   enableSummaryFiltering?: boolean;
   summaries?: SummaryResult[];
+  reviewStartSha?: string;
 }
 
 export class PullRequestReviewGenerator {
-  private readonly defaultOptions: Omit<Required<PullRequestReviewOptions>, 'summaries'> = {
+  private readonly defaultOptions: Omit<Required<PullRequestReviewOptions>, 'summaries' | 'reviewStartSha'> = {
     disableReview: false,
     reviewCommentLGTM: false,
     maxConcurrency: 5,
@@ -130,7 +131,8 @@ export class PullRequestReviewGenerator {
     logger.debug("Preprocessing PR for review", { prNumber: pullNumber });
     const preprocessResult = await this.preprocessor.process(
       pullRequest.base.sha,
-      pullRequest.head.sha
+      pullRequest.head.sha,
+      opts.reviewStartSha
     );
 
     if (!preprocessResult.success) {

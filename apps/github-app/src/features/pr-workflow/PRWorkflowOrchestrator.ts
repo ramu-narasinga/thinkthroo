@@ -6,6 +6,9 @@ import type { SummaryResult } from "@/services/summarization/FileSummarizer";
 import { CreditService } from "@/services/credits/CreditService";
 import { ReviewService } from "@/services/reviews/ReviewService";
 import type { BotAccumulatedUsage } from "@/services/ai/types";
+import { CommitAnalyzer } from "@/services/commits/CommitAnalyzer";
+import { CommentManager } from "@/services/comments/CommentManager";
+import { SUMMARIZE_TAG } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
 /** Minimum credits required to start a PR workflow run */
@@ -75,6 +78,35 @@ export class PRWorkflowOrchestrator {
     let reviewGenerator: PullRequestReviewGenerator | undefined;
     let architectureReviewGenerator: ArchitectureReviewGenerator | undefined;
 
+    // Step 0: Determine the incremental review start point independently of summary generation
+    const pullRequest = this.context.payload.pull_request;
+    const issueDetails = this.context.issue();
+    const octokit = this.context.octokit;
+    let reviewStartSha: string | undefined;
+
+    try {
+      const commitAnalyzer = new CommitAnalyzer(octokit, issueDetails);
+      const commentManager = new CommentManager(octokit, issueDetails);
+      const existingCommentData = await commentManager.getExistingCommentData(
+        pullNumber,
+        SUMMARIZE_TAG,
+        commitAnalyzer.getReviewedCommitIdsBlock.bind(commitAnalyzer)
+      );
+      const allCommitIds = await commitAnalyzer.getAllCommitIds(pullNumber);
+      reviewStartSha = commitAnalyzer.determineReviewStartCommit(
+        allCommitIds,
+        existingCommentData.commitIdsBlock,
+        pullRequest.base.sha,
+        pullRequest.head.sha
+      );
+      logger.info("Review start SHA determined independently", { prNumber: pullNumber, reviewStartSha });
+    } catch (err: any) {
+      logger.warn("Failed to determine review start SHA, will fall back to full review", {
+        prNumber: pullNumber,
+        error: err.message,
+      });
+    }
+
     // Step 1: Generate summaries (if enabled)
     if (options.generateSummaries !== false) {
       logger.info("Starting summary generation phase", { prNumber: pullNumber });
@@ -100,6 +132,7 @@ export class PRWorkflowOrchestrator {
     reviewGenerator = new PullRequestReviewGenerator(this.context, {
       enableSummaryFiltering: options.useSummaryFiltering !== false && !!summaries,
       summaries,
+      reviewStartSha,
       ...options.reviewOptions,
     });
 
@@ -116,7 +149,7 @@ export class PRWorkflowOrchestrator {
       try {
         architectureReviewGenerator = new ArchitectureReviewGenerator(
           this.context,
-          { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50 }
+          { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50, reviewStartSha }
         );
         await architectureReviewGenerator.generate(shortSummary);
         logger.info("Architecture review phase complete", { prNumber: pullNumber });
