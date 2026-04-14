@@ -8,7 +8,7 @@ import PrivatePageGuard from "@/components/private-page-guard";
 const tabs = [
   { label: "Codebase Architecture", value: "architecture" },
   { label: "Reviews", value: "reviews" },
-  { label: "General", value: "general" },
+  { label: "Settings", value: "settings" },
 ];
 
 export default function RepositoryDetailLayout({

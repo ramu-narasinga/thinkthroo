@@ -75,7 +75,7 @@ const RepositoriesListPage = memo(() => {
     <div className="p-6 w-full">
       <Header />
       <h2 className="font-normal font-inter text-black text-sm leading-5 mb-4">
-        List of repositories accessible to Codearc.
+        List of repositories accessible to ThinkThroo.
       </h2>
 
       {/* Tab Navigation */}

@@ -18,6 +18,6 @@ export const createDevtools =
     }
 
     return optionalDevtools(showDevtools)(initializer, {
-      name: `CodeArc_${name}` + (isDev ? "_DEV" : ""),
+      name: `ThinkThroo_${name}` + (isDev ? "_DEV" : ""),
     });
   };

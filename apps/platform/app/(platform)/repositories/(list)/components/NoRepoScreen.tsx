@@ -19,11 +19,11 @@ const NoRepoScreen = memo(() => {
         <div className="max-w-3xl mx-auto  rounded-lg bg-gray-100 p-12">
           <div className="text-center space-y-6">
             <h2 className="text-xl text-black font-medium">
-              CodeArc currently doesn&apos;t have access to repositories for this account.
+              ThinkThroo currently doesn&apos;t have access to repositories for this account.
             </h2>
 
             <p className="text-gray-400 text-sm leading-relaxed max-w-2xl mx-auto">
-              Install CodeArc on your GitHub account and grant access to
+              Install ThinkThroo on your GitHub account and grant access to
               <br />
               the repositories you want to work with.
             </p>

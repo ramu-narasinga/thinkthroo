@@ -7,6 +7,8 @@ import { reviewRouter } from './review';
 import { analyticsRouter } from './analytics';
 import { slackRouter } from './slack';
 import { inviteRouter } from './invite';
+import { repositorySettingsRouter } from './repositorySettings';
+import { organizationSettingsRouter } from './organizationSettings';
 
 export const lambdaRouter = router({
   document: documentRouter,
@@ -17,4 +19,6 @@ export const lambdaRouter = router({
   analytics: analyticsRouter,
   slack: slackRouter,
   invite: inviteRouter,
+  repositorySettings: repositorySettingsRouter,
+  organizationSettings: organizationSettingsRouter,
 });export type LambdaRouter = typeof lambdaRouter;

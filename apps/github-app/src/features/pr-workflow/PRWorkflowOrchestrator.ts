@@ -9,6 +9,7 @@ import type { BotAccumulatedUsage } from "@/services/ai/types";
 import { CommitAnalyzer } from "@/services/commits/CommitAnalyzer";
 import { CommentManager } from "@/services/comments/CommentManager";
 import { SUMMARIZE_TAG } from "@/services/constants";
+import { ReviewSettingsService } from "@/services/settings/ReviewSettingsService";
 import { logger } from "@/utils/logger";
 
 /** Minimum credits required to start a PR workflow run */
@@ -72,6 +73,36 @@ export class PRWorkflowOrchestrator {
       }
     }
 
+    // Fetch effective review settings from the platform (non-fatal — falls back to safe defaults)
+    let reviewSettings = {
+      enableReviews: true,
+      enablePrSummary: true,
+      enableInlineReviewComments: false,
+      enableArchitectureReview: false,
+      reviewLanguage: null as string | null,
+      toneInstructions: null as string | null,
+      pathFilters: [] as string[],
+    };
+
+    if (installationId) {
+      try {
+        const reviewSettingsService = new ReviewSettingsService();
+        reviewSettings = await reviewSettingsService.getSettings(installationId, repositoryFullName);
+        logger.info("Review settings fetched", { prNumber: pullNumber, ...reviewSettings });
+      } catch (err: any) {
+        logger.warn("ReviewSettingsService init failed, using defaults", {
+          prNumber: pullNumber,
+          error: err.message,
+        });
+      }
+    }
+
+    // Master on/off — skip entire workflow if reviews are disabled for this repo
+    if (!reviewSettings.enableReviews) {
+      logger.info("Reviews disabled for this repository — skipping PR workflow", { prNumber: pullNumber });
+      return;
+    }
+
     let summaries: SummaryResult[] | undefined;
     let summaryGenerator: PullRequestSummaryGenerator | undefined;
     let reviewGenerator: PullRequestReviewGenerator | undefined;
@@ -106,8 +137,8 @@ export class PRWorkflowOrchestrator {
       });
     }
 
-    // Step 1: Generate summaries (if enabled)
-    if (options.generateSummaries !== false) {
+    // Step 1: Generate summaries (if enabled by settings)
+    if (reviewSettings.enablePrSummary) {
       logger.info("Starting summary generation phase", { prNumber: pullNumber });
       
       summaryGenerator = new PullRequestSummaryGenerator(this.context);
@@ -132,13 +163,14 @@ export class PRWorkflowOrchestrator {
       enableSummaryFiltering: options.useSummaryFiltering !== false && !!summaries,
       summaries,
       reviewStartSha,
+      disableReview: !reviewSettings.enableInlineReviewComments,
       ...options.reviewOptions,
     });
 
     await reviewGenerator.generate();
 
-    // Step 3: Architecture review (if enabled)
-    if (options.enableArchitectureReview !== false) {
+    // Step 3: Architecture review (if enabled by settings)
+    if (reviewSettings.enableArchitectureReview) {
       logger.info("Starting architecture review phase", { prNumber: pullNumber });
 
       const shortSummary = (summaries ?? [])

@@ -76,7 +76,7 @@ export default function AnalyticsPage() {
           <div className="bg-muted rounded-xl p-12 text-center">
             <h2 className="text-lg font-semibold mb-2">No analytics data yet</h2>
             <p className="text-sm text-muted-foreground">
-              Analytics will appear here once the CodeArc bot reviews PRs in your repositories.
+              Analytics will appear here once the ThinkThroo bot reviews PRs in your repositories.
             </p>
           </div>
         )}

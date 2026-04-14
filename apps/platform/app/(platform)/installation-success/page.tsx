@@ -41,7 +41,7 @@ function InstallationSuccessContent() {
           <Loader2 className="h-16 w-16 animate-spin mx-auto text-blue-500" />
           <h1 className="text-2xl font-semibold">Processing Installation...</h1>
           <p className="text-gray-600">
-            Setting up CodeArc and syncing your repositories
+            Setting up ThinkThroo and syncing your repositories
           </p>
         </div>
       </div>
@@ -115,7 +115,7 @@ function InstallationSuccessContent() {
           <div className="space-y-2">
             <h1 className="text-3xl font-bold">Installation Successful!</h1>
             <p className="text-gray-600">
-              CodeArc has been installed on{" "}
+              ThinkThroo has been installed on{" "}
               <span className="font-semibold">{result.githubOrgId}</span>
             </p>
           </div>
@@ -146,7 +146,7 @@ function InstallationSuccessContent() {
         <XCircle className="h-4 w-4" />
         <AlertTitle>Invalid Installation</AlertTitle>
         <AlertDescription>
-          Missing installation parameters. Please try installing CodeArc again.
+          Missing installation parameters. Please try installing ThinkThroo again.
         </AlertDescription>
         <Button asChild variant="outline" size="sm" className="mt-4">
           <Link href="/repositories">Go to Repositories</Link>

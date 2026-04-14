@@ -2,7 +2,7 @@ import { NextRequest } from "next/dist/server/web/spec-extension/request";
 import { User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
 
-const CODEARC_AUTH_HEADER = "x-codearc-auth";
+const THINKTHROO_AUTH_HEADER = "x-thinkthroo-auth";
 
 export interface SupabaseAuth {
   user: User;
@@ -48,12 +48,12 @@ export const createLambdaContext = async (
   request: NextRequest
 ): Promise<LambdaContext> => {
   // Debug mode for development
-  const isDebugApi = request.headers.get("x-codearc-debug") === "1";
+  const isDebugApi = request.headers.get("x-thinkthroo-debug") === "1";
   const isMockUser = process.env.ENABLE_MOCK_DEV_USER === "1";
 
   if (process.env.NODE_ENV === "development" && (isDebugApi || isMockUser)) {
     return {
-      authorizationHeader: request.headers.get(CODEARC_AUTH_HEADER),
+      authorizationHeader: request.headers.get(THINKTHROO_AUTH_HEADER),
       userId: process.env.MOCK_DEV_USER_ID,
     };
   }
@@ -61,7 +61,7 @@ export const createLambdaContext = async (
   console.log('Creating lambda context for request');
 
   // Get common context
-  const authorization = request.headers.get(CODEARC_AUTH_HEADER);
+  const authorization = request.headers.get(THINKTHROO_AUTH_HEADER);
   const userAgent = request.headers.get("user-agent") || undefined;
 
   const commonContext = {

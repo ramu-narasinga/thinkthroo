@@ -8,6 +8,7 @@ import {
   DollarSign,
   LayoutDashboard,
   MessageSquare,
+  Settings,
   SquareTerminal,
   Users,
 } from "lucide-react";
@@ -40,7 +41,7 @@ const data = {
   ],
   navMain: [
     {
-      title: "CodeArc",
+      title: "ThinkThroo",
       url: "/codearc",
       icon: SquareTerminal,
       isActive: true,
@@ -112,6 +113,11 @@ const data = {
       name: "Integrations",
       url: "/integrations",
       icon: MessageSquare,
+    },
+    {
+      name: "Organization Settings",
+      url: "/organization-settings",
+      icon: Settings,
     },
     {
       name: "Account",
