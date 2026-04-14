@@ -8,7 +8,7 @@ import { FileReviewer } from "@/services/reviews/FileReviewer";
 import { FileReviewFilter } from "@/services/reviews/FileReviewFilter";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
 import type { SummaryResult } from "@/services/summarization/FileSummarizer";
-import { getDefaultAIOptions, ClaudeModel, type AIOptions } from "@/services/ai/types";
+import { getDefaultAIOptions, ClaudeModel, type AIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
 import { logger } from "@/utils/logger";
 
 export interface PullRequestReviewOptions {
@@ -20,10 +20,11 @@ export interface PullRequestReviewOptions {
   debug?: boolean;
   enableSummaryFiltering?: boolean;
   summaries?: SummaryResult[];
+  reviewStartSha?: string;
 }
 
 export class PullRequestReviewGenerator {
-  private readonly defaultOptions: Omit<Required<PullRequestReviewOptions>, 'summaries'> = {
+  private readonly defaultOptions: Omit<Required<PullRequestReviewOptions>, 'summaries' | 'reviewStartSha'> = {
     disableReview: false,
     reviewCommentLGTM: false,
     maxConcurrency: 5,
@@ -130,7 +131,8 @@ export class PullRequestReviewGenerator {
     logger.debug("Preprocessing PR for review", { prNumber: pullNumber });
     const preprocessResult = await this.preprocessor.process(
       pullRequest.base.sha,
-      pullRequest.head.sha
+      pullRequest.head.sha,
+      opts.reviewStartSha
     );
 
     if (!preprocessResult.success) {
@@ -381,5 +383,12 @@ ${
       reviewedFiles: reviewedFiles.length,
       totalComments: totalReviews,
     });
+  }
+
+  /**
+   * Returns the accumulated AI token usage for this generator's review bot.
+   */
+  getAccumulatedUsage(): BotAccumulatedUsage[] {
+    return [this.reviewBot.getAccumulatedUsage()];
   }
 }

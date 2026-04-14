@@ -1,4 +1,13 @@
 /**
+ * Accumulated token usage for a single Claude model instance
+ */
+export interface BotAccumulatedUsage {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+/**
  * Claude model identifiers
  */
 export enum ClaudeModel {

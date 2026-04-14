@@ -11,12 +11,10 @@ function handleAddToSlack() {
     return;
   }
 
-  const redirectUri = `${window.location.origin}/api/integrations/slack/callback`;
   const scope = "incoming-webhook,chat:write";
   const url = new URL("https://slack.com/oauth/v2/authorize");
   url.searchParams.set("client_id", clientId);
   url.searchParams.set("scope", scope);
-  url.searchParams.set("redirect_uri", redirectUri);
 
   window.location.href = url.toString();
 }

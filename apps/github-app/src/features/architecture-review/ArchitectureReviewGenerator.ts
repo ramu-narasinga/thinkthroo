@@ -8,13 +8,30 @@ import { ReviewParser } from "@/services/reviews/ReviewParser";
 import type { ReviewComment } from "@/services/reviews/ReviewParser";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
 import { ArchitectureService } from "@/services/architecture/ArchitectureService";
-import { getDefaultAIOptions } from "@/services/ai/types";
+import { CommentManager } from "@/services/comments/CommentManager";
+import { getDefaultAIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
+import { calculateCostUsd, calculateCredits } from "@/services/ai/pricing";
 import { ARCHITECTURE_REVIEW_TAG, COMMENT_GREETING } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
 export interface ArchitectureReviewOptions {
   maxConcurrency?: number;
   maxFiles?: number;
+  reviewStartSha?: string;
+}
+
+export interface ArchitectureDocReference {
+  name: string;
+  excerpt: string;
+}
+
+export interface ArchitectureFileResult {
+  filename: string;
+  violationCount: number;
+  score: number;
+  violations: ReviewComment[];
+  docReferences: ArchitectureDocReference[];
+  creditsDeducted: number;
 }
 
 interface FileViolations {
@@ -28,7 +45,9 @@ export class ArchitectureReviewGenerator {
   private readonly prompts: Prompts;
   private readonly architectureService: ArchitectureService;
   private readonly reviewParser: ReviewParser;
-  private readonly options: Required<ArchitectureReviewOptions>;
+  private readonly commentManager: CommentManager;
+  private readonly options: Required<Omit<ArchitectureReviewOptions, 'reviewStartSha'>> & { reviewStartSha?: string };
+  private fileResults: ArchitectureFileResult[] = [];
 
   constructor(
     private readonly context: Context<
@@ -39,10 +58,12 @@ export class ArchitectureReviewGenerator {
     this.options = {
       maxConcurrency: options.maxConcurrency ?? 3,
       maxFiles: options.maxFiles ?? 50,
+      reviewStartSha: options.reviewStartSha,
     };
 
     const issueDetails = context.issue();
     this.preprocessor = new PRPreprocessor(context.octokit, issueDetails);
+    this.commentManager = new CommentManager(context.octokit, issueDetails);
 
     const aiOptions = getDefaultAIOptions();
     this.reviewBot = new ClaudeBot(aiOptions.reviewBot);
@@ -55,6 +76,10 @@ export class ArchitectureReviewGenerator {
       maxConcurrency: this.options.maxConcurrency,
       maxFiles: this.options.maxFiles,
     });
+  }
+
+  getFileResults(): ArchitectureFileResult[] {
+    return this.fileResults;
   }
 
   async generate(shortSummary = ""): Promise<void> {
@@ -74,7 +99,8 @@ export class ArchitectureReviewGenerator {
     // Step 1: Preprocess — fetch diffs, filter files, process hunks
     const preprocessResult = await this.preprocessor.process(
       pullRequest.base.sha,
-      pullRequest.head.sha
+      pullRequest.head.sha,
+      this.options.reviewStartSha
     );
 
     if (!preprocessResult.success || preprocessResult.filesAndChanges.length === 0) {
@@ -166,8 +192,9 @@ export class ArchitectureReviewGenerator {
 
     // Query Pinecone for relevant architecture rules using the file diff as context
     let rules: string;
+    let ruleChunks: Awaited<ReturnType<typeof this.architectureService.queryRules>> = [];
     try {
-      const ruleChunks = await this.architectureService.queryRules(
+      ruleChunks = await this.architectureService.queryRules(
         installationId,
         repositoryFullName,
         fileDiff || filename
@@ -209,9 +236,17 @@ export class ArchitectureReviewGenerator {
     const prompt = this.prompts.renderArchitectureReviewFileDiff(templateData);
 
     let response: string;
+    let fileCredits = 0;
     try {
+      const usageBefore = this.reviewBot.getAccumulatedUsage();
       const botResponse = await this.reviewBot.chat(prompt);
+      const usageAfter = this.reviewBot.getAccumulatedUsage();
       response = botResponse.text;
+
+      const deltaInput = usageAfter.inputTokens - usageBefore.inputTokens;
+      const deltaOutput = usageAfter.outputTokens - usageBefore.outputTokens;
+      const costUsd = calculateCostUsd(usageAfter.model, deltaInput, deltaOutput);
+      fileCredits = calculateCredits(costUsd);
     } catch (error: any) {
       logger.error("Claude architecture review call failed", {
         filename,
@@ -224,7 +259,7 @@ export class ArchitectureReviewGenerator {
     // Parse Claude's response
     const reviewComments = this.reviewParser.parse(response, patches);
     const violations = reviewComments.filter(
-      (c) => !c.comment.trim().startsWith("LGTM")
+      (c) => !this.reviewParser.isLGTM(c.comment)
     );
 
     logger.info("Architecture review parsed", {
@@ -243,6 +278,17 @@ export class ArchitectureReviewGenerator {
       );
     }
 
+    // Accumulate file result for platform persistence
+    // Score = % of rules that were not violated, clamped to [0, 100]
+    const score = ruleChunks.length > 0
+      ? Math.max(0, Math.round(100 * (1 - violations.length / ruleChunks.length)))
+      : 100;
+    const docReferences: ArchitectureDocReference[] = ruleChunks.map((chunk) => ({
+      name: chunk.name,
+      excerpt: chunk.text.slice(0, 200),
+    }));
+    this.fileResults.push({ filename, violationCount: violations.length, score, violations, docReferences, creditsDeducted: fileCredits });
+
     return violations;
   }
 
@@ -251,8 +297,6 @@ export class ArchitectureReviewGenerator {
     allViolations: FileViolations[],
     repositoryFullName: string
   ): Promise<void> {
-    const issueDetails = this.context.issue();
-
     let body: string;
 
     if (allViolations.length === 0) {
@@ -292,12 +336,7 @@ ${ARCHITECTURE_REVIEW_TAG}`;
     }
 
     try {
-      await this.context.octokit.issues.createComment({
-        owner: issueDetails.owner,
-        repo: issueDetails.repo,
-        issue_number: pullNumber,
-        body,
-      });
+      await this.commentManager.comment(body, ARCHITECTURE_REVIEW_TAG, "replace");
       logger.info("Architecture summary comment posted", { pullNumber });
     } catch (error: any) {
       logger.error("Failed to post architecture summary comment", {
@@ -305,5 +344,12 @@ ${ARCHITECTURE_REVIEW_TAG}`;
         error: error.message,
       });
     }
+  }
+
+  /**
+   * Returns the accumulated AI token usage for this generator's review bot.
+   */
+  getAccumulatedUsage(): BotAccumulatedUsage[] {
+    return [this.reviewBot.getAccumulatedUsage()];
   }
 }

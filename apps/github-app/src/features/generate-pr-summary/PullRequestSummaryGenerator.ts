@@ -9,7 +9,7 @@ import { FileSummarizer, type SummaryResult } from "@/services/summarization/Fil
 import { ClaudeBot } from "@/services/ai/ClaudeBot";
 import { Prompts } from "@/services/ai/Prompts";
 import type { TemplateData } from "@/services/ai/Prompts";
-import { getDefaultAIOptions, ClaudeModel, type AIOptions } from "@/services/ai/types";
+import { getDefaultAIOptions, ClaudeModel, type AIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
 import pLimit from "p-limit";
 import { logger } from "@/utils/logger";
 
@@ -25,6 +25,8 @@ export class PullRequestSummaryGenerator {
   private readonly prompts: Prompts;
   private readonly fileSummarizer: FileSummarizer;
   private readonly aiOptions: AIOptions;
+  private finalSummary = '';
+  private reviewStartCommit = '';
 
   constructor(private readonly context: Context<"pull_request">) {
     const issueDetails = context.issue();
@@ -103,6 +105,7 @@ export class PullRequestSummaryGenerator {
       pullRequest.base.sha,
       pullRequest.head.sha
     );
+    this.reviewStartCommit = reviewStartCommit;
     
     logger.info("Determined review start commit", { 
       prNumber: pullNumber, 
@@ -543,7 +546,35 @@ export class PullRequestSummaryGenerator {
       totalDurationSinceStart: Date.now() - startTime,
     });
 
+    this.finalSummary = summarizeFinalResponse;
+
     // Return summaries for use in review filtering
     return summaries;
+  }
+
+  /**
+   * Returns the final categorized summary text produced by the AI.
+   * Only populated after generate() has completed.
+   */
+  getFinalSummary(): string {
+    return this.finalSummary;
+  }
+
+  /**
+   * Returns the commit SHA from which the incremental review started.
+   * Only populated after generate() has completed.
+   */
+  getReviewStartCommit(): string {
+    return this.reviewStartCommit;
+  }
+
+  /**
+   * Returns the accumulated AI token usage across both bots used in this generator.
+   */
+  getAccumulatedUsage(): BotAccumulatedUsage[] {
+    return [
+      this.summaryBot.getAccumulatedUsage(),
+      this.reviewBot.getAccumulatedUsage(),
+    ];
   }
 }

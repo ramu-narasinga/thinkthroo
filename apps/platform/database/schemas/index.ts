@@ -14,3 +14,5 @@ export * from './invite';
 export * from './teamInvitation';
 export * from './courseProgress';
 export * from './skillStats';
+export * from './review';
+export * from './slackIntegration';
