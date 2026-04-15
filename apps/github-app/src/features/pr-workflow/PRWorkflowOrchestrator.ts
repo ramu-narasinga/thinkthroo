@@ -34,12 +34,21 @@ export class PRWorkflowOrchestrator {
   async execute(options: PRWorkflowOptions = {}): Promise<void> {
     const pullNumber = this.context.payload.pull_request.number;
     const repositoryFullName = this.context.payload.repository.full_name;
+    const owner = this.context.payload.repository.owner.login;
     const installationId = String(
       (this.context.payload as any).installation?.id ?? ""
     );
     const startTime = Date.now();
 
-    logger.info("PR Workflow started", {
+    // Create a child logger that stamps every log line with PR identity
+    const prLogger = logger.child({
+      prNumber: pullNumber,
+      repo: repositoryFullName,
+      owner,
+      installationId,
+    });
+
+    prLogger.info("PR Workflow started", {
       prNumber: pullNumber,
       generateSummaries: options.generateSummaries ?? true,
       useSummaryFiltering: options.useSummaryFiltering ?? true,
@@ -52,7 +61,7 @@ export class PRWorkflowOrchestrator {
         const balance = await creditService.getBalance(installationId);
 
         if (balance !== null && balance < MIN_CREDIT_THRESHOLD) {
-          logger.warn("Insufficient credits — skipping PR workflow", {
+          prLogger.warn("Insufficient credits — skipping PR workflow", {
             prNumber: pullNumber,
             balance,
           });
@@ -66,7 +75,7 @@ export class PRWorkflowOrchestrator {
         }
       } catch (err: any) {
         // Balance check failure is non-fatal — proceed with the workflow
-        logger.warn("Credit balance check failed, proceeding anyway", {
+        prLogger.warn("Credit balance check failed, proceeding anyway", {
           prNumber: pullNumber,
           error: err.message,
         });
@@ -88,9 +97,9 @@ export class PRWorkflowOrchestrator {
       try {
         const reviewSettingsService = new ReviewSettingsService();
         reviewSettings = await reviewSettingsService.getSettings(installationId, repositoryFullName);
-        logger.info("Review settings fetched", { prNumber: pullNumber, ...reviewSettings });
+        prLogger.info("Review settings fetched", { prNumber: pullNumber, ...reviewSettings });
       } catch (err: any) {
-        logger.warn("ReviewSettingsService init failed, using defaults", {
+        prLogger.warn("ReviewSettingsService init failed, using defaults", {
           prNumber: pullNumber,
           error: err.message,
         });
@@ -99,7 +108,7 @@ export class PRWorkflowOrchestrator {
 
     // Master on/off — skip entire workflow if reviews are disabled for this repo
     if (!reviewSettings.enableReviews) {
-      logger.info("Reviews disabled for this repository — skipping PR workflow", { prNumber: pullNumber });
+      prLogger.info("Reviews disabled for this repository — skipping PR workflow", { prNumber: pullNumber });
       return;
     }
 
@@ -129,9 +138,9 @@ export class PRWorkflowOrchestrator {
         pullRequest.base.sha,
         pullRequest.head.sha
       );
-      logger.info("Review start SHA determined independently", { prNumber: pullNumber, reviewStartSha });
+      prLogger.info("Review start SHA determined independently", { prNumber: pullNumber, reviewStartSha });
     } catch (err: any) {
-      logger.warn("Failed to determine review start SHA, will fall back to full review", {
+      prLogger.warn("Failed to determine review start SHA, will fall back to full review", {
         prNumber: pullNumber,
         error: err.message,
       });
@@ -139,21 +148,21 @@ export class PRWorkflowOrchestrator {
 
     // Step 1: Generate summaries (if enabled by settings)
     if (reviewSettings.enablePrSummary) {
-      logger.info("Starting summary generation phase", { prNumber: pullNumber });
+      prLogger.info("Starting summary generation phase", { prNumber: pullNumber });
       
-      summaryGenerator = new PullRequestSummaryGenerator(this.context);
+      summaryGenerator = new PullRequestSummaryGenerator(this.context, prLogger);
       summaries = await summaryGenerator.generate();
 
-      logger.info("Summary generation complete", {
+      prLogger.info("Summary generation complete", {
         prNumber: pullNumber,
         summariesCount: summaries?.length ?? 0,
       });
     } else {
-      logger.info("Summary generation disabled", { prNumber: pullNumber });
+      prLogger.info("Summary generation disabled", { prNumber: pullNumber });
     }
 
     // Step 2: Generate review (with optional summary filtering)
-    logger.info("Starting review generation phase", {
+    prLogger.info("Starting review generation phase", {
       prNumber: pullNumber,
       useSummaryFiltering: options.useSummaryFiltering ?? true,
       hasSummaries: !!summaries,
@@ -165,13 +174,13 @@ export class PRWorkflowOrchestrator {
       reviewStartSha,
       disableReview: !reviewSettings.enableInlineReviewComments,
       ...options.reviewOptions,
-    });
+    }, prLogger);
 
     await reviewGenerator.generate();
 
     // Step 3: Architecture review (if enabled by settings)
     if (reviewSettings.enableArchitectureReview) {
-      logger.info("Starting architecture review phase", { prNumber: pullNumber });
+      prLogger.info("Starting architecture review phase", { prNumber: pullNumber });
 
       const shortSummary = (summaries ?? [])
         .map((s) => `${s.filename}: ${s.summary}`)
@@ -180,13 +189,14 @@ export class PRWorkflowOrchestrator {
       try {
         architectureReviewGenerator = new ArchitectureReviewGenerator(
           this.context,
-          { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50, reviewStartSha }
+          { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50, reviewStartSha },
+          prLogger
         );
         await architectureReviewGenerator.generate(shortSummary);
-        logger.info("Architecture review phase complete", { prNumber: pullNumber });
+        prLogger.info("Architecture review phase complete", { prNumber: pullNumber });
       } catch (error: any) {
         // Architecture review failure should not break the overall PR workflow
-        logger.error("Architecture review failed, continuing", {
+        prLogger.error("Architecture review failed, continuing", {
           prNumber: pullNumber,
           error: error.message,
         });
@@ -214,20 +224,20 @@ export class PRWorkflowOrchestrator {
 
         if (result.success) {
           creditsDeducted = result.creditsDeducted ?? 0;
-          logger.info("Credits deducted for PR workflow", {
+          prLogger.info("Credits deducted for PR workflow", {
             prNumber: pullNumber,
             creditsDeducted: result.creditsDeducted,
             newBalance: result.newBalance,
           });
         } else {
-          logger.warn("Credit deduction was unsuccessful", {
+          prLogger.warn("Credit deduction was unsuccessful", {
             prNumber: pullNumber,
             reason: result.reason,
           });
         }
       } catch (err: any) {
         // Credit deduction failure must never crash the PR workflow
-        logger.error("Credit deduction failed", {
+        prLogger.error("Credit deduction failed", {
           prNumber: pullNumber,
           error: err.message,
         });
@@ -252,7 +262,7 @@ export class PRWorkflowOrchestrator {
             creditsDeducted,
             hasArchitectureResults: fileResults.length > 0,
           });
-          logger.info("PR review summary saved to platform", { prNumber: pullNumber });
+          prLogger.info("PR review summary saved to platform", { prNumber: pullNumber });
 
           // Step 6: Persist architecture file results if we have them
           if (saveResult.success && saveResult.reviewId && fileResults.length > 0) {
@@ -262,17 +272,17 @@ export class PRWorkflowOrchestrator {
               installationId,
               fileResults,
             });
-            logger.info("Architecture file results saved to platform", {
+            prLogger.info("Architecture file results saved to platform", {
               prNumber: pullNumber,
               fileCount: fileResults.length,
             });
           }
         } else {
-          logger.info("No summary points to save, skipping review persistence", { prNumber: pullNumber });
+          prLogger.info("No summary points to save, skipping review persistence", { prNumber: pullNumber });
         }
       } catch (err: any) {
         // Review save failure must never crash the PR workflow
-        logger.error("PR review save failed", {
+        prLogger.error("PR review save failed", {
           prNumber: pullNumber,
           error: err.message,
         });
@@ -280,7 +290,7 @@ export class PRWorkflowOrchestrator {
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    logger.info("PR Workflow complete", {
+    prLogger.info("PR Workflow complete", {
       prNumber: pullNumber,
       durationSeconds: parseFloat(duration),
       hadSummaries: !!summaries,

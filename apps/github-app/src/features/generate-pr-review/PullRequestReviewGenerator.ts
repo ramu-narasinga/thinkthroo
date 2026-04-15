@@ -9,7 +9,7 @@ import { FileReviewFilter } from "@/services/reviews/FileReviewFilter";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
 import type { SummaryResult } from "@/services/summarization/FileSummarizer";
 import { getDefaultAIOptions, ClaudeModel, type AIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 export interface PullRequestReviewOptions {
   disableReview?: boolean;
@@ -38,13 +38,16 @@ export class PullRequestReviewGenerator {
   private readonly fileReviewFilter: FileReviewFilter;
   private readonly options: PullRequestReviewOptions;
   private readonly aiOptions: AIOptions;
+  private readonly log: Logger;
 
   constructor(
     private readonly context: Context<"pull_request.opened" | "pull_request.synchronize">,
-    options: PullRequestReviewOptions = {}
+    options: PullRequestReviewOptions = {},
+    log?: Logger
   ) {
+    this.log = log ?? logger;
     const prNumber = context.payload.pull_request.number;
-    logger.info("Initializing PullRequestReviewGenerator", {
+    this.log.info("Initializing PullRequestReviewGenerator", {
       prNumber,
       providedOptions: Object.keys(options),
       event: context.name,
@@ -52,7 +55,7 @@ export class PullRequestReviewGenerator {
 
     this.options = { ...this.defaultOptions, ...options };
 
-    logger.debug("Merged options", {
+    this.log.debug("Merged options", {
       prNumber,
       options: this.options,
     });
@@ -60,7 +63,7 @@ export class PullRequestReviewGenerator {
     const issueDetails = context.issue();
     const octokit = context.octokit;
 
-    logger.debug("Creating service instances", {
+    this.log.debug("Creating service instances", {
       prNumber,
       owner: issueDetails.owner,
       repo: issueDetails.repo,
@@ -71,7 +74,7 @@ export class PullRequestReviewGenerator {
 
     this.aiOptions = getDefaultAIOptions();
 
-    logger.debug("AI options configured", {
+    this.log.debug("AI options configured", {
       prNumber,
       reviewBotModel: this.aiOptions.reviewBot.model,
       maxRetries: this.aiOptions.reviewBot.maxRetries,
@@ -80,13 +83,13 @@ export class PullRequestReviewGenerator {
     });
 
     try {
-      this.reviewBot = new ClaudeBot(this.aiOptions.reviewBot);
-      logger.info("Review bot initialized successfully", {
+      this.reviewBot = new ClaudeBot(this.aiOptions.reviewBot, undefined, this.log);
+      this.log.info("Review bot initialized successfully", {
         prNumber,
         model: ClaudeModel.SONNET_4_5,
       });
     } catch (e: any) {
-      logger.error("Failed to create review bot", {
+      this.log.error("Failed to create review bot", {
         prNumber,
         error: e.message,
         stack: e.stack,
@@ -96,7 +99,7 @@ export class PullRequestReviewGenerator {
 
     this.prompts = new Prompts();
 
-    logger.info("PullRequestReviewGenerator initialized successfully", {
+    this.log.info("PullRequestReviewGenerator initialized successfully", {
       prNumber,
       owner: issueDetails.owner,
       repo: issueDetails.repo,
@@ -108,7 +111,7 @@ export class PullRequestReviewGenerator {
     const opts = this.options;
 
     if (opts.disableReview) {
-      logger.info("Review is disabled, skipping", { prNumber: this.context.payload.pull_request.number });
+      this.log.info("Review is disabled, skipping", { prNumber: this.context.payload.pull_request.number });
       return;
     }
 
@@ -116,7 +119,7 @@ export class PullRequestReviewGenerator {
     const pullNumber = pullRequest.number;
     const issueDetails = this.context.issue();
 
-    logger.info("PR Review Generation Started", {
+    this.log.info("PR Review Generation Started", {
       prNumber: pullNumber,
       prTitle: pullRequest.title,
       owner: issueDetails.owner,
@@ -126,7 +129,7 @@ export class PullRequestReviewGenerator {
     });
 
     // Step 1: Preprocess - fetch diffs, filter files, process hunks
-    logger.debug("Preprocessing PR for review", { prNumber: pullNumber });
+    this.log.debug("Preprocessing PR for review", { prNumber: pullNumber });
     const preprocessResult = await this.preprocessor.process(
       pullRequest.base.sha,
       pullRequest.head.sha,
@@ -134,14 +137,14 @@ export class PullRequestReviewGenerator {
     );
 
     if (!preprocessResult.success) {
-      logger.warn("Preprocessing failed, skipping review", { prNumber: pullNumber });
+      this.log.warn("Preprocessing failed, skipping review", { prNumber: pullNumber });
       return;
     }
 
     const { filesAndChanges, filterResult } = preprocessResult;
 
     if (filesAndChanges.length === 0) {
-      logger.info("No file changes to review", { prNumber: pullNumber });
+      this.log.info("No file changes to review", { prNumber: pullNumber });
       return;
     }
 
@@ -150,7 +153,7 @@ export class PullRequestReviewGenerator {
     let reviewsSkipped: string[] = [];
 
     if (opts.enableSummaryFiltering && opts.summaries) {
-      logger.debug("Applying summary-based filtering", {
+      this.log.debug("Applying summary-based filtering", {
         prNumber: pullNumber,
         totalFiles: filesAndChanges.length,
         summariesCount: opts.summaries.length,
@@ -160,22 +163,22 @@ export class PullRequestReviewGenerator {
       filesToReview = filterResult.filesToReview;
       reviewsSkipped = filterResult.reviewsSkipped;
 
-      logger.info("Summary-based filtering complete", {
+      this.log.info("Summary-based filtering complete", {
         prNumber: pullNumber,
         originalFiles: filesAndChanges.length,
         filesToReview: filesToReview.length,
         reviewsSkipped: reviewsSkipped.length,
       });
     } else {
-      logger.debug("Summary-based filtering disabled", { prNumber: pullNumber });
+      this.log.debug("Summary-based filtering disabled", { prNumber: pullNumber });
     }
 
     if (filesToReview.length === 0) {
-      logger.info("No files need review after filtering", { prNumber: pullNumber });
+      this.log.info("No files need review after filtering", { prNumber: pullNumber });
       return;
     }
 
-    logger.info("Files to review", { prNumber: pullNumber, fileCount: filesToReview.length });
+    this.log.info("Files to review", { prNumber: pullNumber, fileCount: filesToReview.length });
 
     // Step 2: Initialize review-specific services
     const reviewCommentManager = new ReviewCommentManager(
@@ -207,7 +210,7 @@ export class PullRequestReviewGenerator {
     };
 
     // Step 4: Review files with concurrency control
-    logger.info("Starting AI review of files", {
+    this.log.info("Starting AI review of files", {
       prNumber: pullNumber,
       concurrency: opts.maxConcurrency ?? 5,
       maxFiles: opts.maxFiles ?? 50,
@@ -245,7 +248,7 @@ export class PullRequestReviewGenerator {
     const reviewedFiles = results.filter((r) => !r.failed);
     const reviewsFailed = fileReviewer.getReviewsFailed();
 
-    logger.info("Review results summary", {
+    this.log.info("Review results summary", {
       prNumber: pullNumber,
       reviewedFilesCount: reviewedFiles.length,
       totalReviewComments: totalReviews,
@@ -253,7 +256,7 @@ export class PullRequestReviewGenerator {
     });
 
     if (failedFiles.length > 0) {
-      logger.warn("Some files failed review", {
+      this.log.warn("Some files failed review", {
         prNumber: pullNumber,
         failedFiles: failedFiles.map((f) => ({ filename: f.filename, reason: f.reason || "unknown error" })),
       });
@@ -349,28 +352,28 @@ ${
 
     // Step 7: Submit review if we have comments
     const bufferedCount = reviewCommentManager.getBufferedCommentCount();
-    logger.debug("Buffered comments ready to submit", { prNumber: pullNumber, bufferedCount });
+    this.log.debug("Buffered comments ready to submit", { prNumber: pullNumber, bufferedCount });
 
     if (bufferedCount > 0) {
       try {
-        logger.info("Submitting review to GitHub", { prNumber: pullNumber, commentCount: bufferedCount });
+        this.log.info("Submitting review to GitHub", { prNumber: pullNumber, commentCount: bufferedCount });
         await reviewCommentManager.submitReview(
           pullNumber,
           pullRequest.head.sha,
           statusMsg
         );
-        logger.info("Review submitted successfully", { prNumber: pullNumber });
+        this.log.info("Review submitted successfully", { prNumber: pullNumber });
       } catch (error: any) {
-        logger.error("Failed to submit review", { prNumber: pullNumber, error: error.message });
+        this.log.error("Failed to submit review", { prNumber: pullNumber, error: error.message });
         throw error;
       }
     } else {
-      logger.info("No review comments to submit", { prNumber: pullNumber });
+      this.log.info("No review comments to submit", { prNumber: pullNumber });
     }
 
     // Step 8: Log completion
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    logger.info("PR Review Generation Complete", {
+    this.log.info("PR Review Generation Complete", {
       prNumber: pullNumber,
       durationSeconds: parseFloat(duration),
       reviewedFiles: reviewedFiles.length,

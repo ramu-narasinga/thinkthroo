@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // TODO: implement p-retry?
 import { retry } from "./retry";
 import type { BotAccumulatedUsage, ClaudeBotConfig } from "./types";
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 /**
  * Conversation context for maintaining multi-turn conversations
@@ -29,9 +29,11 @@ export class ClaudeBot {
   private readonly client: Anthropic;
   private readonly config: ClaudeBotConfig;
   private accumulatedUsage: BotAccumulatedUsage;
+  private readonly log: Logger;
 
-  constructor(config: ClaudeBotConfig, apiKey?: string) {
-    logger.debug("Initializing ClaudeBot", {
+  constructor(config: ClaudeBotConfig, apiKey?: string, log?: Logger) {
+    this.log = log ?? logger;
+    this.log.debug("Initializing ClaudeBot", {
       model: config.model,
       temperature: config.temperature ?? 0.0,
       maxRetries: config.maxRetries ?? 3,
@@ -41,7 +43,7 @@ export class ClaudeBot {
     });
 
     if (!apiKey && !process.env.ANTHROPIC_API_KEY) {
-      logger.error("Anthropic API key not found");
+      this.log.error("Anthropic API key not found");
       throw new Error(
         "Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or pass it to the constructor."
       );
@@ -53,7 +55,7 @@ export class ClaudeBot {
       apiKey: apiKey || process.env.ANTHROPIC_API_KEY,
     });
 
-    logger.info("ClaudeBot initialized successfully", {
+    this.log.info("ClaudeBot initialized successfully", {
       model: config.model,
     });
   }
@@ -69,7 +71,7 @@ export class ClaudeBot {
     context?: ConversationContext
   ): Promise<BotResponse> {
     if (!message) {
-      logger.debug("Empty message provided to Claude chat", {
+      this.log.debug("Empty message provided to Claude chat", {
         model: this.config.model,
       });
       return {
@@ -78,7 +80,7 @@ export class ClaudeBot {
       };
     }
 
-    logger.debug("Sending request to Claude API", {
+    this.log.debug("Sending request to Claude API", {
       model: this.config.model,
       messageLength: message.length,
       hasContext: !!context,
@@ -101,7 +103,7 @@ export class ClaudeBot {
             },
           ];
 
-          logger.debug("Prepared messages for Claude API", {
+          this.log.debug("Prepared messages for Claude API", {
             model: this.config.model,
             totalMessages: messages.length,
           });
@@ -109,7 +111,7 @@ export class ClaudeBot {
           // Prepare system message
           const systemMessage = this.buildSystemMessage();
 
-          logger.debug("Making Claude API request", {
+          this.log.debug("Making Claude API request", {
             model: this.config.model,
             systemMessageLength: systemMessage.length,
           });
@@ -127,7 +129,7 @@ export class ClaudeBot {
         {
           retries: this.config.maxRetries ?? 3,
           onFailedAttempt: (error) => {
-            logger.warn("Claude API request failed, retrying", {
+            this.log.warn("Claude API request failed, retrying", {
               attemptNumber: error.attemptNumber,
               retriesLeft: error.retriesLeft,
               model: this.config.model,
@@ -142,7 +144,7 @@ export class ClaudeBot {
       this.accumulatedUsage.inputTokens += response.usage?.input_tokens ?? 0;
       this.accumulatedUsage.outputTokens += response.usage?.output_tokens ?? 0;
 
-      logger.info("Claude API response received successfully", {
+      this.log.info("Claude API response received successfully", {
         responseTimeMs: end - start,
         model: this.config.model,
         stopReason: response.stop_reason,
@@ -151,11 +153,11 @@ export class ClaudeBot {
       });
 
       if (this.config.debug) {
-        logger.debug("Claude API response received", {
+        this.log.debug("Claude API response received", {
           responseTimeMs: end - start,
           model: this.config.model,
         });
-        logger.trace("Claude API response details", { response });
+        this.log.trace("Claude API response details", { response });
       }
 
       // Extract text from response
@@ -181,7 +183,7 @@ export class ClaudeBot {
         context: updatedContext,
       };
     } catch (error: any) {
-      logger.error("Failed to get response from Claude", {
+      this.log.error("Failed to get response from Claude", {
         model: this.config.model,
         error: error.message,
         stack: error.stack,
@@ -202,7 +204,7 @@ export class ClaudeBot {
 Knowledge cutoff: ${this.config.tokenLimits.knowledgeCutOff}
 Current date: ${currentDate}`;
 
-    logger.debug("System message built", {
+    this.log.debug("System message built", {
       currentDate,
       knowledgeCutoff: this.config.tokenLimits.knowledgeCutOff,
       systemMessageLength: systemMessage.length,
@@ -221,7 +223,7 @@ Current date: ${currentDate}`;
 
     const extractedText = textBlocks.map((block) => block.text).join("\n");
 
-    logger.debug("Extracted text from Claude response", {
+    this.log.debug("Extracted text from Claude response", {
       textBlockCount: textBlocks.length,
       totalContentBlocks: response.content.length,
       extractedTextLength: extractedText.length,
@@ -238,13 +240,13 @@ Current date: ${currentDate}`;
 
     // Remove "with " prefix if present
     if (cleaned.startsWith("with ")) {
-      logger.debug("Removing 'with ' prefix from response");
+      this.log.debug("Removing 'with ' prefix from response");
       cleaned = cleaned.substring(5);
     }
 
     const trimmed = cleaned.trim();
 
-    logger.debug("Response cleaned", {
+    this.log.debug("Response cleaned", {
       originalLength: text.length,
       cleanedLength: trimmed.length,
       hadPrefix: text.startsWith("with "),

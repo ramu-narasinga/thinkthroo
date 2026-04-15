@@ -12,7 +12,7 @@ import { CommentManager } from "@/services/comments/CommentManager";
 import { getDefaultAIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
 import { calculateCostUsd, calculateCredits } from "@/services/ai/pricing";
 import { ARCHITECTURE_REVIEW_TAG, COMMENT_GREETING } from "@/services/constants";
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 export interface ArchitectureReviewOptions {
   maxConcurrency?: number;
@@ -47,14 +47,17 @@ export class ArchitectureReviewGenerator {
   private readonly reviewParser: ReviewParser;
   private readonly commentManager: CommentManager;
   private readonly options: Required<Omit<ArchitectureReviewOptions, 'reviewStartSha'>> & { reviewStartSha?: string };
+  private readonly log: Logger;
   private fileResults: ArchitectureFileResult[] = [];
 
   constructor(
     private readonly context: Context<
       "pull_request.opened" | "pull_request.reopened" | "pull_request.synchronize"
     >,
-    options: ArchitectureReviewOptions = {}
+    options: ArchitectureReviewOptions = {},
+    log?: Logger
   ) {
+    this.log = log ?? logger;
     this.options = {
       maxConcurrency: options.maxConcurrency ?? 3,
       maxFiles: options.maxFiles ?? 50,
@@ -66,12 +69,12 @@ export class ArchitectureReviewGenerator {
     this.commentManager = new CommentManager(context.octokit, issueDetails);
 
     const aiOptions = getDefaultAIOptions();
-    this.reviewBot = new ClaudeBot(aiOptions.reviewBot);
+    this.reviewBot = new ClaudeBot(aiOptions.reviewBot, undefined, this.log);
     this.prompts = new Prompts();
     this.architectureService = new ArchitectureService();
     this.reviewParser = new ReviewParser();
 
-    logger.info("ArchitectureReviewGenerator initialized", {
+    this.log.info("ArchitectureReviewGenerator initialized", {
       prNumber: context.payload.pull_request.number,
       maxConcurrency: this.options.maxConcurrency,
       maxFiles: this.options.maxFiles,
@@ -90,7 +93,7 @@ export class ArchitectureReviewGenerator {
     );
     const repositoryFullName = this.context.payload.repository.full_name;
 
-    logger.info("Architecture review started", {
+    this.log.info("Architecture review started", {
       prNumber: pullNumber,
       repositoryFullName,
       hasInstallationId: !!installationId,
@@ -104,7 +107,7 @@ export class ArchitectureReviewGenerator {
     );
 
     if (!preprocessResult.success || preprocessResult.filesAndChanges.length === 0) {
-      logger.info("No files to architecture-review", { prNumber: pullNumber });
+      this.log.info("No files to architecture-review", { prNumber: pullNumber });
       return;
     }
 
@@ -145,7 +148,7 @@ export class ArchitectureReviewGenerator {
 
     await Promise.all(reviewPromises);
 
-    logger.info("Architecture review files processed", {
+    this.log.info("Architecture review files processed", {
       prNumber: pullNumber,
       filesProcessed,
       filesWithViolations: allViolations.length,
@@ -166,7 +169,7 @@ export class ArchitectureReviewGenerator {
         pullRequest.head.sha,
         `Architecture validation completed. ${bufferedCount} inline comment(s) added.`
       );
-      logger.info("Architecture inline review submitted", {
+      this.log.info("Architecture inline review submitted", {
         prNumber: pullNumber,
         commentCount: bufferedCount,
       });
@@ -186,7 +189,7 @@ export class ArchitectureReviewGenerator {
     reviewCommentManager: ReviewCommentManager
   ): Promise<ReviewComment[]> {
     if (!installationId) {
-      logger.warn("No installationId available, skipping architecture query", { filename });
+      this.log.warn("No installationId available, skipping architecture query", { filename });
       return [];
     }
 
@@ -201,7 +204,7 @@ export class ArchitectureReviewGenerator {
       );
 
       if (ruleChunks.length === 0) {
-        logger.debug("No architecture rules found for file, skipping", { filename });
+        this.log.debug("No architecture rules found for file, skipping", { filename });
         return [];
       }
 
@@ -209,13 +212,13 @@ export class ArchitectureReviewGenerator {
         .map((chunk) => `### ${chunk.name}\n\n${chunk.text}`)
         .join("\n\n---\n\n");
 
-      logger.debug("Architecture rules retrieved", {
+      this.log.debug("Architecture rules retrieved", {
         filename,
         ruleChunksCount: ruleChunks.length,
         rulesLength: rules.length,
       });
     } catch (error: any) {
-      logger.error("Failed to query architecture rules", {
+      this.log.error("Failed to query architecture rules", {
         filename,
         error: error.message,
       });
@@ -248,7 +251,7 @@ export class ArchitectureReviewGenerator {
       const costUsd = calculateCostUsd(usageAfter.model, deltaInput, deltaOutput);
       fileCredits = calculateCredits(costUsd);
     } catch (error: any) {
-      logger.error("Claude architecture review call failed", {
+      this.log.error("Claude architecture review call failed", {
         filename,
         pullNumber,
         error: error.message,
@@ -259,7 +262,7 @@ export class ArchitectureReviewGenerator {
     // Parse Claude's response
     const violations = this.reviewParser.parse(response, patches);
 
-    logger.info("Architecture review parsed", {
+    this.log.info("Architecture review parsed", {
       filename,
       violations: violations.length,
     });
@@ -333,9 +336,9 @@ ${ARCHITECTURE_REVIEW_TAG}`;
 
     try {
       await this.commentManager.comment(body, ARCHITECTURE_REVIEW_TAG, "replace");
-      logger.info("Architecture summary comment posted", { pullNumber });
+      this.log.info("Architecture summary comment posted", { pullNumber });
     } catch (error: any) {
-      logger.error("Failed to post architecture summary comment", {
+      this.log.error("Failed to post architecture summary comment", {
         pullNumber,
         error: error.message,
       });

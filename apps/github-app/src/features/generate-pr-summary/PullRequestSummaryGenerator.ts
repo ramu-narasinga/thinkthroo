@@ -11,7 +11,7 @@ import { Prompts } from "@/services/ai/Prompts";
 import type { TemplateData } from "@/services/ai/Prompts";
 import { getDefaultAIOptions, ClaudeModel, type AIOptions, type BotAccumulatedUsage } from "@/services/ai/types";
 import pLimit from "p-limit";
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 /**
  * Orchestrates the PR summary generation process
@@ -25,10 +25,12 @@ export class PullRequestSummaryGenerator {
   private readonly prompts: Prompts;
   private readonly fileSummarizer: FileSummarizer;
   private readonly aiOptions: AIOptions;
+  private readonly log: Logger;
   private finalSummary = '';
   private reviewStartCommit = '';
 
-  constructor(private readonly context: Context<"pull_request">) {
+  constructor(private readonly context: Context<"pull_request">, log?: Logger) {
+    this.log = log ?? logger;
     const issueDetails = context.issue();
     const octokit = context.octokit;
 
@@ -39,10 +41,10 @@ export class PullRequestSummaryGenerator {
     this.aiOptions = getDefaultAIOptions();
 
     try {
-      this.summaryBot = new ClaudeBot(this.aiOptions.summaryBot);
-      logger.info("Summary bot initialized", { model: ClaudeModel.HAIKU_4_5 });
+      this.summaryBot = new ClaudeBot(this.aiOptions.summaryBot, undefined, this.log);
+      this.log.info("Summary bot initialized", { model: ClaudeModel.HAIKU_4_5 });
     } catch (e: any) {
-      logger.error("Failed to create summary bot", {
+      this.log.error("Failed to create summary bot", {
         error: e.message,
         stack: e.stack,
       });
@@ -50,10 +52,10 @@ export class PullRequestSummaryGenerator {
     }
 
     try {
-      this.reviewBot = new ClaudeBot(this.aiOptions.reviewBot);
-      logger.info("Review bot initialized", { model: ClaudeModel.SONNET_4_5 });
+      this.reviewBot = new ClaudeBot(this.aiOptions.reviewBot, undefined, this.log);
+      this.log.info("Review bot initialized", { model: ClaudeModel.SONNET_4_5 });
     } catch (e: any) {
-      logger.error("Failed to create review bot", {
+      this.log.error("Failed to create review bot", {
         error: e.message,
         stack: e.stack,
       });
@@ -70,7 +72,8 @@ export class PullRequestSummaryGenerator {
       {
         reviewSimpleChanges: this.aiOptions.reviewSimpleChanges,
         maxRequestTokens: this.aiOptions.summaryBot.tokenLimits.requestTokens,
-      }
+      },
+      this.log
     );
   }
 
@@ -86,14 +89,14 @@ export class PullRequestSummaryGenerator {
     );
 
     // Step 2: Analyze commits to determine review start point
-    logger.debug("Starting commit analysis", { 
+    this.log.debug("Starting commit analysis", { 
       prNumber: pullNumber, 
       baseSha: pullRequest.base.sha, 
       headSha: pullRequest.head.sha 
     });
     
     const allCommitIds = await this.commitAnalyzer.getAllCommitIds(pullNumber);
-    logger.debug("Retrieved all commit IDs", { 
+    this.log.debug("Retrieved all commit IDs", { 
       prNumber: pullNumber, 
       commitCount: allCommitIds.length,
       commitIds: allCommitIds 
@@ -107,7 +110,7 @@ export class PullRequestSummaryGenerator {
     );
     this.reviewStartCommit = reviewStartCommit;
     
-    logger.info("Determined review start commit", { 
+    this.log.info("Determined review start commit", { 
       prNumber: pullNumber, 
       reviewStartCommit,
       totalCommits: allCommitIds.length,
@@ -115,7 +118,7 @@ export class PullRequestSummaryGenerator {
     });
 
     // Step 3: Preprocess - fetch diffs, filter files, process hunks
-    logger.info("Starting PR preprocessing", {
+    this.log.info("Starting PR preprocessing", {
       prNumber: pullNumber,
       baseSha: pullRequest.base.sha,
       headSha: pullRequest.head.sha,
@@ -129,7 +132,7 @@ export class PullRequestSummaryGenerator {
     );
     
     if (!preprocessResult.success) {
-      logger.error("PR preprocessing failed", {
+      this.log.error("PR preprocessing failed", {
         prNumber: pullNumber,
         baseSha: pullRequest.base.sha,
         headSha: pullRequest.head.sha,
@@ -140,7 +143,7 @@ export class PullRequestSummaryGenerator {
 
     const { filesAndChanges, filterResult, commits } = preprocessResult;
 
-    logger.info("PR preprocessing completed successfully", {
+    this.log.info("PR preprocessing completed successfully", {
       prNumber: pullNumber,
       filesAndChangesCount: filesAndChanges.length,
       selectedFilesCount: filterResult.selected.length,
@@ -150,12 +153,12 @@ export class PullRequestSummaryGenerator {
 
     // Step 4: Validate commits
     if (commits.length === 0) {
-      logger.warn("Skipping PR summary: no commits found", { prNumber: pullNumber });
+      this.log.warn("Skipping PR summary: no commits found", { prNumber: pullNumber });
       return [];
     }
 
     if (filesAndChanges.length === 0) {
-      logger.warn("Skipping PR summary: no files to review", { prNumber: pullNumber });
+      this.log.warn("Skipping PR summary: no files to review", { prNumber: pullNumber });
       return [];
     }
 
@@ -167,7 +170,7 @@ export class PullRequestSummaryGenerator {
       filterResult.ignored
     );
 
-    logger.debug("PR summary status", {
+    this.log.debug("PR summary status", {
       prNumber: pullNumber,
       reviewStartCommit,
       headSha: pullRequest.head.sha,
@@ -176,7 +179,7 @@ export class PullRequestSummaryGenerator {
     });
 
     // Step 6: Update existing comment with in-progress status
-    logger.debug("Adding in-progress status to comment", {
+    this.log.debug("Adding in-progress status to comment", {
       prNumber: pullNumber,
       hasExistingComment: !!existingCommentData.commentBody,
       existingCommentLength: existingCommentData.commentBody.length,
@@ -187,13 +190,13 @@ export class PullRequestSummaryGenerator {
       statusMsg
     );
 
-    logger.debug("In-progress comment prepared", {
+    this.log.debug("In-progress comment prepared", {
       prNumber: pullNumber,
       commentLength: inProgressSummarizeCmt.length,
     });
 
     // Step 7: Add in-progress status to the summarize comment
-    logger.info("Posting in-progress comment to PR", {
+    this.log.info("Posting in-progress comment to PR", {
       prNumber: pullNumber,
       tag: SUMMARIZE_TAG,
       mode: "replace",
@@ -201,12 +204,12 @@ export class PullRequestSummaryGenerator {
 
     await this.commentManager.comment(inProgressSummarizeCmt, SUMMARIZE_TAG, "replace");
 
-    logger.info("In-progress comment posted successfully", {
+    this.log.info("In-progress comment posted successfully", {
       prNumber: pullNumber,
     });
 
     // Step 8: Summarize files using Claude with concurrency control
-    logger.info("Starting file summarization", {
+    this.log.info("Starting file summarization", {
       prNumber: pullNumber,
       totalFiles: filesAndChanges.length,
       maxConcurrency: this.aiOptions.maxConcurrency,
@@ -224,7 +227,7 @@ export class PullRequestSummaryGenerator {
       description: pullRequest.body || "",
     };
 
-    logger.debug("Template data prepared for summarization", {
+    this.log.debug("Template data prepared for summarization", {
       prNumber: pullNumber,
       hasTitle: !!pullRequest.title,
       hasDescription: !!pullRequest.body,
@@ -235,7 +238,7 @@ export class PullRequestSummaryGenerator {
     // Process files with concurrency control and max file limit
     for (const [filename, fileContent, fileDiff] of filesAndChanges) {
       if (this.aiOptions.maxFiles <= 0 || summaryPromises.length < this.aiOptions.maxFiles) {
-        logger.debug("Queuing file for summarization", {
+        this.log.debug("Queuing file for summarization", {
           prNumber: pullNumber,
           filename,
           fileContentLength: fileContent.length,
@@ -254,7 +257,7 @@ export class PullRequestSummaryGenerator {
           )
         );
       } else {
-        logger.debug("Skipping file due to maxFiles limit", {
+        this.log.debug("Skipping file due to maxFiles limit", {
           prNumber: pullNumber,
           filename,
           maxFiles: this.aiOptions.maxFiles,
@@ -264,7 +267,7 @@ export class PullRequestSummaryGenerator {
       }
     }
 
-    logger.info("File summarization queue prepared", {
+    this.log.info("File summarization queue prepared", {
       prNumber: pullNumber,
       queuedFiles: summaryPromises.length,
       skippedFiles: skippedFiles.length,
@@ -272,7 +275,7 @@ export class PullRequestSummaryGenerator {
     });
 
     // Wait for all summaries to complete
-    logger.info("Starting concurrent file summarization", {
+    this.log.info("Starting concurrent file summarization", {
       prNumber: pullNumber,
       concurrentTasks: summaryPromises.length,
     });
@@ -281,7 +284,7 @@ export class PullRequestSummaryGenerator {
     const summaryResults = await Promise.all(summaryPromises);
     const duration = Date.now() - startTime;
 
-    logger.info("All file summarizations completed", {
+    this.log.info("All file summarizations completed", {
       prNumber: pullNumber,
       totalTasks: summaryPromises.length,
       durationMs: duration,
@@ -295,7 +298,7 @@ export class PullRequestSummaryGenerator {
     const failedSummaries = this.fileSummarizer.getSummariesFailed();
 
     // Log summary results
-    logger.info("File summarization completed", {
+    this.log.info("File summarization completed", {
       prNumber: pullNumber,
       successCount: summaries.length,
       failedCount: failedSummaries.length,
@@ -303,20 +306,20 @@ export class PullRequestSummaryGenerator {
     });
 
     if (failedSummaries.length > 0) {
-      logger.warn("Some files failed summarization", {
+      this.log.warn("Some files failed summarization", {
         prNumber: pullNumber,
         failedFiles: failedSummaries,
       });
     }
     if (skippedFiles.length > 0) {
-      logger.warn("Some files skipped due to maxFiles limit", {
+      this.log.warn("Some files skipped due to maxFiles limit", {
         prNumber: pullNumber,
         skippedFiles,
       });
     }
 
     // Step 9: Batch process summaries and create grouped changeset summaries
-    logger.info("Starting batch processing of summaries", {
+    this.log.info("Starting batch processing of summaries", {
       prNumber: pullNumber,
       totalSummaries: summaries.length,
       batchSize: this.aiOptions.summaryBatchSize,
@@ -334,7 +337,7 @@ export class PullRequestSummaryGenerator {
         const batchNumber = Math.floor(i / batchSize) + 1;
         const summariesBatch = summaries.slice(i, i + batchSize);
         
-        logger.debug("Processing summary batch", {
+        this.log.debug("Processing summary batch", {
           prNumber: pullNumber,
           batchNumber,
           totalBatches,
@@ -348,14 +351,14 @@ export class PullRequestSummaryGenerator {
           batchSummary += `---\n${filename}: ${summary}\n`;
         }
 
-        logger.debug("Batch summary prepared", {
+        this.log.debug("Batch summary prepared", {
           prNumber: pullNumber,
           batchNumber,
           batchSummaryLength: batchSummary.length,
         });
         
         // Ask review bot to group and deduplicate related changes
-        logger.debug("Requesting changeset grouping from AI", {
+        this.log.debug("Requesting changeset grouping from AI", {
           prNumber: pullNumber,
           batchNumber,
           inputLength: batchSummary.length,
@@ -369,7 +372,7 @@ export class PullRequestSummaryGenerator {
         );
         const duration = Date.now() - startTime;
 
-        logger.info("Changeset grouping response received", {
+        this.log.info("Changeset grouping response received", {
           prNumber: pullNumber,
           batchNumber,
           hasResponse: groupedResponse.text.length > 0,
@@ -378,7 +381,7 @@ export class PullRequestSummaryGenerator {
         });
         
         if (groupedResponse.text === "") {
-          logger.warn("Summarize changesets: nothing obtained from AI", { 
+          this.log.warn("Summarize changesets: nothing obtained from AI", { 
             prNumber: pullNumber,
             batchNumber,
             fallbackToBatchSummary: true,
@@ -389,19 +392,19 @@ export class PullRequestSummaryGenerator {
         }
       }
 
-      logger.info("Batch processing completed", {
+      this.log.info("Batch processing completed", {
         prNumber: pullNumber,
         totalBatches,
         rawSummaryLength: rawSummary.length,
       });
     } else {
-      logger.info("No summaries to batch process", {
+      this.log.info("No summaries to batch process", {
         prNumber: pullNumber,
       });
     }
 
     // Step 10: Generate final PR summary
-    logger.info("Generating final PR summary", {
+    this.log.info("Generating final PR summary", {
       prNumber: pullNumber,
       rawSummaryLength: rawSummary.length,
       hasRawSummary: rawSummary.length > 0,
@@ -415,7 +418,7 @@ export class PullRequestSummaryGenerator {
     );
     const finalSummaryDuration = Date.now() - finalSummaryStartTime;
 
-    logger.info("Final PR summary generated", {
+    this.log.info("Final PR summary generated", {
       prNumber: pullNumber,
       hasResponse: finalSummaryResponse.text.length > 0,
       responseLength: finalSummaryResponse.text.length,
@@ -423,14 +426,14 @@ export class PullRequestSummaryGenerator {
     });
 
     if (finalSummaryResponse.text === "") {
-      logger.warn("Final summary: nothing obtained from AI", { prNumber: pullNumber });
+      this.log.warn("Final summary: nothing obtained from AI", { prNumber: pullNumber });
     }
 
     const summarizeFinalResponse = finalSummaryResponse.text;
 
     // Step 11: Generate release notes (if enabled)
     if (this.aiOptions.disableReleaseNotes === false) {
-      logger.info("Generating release notes", {
+      this.log.info("Generating release notes", {
         prNumber: pullNumber,
         rawSummaryLength: rawSummary.length,
       });
@@ -443,7 +446,7 @@ export class PullRequestSummaryGenerator {
       );
       const releaseNotesDuration = Date.now() - releaseNotesStartTime;
 
-      logger.info("Release notes generated", {
+      this.log.info("Release notes generated", {
         prNumber: pullNumber,
         hasResponse: releaseNotesResponse.text.length > 0,
         responseLength: releaseNotesResponse.text.length,
@@ -451,12 +454,12 @@ export class PullRequestSummaryGenerator {
       });
 
       if (releaseNotesResponse.text === "") {
-        logger.warn("Release notes: nothing obtained from AI", { prNumber: pullNumber });
+        this.log.warn("Release notes: nothing obtained from AI", { prNumber: pullNumber });
       } else {
         let message = "### Summary by ThinkThroo\n\n";
         message += releaseNotesResponse.text;
         
-        logger.debug("Updating PR description with release notes", {
+        this.log.debug("Updating PR description with release notes", {
           prNumber: pullNumber,
           messageLength: message.length,
         });
@@ -466,24 +469,24 @@ export class PullRequestSummaryGenerator {
             pullRequest.number,
             message
           );
-          logger.info("PR description updated with release notes", {
+          this.log.info("PR description updated with release notes", {
             prNumber: pullNumber,
           });
         } catch (e: any) {
-          logger.warn("Failed to update PR description with release notes", {
+          this.log.warn("Failed to update PR description with release notes", {
             prNumber: pullNumber,
             error: e.message,
           });
         }
       }
     } else {
-      logger.debug("Release notes generation disabled", {
+      this.log.debug("Release notes generation disabled", {
         prNumber: pullNumber,
       });
     }
 
     // Step 12: Generate short summary for context
-    logger.info("Generating short summary for context", {
+    this.log.info("Generating short summary for context", {
       prNumber: pullNumber,
       rawSummaryLength: rawSummary.length,
     });
@@ -497,14 +500,14 @@ export class PullRequestSummaryGenerator {
     const shortSummaryDuration = Date.now() - shortSummaryStartTime;
     const shortSummary = summarizeShortResponse.text;
 
-    logger.info("Short summary generated", {
+    this.log.info("Short summary generated", {
       prNumber: pullNumber,
       shortSummaryLength: shortSummary.length,
       durationMs: shortSummaryDuration,
     });
 
     // Step 13: Build final summary comment
-    logger.info("Building final summary comment", {
+    this.log.info("Building final summary comment", {
       prNumber: pullNumber,
       finalResponseLength: summarizeFinalResponse.length,
       rawSummaryLength: rawSummary.length,
@@ -522,13 +525,13 @@ export class PullRequestSummaryGenerator {
       failedSummaries
     );
 
-    logger.info("Final summary comment built", {
+    this.log.info("Final summary comment built", {
       prNumber: pullNumber,
       commentLength: summarizeComment.length,
     });
 
     // Step 15: Post the final summary comment
-    logger.info("Posting final summary comment to PR", {
+    this.log.info("Posting final summary comment to PR", {
       prNumber: pullNumber,
       commentLength: summarizeComment.length,
       tag: SUMMARIZE_TAG,
@@ -536,11 +539,11 @@ export class PullRequestSummaryGenerator {
 
     await this.commentManager.comment(summarizeComment, SUMMARIZE_TAG, "replace");
 
-    logger.info("Final summary comment posted successfully", {
+    this.log.info("Final summary comment posted successfully", {
       prNumber: pullNumber,
     });
 
-    logger.info("PR summary generation completed successfully", {
+    this.log.info("PR summary generation completed successfully", {
       prNumber: pullNumber,
       summarizedFilesCount: summaries.length,
       totalDurationSinceStart: Date.now() - startTime,
