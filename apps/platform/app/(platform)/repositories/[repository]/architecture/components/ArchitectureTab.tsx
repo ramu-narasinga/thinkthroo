@@ -47,9 +47,9 @@ export default function ArchitectureTab() {
   const { repository: repositoryNameParam } = useParams();
   const searchParams = useSearchParams();
   
-  const repositoryName = Array.isArray(repositoryNameParam)
-    ? repositoryNameParam[0]
-    : repositoryNameParam;
+  const repositoryName = decodeURIComponent(
+    Array.isArray(repositoryNameParam) ? (repositoryNameParam[0] ?? '') : (repositoryNameParam ?? '')
+  );
 
   if (!repositoryName || typeof repositoryName !== 'string' || !repositoryName.trim()) {
     throw new Error('ArchitectureTab requires a valid repository name');

@@ -23,12 +23,10 @@ import { organizationSelectors } from "@/store/organization/selectors"
 
 export function SettingsTab() {
   const params = useParams()
-  const repoName = decodeURIComponent(params.repository as string)
+  const repositoryFullName = decodeURIComponent(params.repository as string)
 
   const activeOrg = useOrganizationStore(organizationSelectors.activeOrg)
   const isPro = activeOrg?.currentPlanName === "pro"
-
-  const repositoryFullName = activeOrg?.login ? `${activeOrg.login}/${repoName}` : repoName
 
   const [isSaving, setIsSaving] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)

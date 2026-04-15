@@ -362,7 +362,7 @@ export class PullRequestSummaryGenerator {
         });
 
         const startTime = Date.now();
-        const groupedResponse = await this.reviewBot.chat(
+        const groupedResponse = await this.summaryBot.chat(
           this.prompts.renderSummarizeChangesets({
             raw_summary: batchSummary,
           })
@@ -385,7 +385,7 @@ export class PullRequestSummaryGenerator {
           });
           rawSummary += batchSummary;
         } else {
-          rawSummary = groupedResponse.text;
+          rawSummary += groupedResponse.text;
         }
       }
 
@@ -489,7 +489,7 @@ export class PullRequestSummaryGenerator {
     });
 
     const shortSummaryStartTime = Date.now();
-    const summarizeShortResponse = await this.reviewBot.chat(
+    const summarizeShortResponse = await this.summaryBot.chat(
       this.prompts.renderSummarizeShort({
         raw_summary: rawSummary,
       })

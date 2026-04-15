@@ -11,8 +11,6 @@ import {
 import { Button } from "@thinkthroo/ui/components/button";
 import { useReviewStore } from "@/store/review";
 import { reviewSelectors } from "@/store/review/selectors";
-import { useOrganizationStore } from "@/store/organization";
-import { organizationSelectors } from "@/store/organization/selectors";
 import { ArchitectureFileResult } from "@/store/review/initialState";
 
 type SortKey = "credits" | "date";
@@ -111,7 +109,7 @@ function ArchitecturePanel({ prReviewId, repoName }: { prReviewId: string; repoN
                       ref.documentId ? (
                         <Link
                           key={i}
-                          href={`/repositories/${repoName}/architecture?doc=${ref.documentId}`}
+                          href={`/repositories/${encodeURIComponent(repoName)}/architecture?doc=${ref.documentId}`}
                           className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
                           title={ref.excerpt}
                         >
@@ -141,9 +139,7 @@ function ArchitecturePanel({ prReviewId, repoName }: { prReviewId: string; repoN
 
 export function ReviewsTab() {
   const params = useParams();
-  const repoName = decodeURIComponent(params.repository as string);
-  const activeOrg = useOrganizationStore(organizationSelectors.activeOrg);
-  const repositoryFullName = activeOrg?.login ? `${activeOrg.login}/${repoName}` : repoName;
+  const repositoryFullName = decodeURIComponent(params.repository as string);
 
   const reviews = useReviewStore(reviewSelectors.reviews);
   const isLoading = useReviewStore(reviewSelectors.isReviewsLoading);
@@ -294,7 +290,7 @@ export function ReviewsTab() {
                 </div>
               </div>
 
-              <ArchitecturePanel prReviewId={review.id} repoName={repoName} />
+              <ArchitecturePanel prReviewId={review.id} repoName={repositoryFullName} />
             </div>
           ))}
         </div>

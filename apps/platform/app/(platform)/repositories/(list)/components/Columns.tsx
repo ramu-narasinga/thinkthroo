@@ -76,7 +76,7 @@ export const columns: ColumnDef<Repo>[] = [
   {
     id: "actions",
     cell: ({ row }) => (
-      <ConfigureRepoButton repoName={row.original.name} hasAccess={row.original.hasAccess} />
+      <ConfigureRepoButton repoName={row.original.fullName} hasAccess={row.original.hasAccess} />
     ),
   },
 ];
