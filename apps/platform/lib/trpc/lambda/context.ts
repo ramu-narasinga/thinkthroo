@@ -1,6 +1,7 @@
 import { NextRequest } from "next/dist/server/web/spec-extension/request";
 import { User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
+import { pino } from "@/lib/logger";
 
 const THINKTHROO_AUTH_HEADER = "x-thinkthroo-auth";
 
@@ -58,8 +59,6 @@ export const createLambdaContext = async (
     };
   }
 
-  console.log('Creating lambda context for request');
-
   // Get common context
   const authorization = request.headers.get(THINKTHROO_AUTH_HEADER);
   const userAgent = request.headers.get("user-agent") || undefined;
@@ -88,7 +87,7 @@ export const createLambdaContext = async (
       };
     }
   } catch (error) {
-    console.error("Supabase authentication failed:", error);
+    pino.error('Supabase authentication failed', { message: error instanceof Error ? error.message : String(error) });
   }
 
   return await createContextInner({

@@ -20,8 +20,11 @@ const handler = async (req: NextRequest) => {
     endpoint: '/api/trpc/lambda',
 
     onError: ({ error, path, type }) => {
-      pino.info(`Error in tRPC handler (lambda) on path: ${path}, type: ${type}`);
-      console.error(JSON.stringify(error));
+      pino.error(`Error in tRPC handler (lambda) on path: ${path}, type: ${type}`, {
+        message: error.message,
+        code: error.code,
+        stack: error.stack,
+      });
     },
 
     req: preparedReq,

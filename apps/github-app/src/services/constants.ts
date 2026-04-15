@@ -25,7 +25,7 @@ export const IN_PROGRESS_END_TAG =
 
 export const COMMENT_TAG = '<!-- This is an auto-generated comment by OSS ThinkThroo -->'
 
-export const COMMENT_GREETING = 'ThinkThroo Bot here! 🤖'
+export const COMMENT_GREETING = 'ThinkThroo here! 🤖'
 
 export const issueGreetingBodyText =
 			`Thanks for opening your issue, @{user}! 🎉\n\n` +

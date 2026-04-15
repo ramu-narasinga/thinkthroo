@@ -453,7 +453,7 @@ export class PullRequestSummaryGenerator {
       if (releaseNotesResponse.text === "") {
         logger.warn("Release notes: nothing obtained from AI", { prNumber: pullNumber });
       } else {
-        let message = "### Summary by ThinkThroo Bot\n\n";
+        let message = "### Summary by ThinkThroo\n\n";
         message += releaseNotesResponse.text;
         
         logger.debug("Updating PR description with release notes", {
