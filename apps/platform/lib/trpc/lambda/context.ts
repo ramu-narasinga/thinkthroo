@@ -85,6 +85,11 @@ export const createLambdaContext = async (
       supabaseAuth = {
         user,
       };
+    } else if (error) {
+      pino.warn('Supabase auth returned an error, proceeding as unauthenticated', {
+        message: error.message,
+        code: error.code,
+      });
     }
   } catch (error) {
     pino.error('Supabase authentication failed', { message: error instanceof Error ? error.message : String(error) });
