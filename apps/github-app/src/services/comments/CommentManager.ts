@@ -8,6 +8,8 @@ import {
   IN_PROGRESS_START_TAG,
   IN_PROGRESS_END_TAG,
   COMMENT_TAG,
+  COMMIT_ID_START_TAG,
+  COMMIT_ID_END_TAG,
 } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
@@ -25,10 +27,14 @@ const issueCommentsCache: Record<number, any[]> = {};
  * Manages PR comments - finding, parsing, and extracting summary data
  */
 export class CommentManager {
+  private readonly botLogin: string | undefined;
+
   constructor(
     private readonly octokit: Context["octokit"],
     private readonly issueDetails: IssueDetails
-  ) {}
+  ) {
+    this.botLogin = process.env.GITHUB_BOT_LOGIN;
+  }
 
   private async listComments(issueNumber: number): Promise<any[]> {
     if (issueCommentsCache[issueNumber]) {
@@ -108,6 +114,15 @@ export class CommentManager {
     try {
       for (const cmt of comments) {
         if (cmt.body && cmt.body.includes(tag)) {
+          if (this.botLogin && cmt.user?.login !== this.botLogin) {
+            logger.debug("Skipping comment with tag: author mismatch", {
+              tag,
+              commentId: cmt.id,
+              commentAuthor: cmt.user?.login,
+              expectedAuthor: this.botLogin,
+            });
+            continue;
+          }
           logger.info("Comment with tag found", { 
             tag, 
             commentId: cmt.id,
@@ -471,6 +486,15 @@ ${commentBody}`;
           comment_id: cmt.id,
           body,
         });
+
+        // Update the cached comment body so subsequent cache hits within
+        // the same process see the new content (e.g. commit IDs block).
+        if (issueCommentsCache[target]) {
+          const cached = issueCommentsCache[target].find((c: any) => c.id === cmt.id);
+          if (cached) {
+            cached.body = body;
+          }
+        }
         
         logger.info("Comment updated successfully", {
           target,
@@ -560,22 +584,18 @@ ${finalTag}`;
       });
 
       let body = pull.body || "";
-      const tag = "<!-- This is an auto-generated comment: release notes by OSS ThinkThroo -->";
+      const startTag = "<!-- This is an auto-generated comment: release notes by OSS ThinkThroo -->";
+      const endTag = "<!-- end of auto-generated comment: release notes by OSS ThinkThroo -->";
 
-      // Check if release notes already exist
-      const tagIndex = body.indexOf(tag);
-      if (tagIndex === -1) {
-        // Append release notes
-        body = `${body}\n\n---\n\n${message}\n${tag}`;
+      const startIndex = body.indexOf(startTag);
+      const endIndex = body.indexOf(endTag);
+      if (startIndex === -1) {
+        // First time: wrap content between start and end tags
+        body = `${body}\n\n---\n\n${startTag}\n${message}\n${endTag}`;
       } else {
-        // Replace existing release notes
-        const endTag = "<!-- end of auto-generated comment: release notes by OSS ThinkThroo -->";
-        const endIndex = body.indexOf(endTag);
-        if (endIndex !== -1) {
-          body = body.substring(0, tagIndex) + `${message}\n${tag}` + body.substring(endIndex + endTag.length);
-        } else {
-          body = body.substring(0, tagIndex) + `${message}\n${tag}`;
-        }
+        // Replace only the ThinkThroo block, preserving content before and after
+        const after = endIndex !== -1 ? body.substring(endIndex + endTag.length) : "";
+        body = body.substring(0, startIndex) + `${startTag}\n${message}\n${endTag}` + after;
       }
 
       await this.octokit.pulls.update({
@@ -599,13 +619,19 @@ ${finalTag}`;
   buildBaseSummaryComment(
     finalResponse: string,
     rawSummary: string,
-    shortSummary: string
+    shortSummary: string,
+    commitIds: string[] = []
   ): string {
     logger.debug("Building base summary comment", {
       finalResponseLength: finalResponse.length,
       rawSummaryLength: rawSummary.length,
       shortSummaryLength: shortSummary.length,
+      commitIdsCount: commitIds.length,
     });
+
+    const commitIdsBlock = commitIds.length > 0
+      ? `${COMMIT_ID_START_TAG}\n${commitIds.map((id) => `<!--${id}-->`).join("\n")}\n${COMMIT_ID_END_TAG}\n`
+      : "";
 
     return `${finalResponse}
 ${RAW_SUMMARY_START_TAG}
@@ -614,6 +640,7 @@ ${RAW_SUMMARY_END_TAG}
 ${SHORT_SUMMARY_START_TAG}
 ${shortSummary}
 ${SHORT_SUMMARY_END_TAG}
+${commitIdsBlock}
 
 ---
 
@@ -682,7 +709,8 @@ If you like this project, please support us by starring the repository. This too
     shortSummary: string,
     baseStatusMsg: string,
     skippedFiles: string[],
-    failedSummaries: string[]
+    failedSummaries: string[],
+    commitIds: string[] = []
   ): string {
     logger.debug("Building final summary comment", {
       hasSkippedFiles: skippedFiles.length > 0,
@@ -692,7 +720,8 @@ If you like this project, please support us by starring the repository. This too
     const baseSummary = this.buildBaseSummaryComment(
       finalResponse,
       rawSummary,
-      shortSummary
+      shortSummary,
+      commitIds
     );
     
     const statusMsg = this.buildStatusMessageWithErrors(

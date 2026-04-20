@@ -522,7 +522,8 @@ export class PullRequestSummaryGenerator {
       shortSummary,
       statusMsg,
       skippedFiles,
-      failedSummaries
+      failedSummaries,
+      allCommitIds
     );
 
     this.log.info("Final summary comment built", {

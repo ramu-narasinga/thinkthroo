@@ -24,31 +24,41 @@ const rootPino = pino(
   consoleStream
 );
 
+function buildMsgPrefix(bindings: Record<string, unknown>): string {
+  const parts: string[] = [];
+  if (bindings.repo) parts.push(String(bindings.repo));
+  if (bindings.installationId) parts.push(String(bindings.installationId));
+  if (bindings.prNumber != null) parts.push(String(bindings.prNumber));
+  return parts.length > 0 ? `${parts.join(" | ")} | ` : "";
+}
+
 function createLogger(pinoInst: pino.Logger, bindings: Record<string, unknown> = {}): Logger {
+  const prefix = buildMsgPrefix(bindings);
+  const p = (msg: string) => `${prefix}${msg}`;
   return {
     info: (msg, obj) => {
-      pinoInst.info(obj || {}, msg);
-      getPostHogLogger().emit({ severityText: "info", severityNumber: SeverityNumber.INFO, body: msg, attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
+      pinoInst.info(obj || {}, p(msg));
+      getPostHogLogger().emit({ severityText: "info", severityNumber: SeverityNumber.INFO, body: p(msg), attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
     },
     warn: (msg, obj) => {
-      pinoInst.warn(obj || {}, msg);
-      getPostHogLogger().emit({ severityText: "warn", severityNumber: SeverityNumber.WARN, body: msg, attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
+      pinoInst.warn(obj || {}, p(msg));
+      getPostHogLogger().emit({ severityText: "warn", severityNumber: SeverityNumber.WARN, body: p(msg), attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
     },
     error: (msg, obj) => {
-      pinoInst.error(obj || {}, msg);
-      getPostHogLogger().emit({ severityText: "error", severityNumber: SeverityNumber.ERROR, body: msg, attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
+      pinoInst.error(obj || {}, p(msg));
+      getPostHogLogger().emit({ severityText: "error", severityNumber: SeverityNumber.ERROR, body: p(msg), attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
     },
     debug: (msg, obj) => {
-      pinoInst.debug(obj || {}, msg);
-      getPostHogLogger().emit({ severityText: "debug", severityNumber: SeverityNumber.DEBUG, body: msg, attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
+      pinoInst.debug(obj || {}, p(msg));
+      getPostHogLogger().emit({ severityText: "debug", severityNumber: SeverityNumber.DEBUG, body: p(msg), attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
     },
     trace: (msg, obj) => {
-      pinoInst.trace(obj || {}, msg);
-      getPostHogLogger().emit({ severityText: "trace", severityNumber: SeverityNumber.TRACE, body: msg, attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
+      pinoInst.trace(obj || {}, p(msg));
+      getPostHogLogger().emit({ severityText: "trace", severityNumber: SeverityNumber.TRACE, body: p(msg), attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
     },
     fatal: (msg, obj) => {
-      pinoInst.fatal(obj || {}, msg);
-      getPostHogLogger().emit({ severityText: "fatal", severityNumber: SeverityNumber.FATAL, body: msg, attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
+      pinoInst.fatal(obj || {}, p(msg));
+      getPostHogLogger().emit({ severityText: "fatal", severityNumber: SeverityNumber.FATAL, body: p(msg), attributes: { ...bindings, ...(obj || {}) } as AnyValueMap });
     },
     child: (newBindings) => createLogger(pinoInst.child(newBindings), { ...bindings, ...newBindings }),
   };
