@@ -28,6 +28,7 @@ export class PullRequestSummaryGenerator {
   private readonly log: Logger;
   private finalSummary = '';
   private reviewStartCommit = '';
+  private shortSummaryText = '';
 
   constructor(private readonly context: Context<"pull_request">, log?: Logger) {
     this.log = log ?? logger;
@@ -499,6 +500,7 @@ export class PullRequestSummaryGenerator {
     );
     const shortSummaryDuration = Date.now() - shortSummaryStartTime;
     const shortSummary = summarizeShortResponse.text;
+    this.shortSummaryText = shortSummary;
 
     this.log.info("Short summary generated", {
       prNumber: pullNumber,
@@ -562,6 +564,14 @@ export class PullRequestSummaryGenerator {
    */
   getFinalSummary(): string {
     return this.finalSummary;
+  }
+
+  /**
+   * Returns the short summary text produced by the AI.
+   * Only populated after generate() has completed.
+   */
+  getShortSummary(): string {
+    return this.shortSummaryText;
   }
 
   /**

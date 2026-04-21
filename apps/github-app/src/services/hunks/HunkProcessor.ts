@@ -105,20 +105,47 @@ export class HunkProcessor {
     };
   }
 
-  private parsePatch(patch: string): ParsedHunk | null {
-    const hunkLines = patch.split("\n").slice(1); // Skip the @@ line
+  private parsePatch(patch: string, newStartLine: number): ParsedHunk | null {
+    const lines = patch.split("\n").slice(1); // Skip the @@ line
+
+    // Remove trailing empty line if present
+    if (lines[lines.length - 1] === "") {
+      lines.pop();
+    }
+
     const oldHunkLines: string[] = [];
     const newHunkLines: string[] = [];
 
-    for (const line of hunkLines) {
+    let newLine = newStartLine;
+    let currentLine = 0;
+
+    // Skip line-number annotations for the first 3 and last 3 context lines
+    // so the AI focuses on the changed region, not boilerplate context.
+    const skipStart = 3;
+    const skipEnd = 3;
+    const removalOnly = !lines.some((l) => l.startsWith("+"));
+
+    for (const line of lines) {
+      currentLine++;
       if (line.startsWith("-")) {
         oldHunkLines.push(line.substring(1));
       } else if (line.startsWith("+")) {
-        newHunkLines.push(line.substring(1));
+        // Always annotate added lines with their new file line number
+        newHunkLines.push(`${newLine}: ${line.substring(1)}`);
+        newLine++;
       } else {
-        // Context line
-        oldHunkLines.push(line.substring(1));
-        newHunkLines.push(line.substring(1));
+        // Context line — appears in both hunks
+        const content = line.startsWith(" ") ? line.substring(1) : line;
+        oldHunkLines.push(content);
+        if (
+          removalOnly ||
+          (currentLine > skipStart && currentLine <= lines.length - skipEnd)
+        ) {
+          newHunkLines.push(`${newLine}: ${content}`);
+        } else {
+          newHunkLines.push(content);
+        }
+        newLine++;
       }
     }
 
@@ -211,7 +238,7 @@ export class HunkProcessor {
             if (patchLines == null) {
               continue;
             }
-            const hunks = this.parsePatch(patch);
+            const hunks = this.parsePatch(patch, patchLines.newHunk.startLine);
             if (hunks == null) {
               continue;
             }

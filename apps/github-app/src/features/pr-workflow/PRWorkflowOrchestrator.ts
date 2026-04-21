@@ -171,6 +171,7 @@ export class PRWorkflowOrchestrator {
     reviewGenerator = new PullRequestReviewGenerator(this.context, {
       enableSummaryFiltering: options.useSummaryFiltering !== false && !!summaries,
       summaries,
+      shortSummary: summaryGenerator?.getShortSummary(),
       reviewStartSha,
       disableReview: !reviewSettings.enableInlineReviewComments,
       ...options.reviewOptions,

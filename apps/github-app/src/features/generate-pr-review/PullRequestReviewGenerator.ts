@@ -20,16 +20,17 @@ export interface PullRequestReviewOptions {
   enableSummaryFiltering?: boolean;
   summaries?: SummaryResult[];
   reviewStartSha?: string;
+  shortSummary?: string;
 }
 
 export class PullRequestReviewGenerator {
-  private readonly defaultOptions: Omit<Required<PullRequestReviewOptions>, 'summaries' | 'reviewStartSha'> = {
+  private readonly defaultOptions: Omit<Required<PullRequestReviewOptions>, 'summaries' | 'reviewStartSha' | 'shortSummary'> = {
     disableReview: false,
     maxConcurrency: 5,
     maxFiles: 50,
     maxRequestTokens: 10000,
     debug: false,
-    enableSummaryFiltering: false,
+    enableSummaryFiltering: true,
   };
 
   private readonly preprocessor: PRPreprocessor;
@@ -200,7 +201,7 @@ export class PullRequestReviewGenerator {
       title: pullRequest.title,
       description: pullRequest.body || "",
       rawSummary: "",
-      shortSummary: "",
+      shortSummary: opts.shortSummary ?? "",
       filename: "",
       fileDiff: "",
       patches: "",

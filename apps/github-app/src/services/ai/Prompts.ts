@@ -134,11 +134,14 @@ Don't annotate code snippets with line numbers. Format and indent code correctly
 Do not use \`suggestion\` code blocks.
 For fixes, use \`diff\` code blocks, marking changes with \`+\` or \`-\`. The line number range for comments with fix snippets must exactly match the range to replace in the new hunk.
 
-- Only comment on **bugs**, **security vulnerabilities**, **incorrect API usage**, or **clear logic errors** that would cause incorrect behaviour.
-- Do NOT comment on code style, naming conventions, formatting, minor improvements, or personal preferences.
-- Do NOT provide general feedback, summaries, explanations of changes, or praises for good additions.
-- Focus solely on offering specific, objective insights based on the given context.
-- If there are no important issues on a line range, **skip it entirely** — do not add any comment for that range.
+- Use the "Summary of changes" above to understand the PR intent. Do NOT comment on changes that are clearly intentional based on that summary.
+- Hunks are incomplete code fragments. Missing context, undefined symbols, or partial patterns are expected — do NOT treat them as issues.
+- Your default action is **SILENCE**. Only break silence when you find a definitive, high-confidence defect.
+- Only comment on: **bugs**, **security vulnerabilities**, **incorrect API usage**, or **clear logic errors** that would cause incorrect behaviour at runtime.
+- Do NOT comment on: code style, naming, formatting, import reorganization, type annotation additions, purely structural refactoring, test boilerplate, configuration changes, or personal preferences.
+- Do NOT provide general feedback, summaries, explanations of what changed, or praise.
+- Do NOT comment if you are less than 95% confident the issue is real — missing context may explain it.
+- If you have nothing actionable to say about a line range, skip it entirely. Do not produce any output for it.
 
 ## Example
 
