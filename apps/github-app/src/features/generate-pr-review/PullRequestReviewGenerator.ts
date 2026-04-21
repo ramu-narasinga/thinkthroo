@@ -4,7 +4,7 @@ import { ClaudeBot } from "@/services/ai/ClaudeBot";
 import { Prompts } from "@/services/ai/Prompts";
 import type { TemplateData } from "@/services/ai/Prompts";
 import { ReviewCommentManager } from "@/services/reviews/ReviewCommentManager";
-import { FileReviewer } from "@/services/reviews/FileReviewer";
+import { FileReviewer, type FileInlineReview } from "@/services/reviews/FileReviewer";
 import { FileReviewFilter } from "@/services/reviews/FileReviewFilter";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
 import type { SummaryResult } from "@/services/summarization/FileSummarizer";
@@ -40,6 +40,7 @@ export class PullRequestReviewGenerator {
   private readonly options: PullRequestReviewOptions;
   private readonly aiOptions: AIOptions;
   private readonly log: Logger;
+  private fileReviewer: FileReviewer | null = null;
 
   constructor(
     private readonly context: Context<"pull_request.opened" | "pull_request.synchronize">,
@@ -186,7 +187,7 @@ export class PullRequestReviewGenerator {
       this.context.octokit,
       issueDetails
     );
-    const fileReviewer = new FileReviewer(
+    this.fileReviewer = new FileReviewer(
       this.reviewBot,
       this.prompts,
       reviewCommentManager,
@@ -195,6 +196,7 @@ export class PullRequestReviewGenerator {
         debug: opts.debug ?? false,
       }
     );
+    const fileReviewer = this.fileReviewer;
 
     // Step 3: Prepare template data
     const templateData: TemplateData = {
@@ -387,5 +389,12 @@ ${
    */
   getAccumulatedUsage(): BotAccumulatedUsage[] {
     return [this.reviewBot.getAccumulatedUsage()];
+  }
+
+  /**
+   * Returns the inline review comments collected per file after generate() runs.
+   */
+  getInlineFileReviews(): FileInlineReview[] {
+    return this.fileReviewer?.getFileInlineReviews() ?? [];
   }
 }

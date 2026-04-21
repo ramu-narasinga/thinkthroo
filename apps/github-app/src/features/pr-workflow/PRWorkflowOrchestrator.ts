@@ -278,6 +278,27 @@ export class PRWorkflowOrchestrator {
               fileCount: fileResults.length,
             });
           }
+
+          // Step 7: Persist inline review comments if any were generated
+          const inlineReviews = reviewGenerator?.getInlineFileReviews() ?? [];
+          if (saveResult.success && saveResult.reviewId && inlineReviews.length > 0) {
+            try {
+              await reviewService.saveInlineReviews({
+                prReviewId: saveResult.reviewId,
+                inlineReviews,
+              });
+              prLogger.info("Inline review comments saved to platform", {
+                prNumber: pullNumber,
+                fileCount: inlineReviews.length,
+                totalComments: inlineReviews.reduce((sum, f) => sum + f.comments.length, 0),
+              });
+            } catch (err: any) {
+              prLogger.error("Inline reviews save failed, continuing", {
+                prNumber: pullNumber,
+                error: err.message,
+              });
+            }
+          }
         } else {
           prLogger.info("No summary points to save, skipping review persistence", { prNumber: pullNumber });
         }

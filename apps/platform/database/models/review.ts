@@ -1,5 +1,5 @@
 import { and, desc, eq, sql, gte, lte, count, avg, sum } from 'drizzle-orm';
-import { prReviews, prArchitectureFileResults, organizations } from '../schemas';
+import { prReviews, prArchitectureFileResults, prInlineReviewComments, organizations } from '../schemas';
 import { ThinkThrooDatabase } from '../type';
 
 export class ReviewModel {
@@ -49,6 +49,49 @@ export class ReviewModel {
         eq(organizations.userId, this.userId),
       ))
       .orderBy(prArchitectureFileResults.filename);
+  };
+
+  getById = async (prReviewId: string) => {
+    const [row] = await this.db
+      .select({
+        id: prReviews.id,
+        repositoryFullName: prReviews.repositoryFullName,
+        prNumber: prReviews.prNumber,
+        prTitle: prReviews.prTitle,
+        prAuthor: prReviews.prAuthor,
+        summaryPoints: prReviews.summaryPoints,
+        creditsDeducted: prReviews.creditsDeducted,
+        slackStatus: prReviews.slackStatus,
+        createdAt: prReviews.createdAt,
+      })
+      .from(prReviews)
+      .innerJoin(organizations, eq(organizations.id, prReviews.organizationId))
+      .where(and(
+        eq(prReviews.id, prReviewId),
+        eq(organizations.userId, this.userId),
+      ))
+      .limit(1);
+    return row ?? null;
+  };
+
+  getInlineReviews = async (prReviewId: string) => {
+    return this.db
+      .select({
+        id: prInlineReviewComments.id,
+        filename: prInlineReviewComments.filename,
+        startLine: prInlineReviewComments.startLine,
+        endLine: prInlineReviewComments.endLine,
+        comment: prInlineReviewComments.comment,
+        createdAt: prInlineReviewComments.createdAt,
+      })
+      .from(prInlineReviewComments)
+      .innerJoin(prReviews, eq(prReviews.id, prInlineReviewComments.prReviewId))
+      .innerJoin(organizations, eq(organizations.id, prReviews.organizationId))
+      .where(and(
+        eq(prInlineReviewComments.prReviewId, prReviewId),
+        eq(organizations.userId, this.userId),
+      ))
+      .orderBy(prInlineReviewComments.filename, prInlineReviewComments.startLine);
   };
 
   getWeeklyAnalytics = async (organizationId: string, startDate: string, endDate: string, repositoryFullName?: string) => {

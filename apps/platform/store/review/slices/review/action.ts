@@ -1,13 +1,15 @@
 import { StateCreator } from 'zustand/vanilla';
 import { ReviewStore } from '../../store';
-import { ReviewItem, ArchitectureFileResult, ReviewStoreState } from '../../initialState';
+import { ReviewItem, ArchitectureFileResult, InlineReviewComment, ReviewStoreState } from '../../initialState';
 import { reviewClientService } from '@/service/review';
 
 export interface ReviewAction {
   fetchReviews: (repositoryFullName: string) => Promise<void>;
   fetchArchitectureResults: (prReviewId: string) => Promise<void>;
+  fetchInlineReviews: (prReviewId: string) => Promise<void>;
   internal_updateReviews: (reviews: ReviewItem[]) => void;
   internal_updateArchitectureResults: (prReviewId: string, results: ArchitectureFileResult[]) => void;
+  internal_updateInlineReviews: (prReviewId: string, comments: InlineReviewComment[]) => void;
 }
 
 export const createReviewSlice: StateCreator<
@@ -48,6 +50,26 @@ export const createReviewSlice: StateCreator<
     }
   },
 
+  fetchInlineReviews: async (prReviewId) => {
+    set(
+      (s: ReviewStoreState) => ({ isInlineLoading: { ...s.isInlineLoading, [prReviewId]: true } }),
+      false,
+      'fetchInlineReviews/start',
+    );
+    try {
+      const comments = await reviewClientService.getInlineReviews(prReviewId);
+      get().internal_updateInlineReviews(prReviewId, comments);
+    } catch (error) {
+      console.error('[ReviewStore] Error fetching inline reviews:', error);
+    } finally {
+      set(
+        (s: ReviewStoreState) => ({ isInlineLoading: { ...s.isInlineLoading, [prReviewId]: false } }),
+        false,
+        'fetchInlineReviews/done',
+      );
+    }
+  },
+
   internal_updateReviews: (reviews) => {
     set({ reviews }, false, 'internal_updateReviews');
   },
@@ -57,6 +79,14 @@ export const createReviewSlice: StateCreator<
       (s: ReviewStoreState) => ({ architectureResults: { ...s.architectureResults, [prReviewId]: results } }),
       false,
       'internal_updateArchitectureResults',
+    );
+  },
+
+  internal_updateInlineReviews: (prReviewId, comments) => {
+    set(
+      (s: ReviewStoreState) => ({ inlineReviews: { ...s.inlineReviews, [prReviewId]: comments } }),
+      false,
+      'internal_updateInlineReviews',
     );
   },
 });

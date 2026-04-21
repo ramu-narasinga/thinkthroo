@@ -36,6 +36,18 @@ export const reviewRouter = router({
       }));
     }),
 
+  getById: reviewProcedure
+    .input(z.object({ prReviewId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const row = await ctx.reviewModel.getById(input.prReviewId);
+      if (!row) return null;
+      return {
+        ...row,
+        summaryPoints: JSON.parse(row.summaryPoints) as string[],
+        creditsDeducted: Number(row.creditsDeducted),
+      };
+    }),
+
   getArchitectureResults: reviewProcedure
     .input(z.object({ prReviewId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
@@ -46,5 +58,11 @@ export const reviewRouter = router({
         docReferences: JSON.parse(r.docReferences) as { name: string; excerpt: string; documentId: string | null }[],
         creditsDeducted: Number(r.creditsDeducted),
       }));
+    }),
+
+  getInlineReviews: reviewProcedure
+    .input(z.object({ prReviewId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.reviewModel.getInlineReviews(input.prReviewId);
     }),
 });

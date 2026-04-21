@@ -1,7 +1,7 @@
 import type { ClaudeBot } from "@/services/ai/ClaudeBot";
 import type { Prompts, TemplateData } from "@/services/ai/Prompts";
 import { countTokens } from "@/services/ai/TokenCounter";
-import { ReviewParser } from "./ReviewParser";
+import { ReviewParser, type ReviewComment } from "./ReviewParser";
 import type { ReviewCommentManager } from "./ReviewCommentManager";
 import { COMMENT_REPLY_TAG } from "@/services/constants";
 import { logger } from "@/utils/logger";
@@ -18,11 +18,17 @@ export interface ReviewResult {
   reason?: string;
 }
 
+export interface FileInlineReview {
+  filename: string;
+  comments: ReviewComment[];
+}
+
 /**
  * Handles AI-based file review for PR reviews
  */
 export class FileReviewer {
   private reviewsFailed: string[] = [];
+  private fileInlineReviews: FileInlineReview[] = [];
   private readonly reviewParser: ReviewParser;
 
   constructor(
@@ -40,6 +46,10 @@ export class FileReviewer {
 
   getReviewsFailed(): string[] {
     return this.reviewsFailed;
+  }
+
+  getFileInlineReviews(): FileInlineReview[] {
+    return this.fileInlineReviews;
   }
 
   /**
@@ -253,6 +263,11 @@ export class FileReviewer {
           pullNumber,
           reviewsFound: reviews.length,
         });
+
+        // Record inline reviews for persistence
+        if (reviews.length > 0) {
+          this.fileInlineReviews.push({ filename, comments: reviews });
+        }
 
         for (const review of reviews) {
           try {
