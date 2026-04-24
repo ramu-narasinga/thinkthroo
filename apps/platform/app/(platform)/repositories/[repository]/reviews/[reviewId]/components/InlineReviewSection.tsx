@@ -16,7 +16,15 @@ function groupByFile(
   }, {});
 }
 
-export function InlineReviewSection({ prReviewId }: { prReviewId: string }) {
+export function InlineReviewSection({
+  prReviewId,
+  repositoryFullName,
+  prNumber,
+}: {
+  prReviewId: string;
+  repositoryFullName: string;
+  prNumber: number;
+}) {
   const fetchInlineReviews = useReviewStore((s) => s.fetchInlineReviews);
   const comments = useReviewStore(reviewSelectors.inlineReviews(prReviewId));
   const isLoading = useReviewStore(reviewSelectors.isInlineLoading(prReviewId));
@@ -58,7 +66,14 @@ export function InlineReviewSection({ prReviewId }: { prReviewId: string }) {
             {Object.entries(byFile).map(([filename, fileComments]) => (
               <div key={filename} className="space-y-2">
                 <p className="font-mono text-xs text-slate-600 bg-slate-50 border rounded px-2 py-1 break-all">
-                  {filename}
+                  <a
+                    href={`https://github.com/${repositoryFullName}/pull/${prNumber}/files`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {filename}
+                  </a>
                   <span className="ml-2 text-muted-foreground font-sans">
                     {fileComments.length}{" "}
                     {fileComments.length === 1 ? "comment" : "comments"}

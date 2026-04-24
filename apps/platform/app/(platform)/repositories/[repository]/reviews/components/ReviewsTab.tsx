@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   ArrowUpDown, ArrowDown, GitPullRequest,
   ChevronLeft, ChevronRight,
-  User, ChevronRight as ChevronRightIcon,
+  User, ChevronRight as ChevronRightIcon, ExternalLink,
 } from "lucide-react";
 import { Button } from "@thinkthroo/ui/components/button";
 import { useReviewStore } from "@/store/review";
@@ -148,7 +148,17 @@ export function ReviewsTab() {
                 <p className="font-bold text-sm mb-0.5">{review.repositoryFullName}</p>
                 <div className="flex items-center gap-1 text-muted-foreground text-sm mb-3">
                   <GitPullRequest className="h-3.5 w-3.5 shrink-0" />
-                  <span>#{review.prNumber} – {review.prTitle}</span>
+                  <span>#{review.prNumber} –</span>
+                  <a
+                    href={`https://github.com/${review.repositoryFullName}/pull/${review.prNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-0.5 hover:underline hover:text-foreground"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {review.prTitle}
+                    <ExternalLink className="h-3 w-3 shrink-0" />
+                  </a>
                 </div>
                 <ul className="space-y-2">
                   {review.summaryPoints.slice(0, 3).map((point, i) => {

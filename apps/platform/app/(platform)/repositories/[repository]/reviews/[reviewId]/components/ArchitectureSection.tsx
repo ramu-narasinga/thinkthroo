@@ -26,9 +26,11 @@ function ScoreBadge({ score }: { score: number }) {
 export function ArchitectureSection({
   prReviewId,
   repoName,
+  prNumber,
 }: {
   prReviewId: string;
   repoName: string;
+  prNumber: number;
 }) {
   const fetchArchitectureResults = useReviewStore(
     (s) => s.fetchArchitectureResults
@@ -74,7 +76,14 @@ export function ArchitectureSection({
             <div key={file.id} className="space-y-2">
               <div className="flex items-center gap-2">
                 <p className="font-mono text-xs text-slate-600 bg-slate-50 border rounded px-2 py-1 break-all flex-1">
-                  {file.filename}
+                  <a
+                    href={`https://github.com/${repoName}/pull/${prNumber}/files`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {file.filename}
+                  </a>
                 </p>
                 <ScoreBadge score={file.score} />
                 {file.violationCount > 0 && (

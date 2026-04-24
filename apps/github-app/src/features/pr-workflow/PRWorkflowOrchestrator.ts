@@ -18,7 +18,6 @@ const MIN_CREDIT_THRESHOLD = 1;
 export interface PRWorkflowOptions {
   generateSummaries?: boolean;
   useSummaryFiltering?: boolean;
-  enableArchitectureReview?: boolean;
   reviewOptions?: {
     maxConcurrency?: number;
     maxFiles?: number;
@@ -179,13 +178,9 @@ export class PRWorkflowOrchestrator {
 
     await reviewGenerator.generate();
 
-    // Step 3: Architecture review (if enabled by settings)
+    // Step 3: Architecture review (controlled by platform settings)
     if (reviewSettings.enableArchitectureReview) {
       prLogger.info("Starting architecture review phase", { prNumber: pullNumber });
-
-      const shortSummary = (summaries ?? [])
-        .map((s) => `${s.filename}: ${s.summary}`)
-        .join("\n");
 
       try {
         architectureReviewGenerator = new ArchitectureReviewGenerator(
@@ -193,7 +188,7 @@ export class PRWorkflowOrchestrator {
           { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50, reviewStartSha },
           prLogger
         );
-        await architectureReviewGenerator.generate(shortSummary);
+        await architectureReviewGenerator.generate();
         prLogger.info("Architecture review phase complete", { prNumber: pullNumber });
       } catch (error: any) {
         // Architecture review failure should not break the overall PR workflow

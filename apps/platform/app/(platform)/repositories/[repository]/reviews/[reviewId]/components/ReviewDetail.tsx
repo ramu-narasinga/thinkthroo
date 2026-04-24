@@ -3,7 +3,7 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, GitPullRequest, User, MessageSquare } from "lucide-react";
+import { ArrowLeft, GitPullRequest, User, MessageSquare, ExternalLink } from "lucide-react";
 import { Button } from "@thinkthroo/ui/components/button";
 import { useReviewStore } from "@/store/review";
 import { reviewSelectors } from "@/store/review/selectors";
@@ -116,7 +116,15 @@ export function ReviewDetail() {
             <GitPullRequest className="h-4 w-4 shrink-0" />
             <span>
               #{review.prNumber} –{" "}
-              <span className="font-semibold text-foreground">{review.prTitle}</span>
+              <a
+                href={`https://github.com/${review.repositoryFullName}/pull/${review.prNumber}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-foreground hover:underline inline-flex items-center gap-1"
+              >
+                {review.prTitle}
+                <ExternalLink className="h-3 w-3 shrink-0" />
+              </a>
             </span>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap pt-1">
@@ -143,8 +151,8 @@ export function ReviewDetail() {
 
       {/* Sections */}
       <SummarySection summaryPoints={review.summaryPoints} />
-      <InlineReviewSection prReviewId={review.id} />
-      <ArchitectureSection prReviewId={review.id} repoName={repositoryFullName} />
+      <InlineReviewSection prReviewId={review.id} repositoryFullName={review.repositoryFullName} prNumber={review.prNumber} />
+      <ArchitectureSection prReviewId={review.id} repoName={repositoryFullName} prNumber={review.prNumber} />
     </div>
   );
 }

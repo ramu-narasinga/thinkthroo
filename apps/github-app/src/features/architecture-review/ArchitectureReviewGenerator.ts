@@ -85,7 +85,7 @@ export class ArchitectureReviewGenerator {
     return this.fileResults;
   }
 
-  async generate(shortSummary = ""): Promise<void> {
+  async generate(): Promise<void> {
     const pullRequest = this.context.payload.pull_request;
     const pullNumber = pullRequest.number;
     const installationId = String(
@@ -133,7 +133,6 @@ export class ArchitectureReviewGenerator {
             patches,
             pullRequest.title,
             pullRequest.body ?? "",
-            shortSummary,
             installationId,
             repositoryFullName,
             pullNumber,
@@ -182,7 +181,6 @@ export class ArchitectureReviewGenerator {
     patches: Array<[number, number, string]>,
     title: string,
     description: string,
-    shortSummary: string,
     installationId: string,
     repositoryFullName: string,
     pullNumber: number,
@@ -208,9 +206,12 @@ export class ArchitectureReviewGenerator {
         return [];
       }
 
+      // Wrap each chunk in XML-style tags so Claude treats the content as
+      // structured data rather than executable instructions, mitigating
+      // prompt injection from user-uploaded architecture documents.
       rules = ruleChunks
-        .map((chunk) => `### ${chunk.name}\n\n${chunk.text}`)
-        .join("\n\n---\n\n");
+        .map((chunk) => `<rule name="${chunk.name.replace(/"/g, "&quot;")}">\n${chunk.text}\n</rule>`)
+        .join("\n\n");
 
       this.log.debug("Architecture rules retrieved", {
         filename,
@@ -230,7 +231,6 @@ export class ArchitectureReviewGenerator {
     const templateData: TemplateData = {
       title,
       description,
-      short_summary: shortSummary,
       filename,
       patches: patchText,
       architecture_rules: rules,
@@ -278,9 +278,13 @@ export class ArchitectureReviewGenerator {
     }
 
     // Accumulate file result for platform persistence
-    // Score = % of rules that were not violated, clamped to [0, 100]
+    // Score = % of rules that were not violated, clamped to [0, 100].
+    // Cap violations at ruleChunks.length: a single rule can produce multiple
+    // violations, which would otherwise make the ratio exceed 1 and floor all
+    // scores to 0 via Math.max.
+    // FIXME: How accurate this is?
     const score = ruleChunks.length > 0
-      ? Math.max(0, Math.round(100 * (1 - violations.length / ruleChunks.length)))
+      ? Math.max(0, Math.round(100 * (1 - Math.min(violations.length, ruleChunks.length) / ruleChunks.length)))
       : 100;
     const docReferences: ArchitectureDocReference[] = ruleChunks.map((chunk) => ({
       name: chunk.name,
