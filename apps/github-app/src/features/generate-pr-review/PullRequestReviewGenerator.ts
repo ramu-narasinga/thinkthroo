@@ -245,6 +245,24 @@ export class PullRequestReviewGenerator {
 
     const results = await Promise.all(reviewPromises);
 
+    // Notify when files were truncated due to the plan's files-per-review limit
+    if (skippedFiles.length > 0) {
+      try {
+        await this.context.octokit.issues.createComment({
+          owner: issueDetails.owner,
+          repo: issueDetails.repo,
+          issue_number: pullNumber,
+          body: `**${skippedFiles.length} file${skippedFiles.length === 1 ? " was" : "s were"} skipped** because your plan allows a maximum of **${maxFiles} files per review**. Upgrade your plan at [https://app.thinkthroo.com/account](https://app.thinkthroo.com/account) to review more files per PR.`,
+        });
+      } catch (err: any) {
+        this.log.warn("Failed to post skipped-files comment", {
+          prNumber: pullNumber,
+          skippedCount: skippedFiles.length,
+          error: err.message,
+        });
+      }
+    }
+
     // Step 5: Analyze results
     const totalReviews = results.reduce((sum: number, r) => sum + r.reviewCount, 0);
     const failedFiles = results.filter((r) => r.failed);

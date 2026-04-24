@@ -10,6 +10,7 @@ import { CommitAnalyzer } from "@/services/commits/CommitAnalyzer";
 import { CommentManager } from "@/services/comments/CommentManager";
 import { SUMMARIZE_TAG } from "@/services/constants";
 import { ReviewSettingsService } from "@/services/settings/ReviewSettingsService";
+import { RateLimitService } from "@/services/rate-limits/RateLimitService";
 import { logger } from "@/utils/logger";
 
 /** Minimum credits required to start a PR workflow run */
@@ -111,6 +112,50 @@ export class PRWorkflowOrchestrator {
       return;
     }
 
+    // Rate limit check — must pass before any AI work begins
+    let filesPerReview = 50; // safe default
+    if (installationId) {
+      try {
+        const rateLimitService = new RateLimitService();
+        const rateLimit = await rateLimitService.check(installationId, repositoryFullName);
+
+        if (!rateLimit.allowed) {
+          const minutes = rateLimit.retryAfterSeconds
+            ? Math.ceil(rateLimit.retryAfterSeconds / 60)
+            : null;
+          const retryMsg = minutes
+            ? ` The next review slot opens in approximately **${minutes} minute${minutes === 1 ? "" : "s"}**.`
+            : "";
+          prLogger.warn("Rate limit reached — skipping PR workflow", {
+            prNumber: pullNumber,
+            reviewsPerHour: rateLimit.reviewsPerHour,
+            retryAfterSeconds: rateLimit.retryAfterSeconds,
+          });
+          await this.context.octokit.issues.createComment({
+            owner: this.context.payload.repository.owner.login,
+            repo: this.context.payload.repository.name,
+            issue_number: pullNumber,
+            body: `Review skipped — your organisation has reached the limit of **${rateLimit.reviewsPerHour} reviews per hour** on your current plan.${retryMsg} Upgrade your plan at [https://app.thinkthroo.com/account](https://app.thinkthroo.com/account).`,
+          });
+          return;
+        }
+
+        filesPerReview = rateLimit.filesPerReview;
+        prLogger.info("Rate limit check passed", {
+          prNumber: pullNumber,
+          reviewsPerHour: rateLimit.reviewsPerHour,
+          filesPerReview: rateLimit.filesPerReview,
+          remaining: rateLimit.remaining,
+        });
+      } catch (err: any) {
+        // Rate limit check failure is non-fatal — proceed with the workflow
+        prLogger.warn("Rate limit check failed, proceeding anyway", {
+          prNumber: pullNumber,
+          error: err.message,
+        });
+      }
+    }
+
     let summaries: SummaryResult[] | undefined;
     let summaryGenerator: PullRequestSummaryGenerator | undefined;
     let reviewGenerator: PullRequestReviewGenerator | undefined;
@@ -174,6 +219,8 @@ export class PRWorkflowOrchestrator {
       reviewStartSha,
       disableReview: !reviewSettings.enableInlineReviewComments,
       ...options.reviewOptions,
+      // Cap files per review to the plan/override limit resolved from the rate limit check
+      maxFiles: filesPerReview ?? options.reviewOptions?.maxFiles,
     }, prLogger);
 
     await reviewGenerator.generate();

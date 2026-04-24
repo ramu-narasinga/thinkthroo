@@ -134,6 +134,13 @@
       "when": 1776189585323,
       "tag": "0018_glorious_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1776998786206,
+      "tag": "0019_chilly_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }
