@@ -10,6 +10,9 @@ import {
   COMMENT_TAG,
   COMMIT_ID_START_TAG,
   COMMIT_ID_END_TAG,
+  REVIEW_EPOCH_BASE_TAG_PREFIX,
+  REVIEW_PAUSED_NOTICE_TAG,
+  REVIEW_PAUSED_TAG,
 } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
@@ -739,5 +742,55 @@ If you like this project, please support us by starring the repository. This too
     });
     
     return finalComment;
+  }
+
+  /**
+   * Returns the modified comment body with the epoch base tag upserted.
+   * If the tag already exists it is replaced in-place; otherwise it is appended.
+   */
+  upsertEpochBase(commentBody: string, newBase: number): string {
+    const prefix = REVIEW_EPOCH_BASE_TAG_PREFIX;
+    const newTag = `${prefix}${newBase} -->`;
+    const existingStart = commentBody.indexOf(prefix);
+    if (existingStart !== -1) {
+      const existingEnd = commentBody.indexOf(' -->', existingStart);
+      if (existingEnd !== -1) {
+        return (
+          commentBody.substring(0, existingStart) +
+          newTag +
+          commentBody.substring(existingEnd + ' -->'.length)
+        );
+      }
+    }
+    return `${commentBody}\n${newTag}`;
+  }
+
+  /**
+   * Returns true if the pause-notice dedup flag is present in the comment body.
+   */
+  isPauseNoticePosted(commentBody: string): boolean {
+    return commentBody.includes(REVIEW_PAUSED_NOTICE_TAG);
+  }
+
+  /**
+   * Returns the modified comment body with the pause-notice-posted flag appended.
+   */
+  setPauseNoticePosted(commentBody: string): string {
+    return `${commentBody}\n${REVIEW_PAUSED_NOTICE_TAG}`;
+  }
+
+  /** Returns true if the PR has been manually paused via @thinkthroo pause. */
+  isPaused(commentBody: string): boolean {
+    return commentBody.includes(REVIEW_PAUSED_TAG);
+  }
+
+  /** Returns the comment body with the manual-pause tag appended. */
+  setPaused(commentBody: string): string {
+    return `${commentBody}\n${REVIEW_PAUSED_TAG}`;
+  }
+
+  /** Returns the comment body with the manual-pause tag removed. */
+  clearPaused(commentBody: string): string {
+    return commentBody.replace(/\n?<!-- review_paused -->/g, '');
   }
 }

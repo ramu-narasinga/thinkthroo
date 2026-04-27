@@ -9,6 +9,7 @@ export interface RepositorySettingsInput {
   reviewLanguage?: string | null;
   toneInstructions?: string | null;
   pathFilters?: string[];
+  autoPauseAfterReviewedCommits?: number;
 }
 
 export class RepositorySettingsClientService {

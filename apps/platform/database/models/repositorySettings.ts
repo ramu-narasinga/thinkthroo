@@ -11,6 +11,7 @@ export interface RepositorySettingsData {
   reviewLanguage: string | null;
   toneInstructions: string | null;
   pathFilters: string[];
+  autoPauseAfterReviewedCommits: number;
 }
 
 export class RepositorySettingsModel {
@@ -42,6 +43,7 @@ export class RepositorySettingsModel {
       reviewLanguage: row.repository_settings?.reviewLanguage ?? null,
       toneInstructions: row.repository_settings?.toneInstructions ?? null,
       pathFilters: row.repository_settings?.pathFilters ?? [],
+      autoPauseAfterReviewedCommits: row.repository_settings?.autoPauseAfterReviewedCommits ?? 5,
     };
   };
 

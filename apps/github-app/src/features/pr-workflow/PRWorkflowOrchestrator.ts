@@ -19,6 +19,9 @@ const MIN_CREDIT_THRESHOLD = 1;
 export interface PRWorkflowOptions {
   generateSummaries?: boolean;
   useSummaryFiltering?: boolean;
+  forceReview?: boolean;
+  fullReview?: boolean;
+  summaryOnly?: boolean;
   reviewOptions?: {
     maxConcurrency?: number;
     maxFiles?: number;
@@ -91,6 +94,7 @@ export class PRWorkflowOrchestrator {
       reviewLanguage: null as string | null,
       toneInstructions: null as string | null,
       pathFilters: [] as string[],
+      autoPauseAfterReviewedCommits: 5,
     };
 
     if (installationId) {
@@ -166,28 +170,88 @@ export class PRWorkflowOrchestrator {
     const issueDetails = this.context.issue();
     const octokit = this.context.octokit;
     let reviewStartSha: string | undefined;
+    let _commitAnalyzer: CommitAnalyzer | undefined;
+    let _commentManager: CommentManager | undefined;
+    let _existingCommentBody = "";
+    let _existingComment: any | null = null;
 
     try {
       const commitAnalyzer = new CommitAnalyzer(octokit, issueDetails);
       const commentManager = new CommentManager(octokit, issueDetails);
+      _commitAnalyzer = commitAnalyzer;
+      _commentManager = commentManager;
       const existingCommentData = await commentManager.getExistingCommentData(
         pullNumber,
         SUMMARIZE_TAG,
         commitAnalyzer.getReviewedCommitIdsBlock.bind(commitAnalyzer)
       );
+      _existingCommentBody = existingCommentData.commentBody;
+      _existingComment = existingCommentData.comment;
       const allCommitIds = await commitAnalyzer.getAllCommitIds(pullNumber);
-      reviewStartSha = commitAnalyzer.determineReviewStartCommit(
-        allCommitIds,
-        existingCommentData.commitIdsBlock,
-        pullRequest.base.sha,
-        pullRequest.head.sha
-      );
-      prLogger.info("Review start SHA determined independently", { prNumber: pullNumber, reviewStartSha });
+      if (options.fullReview) {
+        reviewStartSha = pullRequest.base.sha;
+        prLogger.info("Full review mode — starting from base SHA", { prNumber: pullNumber, reviewStartSha });
+      } else {
+        reviewStartSha = commitAnalyzer.determineReviewStartCommit(
+          allCommitIds,
+          existingCommentData.commitIdsBlock,
+          pullRequest.base.sha,
+          pullRequest.head.sha
+        );
+        prLogger.info("Review start SHA determined independently", { prNumber: pullNumber, reviewStartSha });
+      }
     } catch (err: any) {
       prLogger.warn("Failed to determine review start SHA, will fall back to full review", {
         prNumber: pullNumber,
         error: err.message,
       });
+    }
+
+    // Pause check — only on synchronize events (not opened/reopened), skipped when forceReview is set
+    const isSynchronize = (this.context.payload as any).action === "synchronize";
+    if (
+      isSynchronize &&
+      !options.forceReview &&
+      reviewSettings.autoPauseAfterReviewedCommits > 0 &&
+      _commitAnalyzer &&
+      _commentManager &&
+      _existingCommentBody
+    ) {
+      const reviewedCount = _commitAnalyzer.getReviewedCountSinceEpoch(_existingCommentBody);
+      if (reviewedCount >= reviewSettings.autoPauseAfterReviewedCommits) {
+        prLogger.info("Auto-pause threshold reached — skipping review cycle", {
+          prNumber: pullNumber,
+          reviewedCount,
+          autoPause: reviewSettings.autoPauseAfterReviewedCommits,
+        });
+        if (_existingComment && !_commentManager.isPauseNoticePosted(_existingCommentBody)) {
+          await this.context.octokit.issues.createComment({
+            owner,
+            repo: this.context.payload.repository.name,
+            issue_number: pullNumber,
+            body: `Reviews have been paused after **${reviewSettings.autoPauseAfterReviewedCommits}** reviewed commits in this push cycle.\nComment \`@thinkthroo review\` to run an immediate review and reset the counter.`,
+          });
+          const updatedBody = _commentManager.setPauseNoticePosted(_existingCommentBody);
+          await octokit.issues.updateComment({
+            owner,
+            repo: this.context.payload.repository.name,
+            comment_id: _existingComment.id,
+            body: updatedBody,
+          });
+        }
+        return;
+      }
+    }
+
+    // Manual pause check — explicit @thinkthroo pause command
+    if (
+      !options.forceReview &&
+      _commentManager &&
+      _existingCommentBody &&
+      _commentManager.isPaused(_existingCommentBody)
+    ) {
+      prLogger.info("PR reviews are manually paused — skipping workflow", { prNumber: pullNumber });
+      return;
     }
 
     // Step 1: Generate summaries (if enabled by settings)
@@ -206,6 +270,9 @@ export class PRWorkflowOrchestrator {
     }
 
     // Step 2: Generate review (with optional summary filtering)
+    if (options.summaryOnly) {
+      prLogger.info("Summary-only mode — skipping review and architecture phases", { prNumber: pullNumber });
+    } else {
     prLogger.info("Starting review generation phase", {
       prNumber: pullNumber,
       useSummaryFiltering: options.useSummaryFiltering ?? true,
@@ -245,6 +312,7 @@ export class PRWorkflowOrchestrator {
         });
       }
     }
+    } // end !options.summaryOnly
 
     // Step 4: Deduct credits for all AI usage accumulated across the workflow
     if (installationId) {

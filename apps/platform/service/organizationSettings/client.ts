@@ -8,6 +8,7 @@ export interface OrganizationSettingsInput {
   reviewLanguage?: string | null;
   toneInstructions?: string | null;
   pathFilters?: string[];
+  autoPauseAfterReviewedCommits?: number;
 }
 
 export class OrganizationSettingsClientService {

@@ -16,6 +16,7 @@ export interface EffectiveReviewSettings {
   reviewLanguage: string | null;
   toneInstructions: string | null;
   pathFilters: string[];
+  autoPauseAfterReviewedCommits: number;
 }
 
 export async function GET(req: NextRequest) {
@@ -90,6 +91,7 @@ export async function GET(req: NextRequest) {
       reviewLanguage: orgSettings?.reviewLanguage ?? null,
       toneInstructions: orgSettings?.toneInstructions ?? null,
       pathFilters: orgSettings?.pathFilters ?? [],
+      autoPauseAfterReviewedCommits: orgSettings?.autoPauseAfterReviewedCommits ?? 5,
     };
   } else {
     effective = {
@@ -100,6 +102,7 @@ export async function GET(req: NextRequest) {
       reviewLanguage: repoSettings.reviewLanguage ?? null,
       toneInstructions: repoSettings.toneInstructions ?? null,
       pathFilters: repoSettings.pathFilters ?? [],
+      autoPauseAfterReviewedCommits: repoSettings.autoPauseAfterReviewedCommits ?? 5,
     };
   }
 

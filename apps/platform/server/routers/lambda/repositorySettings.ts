@@ -12,6 +12,7 @@ const settingsInput = z.object({
   reviewLanguage: z.string().nullable().optional(),
   toneInstructions: z.string().nullable().optional(),
   pathFilters: z.array(z.string()).optional(),
+  autoPauseAfterReviewedCommits: z.number().int().min(0).optional(),
 });
 
 const repositorySettingsProcedure = authedProcedure

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp, unique, pgPolicy, foreignKey } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, boolean, integer, timestamp, unique, pgPolicy, foreignKey } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { organizations } from './organization';
 import { profiles } from './user';
@@ -28,6 +28,9 @@ export const organizationSettings = pgTable('organization_settings', {
 
   // Glob patterns to exclude from review, e.g. 'dist/**', '*.lock'
   pathFilters: text('path_filters').array().default(sql`ARRAY[]::text[]`).notNull(),
+
+  // Pause incremental reviews after N reviewed commits in a cycle (0 = always review)
+  autoPauseAfterReviewedCommits: integer('auto_pause_after_reviewed_commits').default(5).notNull(),
 
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),

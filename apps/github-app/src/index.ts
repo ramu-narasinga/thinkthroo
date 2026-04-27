@@ -7,6 +7,7 @@ import { greetIssue } from "./features/issue-greeting";
 import { PRWorkflowOrchestrator } from "./features/pr-workflow";
 import { MarketplaceService } from "./services/marketplace/MarketplaceService";
 import { InviteGateService } from "./services/invite/InviteGateService";
+import { PRCommandHandler } from "./features/pr-command/PRCommandHandler";
 import { logger } from "@/utils/logger";
 import { SlackNotifier } from "@/utils/slack";
 
@@ -111,6 +112,17 @@ export default (app: Probot) => {
     } catch (error: any) {
       logger.error("Failed to complete PR workflow", {
         prNumber: pullRequest.number,
+        error: error.message,
+        stack: error.stack,
+      });
+    }
+  });
+
+  app.on("issue_comment.created", async (context) => {
+    try {
+      await new PRCommandHandler(context).handle();
+    } catch (error: any) {
+      logger.error("Failed to handle PR command", {
         error: error.message,
         stack: error.stack,
       });

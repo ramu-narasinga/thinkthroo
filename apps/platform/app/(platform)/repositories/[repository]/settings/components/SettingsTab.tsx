@@ -41,6 +41,7 @@ export function SettingsTab() {
   const [tone, setTone] = useState("")
   const [pathFilters, setPathFilters] = useState<string[]>([])
   const [pathFilterInput, setPathFilterInput] = useState("")
+  const [autoPauseAfterReviewedCommits, setAutoPauseAfterReviewedCommits] = useState(5)
 
   // IDs needed for upsert
   const [repositoryId, setRepositoryId] = useState<string | null>(null)
@@ -61,6 +62,7 @@ export function SettingsTab() {
           setLanguage(data.reviewLanguage ?? "")
           setTone(data.toneInstructions ?? "")
           setPathFilters(data.pathFilters ?? [])
+          setAutoPauseAfterReviewedCommits(data.autoPauseAfterReviewedCommits ?? 5)
         }
       } finally {
         setIsLoaded(true)
@@ -94,6 +96,7 @@ export function SettingsTab() {
           reviewLanguage: language || null,
           toneInstructions: tone || null,
           pathFilters,
+          autoPauseAfterReviewedCommits,
       })
     } finally {
       setIsSaving(false)
@@ -313,6 +316,28 @@ export function SettingsTab() {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+
+        <hr />
+
+        {/* Auto-pause after reviewed commits */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+          <div>
+            <Label className="text-base font-semibold">Auto-pause after reviewed commits</Label>
+            <p className="text-sm text-muted-foreground mt-1">
+              Reviews pause automatically after this many commits per push cycle. Set to 0 to always review every push.
+            </p>
+          </div>
+          <div>
+            <Input
+              type="number"
+              min={0}
+              value={autoPauseAfterReviewedCommits}
+              onChange={(e) => setAutoPauseAfterReviewedCommits(Number(e.target.value))}
+              disabled={disabled}
+              className="w-32"
+            />
           </div>
         </div>
 

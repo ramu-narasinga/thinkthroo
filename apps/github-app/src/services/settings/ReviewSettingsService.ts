@@ -9,6 +9,7 @@ export interface EffectiveReviewSettings {
   reviewLanguage: string | null;
   toneInstructions: string | null;
   pathFilters: string[];
+  autoPauseAfterReviewedCommits: number;
 }
 
 /** Safe defaults used when the platform API is unreachable or the repo is not configured. */
@@ -20,6 +21,7 @@ const DEFAULTS: EffectiveReviewSettings = {
   reviewLanguage: null,
   toneInstructions: null,
   pathFilters: [],
+  autoPauseAfterReviewedCommits: 5,
 };
 
 /**
