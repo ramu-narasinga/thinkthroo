@@ -108,17 +108,17 @@ export const Footer = () => {
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
                             <li>
-                                <Link href="https://app.thinkthroo.com/privacy" target="_blank" onClick={() => track('footer-link', { link: 'privacy-policy', href: 'https://app.thinkthroo.com/privacy' })}>
+                                <Link href="/privacy" onClick={() => track('footer-link', { link: 'privacy-policy', href: '/privacy' })}>
                                     Privacy Policy
                                 </Link>
                             </li>
                             <li>
-                                <Link href="https://app.thinkthroo.com/terms" target="_blank" onClick={() => track('footer-link', { link: 'terms-and-conditions', href: 'https://app.thinkthroo.com/terms' })}>
+                                <Link href="/terms" onClick={() => track('footer-link', { link: 'terms-and-conditions', href: '/terms' })}>
                                     Terms and Conditions
                                 </Link>
                             </li>
                             <li>
-                                <Link href="https://app.thinkthroo.com/refund" target="_blank" onClick={() => track('footer-link', { link: 'refund-policy', href: 'https://app.thinkthroo.com/refund' })}>
+                                <Link href="/refund" onClick={() => track('footer-link', { link: 'refund-policy', href: '/refund' })}>
                                     Refund Policy
                                 </Link>
                             </li>

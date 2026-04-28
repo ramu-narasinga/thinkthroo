@@ -20,6 +20,15 @@ export interface ArchitectureFileResult {
   creditsDeducted: number;
 }
 
+export interface InlineReviewComment {
+  id: string;
+  filename: string;
+  startLine: number;
+  endLine: number;
+  comment: string;
+  createdAt: string;
+}
+
 export interface ReviewItem {
   id: string;
   repositoryFullName: string;
@@ -38,6 +47,8 @@ export interface ReviewStoreState {
   isReviewsFirstFetchFinished: boolean;
   architectureResults: Record<string, ArchitectureFileResult[]>; // keyed by prReviewId
   isArchitectureLoading: Record<string, boolean>;
+  inlineReviews: Record<string, InlineReviewComment[]>; // keyed by prReviewId
+  isInlineLoading: Record<string, boolean>;
 }
 
 export const initialState: ReviewStoreState = {
@@ -46,4 +57,6 @@ export const initialState: ReviewStoreState = {
   isReviewsFirstFetchFinished: false,
   architectureResults: {},
   isArchitectureLoading: {},
+  inlineReviews: {},
+  isInlineLoading: {},
 };

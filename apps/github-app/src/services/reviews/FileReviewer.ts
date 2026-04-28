@@ -1,23 +1,26 @@
 import type { ClaudeBot } from "@/services/ai/ClaudeBot";
 import type { Prompts, TemplateData } from "@/services/ai/Prompts";
 import { countTokens } from "@/services/ai/TokenCounter";
-import { ReviewParser } from "./ReviewParser";
+import { ReviewParser, type ReviewComment } from "./ReviewParser";
 import type { ReviewCommentManager } from "./ReviewCommentManager";
 import { COMMENT_REPLY_TAG } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
 export interface ReviewOptions {
   maxRequestTokens: number;
-  reviewCommentLGTM: boolean;
   debug: boolean;
 }
 
 export interface ReviewResult {
   filename: string;
   reviewCount: number;
-  lgtmCount: number;
   failed: boolean;
   reason?: string;
+}
+
+export interface FileInlineReview {
+  filename: string;
+  comments: ReviewComment[];
 }
 
 /**
@@ -25,6 +28,7 @@ export interface ReviewResult {
  */
 export class FileReviewer {
   private reviewsFailed: string[] = [];
+  private fileInlineReviews: FileInlineReview[] = [];
   private readonly reviewParser: ReviewParser;
 
   constructor(
@@ -35,7 +39,6 @@ export class FileReviewer {
   ) {
     logger.debug("FileReviewer initialized", {
       maxRequestTokens: options.maxRequestTokens,
-      reviewCommentLGTM: options.reviewCommentLGTM,
       debug: options.debug,
     });
     this.reviewParser = new ReviewParser();
@@ -43,6 +46,10 @@ export class FileReviewer {
 
   getReviewsFailed(): string[] {
     return this.reviewsFailed;
+  }
+
+  getFileInlineReviews(): FileInlineReview[] {
+    return this.fileInlineReviews;
   }
 
   /**
@@ -66,7 +73,6 @@ export class FileReviewer {
     const result: ReviewResult = {
       filename,
       reviewCount: 0,
-      lgtmCount: 0,
       failed: false,
     };
 
@@ -258,18 +264,12 @@ export class FileReviewer {
           reviewsFound: reviews.length,
         });
 
-        for (const review of reviews) {
-          // Check for LGTM
-          if (!this.options.reviewCommentLGTM && this.reviewParser.isLGTM(review.comment)) {
-            logger.debug("LGTM comment detected, skipping", {
-              filename,
-              pullNumber,
-              lineRange: `${review.startLine}-${review.endLine}`,
-            });
-            result.lgtmCount += 1;
-            continue;
-          }
+        // Record inline reviews for persistence
+        if (reviews.length > 0) {
+          this.fileInlineReviews.push({ filename, comments: reviews });
+        }
 
+        for (const review of reviews) {
           try {
             logger.debug("Buffering review comment", {
               filename,
@@ -321,7 +321,6 @@ export class FileReviewer {
       pullNumber,
       durationMs: duration,
       reviewCount: result.reviewCount,
-      lgtmCount: result.lgtmCount,
       failed: result.failed,
       reason: result.reason,
     });

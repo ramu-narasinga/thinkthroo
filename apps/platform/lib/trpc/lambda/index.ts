@@ -8,6 +8,7 @@
  * @link https://trpc.io/docs/v11/procedures
  */
 import { userAuth } from '../middleware/userAuth';
+import { loggingMiddleware } from './middleware/logging';
 import { trpc } from './init';
 
 /**
@@ -20,10 +21,9 @@ export const router = trpc.router;
  * Create an unprotected procedure
  * @link https://trpc.io/docs/v11/procedures
  **/
-const baseProcedure = trpc.procedure;
+const baseProcedure = trpc.procedure.use(loggingMiddleware);
 
 export const publicProcedure = baseProcedure.use(({ next, ctx }) => {
-  console.log("ctx", ctx)
   return next({
     ctx: { ...ctx, userId: ctx.userId },
   });

@@ -1,5 +1,5 @@
 import { lambdaClient } from '@/lib/trpc/client/lambda';
-import { ReviewItem, ArchitectureFileResult } from '@/store/review/initialState';
+import { ReviewItem, ArchitectureFileResult, InlineReviewComment } from '@/store/review/initialState';
 
 export class ReviewClientService {
   getByRepository = async (repositoryFullName: string): Promise<ReviewItem[]> => {
@@ -33,6 +33,34 @@ export class ReviewClientService {
       docReferences: r.docReferences,
       creditsDeducted: r.creditsDeducted,
     }));
+  };
+
+  getInlineReviews = async (prReviewId: string): Promise<InlineReviewComment[]> => {
+    const result = await lambdaClient.review.getInlineReviews.query({ prReviewId });
+    return result.map((r) => ({
+      id: r.id,
+      filename: r.filename,
+      startLine: r.startLine,
+      endLine: r.endLine,
+      comment: r.comment,
+      createdAt: r.createdAt,
+    }));
+  };
+
+  getById = async (prReviewId: string): Promise<ReviewItem | null> => {
+    const r = await lambdaClient.review.getById.query({ prReviewId });
+    if (!r) return null;
+    return {
+      id: r.id,
+      repositoryFullName: r.repositoryFullName,
+      prNumber: r.prNumber,
+      prTitle: r.prTitle,
+      prAuthor: r.prAuthor ?? '',
+      summaryPoints: r.summaryPoints,
+      creditsDeducted: r.creditsDeducted,
+      slackStatus: r.slackStatus ?? 'pending',
+      createdAt: r.createdAt ?? '',
+    };
   };
 }
 

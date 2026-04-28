@@ -2,9 +2,11 @@ import { StateCreator } from 'zustand/vanilla';
 import { DocumentStore } from '../../store';
 import { documentClientService } from '@/service/document';
 import { DocumentItem } from '@/database/schemas';
+import { useOrganizationStore } from '@/store/organization';
 
 export interface CreateDocumentInput {
   repositoryId: string;
+  organizationId: string;
   parentId?: string | null;
   name: string;
   type: 'file' | 'folder';
@@ -19,6 +21,7 @@ export interface UpdateDocumentInput {
   editorData?: Record<string, any>;
   metadata?: Record<string, any>;
   status?: 'draft' | 'published';
+  organizationId?: string;
 }
 
 export interface DocumentAction {
@@ -203,6 +206,29 @@ export const createDocumentSlice: StateCreator<
     );
 
     try {
+      // Optimistically update org storage when content changes
+      if (input.content !== undefined) {
+        const currentDoc = get().documents.find((d) => d.id === id);
+        if (currentDoc) {
+          const oldBytes = currentDoc.totalCharCount ?? 0;
+          const newBytes = new TextEncoder().encode(input.content).length;
+          const deltaMB = (newBytes - oldBytes) / (1024 * 1024);
+          if (deltaMB !== 0) {
+            const orgStore = useOrganizationStore.getState();
+            const activeOrgId = orgStore.activeOrgId;
+            if (activeOrgId) {
+              orgStore.internal_updateOrganizations(
+                orgStore.organizations.map((org) =>
+                  org.id === activeOrgId
+                    ? { ...org, docStorageUsedMB: Math.max(0, (org.docStorageUsedMB ?? 0) + deltaMB) }
+                    : org
+                )
+              );
+            }
+          }
+        }
+      }
+
       const document = await documentClientService.update(id, input);
 
       get().internal_updateSingleDocument(id, document);
@@ -237,7 +263,23 @@ export const createDocumentSlice: StateCreator<
     );
 
     try {
-      await documentClientService.delete(id);
+      const doc = get().documents.find((d) => d.id === id);
+      const orgStore = useOrganizationStore.getState();
+      const organizationId = doc ? orgStore.activeOrgId : undefined;
+
+      // Optimistically decrement org storage before the API call
+      if (doc && doc.type === 'file' && doc.totalCharCount && organizationId) {
+        const deletedMB = doc.totalCharCount / (1024 * 1024);
+        orgStore.internal_updateOrganizations(
+          orgStore.organizations.map((org) =>
+            org.id === organizationId
+              ? { ...org, docStorageUsedMB: Math.max(0, (org.docStorageUsedMB ?? 0) - deletedMB) }
+              : org
+          )
+        );
+      }
+
+      await documentClientService.delete(id, organizationId ?? undefined);
 
       // If deleted document was selected, select another file
       if (get().selectedDocumentId === id) {

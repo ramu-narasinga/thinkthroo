@@ -8,6 +8,9 @@ import { useDocumentTree } from '../../hooks/useDocumentTree';
 import { FileTreeItem } from './FileTreeItem';
 import { FileTreeActions } from './FileTreeActions';
 import { DocumentTreeNode } from '../../utils/documentTree';
+import { useOrganizationStore } from '@/store/organization';
+import { organizationSelectors } from '@/store/organization/selectors';
+import { PLAN_DOC_STORAGE_MB } from '@/const/pricing';
 
 export interface FileTreeProps {
   onCreateFile: (parentId?: string) => void;
@@ -29,6 +32,15 @@ export function FileTree({
   const { tree, isFolderExpanded } = useDocumentTree();
   const toggleFolder = useDocumentStore((s) => s.toggleFolder);
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
+
+  const activeOrg = useOrganizationStore(organizationSelectors.activeOrg);
+  const planName = useOrganizationStore(organizationSelectors.currentPlanName);
+  const docStorageUsedMB = activeOrg?.docStorageUsedMB ?? 0;
+  const docStorageMaxMB = PLAN_DOC_STORAGE_MB[planName] ?? PLAN_DOC_STORAGE_MB['free']!;
+  const storagePercent = Math.min(100, (docStorageUsedMB / docStorageMaxMB) * 100);
+
+  const formatMB = (mb: number) =>
+    mb < 1 ? `${(mb * 1024).toFixed(0)} KB` : `${mb.toFixed(2)} MB`;
 
   const selectedDocumentId = searchParams.get('doc');
 
@@ -109,6 +121,20 @@ export function FileTree({
             {renderTree(tree)}
           </ul>
         )}
+      </div>
+
+      {/* Storage usage badge */}
+      <div className="pt-2 border-t border-slate-100">
+        <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+          <span>Doc storage</span>
+          <span>{formatMB(docStorageUsedMB)} / {formatMB(docStorageMaxMB)}</span>
+        </div>
+        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${storagePercent >= 90 ? 'bg-red-500' : storagePercent >= 70 ? 'bg-amber-400' : 'bg-emerald-500'}`}
+            style={{ width: `${storagePercent}%` }}
+          />
+        </div>
       </div>
     </aside>
   );

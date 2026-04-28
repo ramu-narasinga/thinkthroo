@@ -60,7 +60,7 @@ export const SlackNotifier = {
           fields: [
             { title: "Email", value: email, short: true },
           ],
-          footer: "CodeArc Platform",
+          footer: "ThinkThroo Platform",
           ts: Math.floor(Date.now() / 1000),
         },
       ],

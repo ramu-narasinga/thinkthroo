@@ -1,6 +1,14 @@
+import { TRPCError } from '@trpc/server';
 import { ThinkThrooDatabase } from '@/database';
 import { DocumentModel } from '@/database/models/document';
+import { OrganizationModel } from '@/database/models/organization';
 import { DocumentItem, NewDocument } from '@/database/schemas';
+import { PLAN_DOC_STORAGE_MB } from '@/const/pricing';
+
+/** Returns the UTF-8 byte size of a string in MB */
+function bytesToMB(str: string): number {
+  return Buffer.byteLength(str, 'utf-8') / (1024 * 1024);
+}
 
 export interface CreateDocumentInput {
   repositoryId: string;
@@ -10,6 +18,8 @@ export interface CreateDocumentInput {
   content?: string;
   editorData?: Record<string, any>;
   metadata?: Record<string, any>;
+  /** ID of the org that owns this repository — used for storage accounting */
+  organizationId: string;
 }
 
 export interface UpdateDocumentInput {
@@ -18,15 +28,19 @@ export interface UpdateDocumentInput {
   editorData?: Record<string, any>;
   metadata?: Record<string, any>;
   status?: 'draft' | 'published';
+  /** Required when content changes — used for storage accounting */
+  organizationId?: string;
 }
 
 export class DocumentService {
   userId: string;
   private documentModel: DocumentModel;
+  private organizationModel: OrganizationModel;
 
   constructor(db: ThinkThrooDatabase, userId: string) {
     this.userId = userId;
     this.documentModel = new DocumentModel(db, userId);
+    this.organizationModel = new OrganizationModel(db, userId);
   }
 
   /**
@@ -55,7 +69,7 @@ export class DocumentService {
    * Create a new document (file or folder)
    */
   async create(input: CreateDocumentInput): Promise<DocumentItem> {
-    const { repositoryId, parentId, name, type, content, editorData, metadata } = input;
+    const { repositoryId, parentId, name, type, content, editorData, metadata, organizationId } = input;
 
     // Normalize name: ensure .md for files
     let normalizedName = name.trim();
@@ -74,13 +88,28 @@ export class DocumentService {
       throw new Error('A file or folder with that name already exists in this location');
     }
 
-    // Calculate character and line counts for files
-    let totalCharCount = 0;
+    // Storage accounting for files with content
+    let newContentMB = 0;
+    let totalByteCount = 0;
     let totalLineCount = 0;
 
     if (type === 'file' && content) {
-      totalCharCount = content.length;
+      newContentMB = bytesToMB(content);
+      totalByteCount = Buffer.byteLength(content, 'utf-8');
       totalLineCount = content.split('\n').length;
+
+      // Enforce storage limit
+      const org = await this.organizationModel.findById(organizationId);
+      const planName = org?.currentPlanName ?? 'free';
+      const limitMB = PLAN_DOC_STORAGE_MB[planName] ?? PLAN_DOC_STORAGE_MB['free']!;
+      const usedMB = parseFloat((org?.docStorageUsedMb as unknown as string) ?? '0');
+
+      if (usedMB + newContentMB > limitMB) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: `Doc storage limit of ${limitMB} MB reached. Upgrade your plan to add more content.`,
+        });
+      }
     }
 
     const documentData: Omit<NewDocument, 'userId'> = {
@@ -91,11 +120,18 @@ export class DocumentService {
       content: type === 'file' ? content || '' : null,
       editorData: editorData || null,
       metadata: metadata || null,
-      totalCharCount,
+      totalCharCount: totalByteCount,
       totalLineCount,
     };
 
-    return this.documentModel.create(documentData);
+    const document = await this.documentModel.create(documentData);
+
+    // Update org storage counter
+    if (type === 'file' && newContentMB > 0) {
+      await this.organizationModel.incrementDocStorage(organizationId, newContentMB);
+    }
+
+    return document;
   }
 
   /**
@@ -134,9 +170,33 @@ export class DocumentService {
 
     // Handle content update
     if (input.content !== undefined) {
+      const newBytes = Buffer.byteLength(input.content, 'utf-8');
+      const oldBytes = document.totalCharCount ?? 0;
+      const deltaMB = (newBytes - oldBytes) / (1024 * 1024);
+
+      // Enforce limit only when content grows
+      if (deltaMB > 0 && input.organizationId) {
+        const org = await this.organizationModel.findById(input.organizationId);
+        const planName = org?.currentPlanName ?? 'free';
+        const limitMB = PLAN_DOC_STORAGE_MB[planName] ?? PLAN_DOC_STORAGE_MB['free']!;
+        const usedMB = parseFloat((org?.docStorageUsedMb as unknown as string) ?? '0');
+
+        if (usedMB + deltaMB > limitMB) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `Doc storage limit of ${limitMB} MB reached. Upgrade your plan to add more content.`,
+          });
+        }
+      }
+
       updateData.content = input.content;
-      updateData.totalCharCount = input.content.length;
+      updateData.totalCharCount = newBytes;
       updateData.totalLineCount = input.content.split('\n').length;
+
+      // Update org storage counter (positive or negative delta)
+      if (input.organizationId && deltaMB !== 0) {
+        await this.organizationModel.incrementDocStorage(input.organizationId, deltaMB);
+      }
     }
 
     // Handle editor data
@@ -166,10 +226,16 @@ export class DocumentService {
    * Delete a document
    * Note: Children are cascade deleted via database FK constraint
    */
-  async delete(id: string): Promise<void> {
+  async delete(id: string, organizationId?: string): Promise<void> {
     const document = await this.documentModel.findById(id);
     if (!document) {
       throw new Error('Document not found');
+    }
+
+    // Reclaim storage before deleting
+    if (organizationId && document.type === 'file' && document.totalCharCount) {
+      const storedMB = document.totalCharCount / (1024 * 1024);
+      await this.organizationModel.incrementDocStorage(organizationId, -storedMB);
     }
 
     await this.documentModel.delete(id);

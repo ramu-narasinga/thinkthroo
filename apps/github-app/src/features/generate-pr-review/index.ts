@@ -9,7 +9,6 @@ export async function generatePullRequestReview(
 ): Promise<void> {
   const generator = new PullRequestReviewGenerator(context, {
     disableReview: false,
-    reviewCommentLGTM: false,
     maxConcurrency: 5,
     maxFiles: 50,
     maxRequestTokens: 10000,

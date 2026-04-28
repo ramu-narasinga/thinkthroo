@@ -1,6 +1,7 @@
 import { env } from "@/utils/env";
 import { logger } from "@/utils/logger";
 import type { ArchitectureFileResult } from "@/features/architecture-review/ArchitectureReviewGenerator";
+import type { FileInlineReview } from "@/services/reviews/FileReviewer";
 
 export interface SaveReviewResult {
   success: boolean;
@@ -108,6 +109,49 @@ export class ReviewService {
       }
     } catch (err: any) {
       logger.warn("Architecture results save request threw an error", {
+        prReviewId: params.prReviewId,
+        error: err.message,
+      });
+    }
+  }
+
+  async saveInlineReviews(params: {
+    prReviewId: string;
+    inlineReviews: FileInlineReview[];
+  }): Promise<void> {
+    if (params.inlineReviews.length === 0) return;
+
+    const url = `${this.baseUrl}/api/reviews/inline/save`;
+
+    const inlineComments = params.inlineReviews.flatMap((f) =>
+      f.comments.map((c) => ({
+        filename: f.filename,
+        startLine: c.startLine,
+        endLine: c.endLine,
+        comment: c.comment,
+      }))
+    );
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-secret": this.secret,
+        },
+        body: JSON.stringify({ prReviewId: params.prReviewId, inlineComments }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        logger.warn("Inline reviews save failed", {
+          status: response.status,
+          body: text,
+          prReviewId: params.prReviewId,
+        });
+      }
+    } catch (err: any) {
+      logger.warn("Inline reviews save request threw an error", {
         prReviewId: params.prReviewId,
         error: err.message,
       });

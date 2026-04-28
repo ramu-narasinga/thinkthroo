@@ -4,6 +4,6 @@ export const PLAN_CREDIT_MAX: Record<string, number> = {
 }
 
 export const PLAN_DOC_STORAGE_MB: Record<string, number> = {
-  free: 25,
-  pro: 250,
+  free: 15,
+  pro: 100,
 }

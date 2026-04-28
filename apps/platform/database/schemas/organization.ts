@@ -21,6 +21,8 @@ export const organizations = pgTable('organizations', {
   // Populated for yearly subscriptions; used to handle expiry edge cases
   planExpiresAt: timestamp('plan_expires_at', { withTimezone: true, mode: 'string' }),
   lastFetched: timestamp('last_fetched', { withTimezone: true, mode: 'string' }).defaultNow(),
+  // Running total of doc storage consumed by this org (MB)
+  docStorageUsedMb: numeric('doc_storage_used_mb', { precision: 10, scale: 4 }).default('0').notNull(),
 }, (table) => [
   unique('organizations_github_org_id_user_id_key').on(table.githubOrgId, table.userId),
   pgPolicy('users can view their own organizations', {

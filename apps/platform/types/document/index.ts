@@ -1,5 +1,5 @@
 /**
- * Document interface for CodeArc platform
+ * Document interface for ThinkThroo platform
  * Represents files and folders in a repository structure
  */
 export interface ArchitectureDocument {

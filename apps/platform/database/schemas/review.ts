@@ -2,6 +2,7 @@ import { pgTable, uuid, text, timestamp, integer, numeric, pgPolicy } from 'driz
 import { sql } from 'drizzle-orm';
 import { organizations } from './organization';
 
+
 export const prReviews = pgTable('pr_reviews', {
   id: uuid().defaultRandom().primaryKey().notNull(),
   organizationId: uuid('organization_id')
@@ -44,6 +45,33 @@ export const prArchitectureFileResults = pgTable('pr_architecture_file_results',
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
   pgPolicy('Enable read access for users to their architecture file results', {
+    as: 'permissive',
+    for: 'select',
+    to: ['authenticated'],
+    using: sql`(
+      EXISTS (
+        SELECT 1 FROM pr_reviews
+        JOIN organizations ON organizations.id = pr_reviews.organization_id
+        WHERE pr_reviews.id = ${table.prReviewId}
+        AND organizations.user_id = auth.uid()
+      )
+    )`,
+  }),
+]);
+
+export const prInlineReviewComments = pgTable('pr_inline_review_comments', {
+  id: uuid().defaultRandom().primaryKey().notNull(),
+  prReviewId: uuid('pr_review_id')
+    .references(() => prReviews.id, { onDelete: 'cascade' })
+    .notNull(),
+  filename: text('filename').notNull(),
+  startLine: integer('start_line').notNull(),
+  endLine: integer('end_line').notNull(),
+  comment: text('comment').notNull(),
+  creditsDeducted: numeric('credits_deducted', { precision: 10, scale: 4 }).notNull().default('0'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+  pgPolicy('Enable read access for users to their inline review comments', {
     as: 'permissive',
     for: 'select',
     to: ['authenticated'],

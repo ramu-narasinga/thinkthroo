@@ -182,17 +182,4 @@ ${review.comment}`;
     comment = this.sanitizeCodeBlock(comment, 'diff');
     return comment;
   }
-
-  isLGTM(comment: string): boolean {
-    const lowerComment = comment.toLowerCase();
-    const isLgtm = lowerComment.includes('lgtm') || lowerComment.includes('looks good to me');
-    
-    if (isLgtm) {
-      logger.debug("LGTM pattern detected in comment", {
-        commentPreview: comment.substring(0, 50),
-      });
-    }
-    
-    return isLgtm;
-  }
 }

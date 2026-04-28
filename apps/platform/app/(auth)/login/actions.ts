@@ -30,16 +30,9 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import * as Sentry from "@sentry/nextjs";
 
 export async function login() {
   const supabase = await createClient();
-
-  Sentry.addBreadcrumb({
-    category: "auth",
-    message: "Initiating GitHub OAuth login",
-    level: "info",
-  });
 
   try {
     // Redirect to GitHub OAuth
@@ -52,40 +45,14 @@ export async function login() {
     });
 
     if (error) {
-      Sentry.captureException(error, {
-        tags: {
-          action: "login",
-          provider: "github",
-        },
-        contexts: {
-          oauth: {
-            error_message: error.message,
-            provider: "github",
-          },
-        },
-      });
       
       const encoded = encodeURIComponent(error.message);
       redirect(`/login?error=${encoded}`);
     }
 
-    Sentry.addBreadcrumb({
-      category: "auth",
-      message: "GitHub OAuth URL generated successfully",
-      level: "info",
-      data: { has_url: !!data.url },
-    });
-
     // Redirect user to GitHub OAuth consent screen
     redirect(data.url);
   } catch (err) {
-    Sentry.captureException(err, {
-      tags: {
-        action: "login",
-        flow: "github_oauth",
-      },
-      level: "error",
-    });
     throw err;
   }
 }

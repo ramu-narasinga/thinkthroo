@@ -116,6 +116,7 @@ export class OrganizationModel {
         currentPlanName: organizations.currentPlanName,
         creditBalance: organizations.creditBalance,
         paddleCustomerId: organizations.paddleCustomerId,
+        docStorageUsedMb: organizations.docStorageUsedMb,
       })
       .from(organizations)
       .where(eq(organizations.userId, this.userId))
@@ -158,5 +159,19 @@ export class OrganizationModel {
           eq(organizations.userId, this.userId)
         )
       );
+  };
+
+  /**
+   * Atomically increment or decrement doc_storage_used_mb for an org.
+   * deltaMB can be negative (on delete or content shrink).
+   * The value is clamped to 0 to avoid negative storage.
+   */
+  incrementDocStorage = async (orgId: string, deltaMB: number) => {
+    await this.db
+      .update(organizations)
+      .set({
+        docStorageUsedMb: sql`GREATEST(0, COALESCE(doc_storage_used_mb, 0) + ${deltaMB})`,
+      })
+      .where(and(eq(organizations.id, orgId), eq(organizations.userId, this.userId)));
   };
 }

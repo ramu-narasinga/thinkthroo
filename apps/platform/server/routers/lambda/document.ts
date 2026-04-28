@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 import { authedProcedure, router } from '@/lib/trpc/lambda';
 import { serverDatabase } from '@/lib/trpc/lambda/middleware';
 import { DocumentService } from '@/server/service/document';
@@ -42,6 +43,7 @@ export const documentRouter = router({
           id: true,
           name: true,
           fullName: true,
+          organizationId: true,
         },
       });
 
@@ -99,6 +101,7 @@ export const documentRouter = router({
     .input(
       z.object({
         repositoryId: z.string().uuid(),
+        organizationId: z.string().uuid(),
         parentId: z.string().uuid().nullable().optional(),
         name: z.string().min(1),
         type: z.enum(['file', 'folder']),
@@ -118,6 +121,7 @@ export const documentRouter = router({
     .input(
       z.object({
         id: z.string().uuid(),
+        organizationId: z.string().uuid().optional(),
         name: z.string().min(1).optional(),
         content: z.string().optional(),
         editorData: z.record(z.any()).optional(),
@@ -137,10 +141,11 @@ export const documentRouter = router({
     .input(
       z.object({
         id: z.string().uuid(),
+        organizationId: z.string().uuid().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.documentService.delete(input.id);
+      await ctx.documentService.delete(input.id, input.organizationId);
       return { success: true };
     }),
 

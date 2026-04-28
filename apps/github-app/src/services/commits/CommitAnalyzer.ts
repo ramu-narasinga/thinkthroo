@@ -1,6 +1,6 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
-import { COMMIT_ID_END_TAG, COMMIT_ID_START_TAG } from "@/services/constants";
+import { COMMIT_ID_END_TAG, COMMIT_ID_START_TAG, REVIEW_EPOCH_BASE_TAG_PREFIX } from "@/services/constants";
 import { logger } from "@/utils/logger";
 
 /**
@@ -146,5 +146,37 @@ export class CommitAnalyzer {
         : "unknown"
     });
     return highestReviewedCommitId;
+  }
+
+  /**
+   * Reads the epoch base (number of reviewed commits at the start of the current cycle)
+   * from the hidden tag embedded in the PR summary comment body.
+   * Returns 0 if no tag is present (first cycle).
+   */
+  getEpochBase(commentBody: string): number {
+    const prefix = REVIEW_EPOCH_BASE_TAG_PREFIX;
+    const start = commentBody.indexOf(prefix);
+    if (start === -1) return 0;
+    const valueStart = start + prefix.length;
+    const end = commentBody.indexOf(' -->', valueStart);
+    if (end === -1) return 0;
+    const raw = commentBody.substring(valueStart, end).trim();
+    const parsed = parseInt(raw, 10);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+
+  /** Builds the hidden tag string to embed in the comment body. */
+  buildEpochBaseTag(epochBase: number): string {
+    return `${REVIEW_EPOCH_BASE_TAG_PREFIX}${epochBase} -->`;
+  }
+
+  /**
+   * Returns how many commits have been reviewed in the current cycle.
+   * Counter = total reviewed commits − epoch base.
+   */
+  getReviewedCountSinceEpoch(commentBody: string): number {
+    const reviewedIds = this.getReviewedCommitIds(commentBody);
+    const epochBase = this.getEpochBase(commentBody);
+    return Math.max(0, reviewedIds.length - epochBase);
   }
 }

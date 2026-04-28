@@ -19,7 +19,11 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
-    "@sentry/node": "^10.32.1",
+    "@opentelemetry/api-logs": "^0.214.0",
+    "@opentelemetry/exporter-logs-otlp-http": "^0.214.0",
+    "@opentelemetry/resources": "^2.6.1",
+    "@opentelemetry/sdk-logs": "^0.214.0",
+    "@opentelemetry/sdk-node": "^0.214.0",
     "@supabase/supabase-js": "^2.48.1",
     "p-limit": "^3.1.0",
     "pino": "^10.1.1",

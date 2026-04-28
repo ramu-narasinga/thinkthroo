@@ -8,4 +8,8 @@ export const reviewSelectors = {
     s.architectureResults[prReviewId] ?? [],
   isArchitectureLoading: (prReviewId: string) => (s: ReviewStore) =>
     s.isArchitectureLoading[prReviewId] ?? false,
+  inlineReviews: (prReviewId: string) => (s: ReviewStore) =>
+    s.inlineReviews[prReviewId] ?? [],
+  isInlineLoading: (prReviewId: string) => (s: ReviewStore) =>
+    s.isInlineLoading[prReviewId] ?? false,
 };

@@ -9,6 +9,8 @@ import type { BotAccumulatedUsage } from "@/services/ai/types";
 import { CommitAnalyzer } from "@/services/commits/CommitAnalyzer";
 import { CommentManager } from "@/services/comments/CommentManager";
 import { SUMMARIZE_TAG } from "@/services/constants";
+import { ReviewSettingsService } from "@/services/settings/ReviewSettingsService";
+import { RateLimitService } from "@/services/rate-limits/RateLimitService";
 import { logger } from "@/utils/logger";
 
 /** Minimum credits required to start a PR workflow run */
@@ -17,9 +19,10 @@ const MIN_CREDIT_THRESHOLD = 1;
 export interface PRWorkflowOptions {
   generateSummaries?: boolean;
   useSummaryFiltering?: boolean;
-  enableArchitectureReview?: boolean;
+  forceReview?: boolean;
+  fullReview?: boolean;
+  summaryOnly?: boolean;
   reviewOptions?: {
-    reviewCommentLGTM?: boolean;
     maxConcurrency?: number;
     maxFiles?: number;
     debug?: boolean;
@@ -34,12 +37,21 @@ export class PRWorkflowOrchestrator {
   async execute(options: PRWorkflowOptions = {}): Promise<void> {
     const pullNumber = this.context.payload.pull_request.number;
     const repositoryFullName = this.context.payload.repository.full_name;
+    const owner = this.context.payload.repository.owner.login;
     const installationId = String(
       (this.context.payload as any).installation?.id ?? ""
     );
     const startTime = Date.now();
 
-    logger.info("PR Workflow started", {
+    // Create a child logger that stamps every log line with PR identity
+    const prLogger = logger.child({
+      prNumber: pullNumber,
+      repo: repositoryFullName,
+      owner,
+      installationId,
+    });
+
+    prLogger.info("PR Workflow started", {
       prNumber: pullNumber,
       generateSummaries: options.generateSummaries ?? true,
       useSummaryFiltering: options.useSummaryFiltering ?? true,
@@ -52,7 +64,7 @@ export class PRWorkflowOrchestrator {
         const balance = await creditService.getBalance(installationId);
 
         if (balance !== null && balance < MIN_CREDIT_THRESHOLD) {
-          logger.warn("Insufficient credits — skipping PR workflow", {
+          prLogger.warn("Insufficient credits — skipping PR workflow", {
             prNumber: pullNumber,
             balance,
           });
@@ -66,7 +78,82 @@ export class PRWorkflowOrchestrator {
         }
       } catch (err: any) {
         // Balance check failure is non-fatal — proceed with the workflow
-        logger.warn("Credit balance check failed, proceeding anyway", {
+        prLogger.warn("Credit balance check failed, proceeding anyway", {
+          prNumber: pullNumber,
+          error: err.message,
+        });
+      }
+    }
+
+    // Fetch effective review settings from the platform (non-fatal — falls back to safe defaults)
+    let reviewSettings = {
+      enableReviews: true,
+      enablePrSummary: true,
+      enableInlineReviewComments: false,
+      enableArchitectureReview: false,
+      reviewLanguage: null as string | null,
+      toneInstructions: null as string | null,
+      pathFilters: [] as string[],
+      autoPauseAfterReviewedCommits: 5,
+    };
+
+    if (installationId) {
+      try {
+        const reviewSettingsService = new ReviewSettingsService();
+        reviewSettings = await reviewSettingsService.getSettings(installationId, repositoryFullName);
+        prLogger.info("Review settings fetched", { prNumber: pullNumber, ...reviewSettings });
+      } catch (err: any) {
+        prLogger.warn("ReviewSettingsService init failed, using defaults", {
+          prNumber: pullNumber,
+          error: err.message,
+        });
+      }
+    }
+
+    // Master on/off — skip entire workflow if reviews are disabled for this repo
+    if (!reviewSettings.enableReviews) {
+      prLogger.info("Reviews disabled for this repository — skipping PR workflow", { prNumber: pullNumber });
+      return;
+    }
+
+    // Rate limit check — must pass before any AI work begins
+    let filesPerReview = 50; // safe default
+    if (installationId) {
+      try {
+        const rateLimitService = new RateLimitService();
+        const rateLimit = await rateLimitService.check(installationId, repositoryFullName);
+
+        if (!rateLimit.allowed) {
+          const minutes = rateLimit.retryAfterSeconds
+            ? Math.ceil(rateLimit.retryAfterSeconds / 60)
+            : null;
+          const retryMsg = minutes
+            ? ` The next review slot opens in approximately **${minutes} minute${minutes === 1 ? "" : "s"}**.`
+            : "";
+          prLogger.warn("Rate limit reached — skipping PR workflow", {
+            prNumber: pullNumber,
+            reviewsPerHour: rateLimit.reviewsPerHour,
+            retryAfterSeconds: rateLimit.retryAfterSeconds,
+          });
+          await this.context.octokit.issues.createComment({
+            owner: this.context.payload.repository.owner.login,
+            repo: this.context.payload.repository.name,
+            issue_number: pullNumber,
+            body: `Review skipped — your organisation has reached the limit of **${rateLimit.reviewsPerHour} reviews per hour** on your current plan.${retryMsg} Upgrade your plan at [https://app.thinkthroo.com/account](https://app.thinkthroo.com/account).`,
+          });
+          return;
+        }
+
+        filesPerReview = rateLimit.filesPerReview;
+        prLogger.info("Rate limit check passed", {
+          prNumber: pullNumber,
+          reviewsPerHour: rateLimit.reviewsPerHour,
+          filesPerReview: rateLimit.filesPerReview,
+          remaining: rateLimit.remaining,
+        });
+      } catch (err: any) {
+        // Rate limit check failure is non-fatal — proceed with the workflow
+        prLogger.warn("Rate limit check failed, proceeding anyway", {
           prNumber: pullNumber,
           error: err.message,
         });
@@ -83,47 +170,110 @@ export class PRWorkflowOrchestrator {
     const issueDetails = this.context.issue();
     const octokit = this.context.octokit;
     let reviewStartSha: string | undefined;
+    let _commitAnalyzer: CommitAnalyzer | undefined;
+    let _commentManager: CommentManager | undefined;
+    let _existingCommentBody = "";
+    let _existingComment: any | null = null;
 
     try {
       const commitAnalyzer = new CommitAnalyzer(octokit, issueDetails);
       const commentManager = new CommentManager(octokit, issueDetails);
+      _commitAnalyzer = commitAnalyzer;
+      _commentManager = commentManager;
       const existingCommentData = await commentManager.getExistingCommentData(
         pullNumber,
         SUMMARIZE_TAG,
         commitAnalyzer.getReviewedCommitIdsBlock.bind(commitAnalyzer)
       );
+      _existingCommentBody = existingCommentData.commentBody;
+      _existingComment = existingCommentData.comment;
       const allCommitIds = await commitAnalyzer.getAllCommitIds(pullNumber);
-      reviewStartSha = commitAnalyzer.determineReviewStartCommit(
-        allCommitIds,
-        existingCommentData.commitIdsBlock,
-        pullRequest.base.sha,
-        pullRequest.head.sha
-      );
-      logger.info("Review start SHA determined independently", { prNumber: pullNumber, reviewStartSha });
+      if (options.fullReview) {
+        reviewStartSha = pullRequest.base.sha;
+        prLogger.info("Full review mode — starting from base SHA", { prNumber: pullNumber, reviewStartSha });
+      } else {
+        reviewStartSha = commitAnalyzer.determineReviewStartCommit(
+          allCommitIds,
+          existingCommentData.commitIdsBlock,
+          pullRequest.base.sha,
+          pullRequest.head.sha
+        );
+        prLogger.info("Review start SHA determined independently", { prNumber: pullNumber, reviewStartSha });
+      }
     } catch (err: any) {
-      logger.warn("Failed to determine review start SHA, will fall back to full review", {
+      prLogger.warn("Failed to determine review start SHA, will fall back to full review", {
         prNumber: pullNumber,
         error: err.message,
       });
     }
 
-    // Step 1: Generate summaries (if enabled)
-    if (options.generateSummaries !== false) {
-      logger.info("Starting summary generation phase", { prNumber: pullNumber });
+    // Pause check — only on synchronize events (not opened/reopened), skipped when forceReview is set
+    const isSynchronize = (this.context.payload as any).action === "synchronize";
+    if (
+      isSynchronize &&
+      !options.forceReview &&
+      reviewSettings.autoPauseAfterReviewedCommits > 0 &&
+      _commitAnalyzer &&
+      _commentManager &&
+      _existingCommentBody
+    ) {
+      const reviewedCount = _commitAnalyzer.getReviewedCountSinceEpoch(_existingCommentBody);
+      if (reviewedCount >= reviewSettings.autoPauseAfterReviewedCommits) {
+        prLogger.info("Auto-pause threshold reached — skipping review cycle", {
+          prNumber: pullNumber,
+          reviewedCount,
+          autoPause: reviewSettings.autoPauseAfterReviewedCommits,
+        });
+        if (_existingComment && !_commentManager.isPauseNoticePosted(_existingCommentBody)) {
+          await this.context.octokit.issues.createComment({
+            owner,
+            repo: this.context.payload.repository.name,
+            issue_number: pullNumber,
+            body: `Reviews have been paused after **${reviewSettings.autoPauseAfterReviewedCommits}** reviewed commits in this push cycle.\nComment \`@thinkthroo review\` to run an immediate review and reset the counter.`,
+          });
+          const updatedBody = _commentManager.setPauseNoticePosted(_existingCommentBody);
+          await octokit.issues.updateComment({
+            owner,
+            repo: this.context.payload.repository.name,
+            comment_id: _existingComment.id,
+            body: updatedBody,
+          });
+        }
+        return;
+      }
+    }
+
+    // Manual pause check — explicit @thinkthroo pause command
+    if (
+      !options.forceReview &&
+      _commentManager &&
+      _existingCommentBody &&
+      _commentManager.isPaused(_existingCommentBody)
+    ) {
+      prLogger.info("PR reviews are manually paused — skipping workflow", { prNumber: pullNumber });
+      return;
+    }
+
+    // Step 1: Generate summaries (if enabled by settings)
+    if (reviewSettings.enablePrSummary) {
+      prLogger.info("Starting summary generation phase", { prNumber: pullNumber });
       
-      summaryGenerator = new PullRequestSummaryGenerator(this.context);
+      summaryGenerator = new PullRequestSummaryGenerator(this.context, prLogger);
       summaries = await summaryGenerator.generate();
 
-      logger.info("Summary generation complete", {
+      prLogger.info("Summary generation complete", {
         prNumber: pullNumber,
         summariesCount: summaries?.length ?? 0,
       });
     } else {
-      logger.info("Summary generation disabled", { prNumber: pullNumber });
+      prLogger.info("Summary generation disabled", { prNumber: pullNumber });
     }
 
     // Step 2: Generate review (with optional summary filtering)
-    logger.info("Starting review generation phase", {
+    if (options.summaryOnly) {
+      prLogger.info("Summary-only mode — skipping review and architecture phases", { prNumber: pullNumber });
+    } else {
+    prLogger.info("Starting review generation phase", {
       prNumber: pullNumber,
       useSummaryFiltering: options.useSummaryFiltering ?? true,
       hasSummaries: !!summaries,
@@ -132,35 +282,37 @@ export class PRWorkflowOrchestrator {
     reviewGenerator = new PullRequestReviewGenerator(this.context, {
       enableSummaryFiltering: options.useSummaryFiltering !== false && !!summaries,
       summaries,
+      shortSummary: summaryGenerator?.getShortSummary(),
       reviewStartSha,
+      disableReview: !reviewSettings.enableInlineReviewComments,
       ...options.reviewOptions,
-    });
+      // Cap files per review to the plan/override limit resolved from the rate limit check
+      maxFiles: filesPerReview ?? options.reviewOptions?.maxFiles,
+    }, prLogger);
 
     await reviewGenerator.generate();
 
-    // Step 3: Architecture review (if enabled)
-    if (options.enableArchitectureReview !== false) {
-      logger.info("Starting architecture review phase", { prNumber: pullNumber });
-
-      const shortSummary = (summaries ?? [])
-        .map((s) => `${s.filename}: ${s.summary}`)
-        .join("\n");
+    // Step 3: Architecture review (controlled by platform settings)
+    if (reviewSettings.enableArchitectureReview) {
+      prLogger.info("Starting architecture review phase", { prNumber: pullNumber });
 
       try {
         architectureReviewGenerator = new ArchitectureReviewGenerator(
           this.context,
-          { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50, reviewStartSha }
+          { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50, reviewStartSha },
+          prLogger
         );
-        await architectureReviewGenerator.generate(shortSummary);
-        logger.info("Architecture review phase complete", { prNumber: pullNumber });
+        await architectureReviewGenerator.generate();
+        prLogger.info("Architecture review phase complete", { prNumber: pullNumber });
       } catch (error: any) {
         // Architecture review failure should not break the overall PR workflow
-        logger.error("Architecture review failed, continuing", {
+        prLogger.error("Architecture review failed, continuing", {
           prNumber: pullNumber,
           error: error.message,
         });
       }
     }
+    } // end !options.summaryOnly
 
     // Step 4: Deduct credits for all AI usage accumulated across the workflow
     if (installationId) {
@@ -183,20 +335,20 @@ export class PRWorkflowOrchestrator {
 
         if (result.success) {
           creditsDeducted = result.creditsDeducted ?? 0;
-          logger.info("Credits deducted for PR workflow", {
+          prLogger.info("Credits deducted for PR workflow", {
             prNumber: pullNumber,
             creditsDeducted: result.creditsDeducted,
             newBalance: result.newBalance,
           });
         } else {
-          logger.warn("Credit deduction was unsuccessful", {
+          prLogger.warn("Credit deduction was unsuccessful", {
             prNumber: pullNumber,
             reason: result.reason,
           });
         }
       } catch (err: any) {
         // Credit deduction failure must never crash the PR workflow
-        logger.error("Credit deduction failed", {
+        prLogger.error("Credit deduction failed", {
           prNumber: pullNumber,
           error: err.message,
         });
@@ -221,7 +373,7 @@ export class PRWorkflowOrchestrator {
             creditsDeducted,
             hasArchitectureResults: fileResults.length > 0,
           });
-          logger.info("PR review summary saved to platform", { prNumber: pullNumber });
+          prLogger.info("PR review summary saved to platform", { prNumber: pullNumber });
 
           // Step 6: Persist architecture file results if we have them
           if (saveResult.success && saveResult.reviewId && fileResults.length > 0) {
@@ -231,17 +383,38 @@ export class PRWorkflowOrchestrator {
               installationId,
               fileResults,
             });
-            logger.info("Architecture file results saved to platform", {
+            prLogger.info("Architecture file results saved to platform", {
               prNumber: pullNumber,
               fileCount: fileResults.length,
             });
           }
+
+          // Step 7: Persist inline review comments if any were generated
+          const inlineReviews = reviewGenerator?.getInlineFileReviews() ?? [];
+          if (saveResult.success && saveResult.reviewId && inlineReviews.length > 0) {
+            try {
+              await reviewService.saveInlineReviews({
+                prReviewId: saveResult.reviewId,
+                inlineReviews,
+              });
+              prLogger.info("Inline review comments saved to platform", {
+                prNumber: pullNumber,
+                fileCount: inlineReviews.length,
+                totalComments: inlineReviews.reduce((sum, f) => sum + f.comments.length, 0),
+              });
+            } catch (err: any) {
+              prLogger.error("Inline reviews save failed, continuing", {
+                prNumber: pullNumber,
+                error: err.message,
+              });
+            }
+          }
         } else {
-          logger.info("No summary points to save, skipping review persistence", { prNumber: pullNumber });
+          prLogger.info("No summary points to save, skipping review persistence", { prNumber: pullNumber });
         }
       } catch (err: any) {
         // Review save failure must never crash the PR workflow
-        logger.error("PR review save failed", {
+        prLogger.error("PR review save failed", {
           prNumber: pullNumber,
           error: err.message,
         });
@@ -249,7 +422,7 @@ export class PRWorkflowOrchestrator {
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    logger.info("PR Workflow complete", {
+    prLogger.info("PR Workflow complete", {
       prNumber: pullNumber,
       durationSeconds: parseFloat(duration),
       hadSummaries: !!summaries,

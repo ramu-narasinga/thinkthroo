@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { lambdaClient } from '@/lib/trpc/client/lambda';
 import { useRouter } from 'next/navigation';
-import * as Sentry from '@sentry/nextjs';
 
 export interface InstallationResult {
   installationId: string;
@@ -25,13 +24,6 @@ export const useInstallation = () => {
       setError(null);
       setResult(null);
 
-      Sentry.addBreadcrumb({
-        category: 'installation',
-        message: 'Processing GitHub installation',
-        level: 'info',
-        data: { installationId, organizationId },
-      });
-
       try {
         const data = await lambdaClient.installation.processCallback.mutate({
           installationId,
@@ -39,16 +31,6 @@ export const useInstallation = () => {
         });
 
         setResult(data);
-
-        Sentry.addBreadcrumb({
-          category: 'installation',
-          message: 'Installation processed successfully',
-          level: 'info',
-          data: {
-            installationId: data.installationId,
-            repoCount: data.repoCount,
-          },
-        });
 
         // Redirect to repositories page after successful installation
         setTimeout(() => {
@@ -63,19 +45,6 @@ export const useInstallation = () => {
             : 'Failed to process installation. Please try again.';
         setError(errorMessage);
         
-        Sentry.captureException(err, {
-          tags: {
-            hook: 'useInstallation',
-            action: 'processCallback',
-          },
-          contexts: {
-            installation: {
-              installation_id: installationId,
-              organization_id: organizationId,
-              error_message: errorMessage,
-            },
-          },
-        });
         
         console.error('[useInstallation] Error processing installation:', err);
         throw err;
@@ -94,21 +63,9 @@ export const useInstallation = () => {
       const installations =
         await lambdaClient.installation.getAllInstallations.query();
       
-      Sentry.addBreadcrumb({
-        category: 'installation',
-        message: 'Fetched installations',
-        level: 'info',
-        data: { count: installations.length },
-      });
       
       return installations;
     } catch (err) {
-      Sentry.captureException(err, {
-        tags: {
-          hook: 'useInstallation',
-          action: 'fetchInstallations',
-        },
-      });
       console.error('[useInstallation] Error fetching installations:', err);
       throw err;
     }
@@ -122,21 +79,9 @@ export const useInstallation = () => {
       const repositories =
         await lambdaClient.installation.getAllRepositories.query();
       
-      Sentry.addBreadcrumb({
-        category: 'installation',
-        message: 'Fetched repositories',
-        level: 'info',
-        data: { count: repositories.length },
-      });
       
       return repositories;
     } catch (err) {
-      Sentry.captureException(err, {
-        tags: {
-          hook: 'useInstallation',
-          action: 'fetchRepositories',
-        },
-      });
       console.error('[useInstallation] Error fetching repositories:', err);
       throw err;
     }
@@ -146,42 +91,13 @@ export const useInstallation = () => {
    * Delete installation
    */
   const deleteInstallation = useCallback(async (installationId: string) => {
-    Sentry.addBreadcrumb({
-      category: 'installation',
-      message: 'Deleting installation',
-      level: 'info',
-      data: { installationId },
-    });
     
     try {
       await lambdaClient.installation.deleteInstallation.mutate({
         installationId,
       });
       
-      Sentry.captureMessage('Installation deleted', {
-        level: 'info',
-        tags: {
-          hook: 'useInstallation',
-          action: 'delete',
-        },
-        contexts: {
-          installation: {
-            installation_id: installationId,
-          },
-        },
-      });
     } catch (err) {
-      Sentry.captureException(err, {
-        tags: {
-          hook: 'useInstallation',
-          action: 'deleteInstallation',
-        },
-        contexts: {
-          installation: {
-            installation_id: installationId,
-          },
-        },
-      });
       console.error('[useInstallation] Error deleting installation:', err);
       throw err;
     }

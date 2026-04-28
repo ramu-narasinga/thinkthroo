@@ -25,7 +25,7 @@ export const IN_PROGRESS_END_TAG =
 
 export const COMMENT_TAG = '<!-- This is an auto-generated comment by OSS ThinkThroo -->'
 
-export const COMMENT_GREETING = 'ThinkThroo Bot here! 🤖'
+export const COMMENT_GREETING = 'ThinkThroo here! 🤖'
 
 export const issueGreetingBodyText =
 			`Thanks for opening your issue, @{user}! 🎉\n\n` +
@@ -37,3 +37,7 @@ export const COMMENT_REPLY_TAG = '<!-- This is an auto-generated reply by OSS Th
 export const REVIEW_TAG = '<!-- This is an auto-generated review: review by OSS ThinkThroo -->'
 
 export const ARCHITECTURE_REVIEW_TAG = '<!-- This is an auto-generated architecture review by OSS ThinkThroo -->'
+
+export const REVIEW_EPOCH_BASE_TAG_PREFIX = '<!-- review_epoch_base:'
+export const REVIEW_PAUSED_NOTICE_TAG = '<!-- review_paused_notice_posted -->'
+export const REVIEW_PAUSED_TAG = '<!-- review_paused -->'

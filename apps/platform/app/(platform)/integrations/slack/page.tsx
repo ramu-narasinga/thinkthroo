@@ -32,7 +32,7 @@ export default function SlackIntegrationPage() {
         <div className="bg-muted rounded-xl p-6 space-y-4">
           <h2 className="text-lg font-medium">Connect Slack</h2>
           <p className="text-sm text-muted-foreground">
-            Add the CodeArc bot to your Slack workspace to get notified about
+            Add the ThinkThroo bot to your Slack workspace to get notified about
             architecture validation results and pull request reviews.
           </p>
           <button

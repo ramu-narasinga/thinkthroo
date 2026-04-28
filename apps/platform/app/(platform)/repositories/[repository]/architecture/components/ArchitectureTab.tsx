@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import * as Sentry from '@sentry/nextjs';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useDocuments } from '../hooks/useDocuments';
 import { useDocumentMutations } from '../hooks/useDocumentMutations';
@@ -48,9 +47,9 @@ export default function ArchitectureTab() {
   const { repository: repositoryNameParam } = useParams();
   const searchParams = useSearchParams();
   
-  const repositoryName = Array.isArray(repositoryNameParam)
-    ? repositoryNameParam[0]
-    : repositoryNameParam;
+  const repositoryName = decodeURIComponent(
+    Array.isArray(repositoryNameParam) ? (repositoryNameParam[0] ?? '') : (repositoryNameParam ?? '')
+  );
 
   if (!repositoryName || typeof repositoryName !== 'string' || !repositoryName.trim()) {
     throw new Error('ArchitectureTab requires a valid repository name');
@@ -61,6 +60,7 @@ export default function ArchitectureTab() {
 
   // State for repository ID lookup
   const [repositoryId, setRepositoryId] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [isLoadingRepo, setIsLoadingRepo] = useState(true);
   const [repoError, setRepoError] = useState<string | null>(null);
 
@@ -78,18 +78,11 @@ export default function ArchitectureTab() {
         setIsLoadingRepo(true);
         const repo = await documentClientService.getRepositoryIdByName(repositoryName);
         setRepositoryId(repo.id);
+        setOrganizationId(repo.organizationId);
         setRepoError(null);
-        Sentry.logger.info(
-          Sentry.logger.fmt`Fetched repositoryId for ${repositoryName}`,
-          { repositoryName, repositoryId: repo.id, timestamp: new Date().toISOString() }
-        );
       } catch (error) {
         console.error('[ArchitectureTab] Error fetching repository:', error);
         setRepoError(error instanceof Error ? error.message : 'Failed to load repository');
-        Sentry.logger.error(
-          Sentry.logger.fmt`Error fetching repositoryId for ${repositoryName}: ${error instanceof Error ? error.message : error}`,
-          { repositoryName, error_message: error instanceof Error ? error.message : String(error), timestamp: new Date().toISOString() }
-        );
       } finally {
         setIsLoadingRepo(false);
       }
@@ -125,16 +118,17 @@ export default function ArchitectureTab() {
 
   const handleCreate = useCallback(
     async (name: string) => {
-      if (!repositoryId) return;
+      if (!repositoryId || !organizationId) return;
       await createDocument({
         repositoryId,
+        organizationId,
         parentId: modals.create.parentId || null,
         name,
         type: modals.create.type || 'file',
         content: modals.create.type === 'file' ? '' : undefined,
       });
     },
-    [createDocument, repositoryId, modals.create]
+    [createDocument, repositoryId, organizationId, modals.create]
   );
 
   // Rename handlers

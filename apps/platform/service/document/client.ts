@@ -3,6 +3,7 @@ import type { DocumentItem } from '@/database/schemas';
 
 export interface CreateDocumentInput {
   repositoryId: string;
+  organizationId: string;
   parentId?: string | null;
   name: string;
   type: 'file' | 'folder';
@@ -14,6 +15,7 @@ export interface UpdateDocumentInput {
   content?: string;
   editorData?: Record<string, any>;
   status?: 'draft' | 'published';
+  organizationId?: string;
 }
 
 /**
@@ -78,8 +80,8 @@ export class DocumentClientService {
   /**
    * Delete a document
    */
-  delete = async (id: string): Promise<void> => {
-    await lambdaClient.document.delete.mutate({ id });
+  delete = async (id: string, organizationId?: string): Promise<void> => {
+    await lambdaClient.document.delete.mutate({ id, organizationId });
   };
 
   /**

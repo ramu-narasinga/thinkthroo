@@ -26,6 +26,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const MAX_CODE_SNIPPET_CHARS = 10_000;
+  if (codeSnippet.length > MAX_CODE_SNIPPET_CHARS) {
+    return NextResponse.json(
+      { error: `codeSnippet must not exceed ${MAX_CODE_SNIPPET_CHARS} characters` },
+      { status: 400 },
+    );
+  }
+
   const [installation] = await serverDB
     .select({ userId: installations.userId })
     .from(installations)
