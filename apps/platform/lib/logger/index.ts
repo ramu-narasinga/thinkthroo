@@ -1,12 +1,12 @@
 import Pino from 'pino';
-import { SeverityNumber, logs } from '@opentelemetry/api-logs';
+import { AnyValue, SeverityNumber, logs } from '@opentelemetry/api-logs';
 
 const pinoLogger = Pino({
   level: process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'info',
 });
 
 function emit(severityText: string, severityNumber: SeverityNumber, msg: string, obj?: Record<string, unknown>) {
-  logs.getLogger('thinkthroo-platform').emit({ severityText, severityNumber, body: msg, attributes: obj });
+  logs.getLogger('thinkthroo-platform').emit({ severityText, severityNumber, body: msg, attributes: obj as Record<string, AnyValue> | undefined });
 }
 
 export const pino = {

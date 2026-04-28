@@ -3,6 +3,7 @@ import { lambdaClient } from '@/lib/trpc/client';
 
 export interface CreateDocumentInput {
   repositoryId: string;
+  organizationId: string;
   parentId?: string | null;
   name: string;
   type: 'file' | 'folder';
