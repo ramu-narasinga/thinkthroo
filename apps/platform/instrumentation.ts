@@ -1,26 +1,35 @@
-import { BatchLogRecordProcessor, LoggerProvider } from "@opentelemetry/sdk-logs";
-import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
-import { logs } from "@opentelemetry/api-logs";
-import { resourceFromAttributes } from "@opentelemetry/resources";
+import type { LoggerProvider } from "@opentelemetry/sdk-logs";
 
-// Created outside register() so it can be exported and flushed in route handlers
-export const loggerProvider = new LoggerProvider({
-  resource: resourceFromAttributes({ "service.name": "thinkthroo-platform" }),
-  processors: [
-    new BatchLogRecordProcessor(
-      new OTLPLogExporter({
-        url: "https://us.i.posthog.com/i/v1/logs",
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_POSTHOG_KEY}`,
-          "Content-Type": "application/json",
-        },
-      })
-    ),
-  ],
-});
+// Lazily initialized — only available in the Node.js runtime.
+let loggerProvider: LoggerProvider | undefined;
+
+export function getLoggerProvider(): LoggerProvider | undefined {
+  return loggerProvider;
+}
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    const { BatchLogRecordProcessor, LoggerProvider } = await import("@opentelemetry/sdk-logs");
+    const { OTLPLogExporter } = await import("@opentelemetry/exporter-logs-otlp-http");
+    const { logs } = await import("@opentelemetry/api-logs");
+    const { resourceFromAttributes } = await import("@opentelemetry/resources");
+
+    loggerProvider = new LoggerProvider({
+      resource: resourceFromAttributes({ "service.name": "thinkthroo-platform" }),
+      processors: [
+        new BatchLogRecordProcessor(
+          new OTLPLogExporter({
+            url: "https://us.i.posthog.com/i/v1/logs",
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_POSTHOG_KEY}`,
+              "Content-Type": "application/json",
+            },
+          })
+        ),
+      ],
+    });
+
     logs.setGlobalLoggerProvider(loggerProvider);
   }
 }
+
