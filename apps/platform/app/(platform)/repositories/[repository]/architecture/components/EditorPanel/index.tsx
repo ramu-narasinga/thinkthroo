@@ -36,6 +36,8 @@ import { Button } from "@thinkthroo/ui/components/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thinkthroo/ui/components/tooltip";
 import { useFileStore } from "@/store/file";
 import { fileManagerSelectors } from "@/store/file/slices/fileManager/selectors";
+import { useOrganizationStore } from "@/store/organization";
+import { organizationSelectors } from "@/store/organization/selectors";
 
 const extensions = [...defaultExtensions, slashCommand];
 
@@ -51,6 +53,7 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
   const fetchDocumentById = useDocumentStore((s) => s.fetchDocumentById);
   const internal_updateSingleDocument = useDocumentStore((s) => s.internal_updateSingleDocument);
   const publishFile = useFileStore((s) => s.publishFile);
+  const activeOrgId = useOrganizationStore(organizationSelectors.activeOrg)?.id;
 
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'Saving…' | 'Saved'>('Saved');
@@ -144,6 +147,7 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
       const updatePayload: UpdateDocumentInput = {
         content: markdownContent,
         editorData: json,
+        organizationId: activeOrgId,
       };
       // If content was edited while status was 'published', persist the revert to draft
       if (revertToDraftRef.current) {

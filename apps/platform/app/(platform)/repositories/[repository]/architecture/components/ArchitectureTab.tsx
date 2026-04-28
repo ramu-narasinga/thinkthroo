@@ -60,6 +60,7 @@ export default function ArchitectureTab() {
 
   // State for repository ID lookup
   const [repositoryId, setRepositoryId] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [isLoadingRepo, setIsLoadingRepo] = useState(true);
   const [repoError, setRepoError] = useState<string | null>(null);
 
@@ -77,6 +78,7 @@ export default function ArchitectureTab() {
         setIsLoadingRepo(true);
         const repo = await documentClientService.getRepositoryIdByName(repositoryName);
         setRepositoryId(repo.id);
+        setOrganizationId(repo.organizationId);
         setRepoError(null);
       } catch (error) {
         console.error('[ArchitectureTab] Error fetching repository:', error);
@@ -116,16 +118,17 @@ export default function ArchitectureTab() {
 
   const handleCreate = useCallback(
     async (name: string) => {
-      if (!repositoryId) return;
+      if (!repositoryId || !organizationId) return;
       await createDocument({
         repositoryId,
+        organizationId,
         parentId: modals.create.parentId || null,
         name,
         type: modals.create.type || 'file',
         content: modals.create.type === 'file' ? '' : undefined,
       });
     },
-    [createDocument, repositoryId, modals.create]
+    [createDocument, repositoryId, organizationId, modals.create]
   );
 
   // Rename handlers

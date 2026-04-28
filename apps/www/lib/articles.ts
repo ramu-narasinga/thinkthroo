@@ -46,6 +46,21 @@ export async function fetchPostBySlug(slug: string) {
     return post;
 }
 
+export async function fetchPrivacyPolicy() {
+    const doc = await client.fetch(`*[_type == "privacy"][0]{ _id, title, body, publishedAt }`);
+    return doc;
+}
+
+export async function fetchTermsOfService() {
+    const doc = await client.fetch(`*[_type == "terms"][0]{ _id, title, body, publishedAt }`);
+    return doc;
+}
+
+export async function fetchRefundPolicy() {
+    const doc = await client.fetch(`*[_type == "refund"][0]{ _id, title, body, publishedAt }`);
+    return doc;
+}
+
 const { projectId, dataset } = client.config();
 export const urlFor = (source: SanityImageSource) =>
     projectId && dataset
