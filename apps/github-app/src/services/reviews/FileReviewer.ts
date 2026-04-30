@@ -1,6 +1,6 @@
 import type { ClaudeBot } from "@/services/ai/ClaudeBot";
 import type { Prompts, TemplateData } from "@/services/ai/Prompts";
-import { countTokens } from "@/services/ai/TokenCounter";
+import { estimateTokens } from "@/services/ai/TokenCounter";
 import { ReviewParser, type ReviewComment } from "./ReviewParser";
 import type { ReviewCommentManager } from "./ReviewCommentManager";
 import { COMMENT_REPLY_TAG } from "@/services/constants";
@@ -85,8 +85,8 @@ export class FileReviewer {
     logger.debug("Rendering base prompt", { filename, pullNumber });
     const basePrompt = this.prompts.renderReviewFileDiff(data);
     
-    // Use Anthropic's accurate token counting for base prompt
-    let tokens = await countTokens(basePrompt, this.bot.getModel());
+    // Use local token estimation for pack-sizing — avoids Anthropic counting API calls
+    let tokens = estimateTokens(basePrompt);
     logger.debug("Base prompt token count", {
       filename,
       pullNumber,
@@ -97,7 +97,7 @@ export class FileReviewer {
     // Determine how many patches we can pack
     let patchesToPack = 0;
     for (const [, , patch] of patches) {
-      const patchTokens = await countTokens(patch, this.bot.getModel());
+      const patchTokens = estimateTokens(patch);
       if (tokens + patchTokens > this.options.maxRequestTokens) {
         logger.debug("Patch packing limit reached", {
           filename,
@@ -183,7 +183,7 @@ export class FileReviewer {
       }
 
       // Check if we can pack comment chain
-      const commentChainTokens = await countTokens(commentChain, this.bot.getModel());
+      const commentChainTokens = estimateTokens(commentChain);
       logger.debug("Comment chain token count", {
         filename,
         pullNumber,

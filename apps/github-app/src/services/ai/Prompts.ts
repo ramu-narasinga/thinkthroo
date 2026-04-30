@@ -14,6 +14,7 @@ export interface TemplateData {
   comment_chain?: string;
   diff?: string;
   architecture_rules?: string;
+  username?: string;
   [key: string]: string | undefined;
 }
 
@@ -78,7 +79,7 @@ Important:
 `;
 
   summarizeChangesets = `Provided below are changesets in this pull request. Changesets 
-are in chronlogical order and new changesets are appended to the
+are in chronological order and new changesets are appended to the
 end of the list. The format consists of filename(s) and the summary 
 of changes for those files. There is a separator between each changeset.
 Your task is to deduplicate and group together files with
@@ -281,11 +282,14 @@ Please review this change.
 
 ### Example response
 
-22-22:
-Violates rule: "All functions must return early on error before performing logic."
+20-21:
+Violates rule: "All business logic must be extracted into service classes, not placed in utility functions."
 \`\`\`diff
--    retrn z
-+    return z
+-def add(x, y):
+-    z = x + y
++class MathService:
++    def add(self, x, y):
++        return x + y
 \`\`\`
 ---
 
@@ -335,12 +339,12 @@ If the comment contains instructions/requests for you, please comply.
 For example, if the comment is asking you to generate documentation 
 comments on the code, in your reply please generate the required code.
 
-In your reply, please make sure to begin the reply by tagging the user 
-with "@user".
+In your reply, please make sure to begin the reply by tagging the commenter 
+with "@$username".
 
 ## Comment format
 
-\`user: comment\`
+\`$username: comment\`
 
 ## Comment chain (including the new comment)
 

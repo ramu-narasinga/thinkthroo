@@ -45,3 +45,28 @@ export function calculateCostUsd(
 export function calculateCredits(costUsd: number): number {
   return costUsd * CREDITS_PER_DOLLAR;
 }
+
+/**
+ * Minimum credits required to start each pipeline phase.
+ * Based on a conservative single-file PR at current Anthropic pricing × markup.
+ */
+export const MIN_CREDITS_SUMMARY_PHASE = 5;
+export const MIN_CREDITS_REVIEW_PHASE = 10;
+export const MIN_CREDITS_ARCHITECTURE_PHASE = 10;
+
+/**
+ * Compute the minimum credit threshold required to start a PR workflow run,
+ * based on which phases are actually enabled.
+ * Applies an absolute floor of 5 even if all features are disabled.
+ */
+export function computeMinCreditThreshold(settings: {
+  enablePrSummary: boolean;
+  enableInlineReviewComments: boolean;
+  enableArchitectureReview: boolean;
+}): number {
+  let threshold = 0;
+  if (settings.enablePrSummary) threshold += MIN_CREDITS_SUMMARY_PHASE;
+  if (settings.enableInlineReviewComments) threshold += MIN_CREDITS_REVIEW_PHASE;
+  if (settings.enableArchitectureReview) threshold += MIN_CREDITS_ARCHITECTURE_PHASE;
+  return Math.max(threshold, 5);
+}

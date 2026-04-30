@@ -5,16 +5,13 @@ import { ArchitectureReviewGenerator } from "../architecture-review/Architecture
 import type { SummaryResult } from "@/services/summarization/FileSummarizer";
 import { CreditService } from "@/services/credits/CreditService";
 import { ReviewService } from "@/services/reviews/ReviewService";
-import type { BotAccumulatedUsage } from "@/services/ai/types";
+import { computeMinCreditThreshold, MIN_CREDITS_REVIEW_PHASE, MIN_CREDITS_ARCHITECTURE_PHASE } from "@/services/ai/pricing";
 import { CommitAnalyzer } from "@/services/commits/CommitAnalyzer";
 import { CommentManager } from "@/services/comments/CommentManager";
 import { SUMMARIZE_TAG } from "@/services/constants";
 import { ReviewSettingsService } from "@/services/settings/ReviewSettingsService";
 import { RateLimitService } from "@/services/rate-limits/RateLimitService";
 import { logger } from "@/utils/logger";
-
-/** Minimum credits required to start a PR workflow run */
-const MIN_CREDIT_THRESHOLD = 1;
 
 export interface PRWorkflowOptions {
   generateSummaries?: boolean;
@@ -57,34 +54,6 @@ export class PRWorkflowOrchestrator {
       useSummaryFiltering: options.useSummaryFiltering ?? true,
     });
 
-    // Pre-flight: check credit balance before running any AI
-    if (installationId) {
-      try {
-        const creditService = new CreditService();
-        const balance = await creditService.getBalance(installationId);
-
-        if (balance !== null && balance < MIN_CREDIT_THRESHOLD) {
-          prLogger.warn("Insufficient credits — skipping PR workflow", {
-            prNumber: pullNumber,
-            balance,
-          });
-          await this.context.octokit.issues.createComment({
-            owner: this.context.payload.repository.owner.login,
-            repo: this.context.payload.repository.name,
-            issue_number: pullNumber,
-            body: `Your organisation has insufficient credits to run an AI review (current balance: **${balance}**). Please top up your credits at [https://app.thinkthroo.com/account](https://app.thinkthroo.com/account).`,
-          });
-          return;
-        }
-      } catch (err: any) {
-        // Balance check failure is non-fatal — proceed with the workflow
-        prLogger.warn("Credit balance check failed, proceeding anyway", {
-          prNumber: pullNumber,
-          error: err.message,
-        });
-      }
-    }
-
     // Fetch effective review settings from the platform (non-fatal — falls back to safe defaults)
     let reviewSettings = {
       enableReviews: true,
@@ -114,6 +83,42 @@ export class PRWorkflowOrchestrator {
     if (!reviewSettings.enableReviews) {
       prLogger.info("Reviews disabled for this repository — skipping PR workflow", { prNumber: pullNumber });
       return;
+    }
+
+    // Pre-flight: check credit balance against the computed threshold for enabled phases
+    let currentBalance: number | null = null;
+    let totalCreditsDeducted = 0;
+    if (installationId) {
+      try {
+        const creditService = new CreditService();
+        const balance = await creditService.getBalance(installationId);
+        currentBalance = balance;
+        const threshold = computeMinCreditThreshold({
+          enablePrSummary: reviewSettings.enablePrSummary,
+          enableInlineReviewComments: reviewSettings.enableInlineReviewComments,
+          enableArchitectureReview: reviewSettings.enableArchitectureReview,
+        });
+        if (balance !== null && balance < threshold) {
+          prLogger.warn("Insufficient credits — skipping PR workflow", {
+            prNumber: pullNumber,
+            balance,
+            threshold,
+          });
+          await this.context.octokit.issues.createComment({
+            owner: this.context.payload.repository.owner.login,
+            repo: this.context.payload.repository.name,
+            issue_number: pullNumber,
+            body: `Your organisation has insufficient credits to run an AI review (current balance: **${balance}**). Please top up your credits at [https://app.thinkthroo.com/account](https://app.thinkthroo.com/account).`,
+          });
+          return;
+        }
+      } catch (err: any) {
+        // Balance check failure is non-fatal — proceed with the workflow
+        prLogger.warn("Credit balance check failed, proceeding anyway", {
+          prNumber: pullNumber,
+          error: err.message,
+        });
+      }
     }
 
     // Rate limit check — must pass before any AI work begins
@@ -265,6 +270,30 @@ export class PRWorkflowOrchestrator {
         prNumber: pullNumber,
         summariesCount: summaries?.length ?? 0,
       });
+
+      // Deduct Phase 1 credits immediately after completion
+      if (installationId) {
+        try {
+          const creditService = new CreditService();
+          const result = await creditService.deductCredits(
+            installationId,
+            repositoryFullName,
+            pullNumber,
+            summaryGenerator.getAccumulatedUsage()
+          );
+          if (result.success) {
+            totalCreditsDeducted += result.creditsDeducted ?? 0;
+            currentBalance = result.newBalance ?? currentBalance;
+            prLogger.info("Phase 1 credits deducted", {
+              prNumber: pullNumber,
+              creditsDeducted: result.creditsDeducted,
+              newBalance: result.newBalance,
+            });
+          }
+        } catch (err: any) {
+          prLogger.error("Phase 1 credit deduction failed", { prNumber: pullNumber, error: err.message });
+        }
+      }
     } else {
       prLogger.info("Summary generation disabled", { prNumber: pullNumber });
     }
@@ -273,88 +302,121 @@ export class PRWorkflowOrchestrator {
     if (options.summaryOnly) {
       prLogger.info("Summary-only mode — skipping review and architecture phases", { prNumber: pullNumber });
     } else {
-    prLogger.info("Starting review generation phase", {
-      prNumber: pullNumber,
-      useSummaryFiltering: options.useSummaryFiltering ?? true,
-      hasSummaries: !!summaries,
-    });
-
-    reviewGenerator = new PullRequestReviewGenerator(this.context, {
-      enableSummaryFiltering: options.useSummaryFiltering !== false && !!summaries,
-      summaries,
-      shortSummary: summaryGenerator?.getShortSummary(),
-      reviewStartSha,
-      disableReview: !reviewSettings.enableInlineReviewComments,
-      ...options.reviewOptions,
-      // Cap files per review to the plan/override limit resolved from the rate limit check
-      maxFiles: filesPerReview ?? options.reviewOptions?.maxFiles,
-    }, prLogger);
-
-    await reviewGenerator.generate();
-
-    // Step 3: Architecture review (controlled by platform settings)
-    if (reviewSettings.enableArchitectureReview) {
-      prLogger.info("Starting architecture review phase", { prNumber: pullNumber });
-
-      try {
-        architectureReviewGenerator = new ArchitectureReviewGenerator(
-          this.context,
-          { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50, reviewStartSha },
-          prLogger
-        );
-        await architectureReviewGenerator.generate();
-        prLogger.info("Architecture review phase complete", { prNumber: pullNumber });
-      } catch (error: any) {
-        // Architecture review failure should not break the overall PR workflow
-        prLogger.error("Architecture review failed, continuing", {
+      // Guard #1: check balance before Phase 2 (inline review)
+      if (installationId && reviewSettings.enableInlineReviewComments && currentBalance !== null && currentBalance < MIN_CREDITS_REVIEW_PHASE) {
+        prLogger.warn("Insufficient credits for inline review phase — skipping phases 2 and 3", {
           prNumber: pullNumber,
-          error: error.message,
+          currentBalance,
+          required: MIN_CREDITS_REVIEW_PHASE,
         });
+        await this.context.octokit.issues.createComment({
+          owner: this.context.payload.repository.owner.login,
+          repo: this.context.payload.repository.name,
+          issue_number: pullNumber,
+          body: `Your organisation has insufficient credits to run the inline review (current balance: **${currentBalance}**). Please top up your credits at [https://app.thinkthroo.com/account](https://app.thinkthroo.com/account).`,
+        });
+      } else {
+        prLogger.info("Starting review generation phase", {
+          prNumber: pullNumber,
+          useSummaryFiltering: options.useSummaryFiltering ?? true,
+          hasSummaries: !!summaries,
+        });
+
+        reviewGenerator = new PullRequestReviewGenerator(this.context, {
+          enableSummaryFiltering: options.useSummaryFiltering !== false && !!summaries,
+          summaries,
+          shortSummary: summaryGenerator?.getShortSummary(),
+          reviewStartSha,
+          disableReview: !reviewSettings.enableInlineReviewComments,
+          ...options.reviewOptions,
+          // Cap files per review to the plan/override limit resolved from the rate limit check
+          maxFiles: filesPerReview ?? options.reviewOptions?.maxFiles,
+        }, prLogger);
+
+        await reviewGenerator.generate();
+
+        // Deduct Phase 2 credits immediately after completion
+        if (installationId) {
+          try {
+            const creditService = new CreditService();
+            const result = await creditService.deductCredits(
+              installationId,
+              repositoryFullName,
+              pullNumber,
+              reviewGenerator.getAccumulatedUsage()
+            );
+            if (result.success) {
+              totalCreditsDeducted += result.creditsDeducted ?? 0;
+              currentBalance = result.newBalance ?? currentBalance;
+              prLogger.info("Phase 2 credits deducted", {
+                prNumber: pullNumber,
+                creditsDeducted: result.creditsDeducted,
+                newBalance: result.newBalance,
+              });
+            }
+          } catch (err: any) {
+            prLogger.error("Phase 2 credit deduction failed", { prNumber: pullNumber, error: err.message });
+          }
+        }
+
+        // Step 3: Architecture review (controlled by platform settings)
+        if (reviewSettings.enableArchitectureReview) {
+          // Guard #2: check balance before Phase 3 (architecture review)
+          if (installationId && currentBalance !== null && currentBalance < MIN_CREDITS_ARCHITECTURE_PHASE) {
+            prLogger.warn("Insufficient credits for architecture review — skipping phase 3", {
+              prNumber: pullNumber,
+              currentBalance,
+              required: MIN_CREDITS_ARCHITECTURE_PHASE,
+            });
+          } else {
+            prLogger.info("Starting architecture review phase", { prNumber: pullNumber });
+
+            try {
+              architectureReviewGenerator = new ArchitectureReviewGenerator(
+                this.context,
+                { maxConcurrency: 3, maxFiles: options.reviewOptions?.maxFiles ?? 50, reviewStartSha },
+                prLogger
+              );
+              await architectureReviewGenerator.generate();
+              prLogger.info("Architecture review phase complete", { prNumber: pullNumber });
+
+              // Deduct Phase 3 credits immediately after completion
+              if (installationId) {
+                try {
+                  const creditService = new CreditService();
+                  const result = await creditService.deductCredits(
+                    installationId,
+                    repositoryFullName,
+                    pullNumber,
+                    architectureReviewGenerator.getAccumulatedUsage()
+                  );
+                  if (result.success) {
+                    totalCreditsDeducted += result.creditsDeducted ?? 0;
+                    currentBalance = result.newBalance ?? currentBalance;
+                    prLogger.info("Phase 3 credits deducted", {
+                      prNumber: pullNumber,
+                      creditsDeducted: result.creditsDeducted,
+                      newBalance: result.newBalance,
+                    });
+                  }
+                } catch (err: any) {
+                  prLogger.error("Phase 3 credit deduction failed", { prNumber: pullNumber, error: err.message });
+                }
+              }
+            } catch (error: any) {
+              // Architecture review failure should not break the overall PR workflow
+              prLogger.error("Architecture review failed, continuing", {
+                prNumber: pullNumber,
+                error: error.message,
+              });
+            }
+          }
+        }
       }
-    }
     } // end !options.summaryOnly
 
-    // Step 4: Deduct credits for all AI usage accumulated across the workflow
+    // Persist the review summary for the platform dashboard
     if (installationId) {
-      const allUsage: BotAccumulatedUsage[] = [
-        ...(summaryGenerator?.getAccumulatedUsage() ?? []),
-        ...(reviewGenerator?.getAccumulatedUsage() ?? []),
-        ...(architectureReviewGenerator?.getAccumulatedUsage() ?? []),
-      ];
-
-      let creditsDeducted = 0;
-
-      try {
-        const creditService = new CreditService();
-        const result = await creditService.deductCredits(
-          installationId,
-          repositoryFullName,
-          pullNumber,
-          allUsage
-        );
-
-        if (result.success) {
-          creditsDeducted = result.creditsDeducted ?? 0;
-          prLogger.info("Credits deducted for PR workflow", {
-            prNumber: pullNumber,
-            creditsDeducted: result.creditsDeducted,
-            newBalance: result.newBalance,
-          });
-        } else {
-          prLogger.warn("Credit deduction was unsuccessful", {
-            prNumber: pullNumber,
-            reason: result.reason,
-          });
-        }
-      } catch (err: any) {
-        // Credit deduction failure must never crash the PR workflow
-        prLogger.error("Credit deduction failed", {
-          prNumber: pullNumber,
-          error: err.message,
-        });
-      }
-
-      // Step 5: Persist the review summary for the platform dashboard
       try {
         const finalSummaryText = summaryGenerator?.getFinalSummary() ?? "";
         const summaryPoints = ReviewService.parseSummaryPoints(finalSummaryText);
@@ -370,7 +432,7 @@ export class PRWorkflowOrchestrator {
             prTitle: this.context.payload.pull_request.title,
             prAuthor,
             summaryPoints,
-            creditsDeducted,
+            creditsDeducted: totalCreditsDeducted,
             hasArchitectureResults: fileResults.length > 0,
           });
           prLogger.info("PR review summary saved to platform", { prNumber: pullNumber });
