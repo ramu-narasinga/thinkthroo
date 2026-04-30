@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, sql } from 'drizzle-orm';
 import { serverDB } from '@/database';
@@ -28,7 +29,8 @@ function calculateCostUsd(model: string, inputTokens: number, outputTokens: numb
 
 export async function POST(req: NextRequest) {
   const secret = req.headers.get('x-internal-secret');
-  if (!process.env.PLATFORM_API_SECRET || secret !== process.env.PLATFORM_API_SECRET) {
+  const expected = process.env.PLATFORM_API_SECRET;
+  if (!secret || !expected || !timingSafeEqual(Buffer.from(secret), Buffer.from(expected))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

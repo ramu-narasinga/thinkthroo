@@ -29,6 +29,8 @@
     "@supabase/ssr": "^0.6.1",
     "@thinkthroo/ui": "workspace:*",
     "@types/mdx": "^2.0.13",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0",
     "@vercel/analytics": "^1.2.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

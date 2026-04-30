@@ -25,6 +25,21 @@ export async function POST(req: Request) {
   const file = req.body || "";
   const filename = req.headers.get("x-vercel-filename") || "file.txt";
   const contentType = req.headers.get("content-type") || "text/plain";
+
+  // 4a. Allowlist MIME types — reject anything that could be served as executable/markup
+  const ALLOWED_TYPES = [
+    "image/png",
+    "image/jpeg",
+    "image/gif",
+    "image/webp",
+    "application/pdf",
+    "text/plain",
+    "text/markdown",
+  ];
+  if (!ALLOWED_TYPES.includes(contentType)) {
+    return new Response("Unsupported file type", { status: 415 });
+  }
+
   const fileType = `.${contentType.split("/")[1]}`;
 
   // 4. Construct final filename

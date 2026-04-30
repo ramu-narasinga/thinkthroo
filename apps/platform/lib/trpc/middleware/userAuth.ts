@@ -7,9 +7,6 @@ export const userAuth = trpc.middleware(async (opts) => {
 
   // `ctx.user` is nullable
   if (!ctx.userId) {
-
-    console.log('supabase auth:', ctx.supabaseAuth);
-
     throw new TRPCError({ code: 'UNAUTHORIZED' });
   }
 

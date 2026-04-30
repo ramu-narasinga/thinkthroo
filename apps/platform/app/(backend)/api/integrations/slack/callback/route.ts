@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { serverDB } from "@/database";
@@ -7,7 +8,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const code = searchParams.get("code");
   const error = searchParams.get("error");
-  const state = searchParams.get("state"); // organizationId
+  const state = searchParams.get("state"); // "<orgId>:<csrfToken>"
 
   if (error || !code) {
     return NextResponse.redirect(
@@ -28,9 +29,21 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  if (!state) {
+  // Verify CSRF token stored in the cookie matches the token embedded in state
+  const storedCsrf = req.cookies.get("slack_oauth_csrf")?.value;
+  const colonIndex = state?.lastIndexOf(":") ?? -1;
+  const orgId = colonIndex > 0 ? state!.substring(0, colonIndex) : null;
+  const incomingCsrf = colonIndex > 0 ? state!.substring(colonIndex + 1) : null;
+
+  const csrfValid =
+    storedCsrf &&
+    incomingCsrf &&
+    storedCsrf.length === incomingCsrf.length &&
+    timingSafeEqual(Buffer.from(storedCsrf), Buffer.from(incomingCsrf));
+
+  if (!csrfValid || !orgId) {
     return NextResponse.redirect(
-      new URL("/integrations?error=missing_organization", req.url)
+      new URL("/integrations?error=invalid_state", req.url)
     );
   }
 
@@ -62,7 +75,7 @@ export async function GET(req: NextRequest) {
   const channelId = data.incoming_webhook?.channel_id ?? "";
 
   await slackModel.upsert({
-    organizationId: state,
+    organizationId: orgId,
     teamId: data.team?.id ?? "",
     teamName: data.team?.name ?? "",
     accessToken: data.access_token,
@@ -98,7 +111,10 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(
+  // Clear the CSRF cookie
+  const redirectResponse = NextResponse.redirect(
     new URL("/integrations?connected=true", req.url)
   );
+  redirectResponse.cookies.set("slack_oauth_csrf", "", { maxAge: 0, path: "/" });
+  return redirectResponse;
 }

@@ -57,25 +57,14 @@ function IntegrationsContent() {
   }, [searchParams, fetchIntegration]);
 
   function handleAddToSlack() {
-    const clientId = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
-
-    if (!clientId) {
-      toast.error("Slack integration is not configured yet.");
-      return;
-    }
-
     if (!activeOrg?.id) {
       toast.error("Please select an organization first.");
       return;
     }
 
-    const scope = "incoming-webhook,chat:write";
-    const url = new URL("https://slack.com/oauth/v2/authorize");
-    url.searchParams.set("client_id", clientId);
-    url.searchParams.set("scope", scope);
-    url.searchParams.set("state", activeOrg.id);
-
-    window.location.href = url.toString();
+    // Redirects through the server-side initiate route which generates
+    // a CSRF token, stores it in a cookie, then redirects to Slack.
+    window.location.href = `/api/integrations/slack/initiate?orgId=${encodeURIComponent(activeOrg.id)}`;
   }
 
   async function handleToggle(

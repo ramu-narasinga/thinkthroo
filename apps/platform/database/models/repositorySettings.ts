@@ -55,7 +55,13 @@ export class RepositorySettingsModel {
     const existing = await this.db
       .select({ id: repositorySettings.id })
       .from(repositorySettings)
-      .where(eq(repositorySettings.repositoryId, repositoryId))
+      .innerJoin(repositories, eq(repositories.id, repositorySettings.repositoryId))
+      .where(
+        and(
+          eq(repositorySettings.repositoryId, repositoryId),
+          eq(repositories.userId, this.userId),
+        ),
+      )
       .limit(1);
 
     if (existing.length > 0) {
