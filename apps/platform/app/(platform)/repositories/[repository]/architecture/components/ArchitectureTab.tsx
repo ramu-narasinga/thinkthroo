@@ -18,6 +18,7 @@ const EditorPanel = dynamic(() => import('./EditorPanel'), {
     </div>
   ),
 });
+import ArchitectureSkeleton from './ArchitectureSkeleton';
 import {
   CreateDocumentModal,
   RenameDocumentModal,
@@ -171,11 +172,7 @@ export default function ArchitectureTab() {
 
   // Show loading or error states
   if (isLoadingRepo) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-slate-500">Loading repository...</p>
-      </div>
-    );
+    return <ArchitectureSkeleton />;
   }
 
   if (repoError || !repositoryId) {
