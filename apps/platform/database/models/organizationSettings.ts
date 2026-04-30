@@ -36,7 +36,13 @@ export class OrganizationSettingsModel {
     const existing = await this.db
       .select({ id: organizationSettings.id })
       .from(organizationSettings)
-      .where(eq(organizationSettings.organizationId, organizationId))
+      .innerJoin(organizations, eq(organizations.id, organizationSettings.organizationId))
+      .where(
+        and(
+          eq(organizationSettings.organizationId, organizationId),
+          eq(organizations.userId, this.userId),
+        ),
+      )
       .limit(1);
 
     if (existing.length > 0) {
