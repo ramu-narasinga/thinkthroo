@@ -86,7 +86,7 @@ export class ReviewService {
     repositoryFullName: string;
     installationId: string;
     fileResults: ArchitectureFileResult[];
-  }): Promise<void> {
+  }): Promise<boolean> {
     const url = `${this.baseUrl}/api/reviews/architecture/save`;
 
     try {
@@ -106,20 +106,24 @@ export class ReviewService {
           body: text,
           prReviewId: params.prReviewId,
         });
+        return false;
       }
+
+      return true;
     } catch (err: any) {
       logger.warn("Architecture results save request threw an error", {
         prReviewId: params.prReviewId,
         error: err.message,
       });
+      return false;
     }
   }
 
   async saveInlineReviews(params: {
     prReviewId: string;
     inlineReviews: FileInlineReview[];
-  }): Promise<void> {
-    if (params.inlineReviews.length === 0) return;
+  }): Promise<boolean> {
+    if (params.inlineReviews.length === 0) return true;
 
     const url = `${this.baseUrl}/api/reviews/inline/save`;
 
@@ -149,12 +153,16 @@ export class ReviewService {
           body: text,
           prReviewId: params.prReviewId,
         });
+        return false;
       }
+
+      return true;
     } catch (err: any) {
       logger.warn("Inline reviews save request threw an error", {
         prReviewId: params.prReviewId,
         error: err.message,
       });
+      return false;
     }
   }
 }

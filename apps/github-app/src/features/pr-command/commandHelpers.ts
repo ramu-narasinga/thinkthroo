@@ -37,18 +37,22 @@ export async function buildOrchestratorContext(
   owner: string,
   repo: string
 ): Promise<any> {
-  const { data: prData } = await context.octokit.pulls.get({ owner, repo, pull_number: pullNumber });
-  return {
-    ...context,
-    payload: {
-      ...context.payload,
-      action: "synchronize",
-      pull_request: prData,
-      repository: context.payload.repository,
-      installation: (context.payload as any).installation,
-    },
-    issue: () => ({ owner, repo, issue_number: pullNumber }),
-  };
+  try {
+    const { data: prData } = await context.octokit.pulls.get({ owner, repo, pull_number: pullNumber });
+    return {
+      ...context,
+      payload: {
+        ...context.payload,
+        action: "synchronize",
+        pull_request: prData,
+        repository: context.payload.repository,
+        installation: (context.payload as any).installation,
+      },
+      issue: () => ({ owner, repo, issue_number: pullNumber }),
+    };
+  } catch (err: any) {
+    throw new Error(`Failed to fetch pull request details: ${err.message}`);
+  }
 }
 
 /**
@@ -115,5 +119,19 @@ export async function runOrchestrator(
       error: err.message,
       stack: err.stack,
     });
+
+    try {
+      await context.octokit.issues.createComment({
+        owner,
+        repo,
+        issue_number: pullNumber,
+        body: "ThinkThroo could not run this command due to an internal error. Please retry in a moment.",
+      });
+    } catch (commentErr: any) {
+      prLogger.warn("Failed to post command failure comment", {
+        pullNumber,
+        error: commentErr.message,
+      });
+    }
   }
 }

@@ -7,6 +7,8 @@ export interface RetryOptions {
   retries?: number;
   minTimeout?: number;
   maxTimeout?: number;
+  jitter?: boolean;
+  jitterFactor?: number;
   onFailedAttempt?: (error: Error & { attemptNumber?: number; retriesLeft?: number }) => void;
 }
 
@@ -21,6 +23,8 @@ export async function retry<T>(
     retries = 3,
     minTimeout = 1000,
     maxTimeout = 30000,
+    jitter = true,
+    jitterFactor = 0.2,
     onFailedAttempt,
   } = options;
 
@@ -39,10 +43,17 @@ export async function retry<T>(
       }
 
       // Exponential backoff: 1s, 2s, 4s, 8s, ...
-      const timeout = Math.min(
+      const baseTimeout = Math.min(
         minTimeout * Math.pow(2, attempt - 1),
         maxTimeout
       );
+
+      const timeout = jitter
+        ? Math.min(
+            Math.round(baseTimeout + baseTimeout * jitterFactor * Math.random()),
+            maxTimeout
+          )
+        : baseTimeout;
 
       if (onFailedAttempt) {
         const enrichedError = lastError as Error & {

@@ -48,6 +48,23 @@ export class PRWorkflowOrchestrator {
       installationId,
     });
 
+    const postPhaseFailureNotice = async (phase: string): Promise<void> => {
+      try {
+        await this.context.octokit.issues.createComment({
+          owner,
+          repo: this.context.payload.repository.name,
+          issue_number: pullNumber,
+          body: `ThinkThroo could not complete the **${phase}** phase for this PR due to an internal error. Please retry with @thinkthroo review. If this keeps happening, contact support at support@thinkthroo.com.`,
+        });
+      } catch (err: any) {
+        prLogger.warn("Failed to post phase failure notice", {
+          prNumber: pullNumber,
+          phase,
+          error: err.message,
+        });
+      }
+    };
+
     prLogger.info("PR Workflow started", {
       prNumber: pullNumber,
       generateSummaries: options.generateSummaries ?? true,
@@ -230,19 +247,29 @@ export class PRWorkflowOrchestrator {
           autoPause: reviewSettings.autoPauseAfterReviewedCommits,
         });
         if (_existingComment && !_commentManager.isPauseNoticePosted(_existingCommentBody)) {
-          await this.context.octokit.issues.createComment({
-            owner,
-            repo: this.context.payload.repository.name,
-            issue_number: pullNumber,
-            body: `Reviews have been paused after **${reviewSettings.autoPauseAfterReviewedCommits}** reviewed commits in this push cycle.\nComment \`@thinkthroo review\` to run an immediate review and reset the counter.`,
-          });
-          const updatedBody = _commentManager.setPauseNoticePosted(_existingCommentBody);
-          await octokit.issues.updateComment({
-            owner,
-            repo: this.context.payload.repository.name,
-            comment_id: _existingComment.id,
-            body: updatedBody,
-          });
+          try {
+            await this.context.octokit.issues.createComment({
+              owner,
+              repo: this.context.payload.repository.name,
+              issue_number: pullNumber,
+              body: `Reviews have been paused after **${reviewSettings.autoPauseAfterReviewedCommits}** reviewed commits in this push cycle.\nComment \`@thinkthroo review\` to run an immediate review and reset the counter.`,
+            });
+            const updatedBody = _commentManager.setPauseNoticePosted(_existingCommentBody);
+            await octokit.issues.updateComment({
+              owner,
+              repo: this.context.payload.repository.name,
+              comment_id: _existingComment.id,
+              body: updatedBody,
+            });
+          } catch (err: any) {
+            prLogger.warn("Failed to post auto-pause notice", {
+              prNumber: pullNumber,
+              reviewedCount,
+              autoPause: reviewSettings.autoPauseAfterReviewedCommits,
+              commentId: _existingComment.id,
+              error: err.message,
+            });
+          }
         }
         return;
       }
@@ -262,37 +289,46 @@ export class PRWorkflowOrchestrator {
     // Step 1: Generate summaries (if enabled by settings)
     if (reviewSettings.enablePrSummary) {
       prLogger.info("Starting summary generation phase", { prNumber: pullNumber });
-      
-      summaryGenerator = new PullRequestSummaryGenerator(this.context, prLogger);
-      summaries = await summaryGenerator.generate();
 
-      prLogger.info("Summary generation complete", {
-        prNumber: pullNumber,
-        summariesCount: summaries?.length ?? 0,
-      });
+      try {
+        summaryGenerator = new PullRequestSummaryGenerator(this.context, prLogger);
+        summaries = await summaryGenerator.generate();
 
-      // Deduct Phase 1 credits immediately after completion
-      if (installationId) {
-        try {
-          const creditService = new CreditService();
-          const result = await creditService.deductCredits(
-            installationId,
-            repositoryFullName,
-            pullNumber,
-            summaryGenerator.getAccumulatedUsage()
-          );
-          if (result.success) {
-            totalCreditsDeducted += result.creditsDeducted ?? 0;
-            currentBalance = result.newBalance ?? currentBalance;
-            prLogger.info("Phase 1 credits deducted", {
-              prNumber: pullNumber,
-              creditsDeducted: result.creditsDeducted,
-              newBalance: result.newBalance,
-            });
+        prLogger.info("Summary generation complete", {
+          prNumber: pullNumber,
+          summariesCount: summaries?.length ?? 0,
+        });
+
+        // Deduct Phase 1 credits immediately after completion
+        if (installationId) {
+          try {
+            const creditService = new CreditService();
+            const result = await creditService.deductCredits(
+              installationId,
+              repositoryFullName,
+              pullNumber,
+              summaryGenerator.getAccumulatedUsage()
+            );
+            if (result.success) {
+              totalCreditsDeducted += result.creditsDeducted ?? 0;
+              currentBalance = result.newBalance ?? currentBalance;
+              prLogger.info("Phase 1 credits deducted", {
+                prNumber: pullNumber,
+                creditsDeducted: result.creditsDeducted,
+                newBalance: result.newBalance,
+              });
+            }
+          } catch (err: any) {
+            prLogger.error("Phase 1 credit deduction failed", { prNumber: pullNumber, error: err.message });
           }
-        } catch (err: any) {
-          prLogger.error("Phase 1 credit deduction failed", { prNumber: pullNumber, error: err.message });
         }
+      } catch (err: any) {
+        prLogger.error("Summary generation failed, continuing without summaries", {
+          prNumber: pullNumber,
+          error: err.message,
+        });
+        await postPhaseFailureNotice("summary");
+        summaries = undefined;
       }
     } else {
       prLogger.info("Summary generation disabled", { prNumber: pullNumber });
@@ -333,30 +369,38 @@ export class PRWorkflowOrchestrator {
           maxFiles: filesPerReview ?? options.reviewOptions?.maxFiles,
         }, prLogger);
 
-        await reviewGenerator.generate();
+        try {
+          await reviewGenerator.generate();
 
-        // Deduct Phase 2 credits immediately after completion
-        if (installationId) {
-          try {
-            const creditService = new CreditService();
-            const result = await creditService.deductCredits(
-              installationId,
-              repositoryFullName,
-              pullNumber,
-              reviewGenerator.getAccumulatedUsage()
-            );
-            if (result.success) {
-              totalCreditsDeducted += result.creditsDeducted ?? 0;
-              currentBalance = result.newBalance ?? currentBalance;
-              prLogger.info("Phase 2 credits deducted", {
-                prNumber: pullNumber,
-                creditsDeducted: result.creditsDeducted,
-                newBalance: result.newBalance,
-              });
+          // Deduct Phase 2 credits immediately after completion
+          if (installationId) {
+            try {
+              const creditService = new CreditService();
+              const result = await creditService.deductCredits(
+                installationId,
+                repositoryFullName,
+                pullNumber,
+                reviewGenerator.getAccumulatedUsage()
+              );
+              if (result.success) {
+                totalCreditsDeducted += result.creditsDeducted ?? 0;
+                currentBalance = result.newBalance ?? currentBalance;
+                prLogger.info("Phase 2 credits deducted", {
+                  prNumber: pullNumber,
+                  creditsDeducted: result.creditsDeducted,
+                  newBalance: result.newBalance,
+                });
+              }
+            } catch (err: any) {
+              prLogger.error("Phase 2 credit deduction failed", { prNumber: pullNumber, error: err.message });
             }
-          } catch (err: any) {
-            prLogger.error("Phase 2 credit deduction failed", { prNumber: pullNumber, error: err.message });
           }
+        } catch (err: any) {
+          prLogger.error("Review generation failed, continuing workflow", {
+            prNumber: pullNumber,
+            error: err.message,
+          });
+          await postPhaseFailureNotice("inline review");
         }
 
         // Step 3: Architecture review (controlled by platform settings)
@@ -439,31 +483,46 @@ export class PRWorkflowOrchestrator {
 
           // Step 6: Persist architecture file results if we have them
           if (saveResult.success && saveResult.reviewId && fileResults.length > 0) {
-            await reviewService.saveArchitectureResults({
+            const architectureSaved = await reviewService.saveArchitectureResults({
               prReviewId: saveResult.reviewId,
               repositoryFullName,
               installationId,
               fileResults,
             });
-            prLogger.info("Architecture file results saved to platform", {
-              prNumber: pullNumber,
-              fileCount: fileResults.length,
-            });
+            if (architectureSaved) {
+              prLogger.info("Architecture file results saved to platform", {
+                prNumber: pullNumber,
+                fileCount: fileResults.length,
+              });
+            } else {
+              prLogger.warn("Architecture file results save failed", {
+                prNumber: pullNumber,
+                fileCount: fileResults.length,
+              });
+            }
           }
 
           // Step 7: Persist inline review comments if any were generated
           const inlineReviews = reviewGenerator?.getInlineFileReviews() ?? [];
           if (saveResult.success && saveResult.reviewId && inlineReviews.length > 0) {
             try {
-              await reviewService.saveInlineReviews({
+              const inlineSaved = await reviewService.saveInlineReviews({
                 prReviewId: saveResult.reviewId,
                 inlineReviews,
               });
-              prLogger.info("Inline review comments saved to platform", {
-                prNumber: pullNumber,
-                fileCount: inlineReviews.length,
-                totalComments: inlineReviews.reduce((sum, f) => sum + f.comments.length, 0),
-              });
+              if (inlineSaved) {
+                prLogger.info("Inline review comments saved to platform", {
+                  prNumber: pullNumber,
+                  fileCount: inlineReviews.length,
+                  totalComments: inlineReviews.reduce((sum, f) => sum + f.comments.length, 0),
+                });
+              } else {
+                prLogger.warn("Inline review comments save failed", {
+                  prNumber: pullNumber,
+                  fileCount: inlineReviews.length,
+                  totalComments: inlineReviews.reduce((sum, f) => sum + f.comments.length, 0),
+                });
+              }
             } catch (err: any) {
               prLogger.error("Inline reviews save failed, continuing", {
                 prNumber: pullNumber,

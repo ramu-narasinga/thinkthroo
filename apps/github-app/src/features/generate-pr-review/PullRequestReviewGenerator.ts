@@ -4,7 +4,7 @@ import { ClaudeBot } from "@/services/ai/ClaudeBot";
 import { Prompts } from "@/services/ai/Prompts";
 import type { TemplateData } from "@/services/ai/Prompts";
 import { ReviewCommentManager } from "@/services/reviews/ReviewCommentManager";
-import { FileReviewer, type FileInlineReview } from "@/services/reviews/FileReviewer";
+import { FileReviewer, type FileInlineReview, type ReviewResult } from "@/services/reviews/FileReviewer";
 import { FileReviewFilter } from "@/services/reviews/FileReviewFilter";
 import { PRPreprocessor } from "@/services/preprocessing/PRPreprocessor";
 import type { SummaryResult } from "@/services/summarization/FileSummarizer";
@@ -132,11 +132,21 @@ export class PullRequestReviewGenerator {
 
     // Step 1: Preprocess - fetch diffs, filter files, process hunks
     this.log.debug("Preprocessing PR for review", { prNumber: pullNumber });
-    const preprocessResult = await this.preprocessor.process(
-      pullRequest.base.sha,
-      pullRequest.head.sha,
-      opts.reviewStartSha
-    );
+    let preprocessResult;
+    try {
+      preprocessResult = await this.preprocessor.process(
+        pullRequest.base.sha,
+        pullRequest.head.sha,
+        opts.reviewStartSha
+      );
+    } catch (error: any) {
+      this.log.error("Preprocessing threw an error, skipping review", {
+        prNumber: pullNumber,
+        error: error.message,
+        stack: error.stack,
+      });
+      return;
+    }
 
     if (!preprocessResult.success) {
       this.log.warn("Preprocessing failed, skipping review", { prNumber: pullNumber });
@@ -220,13 +230,14 @@ export class PullRequestReviewGenerator {
     });
 
     const claudeConcurrencyLimit = pLimit(opts.maxConcurrency ?? 5);
-    const reviewPromises = [];
+    const reviewPromises: Promise<ReviewResult>[] = [];
+    const queuedFilenames: string[] = [];
     const skippedFiles: string[] = [];
-    // FIXME: What happens if there's more than 50 files?x
     const maxFiles = opts.maxFiles ?? 50;
 
     for (const [filename, fileContent, _fileDiff, patches] of filesToReview) {
       if (maxFiles <= 0 || reviewPromises.length < maxFiles) {
+        queuedFilenames.push(filename);
         reviewPromises.push(
           claudeConcurrencyLimit(async () =>
             fileReviewer.reviewFile(
@@ -243,7 +254,38 @@ export class PullRequestReviewGenerator {
       }
     }
 
-    const results = await Promise.all(reviewPromises);
+    const settledResults = await Promise.allSettled(reviewPromises);
+    const results: ReviewResult[] = [];
+    let rejectedCount = 0;
+
+    settledResults.forEach((result, index) => {
+      if (result.status === "fulfilled") {
+        results.push(result.value);
+        return;
+      }
+
+      const filename = queuedFilenames[index] ?? "unknown file";
+      rejectedCount += 1;
+      this.log.error("File review promise rejected", {
+        prNumber: pullNumber,
+        filename,
+        error: String(result.reason),
+      });
+      results.push({
+        filename,
+        reviewCount: 0,
+        failed: true,
+        reason: "review task failed",
+      });
+    });
+
+    if (rejectedCount > 0) {
+      this.log.warn("Some file review tasks rejected", {
+        prNumber: pullNumber,
+        rejectedCount,
+        attemptedFiles: queuedFilenames.length,
+      });
+    }
 
     // Notify when files were truncated due to the plan's files-per-review limit
     if (skippedFiles.length > 0) {

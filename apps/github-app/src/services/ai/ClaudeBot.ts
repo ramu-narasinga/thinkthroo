@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // TODO: implement p-retry?
 import { retry } from "./retry";
 import type { BotAccumulatedUsage, ClaudeBotConfig } from "./types";
+import { env } from "@/utils/env";
 import { logger, type Logger } from "@/utils/logger";
 
 /**
@@ -42,7 +43,7 @@ export class ClaudeBot {
       responseTokens: config.tokenLimits.responseTokens,
     });
 
-    if (!apiKey && !process.env.ANTHROPIC_API_KEY) {
+    if (!apiKey && !env.ANTHROPIC_API_KEY) {
       this.log.error("Anthropic API key not found");
       throw new Error(
         "Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or pass it to the constructor."
@@ -52,7 +53,7 @@ export class ClaudeBot {
     this.config = config;
     this.accumulatedUsage = { model: config.model, inputTokens: 0, outputTokens: 0 };
     this.client = new Anthropic({
-      apiKey: apiKey || process.env.ANTHROPIC_API_KEY,
+      apiKey: apiKey || env.ANTHROPIC_API_KEY,
     });
 
     this.log.info("ClaudeBot initialized successfully", {

@@ -22,7 +22,15 @@ export default (app: Probot) => {
       accountType: account.type,
       repoCount: repositories?.length ?? 0,
     });
-    await SlackNotifier.appInstalled(account.login, account.type, repositories?.length ?? 0);
+    try {
+      await SlackNotifier.appInstalled(account.login, account.type, repositories?.length ?? 0);
+    } catch (error: any) {
+      logger.warn("Failed to send installation created Slack notification", {
+        accountLogin: account.login,
+        accountType: account.type,
+        error: error.message,
+      });
+    }
   });
 
   app.on("installation.deleted", async (context) => {
@@ -32,7 +40,15 @@ export default (app: Probot) => {
       accountLogin: account.login,
       accountType: account.type,
     });
-    await SlackNotifier.appUninstalled(account.login, account.type);
+    try {
+      await SlackNotifier.appUninstalled(account.login, account.type);
+    } catch (error: any) {
+      logger.warn("Failed to send installation deleted Slack notification", {
+        accountLogin: account.login,
+        accountType: account.type,
+        error: error.message,
+      });
+    }
   });
 
   app.on("issues.opened", async (context) => {
@@ -76,8 +92,19 @@ export default (app: Probot) => {
       const repoOwner = context.repo().owner;
 
       // Check both the PR author and the repo owner (org)
-      const authorAllowed = prAuthor ? await InviteGateService.isAllowed(prAuthor) : false;
-      const ownerAllowed = await InviteGateService.isAllowed(repoOwner);
+      let authorAllowed = false;
+      let ownerAllowed = false;
+      try {
+        authorAllowed = prAuthor ? await InviteGateService.isAllowed(prAuthor) : false;
+        ownerAllowed = await InviteGateService.isAllowed(repoOwner);
+      } catch (error: any) {
+        logger.warn("Invite gate check failed, proceeding with PR workflow", {
+          prNumber: pullRequest.number,
+          prAuthor,
+          repoOwner,
+          error: error.message,
+        });
+      }
 
       if (!authorAllowed && !ownerAllowed) {
         logger.info("PR author/owner not on invite list, skipping AI review", {
@@ -87,11 +114,18 @@ export default (app: Probot) => {
         });
 
         // Post a comment on the PR explaining the invite-only restriction
-        await context.octokit.issues.createComment({
-          ...context.repo(),
-          issue_number: pullRequest.number,
-          body: InviteGateService.buildNotInvitedComment(prAuthor || repoOwner),
-        });
+        try {
+          await context.octokit.issues.createComment({
+            ...context.repo(),
+            issue_number: pullRequest.number,
+            body: InviteGateService.buildNotInvitedComment(prAuthor || repoOwner),
+          });
+        } catch (error: any) {
+          logger.warn("Failed to post invite-only restriction comment", {
+            prNumber: pullRequest.number,
+            error: error.message,
+          });
+        }
 
         return;
       }

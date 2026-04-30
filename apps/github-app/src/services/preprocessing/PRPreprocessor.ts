@@ -78,15 +78,27 @@ export class PRPreprocessor {
       baseSha,
     });
 
-    const incrementalDiff = await this.diffFetcher.fetchIncrementalDiff(
-      incrementalBase,
-      headSha
-    );
+    let incrementalDiff;
+    let targetBranchFiles;
+    try {
+      incrementalDiff = await this.diffFetcher.fetchIncrementalDiff(
+        incrementalBase,
+        headSha
+      );
 
-    const targetBranchFiles = await this.diffFetcher.fetchTargetBranchDiff(
-      baseSha,
-      headSha
-    );
+      targetBranchFiles = await this.diffFetcher.fetchTargetBranchDiff(
+        baseSha,
+        headSha
+      );
+    } catch (error: any) {
+      logger.error("Failed to fetch diffs during preprocessing", {
+        baseSha,
+        headSha,
+        incrementalBase,
+        error: error?.message,
+      });
+      return emptyResult;
+    }
 
     logger.info("Diffs fetched successfully", {
       incrementalFilesCount: incrementalDiff.files.length,
@@ -145,10 +157,21 @@ export class PRPreprocessor {
       baseSha,
     });
 
-    const filteredFiles = await this.hunkProcessor.processFilesIntoHunks(
-      filterResult.selected,
-      baseSha
-    );
+    let filteredFiles;
+    try {
+      filteredFiles = await this.hunkProcessor.processFilesIntoHunks(
+        filterResult.selected,
+        baseSha
+      );
+    } catch (error: any) {
+      logger.error("Failed to process files into hunks", {
+        baseSha,
+        headSha,
+        selectedFilesCount: filterResult.selected.length,
+        error: error?.message,
+      });
+      return emptyResult;
+    }
 
     // Step 5: Filter out null results
     const filesAndChanges = filteredFiles.filter(
