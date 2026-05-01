@@ -3,12 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { serverDB } from "@/database";
 import { SlackIntegrationModel } from "@/database/models/slackIntegration";
+import { organizations } from "@/database/schemas";
+import { and, eq } from "drizzle-orm";
+import { parseAndVerifySlackOAuthState } from "@/lib/server/slack-oauth-state";
+import { SlackNotifier } from "@/lib/slack";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const code = searchParams.get("code");
   const error = searchParams.get("error");
-  const state = searchParams.get("state"); // "<orgId>:<csrfToken>"
+  const state = searchParams.get("state");
 
   if (error || !code) {
     return NextResponse.redirect(
@@ -29,11 +33,18 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Verify CSRF token stored in the cookie matches the token embedded in state
+  const clientSecret = process.env.SLACK_CLIENT_SECRET;
+  if (!clientSecret) {
+    return NextResponse.redirect(
+      new URL("/integrations?error=slack_not_configured", req.url)
+    );
+  }
+
+  // Verify signed state payload first (tamper + TTL protection), then CSRF token.
+  const parsedState = parseAndVerifySlackOAuthState(state, clientSecret);
   const storedCsrf = req.cookies.get("slack_oauth_csrf")?.value;
-  const colonIndex = state?.lastIndexOf(":") ?? -1;
-  const orgId = colonIndex > 0 ? state!.substring(0, colonIndex) : null;
-  const incomingCsrf = colonIndex > 0 ? state!.substring(colonIndex + 1) : null;
+  const orgId = parsedState.valid ? parsedState.orgId : null;
+  const incomingCsrf = parsedState.valid ? parsedState.csrfToken : null;
 
   const csrfValid =
     storedCsrf &&
@@ -42,13 +53,35 @@ export async function GET(req: NextRequest) {
     timingSafeEqual(Buffer.from(storedCsrf), Buffer.from(incomingCsrf));
 
   if (!csrfValid || !orgId) {
+    await SlackNotifier.securityAlert(':rotating_light: Slack OAuth invalid state validation.', {
+      hasState: String(Boolean(state)),
+      hasStoredCsrf: String(Boolean(storedCsrf)),
+      userId: user.id,
+    });
     return NextResponse.redirect(
       new URL("/integrations?error=invalid_state", req.url)
     );
   }
 
+  // Ensure the current user owns the target organization from OAuth state
+  const [ownedOrg] = await serverDB
+    .select({ id: organizations.id })
+    .from(organizations)
+    .where(
+      and(
+        eq(organizations.id, orgId),
+        eq(organizations.userId, user.id),
+      ),
+    )
+    .limit(1);
+
+  if (!ownedOrg) {
+    return NextResponse.redirect(
+      new URL("/integrations?error=unauthorized_organization", req.url)
+    );
+  }
+
   const clientId = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID!;
-  const clientSecret = process.env.SLACK_CLIENT_SECRET!;
 
   const response = await fetch("https://slack.com/api/oauth.v2.access", {
     method: "POST",

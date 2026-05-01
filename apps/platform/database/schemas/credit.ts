@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, integer, numeric, pgPolicy } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, numeric, pgPolicy, uniqueIndex } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { organizations } from './organization';
 
@@ -47,9 +47,14 @@ export const creditTransactions = pgTable('credit_transactions', {
   referenceType: text('reference_type'),
   // PR number, Paddle transaction ID, etc.
   referenceId: text('reference_id'),
+  // Deduplicates retries for usage deductions.
+  idempotencyKey: text('idempotency_key'),
   metadata: text(), // JSON stringified additional data
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
+  uniqueIndex('credit_transactions_org_idempotency_key_unique')
+    .on(table.organizationId, table.idempotencyKey)
+    .where(sql`${table.idempotencyKey} is not null`),
   pgPolicy('Enable read access for users to their credit transactions', {
     as: 'permissive',
     for: 'select',

@@ -5,6 +5,23 @@ import { ThinkThrooDatabase } from '../type';
 export class SlackIntegrationModel {
   constructor(private db: ThinkThrooDatabase, private userId: string) {}
 
+  private assertOrganizationOwnership = async (organizationId: string) => {
+    const [org] = await this.db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(
+        and(
+          eq(organizations.id, organizationId),
+          eq(organizations.userId, this.userId),
+        ),
+      )
+      .limit(1);
+
+    if (!org) {
+      throw new Error('Forbidden organization access');
+    }
+  };
+
   getByOrganization = async (organizationId: string) => {
     const [row] = await this.db
       .select({
@@ -43,6 +60,8 @@ export class SlackIntegrationModel {
     webhookUrl: string;
     botUserId: string;
   }) => {
+    await this.assertOrganizationOwnership(data.organizationId);
+
     // Check if integration already exists for this org
     const existing = await this.db
       .select({ id: slackIntegrations.id })
@@ -96,6 +115,8 @@ export class SlackIntegrationModel {
     organizationId: string,
     settings: { notifyPrReviews?: boolean; notifyArchitectureViolations?: boolean },
   ) => {
+    await this.assertOrganizationOwnership(organizationId);
+
     await this.db
       .update(slackIntegrations)
       .set({
@@ -110,6 +131,8 @@ export class SlackIntegrationModel {
   };
 
   disconnect = async (organizationId: string) => {
+    await this.assertOrganizationOwnership(organizationId);
+
     await this.db
       .update(slackIntegrations)
       .set({
@@ -120,6 +143,8 @@ export class SlackIntegrationModel {
   };
 
   delete = async (organizationId: string) => {
+    await this.assertOrganizationOwnership(organizationId);
+
     await this.db
       .delete(slackIntegrations)
       .where(eq(slackIntegrations.organizationId, organizationId));

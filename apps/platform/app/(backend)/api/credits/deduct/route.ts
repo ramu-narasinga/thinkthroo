@@ -1,8 +1,9 @@
-import { timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, sql } from 'drizzle-orm';
 import { serverDB } from '@/database';
 import { installations, organizations, creditTransactions, aiUsageLogs } from '@/database/schemas';
+import { isValidInternalSecret } from '@/lib/server/internal-auth';
+import { trackPlatformSecuritySignal } from '@/lib/server/security-alerts';
 
 const BASE_CREDITS_PER_DOLLAR = 10;
 const AI_MARKUP_MULTIPLIER = Number(process.env.AI_MARKUP_MULTIPLIER ?? 3);
@@ -28,9 +29,16 @@ function calculateCostUsd(model: string, inputTokens: number, outputTokens: numb
 }
 
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get('x-internal-secret');
-  const expected = process.env.PLATFORM_API_SECRET;
-  if (!secret || !expected || !timingSafeEqual(Buffer.from(secret), Buffer.from(expected))) {
+  if (!isValidInternalSecret(req.headers)) {
+    await trackPlatformSecuritySignal({
+      signal: 'internal_auth_failed_credits_deduct',
+      threshold: 3,
+      windowSeconds: 60,
+      text: ':rotating_light: Repeated failed internal auth on /api/credits/deduct.',
+      fields: {
+        route: '/api/credits/deduct',
+      },
+    });
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -39,6 +47,7 @@ export async function POST(req: NextRequest) {
     repositoryFullName?: string;
     prNumber?: number;
     usage?: UsageEntry[];
+    idempotencyKey?: string;
   };
 
   try {
@@ -47,11 +56,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { installationId, repositoryFullName, prNumber, usage } = body;
+  const { installationId, repositoryFullName, prNumber, usage, idempotencyKey } = body;
 
-  if (!installationId || !repositoryFullName || prNumber == null || !Array.isArray(usage)) {
+  if (!installationId || !repositoryFullName || prNumber == null || !Array.isArray(usage) || !idempotencyKey) {
     return NextResponse.json(
-      { error: 'installationId, repositoryFullName, prNumber, and usage[] are required' },
+      { error: 'installationId, repositoryFullName, prNumber, usage[], and idempotencyKey are required' },
       { status: 400 },
     );
   }
@@ -98,64 +107,131 @@ export async function POST(req: NextRequest) {
   for (const [model, tokens] of Object.entries(aggregated)) {
     totalCostUsd += calculateCostUsd(model, tokens.inputTokens, tokens.outputTokens);
   }
-  const totalCreditsToDeduct = totalCostUsd * CREDITS_PER_DOLLAR;
+  const totalCreditsToDeduct = Number((totalCostUsd * CREDITS_PER_DOLLAR).toFixed(2));
 
   if (totalCreditsToDeduct === 0) {
     return NextResponse.json({ success: true, creditsDeducted: 0, newBalance: Number(org.creditBalance) });
   }
 
-  const currentBalance = Number(org.creditBalance);
-  if (currentBalance < totalCreditsToDeduct) {
-    return NextResponse.json({
-      success: false,
-      reason: 'insufficient_credits',
-      currentBalance,
-      creditsRequired: totalCreditsToDeduct,
+  const deductionResult = await serverDB.transaction(async (tx) => {
+    // Serialize all deductions for the same idempotency key and prevent duplicate charging.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${idempotencyKey}))`);
+
+    const [existingTx] = await tx
+      .select({
+        id: creditTransactions.id,
+        amount: creditTransactions.amount,
+        balanceAfter: creditTransactions.balanceAfter,
+      })
+      .from(creditTransactions)
+      .where(
+        and(
+          eq(creditTransactions.organizationId, org.id),
+          eq(creditTransactions.idempotencyKey, idempotencyKey),
+        ),
+      )
+      .limit(1);
+
+    if (existingTx) {
+      await trackPlatformSecuritySignal({
+        signal: 'credits_deduct_idempotent_hit',
+        threshold: 5,
+        windowSeconds: 60,
+        text: ':warning: Elevated idempotent credit deduction retries detected.',
+        fields: {
+          route: '/api/credits/deduct',
+          organizationId: org.id,
+        },
+      });
+      return {
+        success: true as const,
+        idempotent: true as const,
+        creditsDeducted: Math.abs(Number(existingTx.amount)),
+        newBalance: Number(existingTx.balanceAfter),
+      };
+    }
+
+    const [updatedOrg] = await tx
+      .update(organizations)
+      .set({ creditBalance: sql`${organizations.creditBalance} - ${totalCreditsToDeduct}` })
+      .where(
+        and(
+          eq(organizations.id, org.id),
+          sql`${organizations.creditBalance} >= ${totalCreditsToDeduct}`,
+        ),
+      )
+      .returning({ creditBalance: organizations.creditBalance });
+
+    if (!updatedOrg) {
+      const [latestOrg] = await tx
+        .select({ creditBalance: organizations.creditBalance })
+        .from(organizations)
+        .where(eq(organizations.id, org.id))
+        .limit(1);
+
+      await trackPlatformSecuritySignal({
+        signal: 'credits_deduct_insufficient_balance',
+        threshold: 5,
+        windowSeconds: 60,
+        text: ':warning: Elevated insufficient-credit deduction attempts detected.',
+        fields: {
+          route: '/api/credits/deduct',
+          organizationId: org.id,
+        },
+      });
+
+      return {
+        success: false as const,
+        reason: 'insufficient_credits' as const,
+        currentBalance: Number(latestOrg?.creditBalance ?? 0),
+        creditsRequired: totalCreditsToDeduct,
+      };
+    }
+
+    const newBalance = Number(updatedOrg.creditBalance);
+
+    const [creditTx] = await tx
+      .insert(creditTransactions)
+      .values({
+        organizationId: org.id,
+        transactionType: 'ai_usage',
+        amount: String(-totalCreditsToDeduct),
+        balanceAfter: String(newBalance),
+        referenceType: 'pr_review',
+        referenceId: String(prNumber),
+        idempotencyKey,
+        metadata: JSON.stringify({ repositoryFullName, prNumber, idempotencyKey }),
+      })
+      .returning({ id: creditTransactions.id });
+
+    const usageLogRows = Object.entries(aggregated).map(([model, tokens]) => {
+      const costUsd = Number(calculateCostUsd(model, tokens.inputTokens, tokens.outputTokens).toFixed(4));
+      const creditsDeducted = Number((costUsd * CREDITS_PER_DOLLAR).toFixed(2));
+      return {
+        organizationId: org.id,
+        repositoryFullName,
+        prNumber,
+        modelName: model,
+        inputTokens: tokens.inputTokens,
+        outputTokens: tokens.outputTokens,
+        totalTokens: tokens.inputTokens + tokens.outputTokens,
+        costUsd: String(costUsd),
+        creditsDeducted: String(creditsDeducted),
+        creditTransactionId: creditTx.id,
+      };
     });
-  }
 
-  const newBalance = currentBalance - totalCreditsToDeduct;
+    if (usageLogRows.length > 0) {
+      await tx.insert(aiUsageLogs).values(usageLogRows);
+    }
 
-  // Persist: update org balance + insert credit transaction + insert ai_usage_logs
-  const [creditTx] = await serverDB
-    .insert(creditTransactions)
-    .values({
-      organizationId: org.id,
-      transactionType: 'ai_usage',
-      amount: String(-totalCreditsToDeduct),
-      balanceAfter: String(newBalance),
-      referenceType: 'pr_review',
-      referenceId: String(prNumber),
-      metadata: JSON.stringify({ repositoryFullName, prNumber }),
-    })
-    .returning({ id: creditTransactions.id });
-
-  await serverDB
-    .update(organizations)
-    .set({ creditBalance: String(newBalance) })
-    .where(eq(organizations.id, org.id));
-
-  // Insert one ai_usage_logs row per model
-  for (const [model, tokens] of Object.entries(aggregated)) {
-    const costUsd = calculateCostUsd(model, tokens.inputTokens, tokens.outputTokens);
-    const creditsDeducted = costUsd * CREDITS_PER_DOLLAR;
-    await serverDB.insert(aiUsageLogs).values({
-      organizationId: org.id,
-      repositoryFullName,
-      prNumber,
-      modelName: model,
-      inputTokens: tokens.inputTokens,
-      outputTokens: tokens.outputTokens,
-      totalTokens: tokens.inputTokens + tokens.outputTokens,
-      costUsd: String(costUsd),
-      creditsDeducted: String(creditsDeducted),
-      creditTransactionId: creditTx.id,
-    });
-  }
-
-  return NextResponse.json({
-    success: true,
-    creditsDeducted: totalCreditsToDeduct,
-    newBalance,
+    return {
+      success: true as const,
+      idempotent: false as const,
+      creditsDeducted: totalCreditsToDeduct,
+      newBalance,
+    };
   });
+
+  return NextResponse.json(deductionResult);
 }

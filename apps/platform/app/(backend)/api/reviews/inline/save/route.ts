@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { serverDB } from '@/database';
 import { prReviews, prInlineReviewComments } from '@/database/schemas';
+import { isValidInternalSecret } from '@/lib/server/internal-auth';
 
 interface InlineComment {
   filename: string;
@@ -11,8 +12,7 @@ interface InlineComment {
 }
 
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get('x-internal-secret');
-  if (!process.env.PLATFORM_API_SECRET || secret !== process.env.PLATFORM_API_SECRET) {
+  if (!isValidInternalSecret(req.headers)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

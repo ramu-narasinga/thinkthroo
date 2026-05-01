@@ -7,6 +7,15 @@ import { handleReview } from "./commands/review";
 import { handleFullReview } from "./commands/fullReview";
 import { handleSummary } from "./commands/summary";
 import { handleHelp } from "./commands/help";
+import { CommandThrottleService } from "@/services/commands/CommandThrottleService";
+
+const ALLOWED_AUTHOR_ASSOCIATIONS = new Set([
+  "OWNER",
+  "MEMBER",
+  "COLLABORATOR",
+]);
+
+const THROTTLED_COMMANDS = new Set(["review", "full-review", "summary"]);
 
 /**
  * Thin dispatcher — parses the @thinkthroo command from the comment body
@@ -26,14 +35,85 @@ export class PRCommandHandler {
     const command = parseCommand(payload.comment.body ?? "");
     if (!command) return;
 
+    const authorAssociation = payload.comment.author_association;
+    if (!ALLOWED_AUTHOR_ASSOCIATIONS.has(authorAssociation)) {
+      logger.warn("Skipping PR command from unauthorized commenter", {
+        command,
+        author: payload.comment.user?.login,
+        authorAssociation,
+        prNumber: payload.issue.number,
+        repo: `${payload.repository.owner.login}/${payload.repository.name}`,
+      });
+
+      try {
+        await this.context.octokit.issues.createComment({
+          owner: payload.repository.owner.login,
+          repo: payload.repository.name,
+          issue_number: payload.issue.number,
+          body: `Only repository collaborators can run ${BOT_NAME} commands.`,
+        });
+      } catch (err: any) {
+        logger.warn("Failed to post unauthorized command warning", {
+          command,
+          author: payload.comment.user?.login,
+          error: err.message,
+        });
+      }
+      return;
+    }
+
     const pullNumber = payload.issue.number;
     const owner = payload.repository.owner.login;
     const repo = payload.repository.name;
+    const repoFullName = `${owner}/${repo}`;
     const installationId = String((payload as any).installation?.id ?? "");
+    const commenter = payload.comment.user?.login ?? 'unknown';
+
+    if (installationId && THROTTLED_COMMANDS.has(command)) {
+      try {
+        const throttleService = new CommandThrottleService();
+        const throttle = await throttleService.check(
+          installationId,
+          repoFullName,
+          commenter,
+          command,
+        );
+
+        if (!throttle.allowed) {
+          const retryText = throttle.retryAfterSeconds
+            ? `Please try again in about **${Math.ceil(throttle.retryAfterSeconds / 60)} minute(s)**.`
+            : 'Please try again shortly.';
+
+          await this.context.octokit.issues.createComment({
+            owner,
+            repo,
+            issue_number: pullNumber,
+            body: `Command ignored: ${BOT_NAME} ${command} is on cooldown for this repository and user. ${retryText}`,
+          });
+
+          logger.warn('PR command throttled', {
+            command,
+            prNumber: pullNumber,
+            repo: repoFullName,
+            commenter,
+            retryAfterSeconds: throttle.retryAfterSeconds,
+          });
+          return;
+        }
+      } catch (err: any) {
+        logger.warn('Command throttle check failed, proceeding', {
+          command,
+          prNumber: pullNumber,
+          repo: repoFullName,
+          commenter,
+          error: err.message,
+        });
+      }
+    }
 
     const prLogger = logger.child({
       prNumber: pullNumber,
-      repo: `${owner}/${repo}`,
+      repo: repoFullName,
       owner,
       installationId,
       command,

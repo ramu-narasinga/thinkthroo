@@ -1,6 +1,10 @@
 import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { serverDB } from "@/database";
+import { organizations } from "@/database/schemas";
+import { and, eq } from "drizzle-orm";
+import { createSignedSlackOAuthState } from "@/lib/server/slack-oauth-state";
 
 export async function GET(req: NextRequest) {
   // 1. Require an authenticated user
@@ -23,17 +27,35 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  // Enforce that users can only start OAuth for organizations they own
+  const [ownedOrg] = await serverDB
+    .select({ id: organizations.id })
+    .from(organizations)
+    .where(
+      and(
+        eq(organizations.id, orgId),
+        eq(organizations.userId, user.id),
+      ),
+    )
+    .limit(1);
+
+  if (!ownedOrg) {
+    return NextResponse.redirect(
+      new URL("/integrations?error=unauthorized_organization", req.url)
+    );
+  }
+
   const clientId = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
-  if (!clientId) {
+  const clientSecret = process.env.SLACK_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
     return NextResponse.redirect(
       new URL("/integrations?error=slack_not_configured", req.url)
     );
   }
 
-  // 3. Generate a random CSRF token and encode it with the orgId in state
+  // 3. Generate a random CSRF token and sign state payload
   const csrfToken = randomBytes(16).toString("hex");
-  // state = "<orgId>:<csrfToken>" — orgId is extracted in the callback after token is verified
-  const state = `${orgId}:${csrfToken}`;
+  const state = createSignedSlackOAuthState(orgId, csrfToken, clientSecret);
 
   // 4. Build the Slack authorize URL
   const scope = "incoming-webhook,chat:write";

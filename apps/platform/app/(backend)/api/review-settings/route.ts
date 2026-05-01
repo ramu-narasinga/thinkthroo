@@ -1,4 +1,3 @@
-import { timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { serverDB } from '@/database';
@@ -8,6 +7,7 @@ import {
   repositorySettings,
   organizationSettings,
 } from '@/database/schemas';
+import { isValidInternalSecret } from '@/lib/server/internal-auth';
 
 export interface EffectiveReviewSettings {
   enableReviews: boolean;
@@ -21,9 +21,7 @@ export interface EffectiveReviewSettings {
 }
 
 export async function GET(req: NextRequest) {
-  const secret = req.headers.get('x-internal-secret');
-  const expected = process.env.PLATFORM_API_SECRET;
-  if (!secret || !expected || !timingSafeEqual(Buffer.from(secret), Buffer.from(expected))) {
+  if (!isValidInternalSecret(req.headers)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

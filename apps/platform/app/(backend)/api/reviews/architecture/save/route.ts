@@ -1,10 +1,10 @@
-import { timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and } from 'drizzle-orm';
 import { serverDB } from '@/database';
 import { installations, repositories, prArchitectureFileResults, documents, prReviews } from '@/database/schemas';
 import { notifyPrReview } from '@/service/slack/channel';
 import { pino } from '@/lib/logger';
+import { isValidInternalSecret } from '@/lib/server/internal-auth';
 
 interface DocReference {
   name: string;
@@ -21,14 +21,7 @@ interface FileResult {
 }
 
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get('x-internal-secret');
-  const expected = process.env.PLATFORM_API_SECRET;
-  if (
-    !secret ||
-    !expected ||
-    secret.length !== expected.length ||
-    !timingSafeEqual(Buffer.from(secret), Buffer.from(expected))
-  ) {
+  if (!isValidInternalSecret(req.headers)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

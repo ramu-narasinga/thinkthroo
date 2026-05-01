@@ -81,4 +81,21 @@ export const SlackNotifier = {
         },
       ],
     }),
+
+  securityAlert: (title: string, details: Record<string, string>) =>
+    sendSlackNotification({
+      text: title,
+      attachments: [
+        {
+          color: '#e01e5a',
+          fields: Object.entries(details).map(([key, value]) => ({
+            title: key,
+            value,
+            short: true,
+          })),
+          footer: 'Think Throo Platform Security',
+          ts: Math.floor(Date.now() / 1000),
+        },
+      ],
+    }),
 };

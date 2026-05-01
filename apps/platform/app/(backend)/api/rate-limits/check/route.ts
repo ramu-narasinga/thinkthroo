@@ -1,4 +1,3 @@
-import { timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq, isNull } from 'drizzle-orm';
 import { serverDB } from '@/database';
@@ -10,15 +9,24 @@ import {
   rateLimitOverrides,
 } from '@/database/schemas';
 import { createRateLimiter } from '@/lib/upstash';
+import { isValidInternalSecret } from '@/lib/server/internal-auth';
+import { trackPlatformSecuritySignal } from '@/lib/server/security-alerts';
 
 /** Hard-coded safety fallback if the plan is missing from rate_limit_plan_defaults */
 const FALLBACK_REVIEWS_PER_HOUR = 3;
 const FALLBACK_FILES_PER_REVIEW = 50;
 
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get('x-internal-secret');
-  const expected = process.env.PLATFORM_API_SECRET;
-  if (!secret || !expected || !timingSafeEqual(Buffer.from(secret), Buffer.from(expected))) {
+  if (!isValidInternalSecret(req.headers)) {
+    await trackPlatformSecuritySignal({
+      signal: 'internal_auth_failed_rate_limits_check',
+      threshold: 3,
+      windowSeconds: 60,
+      text: ':rotating_light: Repeated failed internal auth on /api/rate-limits/check.',
+      fields: {
+        route: '/api/rate-limits/check',
+      },
+    });
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -307,7 +307,8 @@ export class PRWorkflowOrchestrator {
               installationId,
               repositoryFullName,
               pullNumber,
-              summaryGenerator.getAccumulatedUsage()
+              summaryGenerator.getAccumulatedUsage(),
+              "summary"
             );
             if (result.success) {
               totalCreditsDeducted += result.creditsDeducted ?? 0;
@@ -380,7 +381,8 @@ export class PRWorkflowOrchestrator {
                 installationId,
                 repositoryFullName,
                 pullNumber,
-                reviewGenerator.getAccumulatedUsage()
+                reviewGenerator.getAccumulatedUsage(),
+                "review"
               );
               if (result.success) {
                 totalCreditsDeducted += result.creditsDeducted ?? 0;
@@ -432,7 +434,8 @@ export class PRWorkflowOrchestrator {
                     installationId,
                     repositoryFullName,
                     pullNumber,
-                    architectureReviewGenerator.getAccumulatedUsage()
+                    architectureReviewGenerator.getAccumulatedUsage(),
+                    "architecture"
                   );
                   if (result.success) {
                     totalCreditsDeducted += result.creditsDeducted ?? 0;

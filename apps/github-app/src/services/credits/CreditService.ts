@@ -1,12 +1,14 @@
 import { env } from "@/utils/env";
 import { logger } from "@/utils/logger";
 import type { BotAccumulatedUsage } from "@/services/ai/types";
+import { createHash } from "node:crypto";
 
 export interface DeductResult {
   success: boolean;
   creditsDeducted?: number;
   newBalance?: number;
   reason?: string;
+  idempotent?: boolean;
 }
 
 /**
@@ -25,6 +27,45 @@ export class CreditService {
     }
     this.baseUrl = env.PLATFORM_API_URL;
     this.secret = env.PLATFORM_API_SECRET;
+  }
+
+  private buildIdempotencyKey(
+    installationId: string,
+    repositoryFullName: string,
+    prNumber: number,
+    usage: BotAccumulatedUsage[],
+    phase: string
+  ): string {
+    const usageByModel = usage.reduce<Record<string, { inputTokens: number; outputTokens: number }>>(
+      (acc, item) => {
+        if (!acc[item.model]) {
+          acc[item.model] = { inputTokens: 0, outputTokens: 0 };
+        }
+        acc[item.model].inputTokens += item.inputTokens;
+        acc[item.model].outputTokens += item.outputTokens;
+        return acc;
+      },
+      {}
+    );
+
+    const canonicalUsage = Object.entries(usageByModel)
+      .map(([model, tokens]) => ({
+        model,
+        inputTokens: tokens.inputTokens,
+        outputTokens: tokens.outputTokens,
+      }))
+      .sort((a, b) => a.model.localeCompare(b.model));
+
+    const payload = JSON.stringify({
+      installationId,
+      repositoryFullName,
+      prNumber,
+      phase,
+      usage: canonicalUsage,
+    });
+
+    const digest = createHash("sha256").update(payload).digest("hex");
+    return `credit:${installationId}:${repositoryFullName}:${prNumber}:${phase}:${digest}`;
   }
 
   /**
@@ -59,7 +100,8 @@ export class CreditService {
     installationId: string,
     repositoryFullName: string,
     prNumber: number,
-    usage: BotAccumulatedUsage[]
+    usage: BotAccumulatedUsage[],
+    phase: string = "unspecified"
   ): Promise<DeductResult> {
     const nonEmptyUsage = usage.filter(
       (u) => u.inputTokens > 0 || u.outputTokens > 0
@@ -71,6 +113,13 @@ export class CreditService {
     }
 
     const url = `${this.baseUrl}/api/credits/deduct`;
+    const idempotencyKey = this.buildIdempotencyKey(
+      installationId,
+      repositoryFullName,
+      prNumber,
+      nonEmptyUsage,
+      phase
+    );
 
     const response = await fetch(url, {
       method: "POST",
@@ -83,6 +132,7 @@ export class CreditService {
         repositoryFullName,
         prNumber,
         usage: nonEmptyUsage,
+        idempotencyKey,
       }),
     });
 
