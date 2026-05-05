@@ -32,6 +32,11 @@ export const organizationSettings = pgTable('organization_settings', {
   // Pause incremental reviews after N reviewed commits in a cycle (0 = always review)
   autoPauseAfterReviewedCommits: integer('auto_pause_after_reviewed_commits').default(5).notNull(),
 
+  // Member settings
+  memberDefaultRole: text('member_default_role').default('Member').notNull(),
+  allowMemberInvites: boolean('allow_member_invites').default(false).notNull(),
+  requireMemberApproval: boolean('require_member_approval').default(true).notNull(),
+
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
