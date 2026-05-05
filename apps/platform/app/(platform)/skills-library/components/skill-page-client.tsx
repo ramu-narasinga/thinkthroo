@@ -7,6 +7,7 @@ import { Separator } from "@thinkthroo/ui/components/separator"
 import { Tag } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import type { SanitySkill, SanitySkillItem, SanitySkillTag } from "@/lib/skill"
+import type { SanityChapter } from "@/lib/lesson"
 
 interface SkillStatsProps {
   weeklyDownloads: number
@@ -17,6 +18,7 @@ interface SkillStatsProps {
 interface SkillPageClientProps {
   skill: SanitySkill
   skillItems: SanitySkillItem[]
+  chapters: SanityChapter[]
   installCommand: string
   stats: SkillStatsProps
 }
@@ -33,6 +35,7 @@ const formatDate = (dateStr: string | null) => {
 export function SkillPageClient({
   skill,
   skillItems,
+  chapters,
   installCommand,
   stats,
 }: SkillPageClientProps) {
@@ -66,6 +69,7 @@ export function SkillPageClient({
       <SkillSidebar
         moduleTitle={skill.title}
         skills={skillItems}
+        chapters={chapters}
         selectedSkillSlug={selectedSkill?.slug}
         onSelectSkill={handleSelectSkill}
       />

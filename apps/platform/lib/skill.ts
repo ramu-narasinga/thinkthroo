@@ -27,7 +27,7 @@ export interface SanitySkillItem {
   title: string;
   /** slug.current */
   slug: string;
-  body: string | null;
+  body?: string | null;
   publishedAt: string | null;
 }
 
