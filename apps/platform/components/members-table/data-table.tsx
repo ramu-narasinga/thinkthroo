@@ -12,6 +12,9 @@ import {
 } from "@tanstack/react-table"
 import { RefreshCw, Settings } from "lucide-react"
 import { InviteMemberModal } from "@/components/members-table/invite-member-modal"
+import { MembersSettingsModal } from "@/components/members-table/members-settings-modal"
+import { useOrganizationStore } from "@/store/organization"
+import { organizationSelectors } from "@/store/organization/selectors"
 
 import {
   Table,
@@ -45,6 +48,8 @@ export function DataTable<TData, TValue>({
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [lastUpdated] = React.useState<Date>(new Date())
   const [inviteOpen, setInviteOpen] = React.useState(false)
+  const [settingsOpen, setSettingsOpen] = React.useState(false)
+  const activeOrgId = useOrganizationStore(organizationSelectors.activeOrgId)
 
   const table = useReactTable({
     data,
@@ -132,9 +137,10 @@ export function DataTable<TData, TValue>({
             + Invite Member
           </Button>
           <InviteMemberModal open={inviteOpen} onOpenChange={setInviteOpen} />
-          <Button variant="outline" size="icon" className="h-9 w-9">
+          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setSettingsOpen(true)}>
             <Settings className="w-4 h-4" />
           </Button>
+          <MembersSettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} organizationId={activeOrgId} />
         </div>
       </div>
 
