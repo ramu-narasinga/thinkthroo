@@ -10,7 +10,12 @@ export default async function SkillsLibraryPage() {
 
   // Fetch stats from Supabase for all skills
   const statsModel = new SkillStatsModel(serverDB)
-  const allStats = await statsModel.getAll()
+  let allStats: Awaited<ReturnType<typeof statsModel.getAll>> = []
+  try {
+    allStats = await statsModel.getAll()
+  } catch (err) {
+    console.warn("Failed to fetch skill stats:", err)
+  }
   const statsMap = Object.fromEntries(allStats.map((s) => [s.skillSlug, s]))
 
   const totalWeeklyDownloads = allStats.reduce(

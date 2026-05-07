@@ -26,7 +26,7 @@ import {
 import { useAnalyticsStore } from "@/store/analytics/store";
 import { useOrganizationStore } from "@/store/organization";
 import { organizationSelectors } from "@/store/organization/selectors";
-import { Loader2 } from "lucide-react";
+import { Skeleton } from "@thinkthroo/ui/components/skeleton";
 
 export default function AnalyticsPage() {
   const activeOrg = useOrganizationStore(organizationSelectors.activeOrg);
@@ -66,8 +66,37 @@ export default function AnalyticsPage() {
       <div className="p-8 space-y-6">
         {/* Loading state */}
         {!isFirstFetchFinished && isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <div className="space-y-6">
+            {/* Summary cards skeleton */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-muted rounded-xl p-4 space-y-2">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              ))}
+            </div>
+
+            {/* Chart skeletons */}
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="bg-muted rounded-xl p-6 space-y-4">
+                <div className="space-y-1">
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
+                <Skeleton className="h-[220px] w-full" />
+              </div>
+            ))}
+
+            {/* Table skeleton */}
+            <div className="bg-muted rounded-xl p-6 space-y-4">
+              <Skeleton className="h-7 w-40" />
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full rounded-lg" />
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

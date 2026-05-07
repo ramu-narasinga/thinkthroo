@@ -23,7 +23,7 @@ function IntegrationsContent() {
   const activeOrg = useOrganizationStore(organizationSelectors.activeOrg);
   const [slackIntegration, setSlackIntegration] =
     useState<SlackIntegration | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   const fetchIntegration = useCallback(async () => {

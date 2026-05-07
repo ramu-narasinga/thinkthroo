@@ -21,19 +21,31 @@ export function SanityCourseSidebar({
   completedLessonSlugs = new Set(),
   onSelectLesson,
 }: SanityCourseSidebarProps) {
-  const [openChapters, setOpenChapters] = React.useState<string[]>(
-    chapters.length > 0 ? [chapters[0].title] : []
-  )
+  const [openChapter, setOpenChapter] = React.useState<string | null>(() => {
+    if (selectedLessonSlug) {
+      const match = chapters.find((ch) =>
+        ch.lessons.some((l) => l.slug === selectedLessonSlug)
+      )
+      if (match) return match.title
+    }
+    return chapters.length > 0 ? chapters[0].title : null
+  })
+
+  // Keep the open chapter in sync when the selected lesson changes from outside
+  React.useEffect(() => {
+    if (!selectedLessonSlug) return
+    const match = chapters.find((ch) =>
+      ch.lessons.some((l) => l.slug === selectedLessonSlug)
+    )
+    if (match) setOpenChapter(match.title)
+  }, [selectedLessonSlug, chapters])
+
   const [sidebarOpen, setSidebarOpen] = React.useState(true)
 
   const [isOpen, setIsOpen] = React.useState(true)
 
   const toggleChapter = (title: string) => {
-    setOpenChapters((prev) =>
-      prev.includes(title)
-        ? prev.filter((t) => t !== title)
-        : [...prev, title]
-    )
+    setOpenChapter((prev) => (prev === title ? null : title))
   }
 
   if (!isOpen) {
@@ -81,7 +93,7 @@ export function SanityCourseSidebar({
 
       <div className="py-2">
         {chapters.map((chapter) => {
-          const isChapterOpen = openChapters.includes(chapter.title)
+          const isChapterOpen = openChapter === chapter.title
 
           return (
             <Collapsible
