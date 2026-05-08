@@ -71,7 +71,7 @@ export async function fetchAllSkills(): Promise<SanitySkill[]> {
   return sanityClient.fetch<SanitySkill[]>(
     SKILLS_LIST_QUERY,
     {},
-    { next: { revalidate: 60 } }
+    { next: { revalidate: 0 } }
   );
 }
 
