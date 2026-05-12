@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import { fetchSkillBySlug, fetchSkillItemsByModuleSlug, buildInstallCommand } from "@/lib/skill"
-import { serverDB } from "@/database/core/db-adaptor"
-import { SkillStatsModel } from "@/database/models/skillStats"
+import { fetchSkillChaptersByModuleSlug } from "@/lib/lesson"
 import { SkillPageClient } from "@/app/(platform)/skills-library/components/skill-page-client"
 
 export default async function SkillDetailPage({
@@ -15,12 +14,11 @@ export default async function SkillDetailPage({
   const skill = await fetchSkillBySlug(skillSlug)
   if (!skill) notFound()
 
-  // Fetch individual skill items for this module
-  const skillItems = await fetchSkillItemsByModuleSlug(skillSlug)
-
-  // Fetch stats from Supabase
-  const statsModel = new SkillStatsModel(serverDB)
-  const stats = await statsModel.getBySlug(skillSlug)
+  // Fetch individual skill items and chapters in parallel
+  const [skillItems, chapters] = await Promise.all([
+    fetchSkillItemsByModuleSlug(skillSlug),
+    fetchSkillChaptersByModuleSlug(skillSlug),
+  ])
 
   const installCommand = buildInstallCommand(skill.repoUrl, skill.slug)
 
@@ -28,12 +26,8 @@ export default async function SkillDetailPage({
     <SkillPageClient
       skill={skill}
       skillItems={skillItems}
+      chapters={chapters}
       installCommand={installCommand}
-      stats={{
-        weeklyDownloads: stats?.weeklyDownloads ?? 0,
-        createdAt: stats?.createdAt ?? null,
-        updatedAt: stats?.updatedAt ?? null,
-      }}
     />
   )
 }
