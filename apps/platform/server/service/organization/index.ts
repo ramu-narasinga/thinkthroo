@@ -102,7 +102,7 @@ export class OrganizationService {
     if (!org?.paddleCustomerId) return [];
 
     const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
-      environment: process.env.PADDLE_ENVIRONMENT === 'production' ? Environment.production : Environment.sandbox,
+      environment: process.env.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
     });
 
     // Collect transactions first
@@ -151,7 +151,7 @@ export class OrganizationService {
     }
 
     const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
-      environment: process.env.PADDLE_ENVIRONMENT === 'production' ? Environment.production : Environment.sandbox,
+      environment: process.env.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
     });
     const updated = await paddle.subscriptions.cancel(sub.subscriptionId, {
       effectiveFrom: 'next_billing_period',

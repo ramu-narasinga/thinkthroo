@@ -218,7 +218,7 @@ export function ReviewsTab() {
       )}
 
       {!isLoading && reviews.length > PAGE_SIZE && (
-        <div className="flex items-center justify-end gap-2 pt-2">
+        <div className="flex items-center justify-end gap-3 pt-2 pb-6">
           <Button
             variant="outline"
             size="sm"

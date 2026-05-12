@@ -22,17 +22,31 @@ export default function PrivatePageGuard({ children }: PrivatePageGuardProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const supabase = createClient();
 
     const checkAuth = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      setIsLoading(false);
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (isMounted) {
+          setIsAuthenticated(!!user);
+          setIsLoading(false);
+        }
+      } catch {
+        if (isMounted) {
+          setIsAuthenticated(false);
+          setIsLoading(false);
+        }
+      }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (isLoading) {

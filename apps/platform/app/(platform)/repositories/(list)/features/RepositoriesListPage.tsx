@@ -7,6 +7,7 @@ import NoRepoScreen from "../components/NoRepoScreen";
 import DataTable from "../components/DataTable";
 import { columns } from "../components/Columns";
 import Header from "../components/Header";
+import RepositoriesSkeleton from "../components/RepositoriesSkeleton";
 import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs";
 import posthog from "posthog-js";
 
@@ -48,12 +49,7 @@ const RepositoriesListPage = memo(() => {
   }, [activeTab, accessibleRepos.length, revokedRepos.length]);
 
   if (isLoading) {
-    return (
-      <div className="p-6 w-full">
-        <Header />
-        <div className="text-muted-foreground">Loading repositories...</div>
-      </div>
-    );
+    return <RepositoriesSkeleton />;
   }
 
   if (!hasInstallations) {
