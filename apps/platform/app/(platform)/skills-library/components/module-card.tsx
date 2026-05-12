@@ -2,16 +2,15 @@ import { type SanitySkill } from "@/lib/skill"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@thinkthroo/ui/components/card"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
-import { Download, PlusCircle, Tag, Zap } from "lucide-react"
+import { PlusCircle } from "lucide-react"
 import Link from "next/link"
 
 interface ModuleCardProps {
   skill: SanitySkill
-  weeklyDownloads: number
 }
 
-export function ModuleCard({ skill, weeklyDownloads }: ModuleCardProps) {
-  const { title, description, slug, tags, skillsCount } = skill
+export function ModuleCard({ skill }: ModuleCardProps) {
+  const { title, description, slug, tags } = skill
 
   return (
     <Card className="group hover:shadow-md transition-shadow flex flex-col">
@@ -23,30 +22,17 @@ export function ModuleCard({ skill, weeklyDownloads }: ModuleCardProps) {
       </CardHeader>
 
       <CardContent className="flex flex-col flex-1 gap-4">
-        {/* Stats row */}
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <Zap className="h-4 w-4" />
-            <span>
-              {skillsCount ?? 1} {(skillsCount ?? 1) === 1 ? "skill" : "skills"}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Download className="h-4 w-4" />
-            <span>{weeklyDownloads.toLocaleString()} weekly</span>
-          </div>
-        </div>
-
         {/* Tags */}
-        {tags && tags.length > 0 && (
+        {tags && tags.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1 text-xs">
-                <Tag className="h-3 w-3" />
+              <Badge key={index} variant="secondary" className="text-xs">
                 {tag.title}
               </Badge>
             ))}
           </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">No tags</p>
         )}
 
         {/* CTA pinned to bottom */}
