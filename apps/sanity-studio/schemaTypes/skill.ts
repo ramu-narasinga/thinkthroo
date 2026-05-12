@@ -44,6 +44,12 @@ export default defineType({
       of: [{type: 'reference', to: {type: 'tag'}}],
     }),
     defineField({
+      name: 'chapter',
+      title: 'Chapter',
+      type: 'array',
+      of: [{type: 'reference', to: {type: 'chapter'}}],
+    }),
+    defineField({
       name: 'body',
       title: 'Body',
       description: 'Markdown content for this skill',

@@ -7,34 +7,20 @@ import { Separator } from "@thinkthroo/ui/components/separator"
 import { Tag } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import type { SanitySkill, SanitySkillItem, SanitySkillTag } from "@/lib/skill"
-
-interface SkillStatsProps {
-  weeklyDownloads: number
-  createdAt: string | null
-  updatedAt: string | null
-}
+import type { SanityChapter } from "@/lib/lesson"
 
 interface SkillPageClientProps {
   skill: SanitySkill
   skillItems: SanitySkillItem[]
+  chapters: SanityChapter[]
   installCommand: string
-  stats: SkillStatsProps
-}
-
-const formatDate = (dateStr: string | null) => {
-  if (!dateStr) return "—"
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
 }
 
 export function SkillPageClient({
   skill,
   skillItems,
+  chapters,
   installCommand,
-  stats,
 }: SkillPageClientProps) {
   const [selectedSkill, setSelectedSkill] = useState<SanitySkillItem | null>(
     skillItems[0] ?? null
@@ -66,6 +52,7 @@ export function SkillPageClient({
       <SkillSidebar
         moduleTitle={skill.title}
         skills={skillItems}
+        chapters={chapters}
         selectedSkillSlug={selectedSkill?.slug}
         onSelectSkill={handleSelectSkill}
       />
@@ -104,41 +91,6 @@ export function SkillPageClient({
             <div className="flex items-center gap-3 bg-muted rounded-md px-4 py-3 font-mono text-sm">
               <span className="text-muted-foreground select-none">$</span>
               <span className="text-foreground break-all">{installCommand}</span>
-            </div>
-          </div>
-
-          <Separator className="my-6" />
-
-          {/* Stats table */}
-          <div className="mb-8">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Stats
-            </h2>
-            <div className="rounded-md border overflow-hidden">
-              <table className="w-full text-sm">
-                <tbody>
-                  <tr className="border-b">
-                    <td className="px-4 py-3 font-medium text-muted-foreground w-1/3">
-                      Weekly Downloads
-                    </td>
-                    <td className="px-4 py-3">
-                      {stats.weeklyDownloads.toLocaleString()}
-                    </td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-4 py-3 font-medium text-muted-foreground">
-                      Created At
-                    </td>
-                    <td className="px-4 py-3">{formatDate(stats.createdAt)}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-muted-foreground">
-                      Updated At
-                    </td>
-                    <td className="px-4 py-3">{formatDate(stats.updatedAt)}</td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
           </div>
 

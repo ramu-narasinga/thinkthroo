@@ -130,3 +130,56 @@ export async function fetchPGPChaptersByModuleSlug(
     { next: { revalidate: 30 } }
   );
 }
+
+// ── Skills ────────────────────────────────────────────────────────────
+
+const SKILL_LESSON_BY_SLUG_QUERY = `
+  *[
+    _type == "skill" &&
+    slug.current == $slug
+  ][0] {
+    _id,
+    _type,
+    title,
+    description,
+    "slug": slug.current,
+    body,
+    order
+  }
+`;
+
+export async function fetchSkillLessonBySlug(slug: string): Promise<SanityLesson> {
+  return sanityClient.fetch<SanityLesson>(
+    SKILL_LESSON_BY_SLUG_QUERY,
+    { slug },
+    { next: { revalidate: 30 } }
+  );
+}
+
+const SKILL_CHAPTERS_BY_MODULE_QUERY = `
+  *[
+    _type == "chapter" &&
+    $slug in module[]->slug
+  ] | order(order asc) {
+    title,
+    order,
+    "lessons": *[
+      _type == "skill" &&
+      ^._id in chapter[]._ref
+    ] | order(order asc) {
+      title,
+      "slug": slug.current,
+      order
+    }
+  }
+`;
+
+export async function fetchSkillChaptersByModuleSlug(
+  moduleSlug: string
+): Promise<SanityChapter[]> {
+  return sanityClient.fetch<SanityChapter[]>(
+    SKILL_CHAPTERS_BY_MODULE_QUERY,
+    { slug: moduleSlug },
+    { next: { revalidate: 30 } }
+  );
+}
