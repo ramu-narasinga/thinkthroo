@@ -23,6 +23,12 @@ export function SkillSidebar({
 }: SkillSidebarProps) {
   const hasChapters = chapters && chapters.length > 0
 
+  // Skills not assigned to any chapter — shown flat outside chapter folders
+  const chapteredSlugs = new Set(
+    (chapters ?? []).flatMap((c) => c.lessons.map((l) => l.slug))
+  )
+  const unchapteredSkills = skills.filter((s) => !chapteredSlugs.has(s.slug))
+
   const [openChapters, setOpenChapters] = useState<Record<number, boolean>>(
     () => Object.fromEntries((chapters ?? []).map((_, i) => [i, true]))
   )
@@ -47,41 +53,59 @@ export function SkillSidebar({
 
       <div className="py-2">
         {hasChapters ? (
-          chapters.map((chapter, idx) => (
-            <div key={idx}>
-              <button
-                onClick={() => toggleChapter(idx)}
-                className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-accent transition-colors"
-              >
-                {openChapters[idx] ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          <>
+            {chapters.map((chapter, idx) => (
+              <div key={idx}>
+                <button
+                  onClick={() => toggleChapter(idx)}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-accent transition-colors"
+                >
+                  {openChapters[idx] ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                  )}
+                  <span className="text-sm font-medium truncate">{chapter.title}</span>
+                </button>
+                {openChapters[idx] && (
+                  <div>
+                    {chapter.lessons.map((lesson) => {
+                      const isSelected = selectedSkillSlug === lesson.slug
+                      return (
+                        <button
+                          key={lesson.slug}
+                          onClick={() => handleLessonClick(lesson)}
+                          className={cn(
+                            "w-full flex items-center gap-3 pl-10 pr-4 py-2.5 text-left hover:bg-accent transition-colors",
+                            isSelected && "bg-accent"
+                          )}
+                        >
+                          <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <p className="text-sm truncate">{lesson.title}</p>
+                        </button>
+                      )
+                    })}
+                  </div>
                 )}
-                <span className="text-sm font-medium truncate">{chapter.title}</span>
-              </button>
-              {openChapters[idx] && (
-                <div>
-                  {chapter.lessons.map((lesson) => {
-                    const isSelected = selectedSkillSlug === lesson.slug
-                    return (
-                      <button
-                        key={lesson.slug}
-                        onClick={() => handleLessonClick(lesson)}
-                        className={cn(
-                          "w-full flex items-center gap-3 pl-10 pr-4 py-2.5 text-left hover:bg-accent transition-colors",
-                          isSelected && "bg-accent"
-                        )}
-                      >
-                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                        <p className="text-sm truncate">{lesson.title}</p>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          ))
+              </div>
+            ))}
+            {unchapteredSkills.map((skill) => {
+              const isSelected = selectedSkillSlug === skill.slug
+              return (
+                <button
+                  key={skill.slug}
+                  onClick={() => onSelectSkill(skill)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-accent transition-colors",
+                    isSelected && "bg-accent"
+                  )}
+                >
+                  <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <p className="text-sm truncate">{skill.title}</p>
+                </button>
+              )
+            })}
+          </>
         ) : (
           skills.map((skill) => {
             const isSelected = selectedSkillSlug === skill.slug
