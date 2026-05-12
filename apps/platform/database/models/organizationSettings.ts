@@ -11,6 +11,9 @@ export interface OrganizationSettingsData {
   toneInstructions: string | null;
   pathFilters: string[];
   autoPauseAfterReviewedCommits: number;
+  memberDefaultRole: string;
+  allowMemberInvites: boolean;
+  requireMemberApproval: boolean;
 }
 
 export class OrganizationSettingsModel {

@@ -12,6 +12,9 @@ const settingsInput = z.object({
   toneInstructions: z.string().nullable().optional(),
   pathFilters: z.array(z.string()).optional(),
   autoPauseAfterReviewedCommits: z.number().int().min(0).optional(),
+  memberDefaultRole: z.string().optional(),
+  allowMemberInvites: z.boolean().optional(),
+  requireMemberApproval: z.boolean().optional(),
 });
 
 const organizationSettingsProcedure = authedProcedure
