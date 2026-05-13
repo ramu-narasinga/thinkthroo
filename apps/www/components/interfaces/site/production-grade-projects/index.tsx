@@ -63,9 +63,9 @@ export function ProductionGradeProjects() {
         {/* Header */}
         <div className="text-center mb-16 lg:mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-            <span className="text-sm font-semibold text-primary">Production Grade Projects</span>
+            <span className="text-sm font-semibold text-foreground">Production Grade Projects</span>
           </div>
-          <h2 className="text-primary leading-tighter max-w-3xl mb-6 mx-auto text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] lg:font-semibold xl:text-5xl xl:tracking-tighter">
+          <h2 className="text-foreground leading-tighter max-w-3xl mb-6 mx-auto text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] lg:font-semibold xl:text-5xl xl:tracking-tighter">
             Learn From Top Open-Source Projects
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance">

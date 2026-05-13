@@ -31,7 +31,7 @@ export const Footer = () => {
 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-y-12 gap-x-6 lg:gap-x-16 mt-12">
                     <div>
-                        <h3 className="text-gray-900 font-semibold text-sm leading-5">
+                        <h3 className="text-foreground font-semibold text-sm leading-5">
                             Codebase Architecture
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
@@ -58,7 +58,7 @@ export const Footer = () => {
                     </div>
 
                     <div>
-                        <h3 className="text-gray-900 font-semibold text-sm leading-5">
+                        <h3 className="text-foreground font-semibold text-sm leading-5">
                             Research & Development
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
@@ -75,7 +75,7 @@ export const Footer = () => {
                     </div>
 
                     <div>
-                        <h3 className="text-gray-900 font-semibold text-sm leading-5">
+                        <h3 className="text-foreground font-semibold text-sm leading-5">
                             Community
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
@@ -103,7 +103,7 @@ export const Footer = () => {
                     </div>
 
                     <div>
-                        <h3 className="text-gray-900 font-semibold text-sm leading-5">
+                        <h3 className="text-foreground font-semibold text-sm leading-5">
                             Legal
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
