@@ -14,6 +14,8 @@ export const siteConfig = {
     youtube: "https://www.youtube.com/@ramu-narasinga",
     learningPlatform: "https://app.thinkthroo.com/architecture",
     consultation: "https://cal.com/team-thinkthroo-dxiovj/consultation",
+    /** GitHub OAuth entry on the platform app — use for marketing CTAs */
+    appLogin: "https://app.thinkthroo.com/login",
   },
 };
 
