@@ -207,9 +207,9 @@ export function Problem() {
         {/* Header */}
         <div className="text-center mb-16 lg:mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-            <span className="text-sm font-semibold text-primary">The Problem</span>
+            <span className="text-sm font-semibold text-foreground">The Problem</span>
           </div>
-          <h1 className="text-primary leading-tighter max-w-2xl mb-6 mx-auto text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] lg:font-semibold xl:text-5xl xl:tracking-tighter">
+          <h1 className="text-foreground leading-tighter max-w-2xl mb-6 mx-auto text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] lg:font-semibold xl:text-5xl xl:tracking-tighter">
             Inconsistent Code Patterns Are Costing You Weeks
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance">
