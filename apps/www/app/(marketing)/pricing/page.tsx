@@ -1,19 +1,10 @@
-import { Badge } from "@thinkthroo/ui/components/badge"
 import { Button } from "@thinkthroo/ui/components/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@thinkthroo/ui/components/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@thinkthroo/ui/components/tabs"
 import { Separator } from "@thinkthroo/ui/components/separator"
-import { PricingFeatureList } from "@thinkthroo/ui/components/pricing-feature-list"
 import { CreditBundleGrid } from "@thinkthroo/ui/components/credit-bundle-grid"
-import { freeFeatures, proFeatures, creditBundles, pricing } from "@thinkthroo/ui/lib/pricing"
+import { creditBundles } from "@thinkthroo/ui/lib/pricing"
 import Link from "next/link"
+import { PricingPlanGrid } from "./pricing-plan-grid"
 
 export default function PricingPage() {
   return (
@@ -39,12 +30,12 @@ export default function PricingPage() {
 
         {/* MONTHLY */}
         <TabsContent value="monthly">
-          <PricingGrid billing="monthly" />
+          <PricingPlanGrid billing="monthly" />
         </TabsContent>
 
         {/* YEARLY */}
         <TabsContent value="yearly">
-          <PricingGrid billing="yearly" />
+          <PricingPlanGrid billing="yearly" />
         </TabsContent>
       </Tabs>
 
@@ -71,60 +62,5 @@ export default function PricingPage() {
         </Button>
       </div>
     </main>
-  )
-}
-
-function PricingGrid({ billing }: { billing: "monthly" | "yearly" }) {
-  const priceInfo = billing === "monthly" ? pricing.monthly : pricing.yearly
-
-  return (
-    <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-      {/* FREE */}
-      <Card className="flex flex-col">
-        <CardHeader>
-          <CardTitle>Free</CardTitle>
-          <CardDescription>For individuals & OSS</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1">
-          <p className="text-3xl font-bold">$0 <span className="text-base font-normal text-muted-foreground">{pricing.monthly.label}</span></p>
-          <div className="mt-6">
-            <PricingFeatureList features={freeFeatures} />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full" variant="outline" asChild>
-            <Link href="/sign-up">Get Started</Link>
-          </Button>
-        </CardFooter>
-      </Card>
-
-      {/* PRO */}
-      <Card className="relative border-primary flex flex-col">
-        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-          Most Popular
-        </Badge>
-        <CardHeader>
-          <CardTitle>Pro</CardTitle>
-          <CardDescription>For growing teams</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1">
-          <p className="text-3xl font-bold">
-            {priceInfo.amount}
-            <span className="text-base font-normal text-muted-foreground"> {priceInfo.label}</span>
-          </p>
-          {billing === "yearly" && (
-            <p className="text-sm text-green-600 font-medium mt-0.5">{pricing.yearly.note}</p>
-          )}
-          <div className="mt-6">
-            <PricingFeatureList features={proFeatures} iconColor="text-primary" />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full" asChild>
-            <Link href="/sign-up">Start Pro</Link>
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
   )
 }
