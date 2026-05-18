@@ -146,6 +146,12 @@
   }
 }
 
+@layer utilities {
+  .cursor-pointer {
+    cursor: pointer;
+  }
+}
+
 pre {
   background: #0d0d0d;
   border-radius: 0.5rem;
