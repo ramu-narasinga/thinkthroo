@@ -180,6 +180,18 @@
   button:active {
     @apply opacity-60 md:opacity-100;
   }
+
+  a,
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  label[for],
+  summary,
+  select:not(:disabled),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
 }
 
 @utility border-grid {
@@ -229,6 +241,10 @@
   @media (pointer: coarse) {
     @apply relative touch-manipulation after:absolute after:-inset-2;
   }
+}
+
+@utility cursor-pointer {
+  cursor: pointer;
 }
 
 @layer components {
