@@ -16,29 +16,31 @@ export function LoginPageClient({ error }: { error?: string }) {
   }, [trackEvent]);
 
   return (
-    <div className="flex h-screen w-full bg-gray-100 dark:bg-gray-900 overflow-hidden">
-      {/* Mobile view image */}
-      <div className="md:hidden w-full">
-        <Image
-          src="/examples/authentication-light.png"
-          width={1280}
-          height={843}
-          alt="Authentication"
-          className="block w-full dark:hidden"
-          priority
-        />
-        <Image
-          src="/examples/authentication-dark.png"
-          width={1280}
-          height={843}
-          alt="Authentication"
-          className="hidden w-full dark:block"
-          priority
-        />
+    <div className="flex min-h-dvh w-full bg-gray-100 dark:bg-gray-900 md:overflow-hidden">
+      {/* Narrow viewports: real login UI (DevTools / split panes often go below md width) */}
+      <div className="flex md:hidden min-h-dvh w-full flex-col overflow-y-auto">
+        <div className="relative z-20 flex shrink-0 items-center gap-2 p-6 text-lg font-medium text-black dark:text-white">
+          <Image
+            src="/tt purple.svg"
+            alt="Logo"
+            width={32}
+            height={32}
+            className="shrink-0"
+          />
+          Think Throo
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center px-6 pb-10">
+          <div className="w-full max-w-sm">
+            <LoginForm
+              error={error}
+              className="min-h-0 w-full bg-transparent py-0 dark:bg-transparent"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Desktop layout */}
-      <div className="container relative hidden md:grid lg:max-w-none lg:grid-cols-2 lg:px-0 h-screen items-center overflow-hidden">
+      <div className="container relative hidden h-screen min-h-0 w-full min-w-0 md:grid md:grid-rows-[minmax(0,1fr)] lg:max-w-none lg:grid-cols-2 lg:px-0 items-stretch overflow-hidden">
         {/* Left hero section */}
         <div className="relative hidden h-full flex-col bg-muted p-8 border-r border-gray-300 lg:flex overflow-hidden">
           <div className="absolute inset-0 bg-white" />
@@ -68,10 +70,25 @@ export function LoginPageClient({ error }: { error?: string }) {
           </div>
         </div>
 
-        {/* Login form */}
-        <div className="flex items-center justify-center p-6">
-          <div className="w-full max-w-sm">
-            <LoginForm error={error} />
+        {/* Login form — logo pinned top when hero is hidden (md–lg); form centered in remaining height */}
+        <div className="flex h-full min-h-0 min-w-0 flex-col gap-6 p-6">
+          <div className="flex shrink-0 items-center gap-2 text-lg font-medium text-black dark:text-white lg:hidden">
+            <Image
+              src="/tt purple.svg"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="shrink-0"
+            />
+            Think Throo
+          </div>
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+            <div className="w-full max-w-sm">
+              <LoginForm
+                error={error}
+                className="min-h-0 w-full bg-transparent py-0 dark:bg-transparent"
+              />
+            </div>
           </div>
         </div>
       </div>
