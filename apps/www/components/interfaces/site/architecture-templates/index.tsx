@@ -94,7 +94,7 @@ export function ArchitectureTemplates() {
         <div className="text-center mb-16 lg:mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
             <Layers className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold text-primary">Architecture Templates</span>
+            <span className="text-sm font-semibold text-foreground">Architecture Templates</span>
           </div>
           <h2 className="text-4xl lg:text-5xl font-semibold tracking-tight text-balance leading-tight mb-6">
             Predefined & Fully Customizable

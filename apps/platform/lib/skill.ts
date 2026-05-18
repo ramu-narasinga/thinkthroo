@@ -27,7 +27,7 @@ export interface SanitySkillItem {
   title: string;
   /** slug.current */
   slug: string;
-  body: string | null;
+  body?: string | null;
   publishedAt: string | null;
 }
 
@@ -71,7 +71,7 @@ export async function fetchAllSkills(): Promise<SanitySkill[]> {
   return sanityClient.fetch<SanitySkill[]>(
     SKILLS_LIST_QUERY,
     {},
-    { next: { revalidate: 60 } }
+    { next: { revalidate: 0 } }
   );
 }
 
@@ -85,11 +85,17 @@ export async function fetchSkillBySlug(slug: string): Promise<SanitySkill | null
 
 /**
  * Build the CLI install command for a skill.
- * e.g. npx skills add https://github.com/org/repo --skill my-skill
+ * e.g. npx skills add thinkthroo/skills --skill my-skill
  */
 export function buildInstallCommand(repoUrl: string | null, skillSlug: string): string {
-  if (!repoUrl) return `npx skills add --skill ${skillSlug}`;
-  return `npx skills add ${repoUrl} --skill ${skillSlug}`;
+  if (!repoUrl) return `npx skills add thinkthroo/skills --skill ${skillSlug}`;
+  try {
+    const { pathname } = new URL(repoUrl);
+    const ownerRepo = pathname.replace(/^\//, "").replace(/\.git$/, "");
+    return `npx skills add ${ownerRepo} --skill ${skillSlug}`;
+  } catch {
+    return `npx skills add ${repoUrl} --skill ${skillSlug}`;
+  }
 }
 
 // ── Skill item queries (individual `skill` docs within a module) ──────

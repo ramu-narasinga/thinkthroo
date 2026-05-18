@@ -17,7 +17,7 @@ export function Hero() {
   return (
     <PageHeader>
       <Announcement />
-      <PageHeaderHeading>
+      <PageHeaderHeading className="text-foreground">
         AI Code Review that Enforces Codebase Architecture
       </PageHeaderHeading>
       <PageHeaderDescription>

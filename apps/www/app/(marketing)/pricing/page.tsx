@@ -66,8 +66,8 @@ export default function PricingPage() {
         <p className="text-muted-foreground mt-2">
           Need a custom plan or have security questions?
         </p>
-        <Button variant="outline" className="mt-6">
-          Contact Sales
+        <Button variant="outline" className="mt-6" asChild>
+          <Link href="/contact">Contact Sales</Link>
         </Button>
       </div>
     </main>
