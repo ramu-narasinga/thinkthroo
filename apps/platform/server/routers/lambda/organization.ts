@@ -78,15 +78,15 @@ export const organizationRouter = router({
       return ctx.organizationService.delete(input.id);
     }),
 
-  setPaddleCustomerId: organizationProcedure
+  setDodoCustomerId: organizationProcedure
     .input(
       z.object({
         id: z.string(),
-        paddleCustomerId: z.string(),
+        dodoCustomerId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.organizationService.setPaddleCustomerId(input.id, input.paddleCustomerId);
+      return ctx.organizationService.setDodoCustomerId(input.id, input.dodoCustomerId);
     }),
 
   cancelSubscription: organizationProcedure

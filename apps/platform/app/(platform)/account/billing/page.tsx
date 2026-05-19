@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Switch } from "@thinkthroo/ui/components/switch"
@@ -13,7 +14,6 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { BuyCreditsModal } from "@/components/buy-credits-modal"
 import { DowngradeModal } from "./components/downgrade-modal"
-import { usePaddle } from "@/hooks/usePaddle"
 import { useOrganizationStore } from "@/store/organization"
 import { organizationSelectors } from "@/store/organization/selectors"
 import { useUserStore } from "@/store/user"
@@ -27,55 +27,64 @@ export default function BillingPage() {
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
   const [downgradeOpen, setDowngradeOpen] = useState(false)
 
+  const searchParams = useSearchParams()
+
   const activeOrgId = useOrganizationStore(organizationSelectors.activeOrgId)
-  const activeOrg = useOrganizationStore(organizationSelectors.activeOrg)
-  const completePaddleCheckout = useOrganizationStore((s) => s.completePaddleCheckout)
   const currentPlan = useOrganizationStore(organizationSelectors.currentPlanName)
   const creditBalance = useOrganizationStore(organizationSelectors.creditBalance)
+  const activeOrg = useOrganizationStore(organizationSelectors.activeOrg)
   const userEmail = useUserStore(userSelectors.email)
   const invoices = useOrganizationStore(organizationSelectors.invoices)
   const isInvoicesLoading = useOrganizationStore(organizationSelectors.isInvoicesLoading)
   const fetchInvoices = useOrganizationStore((s) => s.fetchInvoices)
+  const fetchOrganizations = useOrganizationStore((s) => s.fetchOrganizations)
 
   useEffect(() => {
     if (!activeOrgId) return
     fetchInvoices(activeOrgId)
   }, [activeOrgId, fetchInvoices])
 
-  const paddle = usePaddle(
-    async (data) => {
-      const customerId = (data as any)?.customer?.id
-      if (customerId && activeOrgId) {
-        await completePaddleCheckout(activeOrgId, customerId)
-      }
+  // Show success toast when returning from Dodo checkout
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
       toast.success("You're now on Pro! 500 credits have been added to your account.")
-      setLoading(false)
-    },
-    () => {
-      console.log("Checkout closed without completion")
-      setLoading(false)
-    },
-  )
+      fetchOrganizations()
+      // Clean up the URL param
+      window.history.replaceState({}, "", "/account/billing")
+    }
+  }, [searchParams, fetchOrganizations])
 
-  const monthlyPriceId = process.env.NEXT_PUBLIC_PADDLE_PRO_MONTHLY_PRICE_ID
-  const yearlyPriceId = process.env.NEXT_PUBLIC_PADDLE_PRO_YEARLY_PRICE_ID
-  const priceId = billedYearly ? yearlyPriceId : monthlyPriceId
+  const monthlyProductId = process.env.NEXT_PUBLIC_DODO_PRO_MONTHLY_PRODUCT_ID
+  const yearlyProductId = process.env.NEXT_PUBLIC_DODO_PRO_YEARLY_PRODUCT_ID
+  const productId = billedYearly ? yearlyProductId : monthlyProductId
 
-  function handleUpgrade() {
-    if (!paddle || !priceId || !activeOrgId) {
+  async function handleUpgrade() {
+    if (!productId || !activeOrgId || !userEmail) {
       toast.error("Checkout unavailable — missing configuration")
       return
     }
     setLoading(true)
     try {
-      paddle.Checkout.open({
-        items: [{ priceId, quantity: 1 }],
-        customer: userEmail ? { email: userEmail } : undefined,
-        customData: { organizationId: activeOrgId },
-        settings: { displayMode: "overlay", theme: "light", locale: "en" },
+      const res = await fetch("/api/dodo/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          quantity: 1,
+          organizationId: activeOrgId,
+          userEmail,
+          type: "subscription",
+        }),
       })
+      const data = await res.json()
+      if (!res.ok || !data.checkoutUrl) {
+        toast.error("Failed to start checkout")
+        setLoading(false)
+        return
+      }
+      window.location.href = data.checkoutUrl
     } catch {
-      toast.error("Failed to open checkout")
+      toast.error("Failed to start checkout")
       setLoading(false)
     }
   }

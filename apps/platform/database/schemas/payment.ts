@@ -6,7 +6,7 @@ import { organizations } from './organization';
 export const customers = pgTable('customers', {
   customerId: text('customer_id').primaryKey().notNull(),
   email: text().notNull(),
-  // Links this Paddle customer record to a platform user
+  // Links this Dodo Payments customer record to a platform user
   userId: uuid('user_id').references(() => profiles.userId, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),

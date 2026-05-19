@@ -20,7 +20,7 @@ export interface UpdateOrganizationItem {
   apiUrl?: string;
   reposUrl?: string;
   lastFetched?: string;
-  paddleCustomerId?: string;
+  dodoCustomerId?: string;
 }
 
 export class OrganizationModel {
@@ -115,7 +115,7 @@ export class OrganizationModel {
         lastFetched: organizations.lastFetched,
         currentPlanName: organizations.currentPlanName,
         creditBalance: organizations.creditBalance,
-        paddleCustomerId: organizations.paddleCustomerId,
+        dodoCustomerId: organizations.dodoCustomerId,
         docStorageUsedMb: organizations.docStorageUsedMb,
       })
       .from(organizations)

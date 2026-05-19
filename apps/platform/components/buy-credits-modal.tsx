@@ -10,9 +10,7 @@ import {
 import { Button } from "@thinkthroo/ui/components/button"
 import { Input } from "@thinkthroo/ui/components/input"
 import { toast } from "sonner"
-import { usePaddle } from "@/hooks/usePaddle"
 import { useOrganizationStore } from "@/store/organization"
-import { organizationClientService } from "@/service/organization"
 import { useUserStore } from "@/store/user"
 import { userSelectors } from "@/store/user/selectors"
 
@@ -28,28 +26,13 @@ export function BuyCreditsModal({
   const [loading, setLoading] = useState(false)
 
   const activeOrgId = useOrganizationStore((s) => s.activeOrgId)
-  const fetchOrganizations = useOrganizationStore((s) => s.fetchOrganizations)
   const userEmail = useUserStore(userSelectors.email)
 
-  const paddle = usePaddle(
-    async (data) => {
-      const customerId = (data as any)?.customer?.id
-      if (customerId && activeOrgId) {
-        await organizationClientService.setPaddleCustomerId(activeOrgId, customerId)
-      }
-      await fetchOrganizations()
-      toast.success(`${dollars * 10} credits added to your account!`)
-      setLoading(false)
-      onOpenChange(false)
-    },
-    () => setLoading(false),
-  )
-
-  const priceId = process.env.NEXT_PUBLIC_PADDLE_CREDITS_TOPUP_PRICE_ID
   const creditsToAdd = dollars * 10
+  const productId = process.env.NEXT_PUBLIC_DODO_CREDITS_TOPUP_PRODUCT_ID
 
-  function handleBuy() {
-    if (!paddle || !priceId || !activeOrgId) {
+  async function handleBuy() {
+    if (!productId || !activeOrgId || !userEmail) {
       toast.error("Checkout unavailable — missing configuration")
       return
     }
@@ -59,14 +42,26 @@ export function BuyCreditsModal({
     }
     setLoading(true)
     try {
-      paddle.Checkout.open({
-        items: [{ priceId, quantity: dollars }],
-        customer: userEmail ? { email: userEmail } : undefined,
-        customData: { organizationId: activeOrgId },
-        settings: { displayMode: "overlay", theme: "light", locale: "en" },
+      const res = await fetch("/api/dodo/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          quantity: dollars,
+          organizationId: activeOrgId,
+          userEmail,
+          type: "topup",
+        }),
       })
+      const data = await res.json()
+      if (!res.ok || !data.checkoutUrl) {
+        toast.error("Failed to start checkout")
+        setLoading(false)
+        return
+      }
+      window.location.href = data.checkoutUrl
     } catch {
-      toast.error("Failed to open checkout")
+      toast.error("Failed to start checkout")
       setLoading(false)
     }
   }
@@ -106,9 +101,9 @@ export function BuyCreditsModal({
         <Button
           className="w-full hover:bg-primary hover:brightness-110 hover:scale-[1.02] transition-all"
           onClick={handleBuy}
-          disabled={!paddle || loading || dollars < 5 || dollars > 100}
+          disabled={loading || dollars < 5 || dollars > 100}
         >
-          {!paddle ? "Initializing…" : loading ? "Opening checkout…" : `Buy ${creditsToAdd} credits for $${dollars}`}
+          {loading ? "Opening checkout…" : `Buy ${creditsToAdd} credits for $${dollars}`}
         </Button>
 
         <p className="text-xs text-muted-foreground text-center">

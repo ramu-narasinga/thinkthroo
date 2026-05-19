@@ -26,17 +26,17 @@ export interface OrganizationAction {
   internal_updateOrganizations: (organizations: OrganizationItem[]) => void;
 
   /**
-   * Complete a Paddle checkout: persist the customer ID then refresh org data
+   * Complete a Dodo checkout: persist the customer ID then refresh org data
    */
-  completePaddleCheckout: (orgId: string, customerId: string) => Promise<void>;
+  completeDodoCheckout: (orgId: string, customerId: string) => Promise<void>;
 
   /**
-   * Cancel the active subscription via Paddle
+   * Cancel the active subscription via Dodo Payments
    */
-  cancelSubscription: (orgId: string) => Promise<{ effectiveAt?: string }>;
+  cancelSubscription: (orgId: string) => Promise<{ effectiveAt?: string | null }>;
 
   /**
-   * Fetch invoices (Paddle transactions) for an org
+   * Fetch invoices (Dodo Payments transactions) for an org
    */
   fetchInvoices: (orgId: string) => Promise<void>;
 }
@@ -104,8 +104,8 @@ export const createOrganizationSlice: StateCreator<
     set({ organizations }, false, 'internal_updateOrganizations');
   },
 
-  completePaddleCheckout: async (orgId, customerId) => {
-    await organizationClientService.setPaddleCustomerId(orgId, customerId);
+  completeDodoCheckout: async (orgId, customerId) => {
+    await organizationClientService.setDodoCustomerId(orgId, customerId);
     await get().fetchOrganizations();
   },
 
