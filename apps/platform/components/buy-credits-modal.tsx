@@ -99,7 +99,7 @@ export function BuyCreditsModal({
         </div>
 
         <Button
-          className="w-full hover:bg-primary hover:brightness-110 hover:scale-[1.02] transition-all"
+          className="w-full hover:bg-primary cursor-pointer hover:brightness-110 hover:scale-[1.02] transition-all"
           onClick={handleBuy}
           disabled={loading || dollars < 5 || dollars > 100}
         >

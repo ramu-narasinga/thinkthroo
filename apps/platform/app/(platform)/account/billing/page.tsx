@@ -105,7 +105,11 @@ export default function BillingPage() {
         {/* Yearly toggle */}
         <div className="flex items-center gap-3">
           <span className={cn("text-sm", !billedYearly && "font-semibold")}>Monthly</span>
-          <Switch checked={billedYearly} onCheckedChange={setBilledYearly} />
+          <Switch
+  checked={billedYearly}
+  onCheckedChange={setBilledYearly}
+  className="cursor-pointer"
+/>
           <span className={cn("text-sm", billedYearly && "font-semibold")}>
             Yearly
             <span className="ml-1.5 text-xs text-green-600 font-medium">Save ~14%</span>
@@ -169,15 +173,19 @@ export default function BillingPage() {
 
             <Button
               className={cn(
-                "w-full font-semibold transition-all",
+                "w-full font-semibold transition-all cursor-pointer",
                 currentPlan === "pro"
                   ? "bg-muted text-muted-foreground cursor-not-allowed"
                   : "bg-[#7000FF] text-white hover:bg-[#7000FF]/90 hover:brightness-110 hover:scale-[1.02]"
               )}
               disabled={loading || currentPlan === "pro"}
               onClick={handleUpgrade}
-            >
-              {loading ? "Opening checkout…" : currentPlan === "pro" ? "Current plan" : "Upgrade to Pro"}
+              >
+                {loading
+                  ? "Opening checkout…"
+                  : currentPlan === "pro"
+                    ? "Current plan"
+                    : "Upgrade to Pro"}
             </Button>
 
             <PricingFeatureList features={proFeatures} iconColor="text-[#7000FF]" />
@@ -216,13 +224,13 @@ export default function BillingPage() {
             )}
           </div>
           <CreditBundleGrid bundles={creditBundles} />
-          <Button
-            variant="outline"
-            className="border-[#7000FF] text-[#7000FF] hover:bg-[#7000FF]/5"
-            onClick={() => setBuyCreditsOpen(true)}
-          >
-            Buy credits
-          </Button>
+         <Button
+  variant="outline"
+  className="border-[#7000FF] text-[#7000FF] hover:bg-[#7000FF]/5 cursor-pointer"
+  onClick={() => setBuyCreditsOpen(true)}
+>
+  Buy credits
+</Button>
           <p className="text-xs text-muted-foreground">
             Custom amount: enter any value between $5 and $100 using the buy credits dialog.
             10 credits are added per $1 spent.

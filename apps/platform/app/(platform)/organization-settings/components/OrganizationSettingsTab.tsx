@@ -306,6 +306,7 @@ export function OrganizationSettingsTab() {
         <Button
           onClick={handleSave}
           disabled={isSaving || !isLoaded || !activeOrg?.id}
+          className="cursor-pointer"
         >
           {isSaving ? "Saving..." : "Apply changes"}
         </Button>
