@@ -30,7 +30,7 @@ function ConfigureRepoButton({ repoName, hasAccess }: { repoName: string; hasAcc
       <Button
         variant="outline"
         size="sm"
-        className="ml-auto hidden h-8 lg:flex"
+        className="ml-auto hidden h-8 lg:flex cursor-pointer"
         disabled={!hasAccess}
         onClick={() =>
           track("repositories_configure_clicked", {

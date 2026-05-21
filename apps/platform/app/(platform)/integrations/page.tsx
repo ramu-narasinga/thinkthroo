@@ -221,7 +221,7 @@ function IntegrationsContent() {
           ) : (
             <button
               onClick={handleAddToSlack}
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 hover:scale-[1.02] transition-all"
+              className="inline-flex items-center gap-2 rounded-md cursor-pointer bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 hover:scale-[1.02] transition-all"
             >
               Add to Slack
             </button>

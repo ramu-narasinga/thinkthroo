@@ -53,7 +53,7 @@ export function DataTable<TData, TValue>({
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className="uppercase text-xs font-semibold text-muted-foreground"
+                  className="uppercase text-xs font-semibold  text-muted-foreground"
                 >
                   {header.isPlaceholder
                     ? null
@@ -85,7 +85,7 @@ export function DataTable<TData, TValue>({
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="h-[360px] bg-muted/40 text-center text-muted-foreground"
+                className="h-[360px] bg-muted/40 text-center  text-muted-foreground"
               >
                 No results
               </TableCell>

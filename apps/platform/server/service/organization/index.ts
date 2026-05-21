@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import { Paddle, Environment } from '@paddle/paddle-node-sdk';
+import DodoPayments from 'dodopayments';
 import { subscriptions } from '@/database/schemas';
 import { OrganizationModel } from '@/database/models/organization';
 import { ThinkThrooDatabase } from '@/database/type';
@@ -93,48 +93,33 @@ export class OrganizationService {
     return this.organizationModel.delete(id);
   }
 
-  async setPaddleCustomerId(id: string, paddleCustomerId: string) {
-    return this.organizationModel.update(id, { paddleCustomerId });
+  async setDodoCustomerId(id: string, dodoCustomerId: string) {
+    return this.organizationModel.update(id, { dodoCustomerId });
   }
 
   async getInvoices(orgId: string) {
     const org = await this.organizationModel.findById(orgId);
-    if (!org?.paddleCustomerId) return [];
+    if (!org?.dodoCustomerId) return [];
 
-    const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
-      environment: process.env.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
+    const dodo = new DodoPayments({
+      bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+      environment: (process.env.DODO_PAYMENTS_ENVIRONMENT ?? 'test_mode') as 'test_mode' | 'live_mode',
     });
 
-    // Collect transactions first
-    const txList: any[] = [];
-    for await (const tx of paddle.transactions.list({ customerId: [org.paddleCustomerId], perPage: 20 })) {
-      txList.push(tx as any);
-      if (txList.length >= 20) break;
+    const paymentList: any[] = [];
+    for await (const payment of dodo.payments.list({ customer_id: org.dodoCustomerId } as any)) {
+      paymentList.push(payment);
+      if (paymentList.length >= 20) break;
     }
 
-    // Parallel-fetch invoice PDF URLs for transactions that have an invoice
-    const invoiceUrlMap = new Map<string, string>();
-    await Promise.all(
-      txList
-        .filter((tx: any) => tx.invoiceId)
-        .map(async (tx: any) => {
-          try {
-            const pdf = await paddle.transactions.getInvoicePDF(tx.id);
-            if (pdf?.url) invoiceUrlMap.set(tx.id, pdf.url);
-          } catch {
-            // PDF not available — skip silently
-          }
-        })
-    );
-
-    return txList.map((tx: any) => ({
-      id: tx.id as string,
-      date: (tx.billedAt ?? tx.createdAt ?? '') as string,
-      description: (tx.items?.[0]?.price?.description ?? tx.items?.[0]?.price?.name ?? 'Purchase') as string,
-      total: (tx.details?.totals?.grandTotal ?? '0') as string,
-      currency: (tx.currencyCode ?? 'USD') as string,
-      status: (tx.status ?? 'unknown') as string,
-      invoiceUrl: invoiceUrlMap.get(tx.id) ?? null,
+    return paymentList.map((payment: any) => ({
+      id: payment.payment_id as string,
+      date: (payment.created_at ?? '') as string,
+      description: (payment.product_cart?.[0]?.product_id ?? 'Purchase') as string,
+      total: String(payment.total_amount ?? '0'),
+      currency: (payment.currency ?? 'USD') as string,
+      status: (payment.status ?? 'unknown') as string,
+      invoiceUrl: null,
     }));
   }
 
@@ -150,28 +135,23 @@ export class OrganizationService {
       throw new Error('No active subscription found for this organization');
     }
 
-    const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
-      environment: process.env.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
-    });
-    const updated = await paddle.subscriptions.cancel(sub.subscriptionId, {
-      effectiveFrom: 'next_billing_period',
+    const dodo = new DodoPayments({
+      bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+      environment: (process.env.DODO_PAYMENTS_ENVIRONMENT ?? 'test_mode') as 'test_mode' | 'live_mode',
     });
 
-    const scheduledChangeJson = updated.scheduledChange
-      ? JSON.stringify(updated.scheduledChange)
-      : null;
+    await dodo.subscriptions.update(sub.subscriptionId, {
+      cancel_at_next_billing_date: true,
+    } as any);
 
     await this.db
       .update(subscriptions)
       .set({
-        subscriptionStatus: updated.status,
-        scheduledChange: scheduledChangeJson,
+        subscriptionStatus: 'cancellation_scheduled',
         updatedAt: new Date().toISOString(),
       })
       .where(eq(subscriptions.subscriptionId, sub.subscriptionId));
 
-    return {
-      effectiveAt: (updated.scheduledChange as any)?.effectiveAt ?? null,
-    };
+    return { effectiveAt: null };
   }
 }

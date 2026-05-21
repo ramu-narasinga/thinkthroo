@@ -16,8 +16,8 @@ export const organizations = pgTable('organizations', {
   creditBalance: numeric('credit_balance', { precision: 10, scale: 2 }).default('10.00').notNull(),
   // 'free' | 'pro'
   currentPlanName: text('current_plan_name').default('free').notNull(),
-  // Cached Paddle customer ID to avoid extra lookups on checkout
-  paddleCustomerId: text('paddle_customer_id'),
+  // Cached Dodo Payments customer ID to avoid extra lookups on checkout
+  dodoCustomerId: text('dodo_customer_id'),
   // Populated for yearly subscriptions; used to handle expiry edge cases
   planExpiresAt: timestamp('plan_expires_at', { withTimezone: true, mode: 'string' }),
   lastFetched: timestamp('last_fetched', { withTimezone: true, mode: 'string' }).defaultNow(),

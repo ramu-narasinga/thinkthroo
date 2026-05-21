@@ -148,6 +148,13 @@
       "when": 1777346878048,
       "tag": "0020_kind_revanche",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1779249729223,
+      "tag": "0021_chief_pet_avengers",
+      "breakpoints": true
     }
   ]
 }

@@ -24,7 +24,7 @@ export class OrganizationClientService {
       lastFetched: org.lastFetched ?? undefined,
       currentPlanName: org.currentPlanName ?? undefined,
       creditBalance: org.creditBalance ?? undefined,
-      paddleCustomerId: org.paddleCustomerId ?? undefined,
+      dodoCustomerId: org.dodoCustomerId ?? undefined,
       docStorageUsedMB: org.docStorageUsedMb != null ? parseFloat(org.docStorageUsedMb as unknown as string) : undefined,
     }));
   };
@@ -59,8 +59,8 @@ export class OrganizationClientService {
     return lambdaClient.organization.delete.mutate({ id });
   };
 
-  setPaddleCustomerId = async (id: string, paddleCustomerId: string) => {
-    return lambdaClient.organization.setPaddleCustomerId.mutate({ id, paddleCustomerId });
+  setDodoCustomerId = async (id: string, dodoCustomerId: string) => {
+    return lambdaClient.organization.setDodoCustomerId.mutate({ id, dodoCustomerId });
   };
 
   cancelSubscription = async (orgId: string) => {

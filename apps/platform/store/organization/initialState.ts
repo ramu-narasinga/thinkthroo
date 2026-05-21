@@ -9,7 +9,7 @@ export interface OrganizationItem {
   lastFetched?: string;
   currentPlanName?: string;
   creditBalance?: string;
-  paddleCustomerId?: string;
+  dodoCustomerId?: string;
   prsReviewed?: number;
   docStorageUsedMB?: number;
 }

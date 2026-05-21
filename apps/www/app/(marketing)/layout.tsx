@@ -1,6 +1,6 @@
 import { Footer } from "@/components/interfaces/site/footer";
 import { SiteHeader } from "@/components/interfaces/site/header";
-import { InviteOnlyTopBanner } from "@/components/interfaces/site/invite-only-top-banner";
+import { BetaTopBanner } from "@/components/interfaces/site/beta-top-banner";
 
 interface MarketingLayoutProps {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface MarketingLayoutProps {
 export default function MarketingLayout({ children }: MarketingLayoutProps) {
   return (
     <>
-      <InviteOnlyTopBanner />
+      <BetaTopBanner />
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <Footer />

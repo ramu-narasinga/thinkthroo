@@ -43,9 +43,9 @@ export const creditTransactions = pgTable('credit_transactions', {
   // positive = credit added, negative = credit deducted
   amount: numeric({ precision: 10, scale: 2 }).notNull(),
   balanceAfter: numeric('balance_after', { precision: 10, scale: 2 }).notNull(),
-  // 'paddle_subscription' | 'paddle_topup' | 'pr_review' | 'manual'
+  // 'dodo_subscription' | 'dodo_topup' | 'pr_review' | 'manual'
   referenceType: text('reference_type'),
-  // PR number, Paddle transaction ID, etc.
+  // PR number, Dodo payment ID, etc.
   referenceId: text('reference_id'),
   metadata: text(), // JSON stringified additional data
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -94,14 +94,14 @@ export const aiUsageLogs = pgTable('ai_usage_logs', {
   }),
 ]);
 
-// One-time credit bundle purchases via Paddle (separate from subscriptions)
+// One-time credit bundle purchases via Dodo Payments (separate from subscriptions)
 export const creditTopups = pgTable('credit_topups', {
   id: uuid().defaultRandom().primaryKey().notNull(),
   organizationId: uuid('organization_id')
     .references(() => organizations.id, { onDelete: 'cascade' })
     .notNull(),
-  // Paddle transaction ID for the one-time purchase
-  paddleTransactionId: text('paddle_transaction_id').notNull().unique(),
+  // Dodo Payments payment ID for the one-time purchase (idempotency key)
+  dodoPaymentId: text('dodo_payment_id').notNull().unique(),
   creditsAdded: numeric('credits_added', { precision: 10, scale: 2 }).notNull(),
   amountUsd: numeric('amount_usd', { precision: 10, scale: 2 }).notNull(),
   // 'completed' | 'refunded'

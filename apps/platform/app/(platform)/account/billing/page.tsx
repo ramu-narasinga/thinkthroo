@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
 import { Switch } from "@thinkthroo/ui/components/switch"
@@ -13,7 +14,6 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { BuyCreditsModal } from "@/components/buy-credits-modal"
 import { DowngradeModal } from "./components/downgrade-modal"
-import { usePaddle } from "@/hooks/usePaddle"
 import { useOrganizationStore } from "@/store/organization"
 import { organizationSelectors } from "@/store/organization/selectors"
 import { useUserStore } from "@/store/user"
@@ -21,61 +21,77 @@ import { userSelectors } from "@/store/user/selectors"
 import { DataTable } from "./components/subscription-table/data-table"
 import { columns } from "./components/subscription-table/columns"
 
-export default function BillingPage() {
+function BillingPageContent() {
   const [billedYearly, setBilledYearly] = useState(false)
   const [loading, setLoading] = useState(false)
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
   const [downgradeOpen, setDowngradeOpen] = useState(false)
 
+  const searchParams = useSearchParams()
+
   const activeOrgId = useOrganizationStore(organizationSelectors.activeOrgId)
-  const activeOrg = useOrganizationStore(organizationSelectors.activeOrg)
-  const completePaddleCheckout = useOrganizationStore((s) => s.completePaddleCheckout)
   const currentPlan = useOrganizationStore(organizationSelectors.currentPlanName)
   const creditBalance = useOrganizationStore(organizationSelectors.creditBalance)
+  const activeOrg = useOrganizationStore(organizationSelectors.activeOrg)
   const userEmail = useUserStore(userSelectors.email)
   const invoices = useOrganizationStore(organizationSelectors.invoices)
   const isInvoicesLoading = useOrganizationStore(organizationSelectors.isInvoicesLoading)
   const fetchInvoices = useOrganizationStore((s) => s.fetchInvoices)
+  const fetchOrganizations = useOrganizationStore((s) => s.fetchOrganizations)
 
   useEffect(() => {
     if (!activeOrgId) return
     fetchInvoices(activeOrgId)
   }, [activeOrgId, fetchInvoices])
 
-  const paddle = usePaddle(
-    async (data) => {
-      const customerId = (data as any)?.customer?.id
-      if (customerId && activeOrgId) {
-        await completePaddleCheckout(activeOrgId, customerId)
-      }
+  // Show toast when returning from Dodo checkout
+  useEffect(() => {
+    const success = searchParams.get("success") === "true"
+    const failed = searchParams.get("status") === "failed"
+
+    if (!success && !failed) return
+
+    if (failed) {
+      toast.error("Payment failed. Please try again or use a different payment method.")
+    } else {
       toast.success("You're now on Pro! 500 credits have been added to your account.")
-      setLoading(false)
-    },
-    () => {
-      console.log("Checkout closed without completion")
-      setLoading(false)
-    },
-  )
+      fetchOrganizations()
+    }
 
-  const monthlyPriceId = process.env.NEXT_PUBLIC_PADDLE_PRO_MONTHLY_PRICE_ID
-  const yearlyPriceId = process.env.NEXT_PUBLIC_PADDLE_PRO_YEARLY_PRICE_ID
-  const priceId = billedYearly ? yearlyPriceId : monthlyPriceId
+    window.history.replaceState({}, "", "/account/billing")
+  }, [searchParams, fetchOrganizations])
 
-  function handleUpgrade() {
-    if (!paddle || !priceId || !activeOrgId) {
+  const monthlyProductId = process.env.NEXT_PUBLIC_DODO_PRO_MONTHLY_PRODUCT_ID
+  const yearlyProductId = process.env.NEXT_PUBLIC_DODO_PRO_YEARLY_PRODUCT_ID
+  const productId = billedYearly ? yearlyProductId : monthlyProductId
+
+  async function handleUpgrade() {
+    if (!productId || !activeOrgId || !userEmail) {
       toast.error("Checkout unavailable — missing configuration")
       return
     }
     setLoading(true)
     try {
-      paddle.Checkout.open({
-        items: [{ priceId, quantity: 1 }],
-        customer: userEmail ? { email: userEmail } : undefined,
-        customData: { organizationId: activeOrgId },
-        settings: { displayMode: "overlay", theme: "light", locale: "en" },
+      const res = await fetch("/api/dodo/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          quantity: 1,
+          organizationId: activeOrgId,
+          userEmail,
+          type: "subscription",
+        }),
       })
+      const data = await res.json()
+      if (!res.ok || !data.checkoutUrl) {
+        toast.error("Failed to start checkout")
+        setLoading(false)
+        return
+      }
+      window.location.href = data.checkoutUrl
     } catch {
-      toast.error("Failed to open checkout")
+      toast.error("Failed to start checkout")
       setLoading(false)
     }
   }
@@ -96,7 +112,11 @@ export default function BillingPage() {
         {/* Yearly toggle */}
         <div className="flex items-center gap-3">
           <span className={cn("text-sm", !billedYearly && "font-semibold")}>Monthly</span>
-          <Switch checked={billedYearly} onCheckedChange={setBilledYearly} />
+          <Switch
+  checked={billedYearly}
+  onCheckedChange={setBilledYearly}
+  className="cursor-pointer"
+/>
           <span className={cn("text-sm", billedYearly && "font-semibold")}>
             Yearly
             <span className="ml-1.5 text-xs text-green-600 font-medium">Save ~14%</span>
@@ -160,15 +180,19 @@ export default function BillingPage() {
 
             <Button
               className={cn(
-                "w-full font-semibold transition-all",
+                "w-full font-semibold transition-all cursor-pointer",
                 currentPlan === "pro"
                   ? "bg-muted text-muted-foreground cursor-not-allowed"
                   : "bg-[#7000FF] text-white hover:bg-[#7000FF]/90 hover:brightness-110 hover:scale-[1.02]"
               )}
               disabled={loading || currentPlan === "pro"}
               onClick={handleUpgrade}
-            >
-              {loading ? "Opening checkout…" : currentPlan === "pro" ? "Current plan" : "Upgrade to Pro"}
+              >
+                {loading
+                  ? "Opening checkout…"
+                  : currentPlan === "pro"
+                    ? "Current plan"
+                    : "Upgrade to Pro"}
             </Button>
 
             <PricingFeatureList features={proFeatures} iconColor="text-[#7000FF]" />
@@ -207,13 +231,13 @@ export default function BillingPage() {
             )}
           </div>
           <CreditBundleGrid bundles={creditBundles} />
-          <Button
-            variant="outline"
-            className="border-[#7000FF] text-[#7000FF] hover:bg-[#7000FF]/5"
-            onClick={() => setBuyCreditsOpen(true)}
-          >
-            Buy credits
-          </Button>
+         <Button
+  variant="outline"
+  className="border-[#7000FF] text-[#7000FF] hover:bg-[#7000FF]/5 cursor-pointer"
+  onClick={() => setBuyCreditsOpen(true)}
+>
+  Buy credits
+</Button>
           <p className="text-xs text-muted-foreground">
             Custom amount: enter any value between $5 and $100 using the buy credits dialog.
             10 credits are added per $1 spent.
@@ -235,5 +259,13 @@ export default function BillingPage() {
         <BuyCreditsModal open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
         <DowngradeModal open={downgradeOpen} onOpenChange={setDowngradeOpen} />
     </div>
+  )
+}
+
+export default function BillingPage() {
+  return (
+    <Suspense>
+      <BillingPageContent />
+    </Suspense>
   )
 }
