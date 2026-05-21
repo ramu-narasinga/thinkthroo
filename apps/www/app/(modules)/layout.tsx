@@ -1,7 +1,7 @@
 import { Footer } from "@/components/interfaces/site/footer";
 import ConvertKitForm from "@/components/interfaces/site/forms/newsletter";
 import { SiteHeader } from "@/components/interfaces/site/header";
-import { InviteOnlyTopBanner } from "@/components/interfaces/site/invite-only-top-banner";
+import { BetaTopBanner } from "@/components/interfaces/site/beta-top-banner";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -10,7 +10,7 @@ interface AppLayoutProps {
 export default function ModulesLayout({ children }: AppLayoutProps) {
   return (
     <>
-      <InviteOnlyTopBanner />
+      <BetaTopBanner />
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <Footer />
