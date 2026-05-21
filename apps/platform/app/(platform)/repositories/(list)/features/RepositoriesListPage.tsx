@@ -17,6 +17,7 @@ const RepositoriesListPage = memo(() => {
   const [activeTab, setActiveTab] = useState<"accessible" | "revoked">(
     "accessible"
   );
+  
   const { track } = useUmami();
 
   // Track page load and repository stats
@@ -89,10 +90,10 @@ const RepositoriesListPage = memo(() => {
         className="mb-4"
       >
         <TabsList>
-          <TabsTrigger value="accessible">
+          <TabsTrigger value="accessible" className="cursor-pointer">
             Accessible ({accessibleRepos.length})
           </TabsTrigger>
-          <TabsTrigger value="revoked">
+          <TabsTrigger value="revoked" className="cursor-pointer">
             Revoked ({revokedRepos.length})
           </TabsTrigger>
         </TabsList>

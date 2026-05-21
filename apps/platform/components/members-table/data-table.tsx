@@ -133,11 +133,11 @@ export function DataTable<TData, TValue>({
         </Select>
 
         <div className="ml-auto flex items-center gap-2">
-          <Button size="sm" className="gap-1.5" onClick={() => setInviteOpen(true)}>
+          <Button size="sm" className="gap-1.5 cursor-pointer" onClick={() => setInviteOpen(true)}>
             + Invite Member
           </Button>
           <InviteMemberModal open={inviteOpen} onOpenChange={setInviteOpen} />
-          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setSettingsOpen(true)}>
+          <Button variant="outline" size="icon" className="h-9 w-9 cursor-pointer" onClick={() => setSettingsOpen(true)}>
             <Settings className="w-4 h-4" />
           </Button>
           <MembersSettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} organizationId={activeOrgId} />
