@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
@@ -21,7 +21,7 @@ import { userSelectors } from "@/store/user/selectors"
 import { DataTable } from "./components/subscription-table/data-table"
 import { columns } from "./components/subscription-table/columns"
 
-export default function BillingPage() {
+function BillingPageContent() {
   const [billedYearly, setBilledYearly] = useState(false)
   const [loading, setLoading] = useState(false)
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
@@ -259,5 +259,13 @@ export default function BillingPage() {
         <BuyCreditsModal open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
         <DowngradeModal open={downgradeOpen} onOpenChange={setDowngradeOpen} />
     </div>
+  )
+}
+
+export default function BillingPage() {
+  return (
+    <Suspense>
+      <BillingPageContent />
+    </Suspense>
   )
 }
