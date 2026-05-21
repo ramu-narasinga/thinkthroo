@@ -239,6 +239,54 @@ export async function POST(req: NextRequest) {
       break;
     }
 
+    case 'payment.failed': {
+      const payment = data;
+      console.log(`[payment.failed] paymentId=${payment.payment_id} metadata.type=${payment.metadata?.type}`);
+
+      if (payment.metadata?.type !== 'topup') {
+        console.log(`[payment.failed] Skipping — not a topup (type=${payment.metadata?.type})`);
+        break;
+      }
+
+      const paymentId: string = payment.payment_id;
+      const customerId: string = payment.customer?.customer_id ?? '';
+      const quantity: number = payment.metadata?.quantity ? Number(payment.metadata.quantity) : 0;
+      const creditsIntended = quantity * CREDITS_PER_DOLLAR;
+      const amountUsd = quantity;
+
+      if (!customerId) break;
+
+      const org = await db.query.organizations.findFirst({
+        where: eq(organizations.dodoCustomerId, customerId),
+      });
+
+      if (!org) {
+        console.warn(`[payment.failed] No org found for customerId=${customerId} — skipping record`);
+        break;
+      }
+
+      // Idempotency: skip if already recorded
+      const existing = await db.query.creditTopups.findFirst({
+        where: eq(creditTopups.dodoPaymentId, paymentId),
+      });
+      if (existing) {
+        console.warn(`[payment.failed] Already recorded paymentId=${paymentId} — skipping`);
+        break;
+      }
+
+      await db.insert(creditTopups).values({
+        organizationId: org.id,
+        dodoPaymentId: paymentId,
+        creditsAdded: String(creditsIntended),
+        amountUsd: String(amountUsd),
+        status: 'failed',
+        creditTransactionId: null,
+      });
+
+      console.log(`[payment.failed] Recorded failed topup attempt for org id=${org.id} paymentId=${paymentId}`);
+      break;
+    }
+
     default:
       console.log(`[Dodo webhook] Unhandled event type: ${eventType}`);
       break;

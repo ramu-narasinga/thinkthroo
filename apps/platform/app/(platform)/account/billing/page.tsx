@@ -44,14 +44,21 @@ export default function BillingPage() {
     fetchInvoices(activeOrgId)
   }, [activeOrgId, fetchInvoices])
 
-  // Show success toast when returning from Dodo checkout
+  // Show toast when returning from Dodo checkout
   useEffect(() => {
-    if (searchParams.get("success") === "true") {
+    const success = searchParams.get("success") === "true"
+    const failed = searchParams.get("status") === "failed"
+
+    if (!success && !failed) return
+
+    if (failed) {
+      toast.error("Payment failed. Please try again or use a different payment method.")
+    } else {
       toast.success("You're now on Pro! 500 credits have been added to your account.")
       fetchOrganizations()
-      // Clean up the URL param
-      window.history.replaceState({}, "", "/account/billing")
     }
+
+    window.history.replaceState({}, "", "/account/billing")
   }, [searchParams, fetchOrganizations])
 
   const monthlyProductId = process.env.NEXT_PUBLIC_DODO_PRO_MONTHLY_PRODUCT_ID
