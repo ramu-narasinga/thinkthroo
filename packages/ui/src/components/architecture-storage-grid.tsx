@@ -5,8 +5,8 @@ export function ArchitectureStorageGrid() {
       <div className="rounded-lg border border-border p-4 space-y-1">
         <p className="font-medium text-sm">Free</p>
         <p className="text-2xl font-bold">
-          1{" "}
-          <span className="text-base font-normal text-muted-foreground">public repository</span>
+          3{" "}
+          <span className="text-base font-normal text-muted-foreground">repositories {"("}public & private{")"}</span>
         </p>
         <p className="text-sm font-semibold">25 MB</p>
         <p className="text-xs text-muted-foreground">
