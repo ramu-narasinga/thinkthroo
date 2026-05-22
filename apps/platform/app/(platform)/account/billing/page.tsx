@@ -119,7 +119,6 @@ function BillingPageContent() {
 />
           <span className={cn("text-sm", billedYearly && "font-semibold")}>
             Yearly
-            <span className="ml-1.5 text-xs text-green-600 font-medium">Save ~14%</span>
           </span>
         </div>
 
@@ -232,12 +231,11 @@ function BillingPageContent() {
           </div>
           <CreditBundleGrid bundles={creditBundles} />
          <Button
-  variant="outline"
-  className="border-[#7000FF] text-[#7000FF] hover:bg-[#7000FF]/5 cursor-pointer"
-  onClick={() => setBuyCreditsOpen(true)}
->
-  Buy credits
-</Button>
+            className="bg-[#7000FF] text-white hover:bg-[#7000FF]/90 hover:brightness-110 hover:scale-[1.02] cursor-pointer"
+            onClick={() => setBuyCreditsOpen(true)}
+          >
+            Buy credits
+          </Button>
           <p className="text-xs text-muted-foreground">
             Custom amount: enter any value between $5 and $100 using the buy credits dialog.
             10 credits are added per $1 spent.
