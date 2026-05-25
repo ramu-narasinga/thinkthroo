@@ -1,6 +1,7 @@
 import { env } from "@/utils/env";
 import { logger } from "@/utils/logger";
 import type { BotAccumulatedUsage } from "@/services/ai/types";
+import { platformFetch } from "@/utils/platformFetch";
 
 export interface DeductResult {
   success: boolean;
@@ -34,7 +35,7 @@ export class CreditService {
   async getBalance(installationId: string): Promise<number | null> {
     const url = `${this.baseUrl}/api/credits/balance?installationId=${encodeURIComponent(installationId)}`;
 
-    const response = await fetch(url, {
+    const response = await platformFetch(url, {
       method: "GET",
       headers: { "x-internal-secret": this.secret },
     });
@@ -72,7 +73,7 @@ export class CreditService {
 
     const url = `${this.baseUrl}/api/credits/deduct`;
 
-    const response = await fetch(url, {
+    const response = await platformFetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

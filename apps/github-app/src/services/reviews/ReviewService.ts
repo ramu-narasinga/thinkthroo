@@ -1,5 +1,6 @@
 import { env } from "@/utils/env";
 import { logger } from "@/utils/logger";
+import { platformFetch } from "@/utils/platformFetch";
 import type { ArchitectureFileResult } from "@/features/architecture-review/ArchitectureReviewGenerator";
 import type { FileInlineReview } from "@/services/reviews/FileReviewer";
 
@@ -51,7 +52,7 @@ export class ReviewService {
     const url = `${this.baseUrl}/api/reviews/save`;
 
     try {
-      const response = await fetch(url, {
+      const response = await platformFetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +91,7 @@ export class ReviewService {
     const url = `${this.baseUrl}/api/reviews/architecture/save`;
 
     try {
-      const response = await fetch(url, {
+      const response = await platformFetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +134,7 @@ export class ReviewService {
     );
 
     try {
-      const response = await fetch(url, {
+      const response = await platformFetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

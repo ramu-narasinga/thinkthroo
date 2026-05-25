@@ -1,4 +1,5 @@
 import { env } from '../../utils/env';
+import { platformFetch } from '../../utils/platformFetch';
 
 export interface ArchitectureRuleChunk {
   id: string;
@@ -33,7 +34,7 @@ export class ArchitectureService {
   ): Promise<ArchitectureRuleChunk[]> => {
     const url = `${this.baseUrl}/api/architecture/query`;
 
-    const response = await fetch(url, {
+    const response = await platformFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
