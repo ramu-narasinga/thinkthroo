@@ -1,5 +1,6 @@
 import { env } from "@/utils/env";
 import { logger } from "@/utils/logger";
+import { platformFetch } from "@/utils/platformFetch";
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -48,7 +49,7 @@ export class RateLimitService {
     const url = `${this.baseUrl}/api/rate-limits/check`;
 
     try {
-      const response = await fetch(url, {
+      const response = await platformFetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
