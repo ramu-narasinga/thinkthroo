@@ -18,6 +18,7 @@
   "packageManager": "pnpm@9.0.0",
   "dependencies": {
     "@calcom/embed-react": "^1.5.2",
+    "dodopayments": "^2.31.2",
     "thinkthroo": "^0.0.8"
   }
 }

@@ -42,8 +42,13 @@ export const proFeatures: PricingFeature[] = [
 export const creditBundles: CreditBundle[] = [
   { label: "50 credits", dollars: 5, description: "~5 PR reviews" },
   { label: "100 credits", dollars: 10, description: "~10 PR reviews" },
+<<<<<<< Updated upstream
   { label: "250 credits", dollars: 20, description: "~25 PR reviews" },
   { label: "500 credits", dollars: 35, description: "Best value" },
+=======
+  { label: "200 credits", dollars: 20, description: "~25 PR reviews" },
+  { label: "350 credits", dollars: 35, description: "Best value" },
+>>>>>>> Stashed changes
 ]
 
 export const pricing = {
