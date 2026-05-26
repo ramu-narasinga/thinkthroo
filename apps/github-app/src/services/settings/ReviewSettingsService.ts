@@ -1,5 +1,6 @@
 import { env } from "@/utils/env";
 import { logger } from "@/utils/logger";
+import { platformFetch } from "@/utils/platformFetch";
 
 export interface EffectiveReviewSettings {
   enableReviews: boolean;
@@ -50,7 +51,7 @@ export class ReviewSettingsService {
     const url = `${this.baseUrl}/api/review-settings?installationId=${encodeURIComponent(installationId)}&repoFullName=${encodeURIComponent(repoFullName)}`;
 
     try {
-      const response = await fetch(url, {
+      const response = await platformFetch(url, {
         method: "GET",
         headers: { "x-internal-secret": this.secret },
       });
