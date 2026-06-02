@@ -15,17 +15,12 @@ export interface DeductResult {
  */
 export class CreditService {
   private readonly baseUrl: string;
-  private readonly secret: string;
 
   constructor() {
     if (!env.PLATFORM_API_URL) {
       throw new Error("PLATFORM_API_URL environment variable is not set");
     }
-    if (!env.PLATFORM_API_SECRET) {
-      throw new Error("PLATFORM_API_SECRET environment variable is not set");
-    }
     this.baseUrl = env.PLATFORM_API_URL;
-    this.secret = env.PLATFORM_API_SECRET;
   }
 
   /**
@@ -37,7 +32,7 @@ export class CreditService {
 
     const response = await platformFetch(url, {
       method: "GET",
-      headers: { "x-internal-secret": this.secret },
+      headers: {},
     });
 
     if (response.status === 404) {
@@ -77,7 +72,6 @@ export class CreditService {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-internal-secret": this.secret,
       },
       body: JSON.stringify({
         installationId,

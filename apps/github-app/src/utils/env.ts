@@ -29,6 +29,4 @@ export const env = {
   /** PostHog project token (phc_...) for sending logs via OpenTelemetry */
   POSTHOG_PROJECT_TOKEN: process.env.POSTHOG_PROJECT_TOKEN,
 
-  /** Vercel Protection Bypass token — sent as x-vercel-protection-bypass to skip bot challenges */
-  VERCEL_BYPASS_TOKEN: process.env.VERCEL_BYPASS_TOKEN,
 } as const;

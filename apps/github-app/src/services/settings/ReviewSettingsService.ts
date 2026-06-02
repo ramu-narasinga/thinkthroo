@@ -31,17 +31,12 @@ const DEFAULTS: EffectiveReviewSettings = {
  */
 export class ReviewSettingsService {
   private readonly baseUrl: string;
-  private readonly secret: string;
 
   constructor() {
     if (!env.PLATFORM_API_URL) {
       throw new Error("PLATFORM_API_URL environment variable is not set");
     }
-    if (!env.PLATFORM_API_SECRET) {
-      throw new Error("PLATFORM_API_SECRET environment variable is not set");
-    }
     this.baseUrl = env.PLATFORM_API_URL;
-    this.secret = env.PLATFORM_API_SECRET;
   }
 
   async getSettings(
@@ -53,7 +48,7 @@ export class ReviewSettingsService {
     try {
       const response = await platformFetch(url, {
         method: "GET",
-        headers: { "x-internal-secret": this.secret },
+        headers: {},
       });
 
       if (response.status === 404) {
