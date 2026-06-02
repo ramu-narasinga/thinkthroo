@@ -17,7 +17,7 @@ export default function HomePage() {
 
   return (
     <div className="bg-white text-black font-sans">
-      <div className="flex flex-col lg:flex-row max-w-[1280px] mx-auto px-6 py-10 gap-10">
+      <div className="flex flex-col lg:flex-row max-w-[1280px] mx-auto px-6 pt-2 pb-10 gap-10">
         {/* Sidebar */}
         <aside className="w-full lg:max-w-[300px] text-left">
           <div className="flex flex-col items-center lg:items-start">
