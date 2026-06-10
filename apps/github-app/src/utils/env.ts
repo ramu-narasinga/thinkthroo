@@ -29,4 +29,14 @@ export const env = {
   /** PostHog project token (phc_...) for sending logs via OpenTelemetry */
   POSTHOG_PROJECT_TOKEN: process.env.POSTHOG_PROJECT_TOKEN,
 
+  /** Upstash QStash token for publishing async PR review jobs */
+  QSTASH_TOKEN: process.env.QSTASH_TOKEN,
+
+  /** Public URL of this server — QStash calls /api/process-review on this host */
+  QSTASH_CONSUMER_URL: process.env.QSTASH_CONSUMER_URL,
+
+  /** QStash signing keys for verifying incoming requests */
+  QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
+  QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
+
 } as const;
