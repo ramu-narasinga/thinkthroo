@@ -20,10 +20,15 @@ const handler = async (req: NextRequest) => {
     endpoint: '/api/trpc/lambda',
 
     onError: ({ error, path, type }) => {
+      const cause = error.cause as Error | undefined;
+      const rootCause = (cause as any)?.cause as Error | undefined;
       pino.error(`Error in tRPC handler (lambda) on path: ${path}, type: ${type}`, {
         message: error.message,
         code: error.code,
         stack: error.stack,
+        cause: cause?.message,
+        rootCause: rootCause?.message,
+        rootCauseStack: rootCause?.stack,
       });
     },
 
