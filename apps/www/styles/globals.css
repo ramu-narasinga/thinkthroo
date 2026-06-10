@@ -372,11 +372,11 @@
 }
 
 #nd-toc {
-  @apply mt-12;
+  @apply mt-2;
 }
 
 #nd-sidebar {
-  @apply mt-12;
+  @apply mt-2;
 }
 
 @keyframes scan {
