@@ -41,7 +41,7 @@ export async function qstashConsumerHandler(req: Request, res: Response): Promis
   const octokit = new ProbotOctokit({
     auth: {
       appId: process.env.APP_ID!,
-      privateKey: process.env.PRIVATE_KEY!,
+      privateKey: process.env.PRIVATE_KEY!.replace(/\\n/g, '\n'),
       installationId: Number(payload.installationId),
     },
   });
