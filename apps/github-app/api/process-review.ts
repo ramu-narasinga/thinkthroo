@@ -1,3 +1,10 @@
-import handler from "../../lib/handler";
+import { qstashConsumerHandler } from "../../lib/features/pr-workflow/QStashConsumerHandler";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-export default handler;
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
+  await qstashConsumerHandler(req as any, res as any);
+}
