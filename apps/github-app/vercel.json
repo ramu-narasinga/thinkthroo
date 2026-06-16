@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run build",
   "functions": {
     "api/process-review.ts": {
       "maxDuration": 300
