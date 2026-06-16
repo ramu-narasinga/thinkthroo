@@ -26,6 +26,7 @@
     "@opentelemetry/sdk-node": "^0.214.0",
     "@supabase/supabase-js": "^2.48.1",
     "@upstash/qstash": "^2.7.0",
+    "@vercel/node": "^5.8.17",
     "p-limit": "^3.1.0",
     "pino": "^10.1.1",
     "probot": "^13.4.5"
