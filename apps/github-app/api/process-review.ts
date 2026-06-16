@@ -1,13 +1,19 @@
 import { qstashConsumerHandler } from "../lib/features/pr-workflow/QStashConsumerHandler";
 import { logger } from "../lib/utils/logger";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { IncomingMessage, ServerResponse } from "http";
 import type { PRJobPayload } from "../lib/services/qstash/QStashPublisher";
 
 export const config = { api: { bodyParser: false } };
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+function sendJson(res: ServerResponse, statusCode: number, body: unknown) {
+  res.statusCode = statusCode;
+  res.setHeader("Content-Type", "application/json");
+  res.end(JSON.stringify(body));
+}
+
+export default async function handler(req: IncomingMessage, res: ServerResponse) {
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
+    sendJson(res, 405, { error: "Method not allowed" });
     return;
   }
   logger.info("QStash consumer endpoint hit", { method: req.method });
@@ -23,10 +29,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     payload = JSON.parse(rawBody);
   } catch {
-    res.status(400).json({ error: "Invalid JSON body" });
+    sendJson(res, 400, { error: "Invalid JSON body" });
     return;
   }
 
   const result = await qstashConsumerHandler(req.headers, rawBody, payload);
-  res.status(result.statusCode).json(result.body);
+  sendJson(res, result.statusCode, result.body);
 }
