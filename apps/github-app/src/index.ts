@@ -20,7 +20,18 @@ export default (app: Probot, options: ApplicationFunctionOptions) => {
   // QStash consumer endpoint — receives async PR review jobs
   if (options.getRouter) {
     const router = options.getRouter("/api/process-review");
-    router.post("/", express.json(), qstashConsumerHandler);
+    router.post("/", express.raw({ type: "*/*" }), async (req: express.Request, res: express.Response) => {
+      const rawBody = Buffer.isBuffer(req.body) ? req.body.toString("utf-8") : String(req.body ?? "");
+      let payload;
+      try {
+        payload = JSON.parse(rawBody);
+      } catch {
+        res.status(400).json({ error: "Invalid JSON body" });
+        return;
+      }
+      const result = await qstashConsumerHandler(req.headers, rawBody, payload);
+      res.status(result.statusCode).json(result.body);
+    });
   }
 
   app.on("installation.created", async (context) => {
