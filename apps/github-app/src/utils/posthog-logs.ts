@@ -1,33 +1,42 @@
-import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LoggerProvider, BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
-import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { logs } from "@opentelemetry/api-logs";
 import { env } from "./env";
 
 let initialized = false;
+let loggerProvider: LoggerProvider | null = null;
 
 export function initPostHogLogs() {
   if (initialized || !env.POSTHOG_PROJECT_TOKEN) {
     return;
   }
 
-  const sdk = new NodeSDK({
+  loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes({
       "service.name": "think-throo-github-app",
     }),
-    logRecordProcessor: new BatchLogRecordProcessor(
+  });
+
+  loggerProvider.addLogRecordProcessor(
+    new BatchLogRecordProcessor(
       new OTLPLogExporter({
         url: "https://us.i.posthog.com/i/v1/logs",
         headers: {
           Authorization: `Bearer ${env.POSTHOG_PROJECT_TOKEN}`,
         },
       })
-    ),
-  });
+    )
+  );
 
-  sdk.start();
+  logs.setGlobalLoggerProvider(loggerProvider);
   initialized = true;
+}
+
+export async function forceFlushPostHogLogs(): Promise<void> {
+  if (loggerProvider) {
+    await loggerProvider.forceFlush();
+  }
 }
 
 export function getPostHogLogger() {
