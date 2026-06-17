@@ -1,7 +1,10 @@
 import { qstashConsumerHandler } from "../lib/features/pr-workflow/QStashConsumerHandler";
 import { logger } from "../lib/utils/logger";
+import { initPostHogLogs, forceFlushPostHogLogs } from "../lib/utils/posthog-logs";
 import type { IncomingMessage, ServerResponse } from "http";
 import type { PRJobPayload } from "../lib/services/qstash/QStashPublisher";
+
+initPostHogLogs();
 
 export const config = { api: { bodyParser: false } };
 
@@ -35,4 +38,5 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   const result = await qstashConsumerHandler(req.headers, rawBody, payload);
   sendJson(res, result.statusCode, result.body);
+  await forceFlushPostHogLogs();
 }

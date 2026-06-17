@@ -35,6 +35,10 @@ export function SignupForm({
       method: 'email',
       email: email || undefined,
     });
+
+    if (typeof window !== "undefined" && (window as unknown as { rdt?: (action: string, event: string) => void }).rdt) {
+      (window as unknown as { rdt: (action: string, event: string) => void }).rdt("track", "SignUp");
+    }
   };
 
   const handleGoogleSignupClick = () => {
