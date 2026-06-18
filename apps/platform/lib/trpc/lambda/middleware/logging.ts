@@ -15,6 +15,8 @@ export const loggingMiddleware = trpc.middleware(async (opts) => {
   if (result.ok) {
     pino.info(`tRPC ${type} ${path} completed`, { userId, path, type, duration });
   } else {
+    const cause = result.error.cause as Error | undefined;
+    const rootCause = (cause as any)?.cause as Error | undefined;
     pino.error(`tRPC ${type} ${path} failed`, {
       userId,
       path,
@@ -22,6 +24,8 @@ export const loggingMiddleware = trpc.middleware(async (opts) => {
       duration,
       error: result.error.message,
       code: result.error.code,
+      cause: cause?.message,
+      rootCause: rootCause?.message,
     });
   }
 

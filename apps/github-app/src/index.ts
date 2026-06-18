@@ -3,16 +3,36 @@ import { initPostHogLogs } from "./utils/posthog-logs";
 initPostHogLogs();
 
 import { Probot } from "probot";
+import type { ApplicationFunctionOptions } from "probot";
+import express from "express";
 import { greetIssue } from "./features/issue-greeting";
-import { PRWorkflowOrchestrator } from "./features/pr-workflow";
 import { MarketplaceService } from "./services/marketplace/MarketplaceService";
 import { InviteGateService } from "./services/invite/InviteGateService";
 import { PRCommandHandler } from "./features/pr-command/PRCommandHandler";
+import { publishPRReviewJob } from "./services/qstash/QStashPublisher";
+import { qstashConsumerHandler } from "./features/pr-workflow/QStashConsumerHandler";
 import { logger } from "@/utils/logger";
 import { SlackNotifier } from "@/utils/slack";
 
-export default (app: Probot) => {
+export default (app: Probot, options: ApplicationFunctionOptions) => {
   logger.info("GitHub App initialized", { appName: "think-throo" });
+
+  // QStash consumer endpoint — receives async PR review jobs
+  if (options.getRouter) {
+    const router = options.getRouter("/api/process-review");
+    router.post("/", express.raw({ type: "*/*" }), async (req: express.Request, res: express.Response) => {
+      const rawBody = Buffer.isBuffer(req.body) ? req.body.toString("utf-8") : String(req.body ?? "");
+      let payload;
+      try {
+        payload = JSON.parse(rawBody);
+      } catch {
+        res.status(400).json({ error: "Invalid JSON body" });
+        return;
+      }
+      const result = await qstashConsumerHandler(req.headers, rawBody, payload);
+      res.status(result.statusCode).json(result.body);
+    });
+  }
 
   app.on("installation.created", async (context) => {
     const { installation, repositories } = context.payload;
@@ -96,19 +116,22 @@ export default (app: Probot) => {
         return;
       }
 
-      const orchestrator = new PRWorkflowOrchestrator(context);
-      
-      await orchestrator.execute({
-        generateSummaries: true,
-        useSummaryFiltering: true,
-        reviewOptions: {
-          maxFiles: 50,
-          maxConcurrency: 5,
-          debug: false,
-        },
+      await publishPRReviewJob({
+        installationId: String((context.payload as any).installation?.id ?? ""),
+        owner: context.repo().owner,
+        repo: context.repo().repo,
+        repoName: context.payload.repository.name,
+        prNumber: pullRequest.number,
+        headSHA: pullRequest.head.sha,
+        baseSHA: pullRequest.base.sha,
+        headRef: pullRequest.head.ref,
+        baseRef: pullRequest.base.ref,
+        prTitle: pullRequest.title,
+        prAuthor: pullRequest.user?.login ?? "",
+        action: context.payload.action,
       });
-      
-      logger.info("PR workflow completed", { prNumber: pullRequest.number });
+
+      logger.info("PR review job published to QStash", { prNumber: pullRequest.number });
     } catch (error: any) {
       logger.error("Failed to complete PR workflow", {
         prNumber: pullRequest.number,
