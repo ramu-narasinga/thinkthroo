@@ -493,3 +493,12 @@
 .animate-architecture-pulse {
   animation: architecturePulse 3s linear infinite;
 }
+@keyframes progress {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
