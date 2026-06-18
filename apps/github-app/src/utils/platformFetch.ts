@@ -8,6 +8,9 @@ export function platformFetch(url: string, init?: RequestInit): Promise<Response
     ...init,
     headers: {
       "x-internal-secret": env.PLATFORM_API_SECRET,
+      ...(env.VERCEL_AUTOMATION_BYPASS_SECRET && {
+        "x-vercel-protection-bypass": env.VERCEL_AUTOMATION_BYPASS_SECRET,
+      }),
       ...init?.headers,
     },
   });

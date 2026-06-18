@@ -37,7 +37,29 @@ export function PromoCard() {
         </h4>
 
         <p className="text-sm text-muted-foreground leading-relaxed">
-          {promo.body}
+          <div className="mt-2 h-32 rounded-md border bg-background p-3 overflow-hidden">
+  <div className="space-y-2 text-xs">
+    <div className="flex items-center justify-between">
+      <span>PR #421</span>
+      <span className="text-yellow-500 animate-pulse">
+        Reviewing...
+      </span>
+    </div>
+
+    <div className="h-2 rounded bg-muted overflow-hidden">
+      <div className="h-full w-full bg-primary animate-[progress_4s_linear_infinite]" />
+    </div>
+
+    <div className="space-y-1">
+      <div>✓ Folder structure</div>
+      <div>✓ Naming conventions</div>
+      <div>✓ Architecture rules</div>
+      <div className="text-green-500 font-medium">
+        ✓ Approved
+      </div>
+    </div>
+  </div>
+</div>
         </p>
 
         <div className="flex items-center gap-3 pt-2">
