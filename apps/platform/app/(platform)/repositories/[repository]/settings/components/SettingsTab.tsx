@@ -83,6 +83,13 @@ export function SettingsTab() {
     setPathFilters((prev) => prev.filter((f) => f !== filter))
   }
 
+  const handleEnableReviewsChange = (checked: boolean) => {
+    setEnableReviews(checked)
+    if (!checked) {
+      setEnablePrSummary(false)
+    }
+  }
+
   const handleSave = async () => {
     if (!repositoryId || !organizationId) return
     setIsSaving(true)
@@ -90,7 +97,7 @@ export function SettingsTab() {
       await repositorySettingsClientService.upsert(repositoryId, organizationId, {
           useOrganizationSettings: useOrgSettings,
           enableReviews,
-          enablePrSummary,
+          enablePrSummary: enableReviews ? enablePrSummary : false,
           enableInlineReviewComments: isPro ? enableInlineReviewComments : false,
           enableArchitectureReview: isPro ? enableArchitectureReview : false,
           reviewLanguage: language || null,
@@ -146,7 +153,7 @@ export function SettingsTab() {
           <div className="flex items-center">
             <Switch
               checked={enableReviews}
-              onCheckedChange={setEnableReviews}
+              onCheckedChange={handleEnableReviewsChange}
               disabled={disabled}
               className="data-[state=checked]:bg-black data-[state=unchecked]:bg-gray-200"
             />
@@ -167,7 +174,7 @@ export function SettingsTab() {
             <Switch
               checked={enablePrSummary}
               onCheckedChange={setEnablePrSummary}
-              disabled={disabled}
+              disabled={disabled || !enableReviews}
               className="data-[state=checked]:bg-black data-[state=unchecked]:bg-gray-200"
             />
           </div>
