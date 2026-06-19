@@ -28,7 +28,7 @@ export async function signup(formData: FormData) {
     await SlackNotifier.newSignup(data.email);
 
     revalidatePath("/", "layout");
-    redirect("/");
+    redirect("/?signup=success");
   } catch (err) {
     throw err;
   }
