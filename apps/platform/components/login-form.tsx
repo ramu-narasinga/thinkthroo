@@ -30,10 +30,6 @@ export function LoginForm({
       provider: "github",
       timestamp: new Date().toISOString(),
     });
-
-    if (typeof window !== "undefined" && (window as unknown as { rdt?: (action: string, event: string) => void }).rdt) {
-      (window as unknown as { rdt: (action: string, event: string) => void }).rdt("track", "Lead");
-    }
   };
 
   return (

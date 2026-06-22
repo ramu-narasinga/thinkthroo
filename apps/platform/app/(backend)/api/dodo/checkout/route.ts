@@ -9,19 +9,20 @@ const client = new DodoPayments({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { productId, quantity, organizationId, userEmail, type } = body as {
+    const { productId, quantity, organizationId, userEmail, type, amount } = body as {
       productId: string;
       quantity?: number;
       organizationId: string;
       userEmail: string;
       type: 'subscription' | 'topup';
+      amount?: number;
     };
 
     if (!productId || !organizationId || !userEmail) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/account/billing?success=true`;
+    const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/account/billing?success=true&type=${type}${amount ? `&amount=${amount}` : ''}`;
 
     const session = await client.checkoutSessions.create({
       product_cart: [{ product_id: productId, quantity: quantity ?? 1 }],

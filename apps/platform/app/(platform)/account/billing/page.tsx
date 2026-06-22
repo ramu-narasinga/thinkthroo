@@ -56,6 +56,10 @@ function BillingPageContent() {
     } else {
       toast.success("You're now on Pro! 500 credits have been added to your account.")
       fetchOrganizations()
+      const amount = parseFloat(searchParams.get("amount") ?? "0")
+      if (typeof window !== "undefined" && (window as unknown as { rdt?: (a: string, e: string, d?: object) => void }).rdt && amount > 0) {
+        (window as unknown as { rdt: (a: string, e: string, d: object) => void }).rdt("track", "Purchase", { value: amount, currency: "USD" })
+      }
     }
 
     window.history.replaceState({}, "", "/account/billing")
@@ -81,6 +85,7 @@ function BillingPageContent() {
           organizationId: activeOrgId,
           userEmail,
           type: "subscription",
+          amount: billedYearly ? 180 : 15,
         }),
       })
       const data = await res.json()

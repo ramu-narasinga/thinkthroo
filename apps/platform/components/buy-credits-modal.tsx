@@ -51,6 +51,7 @@ export function BuyCreditsModal({
           organizationId: activeOrgId,
           userEmail,
           type: "topup",
+          amount: dollars,
         }),
       })
       const data = await res.json()
