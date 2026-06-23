@@ -5,6 +5,7 @@ import { ThinkThrooDatabase } from '../type';
 export interface InstallationData {
   installationId: string;
   githubOrgId: string;
+  githubOrgName: string;
   userId: string;
 }
 
@@ -39,12 +40,14 @@ export class InstallationModel {
       .values({
         installationId: data.installationId,
         githubOrgId: data.githubOrgId,
+        githubOrgName: data.githubOrgName,
         userId: data.userId,
       })
       .onConflictDoUpdate({
         target: [installations.githubOrgId, installations.userId],
         set: {
           installationId: data.installationId,
+          githubOrgName: data.githubOrgName,
         },
       })
       .returning();
