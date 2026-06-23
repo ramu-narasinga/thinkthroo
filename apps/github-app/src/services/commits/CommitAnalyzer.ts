@@ -1,19 +1,24 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
 import { COMMIT_ID_END_TAG, COMMIT_ID_START_TAG, REVIEW_EPOCH_BASE_TAG_PREFIX } from "@/services/constants";
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 /**
  * Analyzes commits to determine what needs to be reviewed
  */
 export class CommitAnalyzer {
+  private readonly log: Logger;
+
   constructor(
     private readonly octokit: Context["octokit"],
-    private readonly issueDetails: IssueDetails
-  ) {}
+    private readonly issueDetails: IssueDetails,
+    log?: Logger
+  ) {
+    this.log = log ?? logger;
+  }
 
   async getAllCommitIds(pullNumber: number): Promise<string[]> {
-    logger.debug("Fetching all commit IDs", { 
+    this.log.debug("Fetching all commit IDs", { 
       pullNumber, 
       owner: this.issueDetails.owner, 
       repo: this.issueDetails.repo 
@@ -24,7 +29,7 @@ export class CommitAnalyzer {
     let commits;
 
     do {
-      logger.debug("Fetching commits page", { pullNumber, page });
+      this.log.debug("Fetching commits page", { pullNumber, page });
       
       commits = await this.octokit.pulls.listCommits({
         owner: this.issueDetails.owner,
@@ -35,7 +40,7 @@ export class CommitAnalyzer {
       });
 
       allCommits.push(...commits.data.map((commit) => commit.sha));
-      logger.debug("Fetched commits from page", { 
+      this.log.debug("Fetched commits from page", { 
         pullNumber, 
         page, 
         commitsInPage: commits.data.length,
@@ -45,7 +50,7 @@ export class CommitAnalyzer {
       page++;
     } while (commits.data.length > 0);
 
-    logger.info("Successfully fetched all commit IDs", { 
+    this.log.info("Successfully fetched all commit IDs", { 
       pullNumber, 
       totalCommits: allCommits.length,
       commitIds: allCommits
@@ -98,7 +103,7 @@ export class CommitAnalyzer {
     baseSha: string,
     headSha: string
   ): string {
-    logger.debug("Determining review start commit", {
+    this.log.debug("Determining review start commit", {
       totalCommits: allCommitIds.length,
       hasExistingCommitBlock: existingCommitIdsBlock !== "",
       baseSha,
@@ -106,7 +111,7 @@ export class CommitAnalyzer {
     });
     
     if (existingCommitIdsBlock === "") {
-      logger.info("No existing review found - will review from base commit", { 
+      this.log.info("No existing review found - will review from base commit", { 
         baseSha,
         reason: "no existing commit block" 
       });
@@ -114,7 +119,7 @@ export class CommitAnalyzer {
     }
 
     const reviewedCommitIds = this.getReviewedCommitIds(existingCommitIdsBlock);
-    logger.debug("Retrieved previously reviewed commits", { 
+    this.log.debug("Retrieved previously reviewed commits", { 
       reviewedCommitCount: reviewedCommitIds.length,
       reviewedCommitIds 
     });
@@ -124,12 +129,12 @@ export class CommitAnalyzer {
       reviewedCommitIds
     );
     
-    logger.debug("Found highest reviewed commit", { 
+    this.log.debug("Found highest reviewed commit", { 
       highestReviewedCommitId: highestReviewedCommitId || "none"
     });
 
     if (highestReviewedCommitId === "" || highestReviewedCommitId === headSha) {
-      logger.info("Will review from base commit", { 
+      this.log.info("Will review from base commit", { 
         baseSha,
         reason: highestReviewedCommitId === "" ? "no matching reviewed commit found" : "highest reviewed commit matches head",
         highestReviewedCommitId: highestReviewedCommitId || "none",
@@ -138,7 +143,7 @@ export class CommitAnalyzer {
       return baseSha;
     }
 
-    logger.info("Will review from highest reviewed commit - incremental review", { 
+    this.log.info("Will review from highest reviewed commit - incremental review", { 
       highestReviewedCommitId,
       reviewedCommitCount: reviewedCommitIds.length,
       newCommitsToReview: allCommitIds.indexOf(highestReviewedCommitId) >= 0 

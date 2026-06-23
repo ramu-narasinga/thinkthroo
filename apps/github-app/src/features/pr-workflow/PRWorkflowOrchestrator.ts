@@ -176,8 +176,8 @@ export class PRWorkflowOrchestrator {
     let _existingComment: any | null = null;
 
     try {
-      const commitAnalyzer = new CommitAnalyzer(octokit, issueDetails);
-      const commentManager = new CommentManager(octokit, issueDetails);
+      const commitAnalyzer = new CommitAnalyzer(octokit, issueDetails, prLogger);
+      const commentManager = new CommentManager(octokit, issueDetails, prLogger);
       _commitAnalyzer = commitAnalyzer;
       _commentManager = commentManager;
       const existingCommentData = await commentManager.getExistingCommentData(

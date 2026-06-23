@@ -17,7 +17,7 @@ export interface TemplateData {
   [key: string]: string | undefined;
 }
 
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 /**
  * Prompts service for PR review and summarization
@@ -354,6 +354,8 @@ $comment
 \`\`\`
 `;
 
+  private readonly log: Logger;
+
   constructor(
     summarize = `Your task is to produce a concise, categorized summary of the PR changes.
 
@@ -394,17 +396,19 @@ Output format:
 
 **<Category>:**
 - <change>
-`
+`,
+    log?: Logger
   ) {
     this.summarize = summarize;
     this.summarizeReleaseNotes = summarizeReleaseNotes;
+    this.log = log ?? logger;
   }
 
   /**
    * Render a template string with data
    */
   private render(template: string, data: TemplateData): string {
-    logger.debug("Rendering prompt template", {
+    this.log.debug("Rendering prompt template", {
       templateLength: template.length,
       dataKeys: Object.keys(data),
       hasTitle: !!data.title,
@@ -436,7 +440,7 @@ Output format:
       }
     }
 
-    logger.debug("Prompt template rendered", {
+    this.log.debug("Prompt template rendered", {
       originalLength: template.length,
       renderedLength: result.length,
       replacementsMade: Object.keys(replacements).length,
@@ -450,7 +454,7 @@ Output format:
     data: TemplateData,
     reviewSimpleChanges: boolean
   ): string {
-    logger.debug("Rendering summarize file diff prompt", {
+    this.log.debug("Rendering summarize file diff prompt", {
       filename: data.filename,
       reviewSimpleChanges,
       hasFileDiff: !!(data.file_diff || data.fileDiff),
@@ -470,7 +474,7 @@ Output format:
     
     const result = this.render(prompt, normalizedData);
     
-    logger.info("Summarize file diff prompt rendered", {
+    this.log.info("Summarize file diff prompt rendered", {
       filename: data.filename,
       includesTriage: reviewSimpleChanges === false,
       promptLength: result.length,
@@ -480,14 +484,14 @@ Output format:
   }
 
   renderSummarizeChangesets(data: TemplateData): string {
-    logger.debug("Rendering summarize changesets prompt", {
+    this.log.debug("Rendering summarize changesets prompt", {
       hasRawSummary: !!data.raw_summary,
       rawSummaryLength: data.raw_summary?.length || 0,
     });
 
     const result = this.render(this.summarizeChangesets, data);
     
-    logger.info("Summarize changesets prompt rendered", {
+    this.log.info("Summarize changesets prompt rendered", {
       promptLength: result.length,
       inputSummaryLength: data.raw_summary?.length || 0,
     });
@@ -496,7 +500,7 @@ Output format:
   }
 
   renderSummarize(data: TemplateData): string {
-    logger.debug("Rendering summarize prompt", {
+    this.log.debug("Rendering summarize prompt", {
       hasRawSummary: !!data.raw_summary,
       rawSummaryLength: data.raw_summary?.length || 0,
     });
@@ -504,7 +508,7 @@ Output format:
     const prompt = this.summarizePrefix + this.summarize;
     const result = this.render(prompt, data);
     
-    logger.info("Summarize prompt rendered", {
+    this.log.info("Summarize prompt rendered", {
       promptLength: result.length,
       inputSummaryLength: data.raw_summary?.length || 0,
     });
@@ -513,7 +517,7 @@ Output format:
   }
 
   renderSummarizeShort(data: TemplateData): string {
-    logger.debug("Rendering summarize short prompt", {
+    this.log.debug("Rendering summarize short prompt", {
       hasRawSummary: !!data.raw_summary,
       rawSummaryLength: data.raw_summary?.length || 0,
     });
@@ -521,7 +525,7 @@ Output format:
     const prompt = this.summarizePrefix + this.summarizeShort;
     const result = this.render(prompt, data);
     
-    logger.info("Summarize short prompt rendered", {
+    this.log.info("Summarize short prompt rendered", {
       promptLength: result.length,
       inputSummaryLength: data.raw_summary?.length || 0,
     });
@@ -530,7 +534,7 @@ Output format:
   }
 
   renderSummarizeReleaseNotes(data: TemplateData): string {
-    logger.debug("Rendering summarize release notes prompt", {
+    this.log.debug("Rendering summarize release notes prompt", {
       hasRawSummary: !!data.raw_summary,
       rawSummaryLength: data.raw_summary?.length || 0,
     });
@@ -538,7 +542,7 @@ Output format:
     const prompt = this.summarizePrefix + this.summarizeReleaseNotes;
     const result = this.render(prompt, data);
     
-    logger.info("Summarize release notes prompt rendered", {
+    this.log.info("Summarize release notes prompt rendered", {
       promptLength: result.length,
       inputSummaryLength: data.raw_summary?.length || 0,
     });

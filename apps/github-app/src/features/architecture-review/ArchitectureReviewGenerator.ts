@@ -65,12 +65,12 @@ export class ArchitectureReviewGenerator {
     };
 
     const issueDetails = context.issue();
-    this.preprocessor = new PRPreprocessor(context.octokit, issueDetails);
-    this.commentManager = new CommentManager(context.octokit, issueDetails);
+    this.preprocessor = new PRPreprocessor(context.octokit, issueDetails, this.log);
+    this.commentManager = new CommentManager(context.octokit, issueDetails, this.log);
 
     const aiOptions = getDefaultAIOptions();
     this.reviewBot = new ClaudeBot(aiOptions.reviewBot, undefined, this.log);
-    this.prompts = new Prompts();
+    this.prompts = new Prompts(undefined, undefined, this.log);
     this.architectureService = new ArchitectureService();
     this.reviewParser = new ReviewParser();
 

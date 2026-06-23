@@ -1,7 +1,7 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
 import pLimit from "p-limit";
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 // Helper types
 export type FileWithHunks = [
@@ -26,12 +26,15 @@ interface ParsedHunk {
  */
 export class HunkProcessor {
   private readonly concurrencyLimit = pLimit(5);
+  private readonly log: Logger;
 
   constructor(
     private readonly octokit: Context["octokit"],
-    private readonly issueDetails: IssueDetails
+    private readonly issueDetails: IssueDetails,
+    log?: Logger
   ) {
-    logger.debug("HunkProcessor initialized", {
+    this.log = log ?? logger;
+    this.log.debug("HunkProcessor initialized", {
       owner: issueDetails.owner,
       repo: issueDetails.repo,
       concurrencyLimit: 5,
@@ -40,11 +43,11 @@ export class HunkProcessor {
 
   private splitPatch(patch: string | null | undefined): string[] {
     if (!patch) {
-      logger.debug("splitPatch received null/undefined patch");
+      this.log.debug("splitPatch received null/undefined patch");
       return [];
     }
 
-    logger.debug("Splitting patch", {
+    this.log.debug("Splitting patch", {
       patchLength: patch.length,
     });
 
@@ -65,7 +68,7 @@ export class HunkProcessor {
       result.push(patch.substring(last));
     }
 
-    logger.debug("Patch split complete", {
+    this.log.debug("Patch split complete", {
       splitCount: result.length,
       patchLength: patch.length,
     });
@@ -77,7 +80,7 @@ export class HunkProcessor {
     const pattern = /@@ -(\d+),(\d+) \+(\d+),(\d+) @@/;
     const match = patch.match(pattern);
     if (!match) {
-      logger.debug("Failed to match patch pattern", {
+      this.log.debug("Failed to match patch pattern", {
         patchPreview: patch.substring(0, 100),
       });
       return null;
@@ -88,7 +91,7 @@ export class HunkProcessor {
     const newBegin = parseInt(match[3]);
     const newDiff = parseInt(match[4]);
 
-    logger.debug("Parsed patch line numbers", {
+    this.log.debug("Parsed patch line numbers", {
       oldRange: `${oldBegin}-${oldBegin + oldDiff - 1}`,
       newRange: `${newBegin}-${newBegin + newDiff - 1}`,
     });
@@ -159,7 +162,7 @@ export class HunkProcessor {
     files: any[],
     baseSha: string
   ): Promise<FileWithHunks[]> {
-    logger.info("Starting hunk processing", {
+    this.log.info("Starting hunk processing", {
       filesCount: files.length,
       baseSha,
       concurrencyLimit: 5,
@@ -173,7 +176,7 @@ export class HunkProcessor {
     const filteredFiles = await Promise.all(
       files.map((file) =>
         this.concurrencyLimit(async () => {
-          logger.debug("Processing file into hunks", {
+          this.log.debug("Processing file into hunks", {
             filename: file.filename,
             status: file.status,
             additions: file.additions,
@@ -202,7 +205,7 @@ export class HunkProcessor {
                     "base64"
                   ).toString();
 
-                  logger.debug("File content retrieved", {
+                  this.log.debug("File content retrieved", {
                     filename: file.filename,
                     contentLength: fileContent.length,
                     encoding: contents.data.encoding,
@@ -212,7 +215,7 @@ export class HunkProcessor {
             }
           } catch (e: any) {
             newFileCount++;
-            logger.debug("Failed to get file contents", {
+            this.log.debug("Failed to get file contents", {
               filename: file.filename,
               error: e.message,
               status: e.status,
@@ -228,7 +231,7 @@ export class HunkProcessor {
           const patches: Array<[number, number, string]> = [];
           const splitPatches = this.splitPatch(file.patch);
 
-          logger.debug("Split patches for file", {
+          this.log.debug("Split patches for file", {
             filename: file.filename,
             patchCount: splitPatches.length,
           });
@@ -262,7 +265,7 @@ ${hunks.oldHunk}
 
           if (patches.length > 0) {
             successCount++;
-            logger.debug("File processed successfully with hunks", {
+            this.log.debug("File processed successfully with hunks", {
               filename: file.filename,
               patchesCount: patches.length,
               contentLength: fileContent.length,
@@ -275,7 +278,7 @@ ${hunks.oldHunk}
             ];
           } else {
             failedCount++;
-            logger.warn("No patches generated for file", {
+            this.log.warn("No patches generated for file", {
               filename: file.filename,
               hasPatch: !!file.patch,
               patchLength: file.patch?.length || 0,
@@ -288,7 +291,7 @@ ${hunks.oldHunk}
 
     const duration = Date.now() - startTime;
 
-    logger.info("Hunk processing completed", {
+    this.log.info("Hunk processing completed", {
       totalFiles: files.length,
       successCount,
       failedCount,

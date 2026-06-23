@@ -14,7 +14,7 @@ import {
   REVIEW_PAUSED_NOTICE_TAG,
   REVIEW_PAUSED_TAG,
 } from "@/services/constants";
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 export interface ExistingCommentData {
   comment: any | null;
@@ -31,24 +31,27 @@ const issueCommentsCache: Record<number, any[]> = {};
  */
 export class CommentManager {
   private readonly botLogin: string | undefined;
+  private readonly log: Logger;
 
   constructor(
     private readonly octokit: Context["octokit"],
-    private readonly issueDetails: IssueDetails
+    private readonly issueDetails: IssueDetails,
+    log?: Logger
   ) {
     this.botLogin = process.env.GITHUB_BOT_LOGIN;
+    this.log = log ?? logger;
   }
 
   private async listComments(issueNumber: number): Promise<any[]> {
     if (issueCommentsCache[issueNumber]) {
-      logger.debug("Using cached comments", { 
+      this.log.debug("Using cached comments", { 
         issueNumber,
         cachedCount: issueCommentsCache[issueNumber].length 
       });
       return issueCommentsCache[issueNumber];
     }
 
-    logger.info("Fetching comments from GitHub API", { 
+    this.log.info("Fetching comments from GitHub API", { 
       issueNumber,
       owner: this.issueDetails.owner,
       repo: this.issueDetails.repo 
@@ -58,7 +61,7 @@ export class CommentManager {
     let page = 1;
     try {
       for (;;) {
-        logger.debug("Fetching comments page", { 
+        this.log.debug("Fetching comments page", { 
           issueNumber, 
           page, 
           perPage: 100 
@@ -73,7 +76,7 @@ export class CommentManager {
         });
         
         allComments.push(...comments);
-        logger.debug("Comments page fetched", { 
+        this.log.debug("Comments page fetched", { 
           issueNumber, 
           page, 
           commentsInPage: comments.length,
@@ -87,14 +90,14 @@ export class CommentManager {
       }
 
       issueCommentsCache[issueNumber] = allComments;
-      logger.info("All comments fetched and cached", { 
+      this.log.info("All comments fetched and cached", { 
         issueNumber, 
         totalComments: allComments.length,
         totalPages: page - 1 
       });
       return allComments;
     } catch (e: any) {
-      logger.error("Failed to list comments", {
+      this.log.error("Failed to list comments", {
         issueNumber,
         page,
         partialCount: allComments.length,
@@ -109,7 +112,7 @@ export class CommentManager {
     tag: string,
     comments: any[]
   ): Promise<any | null> {
-    logger.debug("Searching for comment with tag", { 
+    this.log.debug("Searching for comment with tag", { 
       tag, 
       totalComments: comments.length 
     });
@@ -118,7 +121,7 @@ export class CommentManager {
       for (const cmt of comments) {
         if (cmt.body && cmt.body.includes(tag)) {
           if (this.botLogin && cmt.user?.login !== this.botLogin) {
-            logger.debug("Skipping comment with tag: author mismatch", {
+            this.log.debug("Skipping comment with tag: author mismatch", {
               tag,
               commentId: cmt.id,
               commentAuthor: cmt.user?.login,
@@ -126,7 +129,7 @@ export class CommentManager {
             });
             continue;
           }
-          logger.info("Comment with tag found", { 
+          this.log.info("Comment with tag found", { 
             tag, 
             commentId: cmt.id,
             commentAuthor: cmt.user?.login,
@@ -138,13 +141,13 @@ export class CommentManager {
         }
       }
       
-      logger.debug("No comment found with tag", { 
+      this.log.debug("No comment found with tag", { 
         tag, 
         searchedComments: comments.length 
       });
       return null;
     } catch (e: unknown) {
-      logger.error("Error while searching for comment with tag", { 
+      this.log.error("Error while searching for comment with tag", { 
         tag, 
         error: String(e),
         totalComments: comments.length 
@@ -163,7 +166,7 @@ export class CommentManager {
     
     if (start >= 0 && end >= 0) {
       const extracted = content.slice(start + startTag.length, end);
-      logger.debug("Content extracted within tags", { 
+      this.log.debug("Content extracted within tags", { 
         startTag: startTag.substring(0, 50),
         endTag: endTag.substring(0, 50),
         startIndex: start,
@@ -173,7 +176,7 @@ export class CommentManager {
       return extracted;
     }
     
-    logger.debug("Tags not found in content", { 
+    this.log.debug("Tags not found in content", { 
       startTag: startTag.substring(0, 50),
       endTag: endTag.substring(0, 50),
       startFound: start >= 0,
@@ -184,7 +187,7 @@ export class CommentManager {
   }
 
   private getRawSummary(summary: string): string {
-    logger.debug("Extracting raw summary", { 
+    this.log.debug("Extracting raw summary", { 
       summaryLength: summary.length 
     });
     
@@ -195,11 +198,11 @@ export class CommentManager {
     );
     
     if (result) {
-      logger.debug("Raw summary extracted", { 
+      this.log.debug("Raw summary extracted", { 
         rawSummaryLength: result.length 
       });
     } else {
-      logger.warn("Raw summary not found in comment", { 
+      this.log.warn("Raw summary not found in comment", { 
         summaryLength: summary.length 
       });
     }
@@ -208,7 +211,7 @@ export class CommentManager {
   }
 
   private getShortSummary(summary: string): string {
-    logger.debug("Extracting short summary", { 
+    this.log.debug("Extracting short summary", { 
       summaryLength: summary.length 
     });
     
@@ -219,11 +222,11 @@ export class CommentManager {
     );
     
     if (result) {
-      logger.debug("Short summary extracted", { 
+      this.log.debug("Short summary extracted", { 
         shortSummaryLength: result.length 
       });
     } else {
-      logger.warn("Short summary not found in comment", { 
+      this.log.warn("Short summary not found in comment", { 
         summaryLength: summary.length 
       });
     }
@@ -236,7 +239,7 @@ export class CommentManager {
     tag: string,
     getReviewedCommitIdsBlock: (commentBody: string) => string
   ): Promise<ExistingCommentData> {
-    logger.info("Fetching existing comment data", { 
+    this.log.info("Fetching existing comment data", { 
       pullNumber, 
       tag,
       owner: this.issueDetails.owner,
@@ -244,7 +247,7 @@ export class CommentManager {
     });
 
     const comments = await this.listComments(pullNumber);
-    logger.debug("Comments retrieved", { 
+    this.log.debug("Comments retrieved", { 
       pullNumber, 
       totalComments: comments.length 
     });
@@ -252,7 +255,7 @@ export class CommentManager {
     const existingComment = await this.findCommentWithTag(tag, comments);
 
     if (!existingComment) {
-      logger.info("No existing comment found with tag", { 
+      this.log.info("No existing comment found with tag", { 
         pullNumber, 
         tag 
       });
@@ -265,7 +268,7 @@ export class CommentManager {
       };
     }
 
-    logger.info("Existing comment found", { 
+    this.log.info("Existing comment found", { 
       pullNumber, 
       tag,
       commentId: existingComment.id,
@@ -277,7 +280,7 @@ export class CommentManager {
     const rawSummary = this.getRawSummary(commentBody);
     const shortSummary = this.getShortSummary(commentBody);
 
-    logger.debug("Extracted comment data", { 
+    this.log.debug("Extracted comment data", { 
       pullNumber,
       hasCommitIdsBlock: commitIdsBlock.length > 0,
       hasRawSummary: rawSummary.length > 0,
@@ -314,7 +317,7 @@ export class CommentManager {
     filesAndChanges: Array<[string, string, string, Array<[number, number, string]>]>,
     filterIgnoredFiles: any[]
   ): string {
-    logger.debug("Generating status message", {
+    this.log.debug("Generating status message", {
       reviewStartCommit,
       headSha,
       filesAndChangesCount: filesAndChanges.length,
@@ -324,7 +327,7 @@ export class CommentManager {
     // Calculate total patches across all files
     const totalPatches = filesAndChanges.reduce((sum, [, , , patches]) => sum + patches.length, 0);
 
-    logger.debug("Status message file details", {
+    this.log.debug("Status message file details", {
       selectedFiles: filesAndChanges.map(([filename, , , patches]) => ({
         filename,
         patchCount: patches.length,
@@ -364,7 +367,7 @@ ${
 }
 `;
 
-    logger.info("Status message generated", {
+    this.log.info("Status message generated", {
       reviewStartCommit,
       headSha,
       messageLength: statusMessage.length,
@@ -379,7 +382,7 @@ ${
   }
 
   addInProgressStatus(commentBody: string, statusMsg: string): string {
-    logger.debug("Adding in-progress status", {
+    this.log.debug("Adding in-progress status", {
       hasExistingComment: commentBody.length > 0,
       commentBodyLength: commentBody.length,
       statusMsgLength: statusMsg.length,
@@ -403,7 +406,7 @@ ${IN_PROGRESS_END_TAG}
 
 ${commentBody}`;
       
-      logger.info("In-progress status added to comment", {
+      this.log.info("In-progress status added to comment", {
         hadExistingMarker: false,
         originalLength: commentBody.length,
         newLength: result.length,
@@ -412,7 +415,7 @@ ${commentBody}`;
       return result;
     }
     
-    logger.debug("In-progress marker already exists in comment", {
+    this.log.debug("In-progress marker already exists in comment", {
       startIndex: start,
       endIndex: end,
       commentBodyLength: commentBody.length,
@@ -422,7 +425,7 @@ ${commentBody}`;
   }
 
   private async create(body: string, target: number): Promise<void> {
-    logger.debug("Creating new comment", {
+    this.log.debug("Creating new comment", {
       target,
       bodyLength: body.length,
       owner: this.issueDetails.owner,
@@ -445,14 +448,14 @@ ${commentBody}`;
         issueCommentsCache[target] = [response.data];
       }
       
-      logger.info("Comment created successfully", {
+      this.log.info("Comment created successfully", {
         target,
         commentId: response.data.id,
         commentUrl: response.data.html_url,
         bodyLength: body.length,
       });
     } catch (e: any) {
-      logger.error("Failed to create comment", {
+      this.log.error("Failed to create comment", {
         target,
         bodyLength: body.length,
         error: e.message,
@@ -462,7 +465,7 @@ ${commentBody}`;
   }
 
   private async replace(body: string, tag: string, target: number): Promise<void> {
-    logger.debug("Replacing comment with tag", {
+    this.log.debug("Replacing comment with tag", {
       target,
       tag,
       bodyLength: body.length,
@@ -475,7 +478,7 @@ ${commentBody}`;
       const cmt = await this.findCommentWithTag(tag, comments);
       
       if (cmt) {
-        logger.debug("Updating existing comment", {
+        this.log.debug("Updating existing comment", {
           target,
           tag,
           commentId: cmt.id,
@@ -499,21 +502,21 @@ ${commentBody}`;
           }
         }
         
-        logger.info("Comment updated successfully", {
+        this.log.info("Comment updated successfully", {
           target,
           tag,
           commentId: cmt.id,
           bodyLength: body.length,
         });
       } else {
-        logger.debug("No existing comment found, creating new one", {
+        this.log.debug("No existing comment found, creating new one", {
           target,
           tag,
         });
         await this.create(body, target);
       }
     } catch (e: any) {
-      logger.error("Failed to replace comment", {
+      this.log.error("Failed to replace comment", {
         target,
         tag,
         bodyLength: body.length,
@@ -529,7 +532,7 @@ ${commentBody}`;
   async comment(message: string, tag: string, mode: string = "replace"): Promise<void> {
     const finalTag = tag || COMMENT_TAG;
 
-    logger.debug("Preparing to post comment", {
+    this.log.debug("Preparing to post comment", {
       mode,
       tag: finalTag,
       messageLength: message.length,
@@ -540,7 +543,7 @@ ${commentBody}`;
 
 ${finalTag}`;
 
-    logger.debug("Comment body prepared", {
+    this.log.debug("Comment body prepared", {
       mode,
       tag: finalTag,
       bodyLength: body.length,
@@ -548,19 +551,19 @@ ${finalTag}`;
     });
 
     if (mode === "create") {
-      logger.info("Creating new comment", {
+      this.log.info("Creating new comment", {
         tag: finalTag,
         issueNumber: this.issueDetails.issue_number,
       });
       await this.create(body, this.issueDetails.issue_number);
     } else if (mode === "replace") {
-      logger.info("Replacing existing comment", {
+      this.log.info("Replacing existing comment", {
         tag: finalTag,
         issueNumber: this.issueDetails.issue_number,
       });
       await this.replace(body, finalTag, this.issueDetails.issue_number);
     } else {
-      logger.warn("Unknown comment mode, using replace", { 
+      this.log.warn("Unknown comment mode, using replace", { 
         mode,
         tag: finalTag,
         issueNumber: this.issueDetails.issue_number,
@@ -568,7 +571,7 @@ ${finalTag}`;
       await this.replace(body, finalTag, this.issueDetails.issue_number);
     }
 
-    logger.info("Comment operation completed", {
+    this.log.info("Comment operation completed", {
       mode,
       tag: finalTag,
       issueNumber: this.issueDetails.issue_number,
@@ -608,7 +611,7 @@ ${finalTag}`;
         body,
       });
     } catch (e: any) {
-      logger.warn("Failed to update PR description", {
+      this.log.warn("Failed to update PR description", {
         pullNumber,
         error: e.message,
       });
@@ -625,7 +628,7 @@ ${finalTag}`;
     shortSummary: string,
     commitIds: string[] = []
   ): string {
-    logger.debug("Building base summary comment", {
+    this.log.debug("Building base summary comment", {
       finalResponseLength: finalResponse.length,
       rawSummaryLength: rawSummary.length,
       shortSummaryLength: shortSummary.length,
@@ -669,7 +672,7 @@ If you like this project, please support us by starring the repository. This too
     let finalStatusMsg = baseStatusMsg;
     
     if (skippedFiles.length > 0) {
-      logger.debug("Adding skipped files to status message", {
+      this.log.debug("Adding skipped files to status message", {
         skippedFilesCount: skippedFiles.length,
       });
       finalStatusMsg += `\n<details>
@@ -682,7 +685,7 @@ If you like this project, please support us by starring the repository. This too
     }
 
     if (failedSummaries.length > 0) {
-      logger.debug("Adding failed summaries to status message", {
+      this.log.debug("Adding failed summaries to status message", {
         failedSummariesCount: failedSummaries.length,
       });
       finalStatusMsg += `\n<details>
@@ -694,7 +697,7 @@ If you like this project, please support us by starring the repository. This too
 `;
     }
 
-    logger.debug("Status message with errors built", {
+    this.log.debug("Status message with errors built", {
       hasSkippedFiles: skippedFiles.length > 0,
       hasFailedSummaries: failedSummaries.length > 0,
       finalLength: finalStatusMsg.length,
@@ -715,7 +718,7 @@ If you like this project, please support us by starring the repository. This too
     failedSummaries: string[],
     commitIds: string[] = []
   ): string {
-    logger.debug("Building final summary comment", {
+    this.log.debug("Building final summary comment", {
       hasSkippedFiles: skippedFiles.length > 0,
       hasFailedSummaries: failedSummaries.length > 0,
     });
@@ -735,7 +738,7 @@ If you like this project, please support us by starring the repository. This too
     
     const finalComment = `${statusMsg}\n\n${baseSummary}`;
     
-    logger.info("Final summary comment built", {
+    this.log.info("Final summary comment built", {
       totalLength: finalComment.length,
       statusMsgLength: statusMsg.length,
       baseSummaryLength: baseSummary.length,
