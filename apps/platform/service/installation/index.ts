@@ -47,7 +47,8 @@ export class InstallationService {
 
     // 1. Fetch installation details from GitHub
     const installation = await this.fetchInstallationDetails(installationId);
-    const githubOrgId = installation.account?.login;
+    const githubOrgId = installation.account?.id.toString();
+    const githubOrgName = installation.account?.login;
 
     if (!githubOrgId) {
       throw new Error('Could not determine GitHub organization ID from installation');
@@ -57,6 +58,7 @@ export class InstallationService {
     await this.installationModel.upsertInstallation({
       installationId,
       githubOrgId,
+      githubOrgName: githubOrgName ?? '',
       userId: this.userId,
     });
 

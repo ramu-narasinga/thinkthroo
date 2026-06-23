@@ -6,6 +6,7 @@ export const installations = pgTable('installations', {
   id: uuid().defaultRandom().primaryKey().notNull(),
   installationId: text('installation_id').notNull(),
   githubOrgId: text('github_org_id').notNull(),
+  githubOrgName: text('github_org_name'),
   userId: uuid('user_id')
     .references(() => profiles.userId, { onDelete: 'cascade' })
     .notNull(),
