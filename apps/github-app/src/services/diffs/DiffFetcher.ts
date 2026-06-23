@@ -1,6 +1,6 @@
 import type { Context } from "probot";
 import type { IssueDetails } from "@/types/issue";
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 export interface DiffData {
   files: any[];
@@ -11,11 +11,15 @@ export interface DiffData {
  * Fetches and compares diffs between commits
  */
 export class DiffFetcher {
+  private readonly log: Logger;
+
   constructor(
     private readonly octokit: Context["octokit"],
-    private readonly issueDetails: IssueDetails
+    private readonly issueDetails: IssueDetails,
+    log?: Logger
   ) {
-    logger.debug("DiffFetcher initialized", {
+    this.log = log ?? logger;
+    this.log.debug("DiffFetcher initialized", {
       owner: issueDetails.owner,
       repo: issueDetails.repo,
     });
@@ -25,7 +29,7 @@ export class DiffFetcher {
     baseSha: string,
     headSha: string
   ): Promise<DiffData> {
-    logger.debug("Fetching incremental diff", {
+    this.log.debug("Fetching incremental diff", {
       baseSha,
       headSha,
       owner: this.issueDetails.owner,
@@ -45,7 +49,7 @@ export class DiffFetcher {
         commits: diff.data.commits || [],
       };
 
-      logger.info("Incremental diff fetched successfully", {
+      this.log.info("Incremental diff fetched successfully", {
         baseSha,
         headSha,
         filesCount: result.files.length,
@@ -57,7 +61,7 @@ export class DiffFetcher {
 
       return result;
     } catch (e: any) {
-      logger.error("Failed to fetch incremental diff", {
+      this.log.error("Failed to fetch incremental diff", {
         baseSha,
         headSha,
         error: e.message,
@@ -71,7 +75,7 @@ export class DiffFetcher {
     baseSha: string,
     headSha: string
   ): Promise<any[]> {
-    logger.debug("Fetching target branch diff", {
+    this.log.debug("Fetching target branch diff", {
       baseSha,
       headSha,
       owner: this.issueDetails.owner,
@@ -88,7 +92,7 @@ export class DiffFetcher {
 
       const files = diff.data.files || [];
 
-      logger.info("Target branch diff fetched successfully", {
+      this.log.info("Target branch diff fetched successfully", {
         baseSha,
         headSha,
         filesCount: files.length,
@@ -97,7 +101,7 @@ export class DiffFetcher {
 
       return files;
     } catch (e: any) {
-      logger.error("Failed to fetch target branch diff", {
+      this.log.error("Failed to fetch target branch diff", {
         baseSha,
         headSha,
         error: e.message,
@@ -111,7 +115,7 @@ export class DiffFetcher {
     incrementalFiles: any[],
     targetBranchFiles: any[]
   ): boolean {
-    logger.debug("Validating diff data", {
+    this.log.debug("Validating diff data", {
       hasIncrementalFiles: !!incrementalFiles,
       hasTargetBranchFiles: !!targetBranchFiles,
       incrementalFilesCount: incrementalFiles?.length || 0,
@@ -119,14 +123,14 @@ export class DiffFetcher {
     });
 
     if (!incrementalFiles || !targetBranchFiles) {
-      logger.warn("Diff data validation failed: files data is missing", {
+      this.log.warn("Diff data validation failed: files data is missing", {
         hasIncrementalFiles: !!incrementalFiles,
         hasTargetBranchFiles: !!targetBranchFiles,
       });
       return false;
     }
 
-    logger.debug("Diff data validation passed", {
+    this.log.debug("Diff data validation passed", {
       incrementalFilesCount: incrementalFiles.length,
       targetBranchFilesCount: targetBranchFiles.length,
     });

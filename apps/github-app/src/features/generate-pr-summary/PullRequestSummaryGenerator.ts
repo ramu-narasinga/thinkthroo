@@ -35,9 +35,9 @@ export class PullRequestSummaryGenerator {
     const issueDetails = context.issue();
     const octokit = context.octokit;
 
-    this.commentManager = new CommentManager(octokit, issueDetails);
-    this.commitAnalyzer = new CommitAnalyzer(octokit, issueDetails);
-    this.preprocessor = new PRPreprocessor(octokit, issueDetails);
+    this.commentManager = new CommentManager(octokit, issueDetails, this.log);
+    this.commitAnalyzer = new CommitAnalyzer(octokit, issueDetails, this.log);
+    this.preprocessor = new PRPreprocessor(octokit, issueDetails, this.log);
 
     this.aiOptions = getDefaultAIOptions();
 
@@ -64,7 +64,7 @@ export class PullRequestSummaryGenerator {
     }
 
     // Initialize prompts
-    this.prompts = new Prompts();
+    this.prompts = new Prompts(undefined, undefined, this.log);
 
     // Initialize file summarizer with DI
     this.fileSummarizer = new FileSummarizer(

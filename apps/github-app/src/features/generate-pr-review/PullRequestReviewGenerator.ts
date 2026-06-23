@@ -71,7 +71,7 @@ export class PullRequestReviewGenerator {
       repo: issueDetails.repo,
     });
 
-    this.preprocessor = new PRPreprocessor(octokit, issueDetails);
+    this.preprocessor = new PRPreprocessor(octokit, issueDetails, this.log);
     this.fileReviewFilter = new FileReviewFilter();
 
     this.aiOptions = getDefaultAIOptions();
@@ -99,7 +99,7 @@ export class PullRequestReviewGenerator {
       throw e;
     }
 
-    this.prompts = new Prompts();
+    this.prompts = new Prompts(undefined, undefined, this.log);
 
     this.log.info("PullRequestReviewGenerator initialized successfully", {
       prNumber,

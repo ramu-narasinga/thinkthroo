@@ -1,4 +1,4 @@
-import { logger } from "@/utils/logger";
+import { logger, type Logger } from "@/utils/logger";
 
 export interface FilterResult {
   selected: any[];
@@ -9,11 +9,17 @@ export interface FilterResult {
  * Filters and selects files for review
  */
 export class FileFilter {
+  private readonly log: Logger;
+
+  constructor(log?: Logger) {
+    this.log = log ?? logger;
+  }
+
   filterChangedFiles(
     targetBranchFiles: any[],
     incrementalFiles: any[]
   ): any[] {
-    logger.debug("Filtering changed files", {
+    this.log.debug("Filtering changed files", {
       targetBranchFilesCount: targetBranchFiles.length,
       incrementalFilesCount: incrementalFiles.length,
     });
@@ -25,7 +31,7 @@ export class FileFilter {
       )
     );
 
-    logger.info("Changed files filtered", {
+    this.log.info("Changed files filtered", {
       inputTargetFiles: targetBranchFiles.length,
       inputIncrementalFiles: incrementalFiles.length,
       outputChangedFiles: result.length,
@@ -36,7 +42,7 @@ export class FileFilter {
   }
 
   applyFileIgnoreRules(files: any[]): FilterResult {
-    logger.debug("Applying file ignore rules", {
+    this.log.debug("Applying file ignore rules", {
       inputFilesCount: files.length,
     });
 
@@ -51,7 +57,7 @@ export class FileFilter {
       filterSelectedFiles.push(file);
     }
 
-    logger.info("File ignore rules applied", {
+    this.log.info("File ignore rules applied", {
       inputFiles: files.length,
       selectedFiles: filterSelectedFiles.length,
       ignoredFiles: filterIgnoredFiles.length,
@@ -64,14 +70,14 @@ export class FileFilter {
   }
 
   validateFiles(files: any[], context: string): boolean {
-    logger.debug("Validating files", {
+    this.log.debug("Validating files", {
       context,
       hasFiles: !!files,
       fileCount: files?.length ?? 0,
     });
 
     if (!files || files.length === 0) {
-      logger.warn("File validation failed", {
+      this.log.warn("File validation failed", {
         context,
         fileCount: files?.length ?? 0,
         reason: !files ? 'files is null/undefined' : 'files array is empty',
@@ -79,7 +85,7 @@ export class FileFilter {
       return false;
     }
 
-    logger.debug("File validation passed", {
+    this.log.debug("File validation passed", {
       context,
       fileCount: files.length,
     });
