@@ -6,9 +6,11 @@ import { Tabs, TabsList, TabsTrigger } from "@thinkthroo/ui/components/tabs";
 import PrivatePageGuard from "@/components/private-page-guard";
 
 const tabs = [
-  { label: "Codebase Architecture", value: "architecture" },
-  { label: "Reviews", value: "reviews" },
-  { label: "Settings", value: "settings" },
+  { label: "Agent",        value: "agent" },
+  { label: "Issues",       value: "issues" },
+  { label: "Code Reviews", value: "reviews" },
+  { label: "Skills",       value: "skills" },
+  { label: "Settings",     value: "settings" },
 ];
 
 export default function RepositoryDetailLayout({
