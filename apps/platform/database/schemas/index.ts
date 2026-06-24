@@ -22,3 +22,4 @@ export * from './rateLimitPlanDefaults';
 export * from './rateLimitOverrides';
 export * from './daemonRuntime';
 export * from './agent';
+export * from './agentTask';
