@@ -20,6 +20,7 @@ import { HelpCircle, X } from "lucide-react"
 import { repositorySettingsClientService } from "@/service/repositorySettings"
 import { useOrganizationStore } from "@/store/organization"
 import { organizationSelectors } from "@/store/organization/selectors"
+import { RuntimesCard } from "./RuntimesCard"
 
 export function SettingsTab() {
   const params = useParams()
@@ -113,6 +114,8 @@ export function SettingsTab() {
   const disabled = useOrgSettings
 
   return (
+    <div className="space-y-6">
+    <RuntimesCard />
     <Card>
       <CardHeader>
         <CardTitle>Settings</CardTitle>
@@ -359,6 +362,7 @@ export function SettingsTab() {
         </Button>
       </CardFooter>
     </Card>
+    </div>
   )
 }
 

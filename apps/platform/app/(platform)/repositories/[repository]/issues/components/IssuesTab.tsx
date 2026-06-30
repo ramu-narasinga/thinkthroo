@@ -1,12 +1,16 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, CircleDot, CircleCheck, ExternalLink, User } from "lucide-react";
 import { Button } from "@thinkthroo/ui/components/button";
 import { useIssueStore } from "@/store/issues";
 import { issueSelectors } from "@/store/issues/selectors";
 import { IssueState } from "@/store/issues/initialState";
+import { useAgentStore } from "@/store/agent";
+import { agentSelectors } from "@/store/agent/selectors";
+import { IssueAgentBadge } from "./IssueAgentBadge";
 
 function formatRelativeDate(isoDate: string): string {
   const today = new Date();
@@ -32,9 +36,18 @@ export function IssuesTab() {
   const fetchIssues = useIssueStore((s) => s.fetchIssues);
   const setStateFilter = useIssueStore((s) => s.setStateFilter);
 
+  const agents = useAgentStore(agentSelectors.agents);
+  const fetchAgents = useAgentStore((s) => s.fetchAgents);
+
+  const activeAgents = React.useMemo(
+    () => agents.filter((a) => a.status === "active"),
+    [agents]
+  );
+
   React.useEffect(() => {
     fetchIssues(repositoryFullName, 1, stateFilter);
-  }, [repositoryFullName, stateFilter, fetchIssues]);
+    fetchAgents(repositoryFullName);
+  }, [repositoryFullName, stateFilter, fetchIssues, fetchAgents]);
 
   const handleStateToggle = (state: IssueState) => {
     setStateFilter(state);
@@ -84,6 +97,9 @@ export function IssuesTab() {
         <span className="flex-1 text-sm font-medium text-muted-foreground">Issue</span>
         <span className="w-24 text-right text-sm font-medium text-muted-foreground shrink-0">Author</span>
         <span className="w-28 text-right text-sm font-medium text-muted-foreground shrink-0">Opened</span>
+        {activeAgents.length > 0 && (
+          <span className="w-36 text-right text-sm font-medium text-muted-foreground shrink-0">Agent</span>
+        )}
       </div>
 
       {isLoading && (
@@ -98,7 +114,10 @@ export function IssuesTab() {
 
       {!isLoading && issues.length > 0 && (
         <div className="divide-y">
-          {issues.map((issue) => (
+          {issues.map((issue) => {
+            const encodedRepo = encodeURIComponent(repositoryFullName);
+            const detailHref = `/repositories/${encodedRepo}/issues/${issue.number}`;
+            return (
             <div key={issue.id} className="flex gap-4 py-4 items-start">
               {/* Issue info */}
               <div className="flex-1 min-w-0">
@@ -108,14 +127,21 @@ export function IssuesTab() {
                   ) : (
                     <CircleCheck className="h-4 w-4 text-purple-600 shrink-0" />
                   )}
+                  <Link
+                    href={detailHref}
+                    className="font-medium text-sm hover:underline inline-flex items-center gap-1"
+                  >
+                    {issue.title}
+                  </Link>
                   <a
                     href={issue.htmlUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-sm hover:underline inline-flex items-center gap-1"
+                    className="text-muted-foreground hover:text-foreground shrink-0"
+                    title="Open on GitHub"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    {issue.title}
-                    <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground" />
+                    <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
                 <p className="text-xs text-muted-foreground ml-5.5">#{issue.number}</p>
@@ -150,8 +176,20 @@ export function IssuesTab() {
               <div className="w-28 text-right text-sm text-muted-foreground shrink-0 whitespace-nowrap">
                 {formatRelativeDate(issue.createdAt)}
               </div>
+
+              {/* Agent action / status badge */}
+              {activeAgents.length > 0 && (
+                <div className="w-36 flex justify-end shrink-0">
+                  <IssueAgentBadge
+                    repositoryFullName={repositoryFullName}
+                    issueNumber={issue.number}
+                    activeAgents={activeAgents}
+                  />
+                </div>
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

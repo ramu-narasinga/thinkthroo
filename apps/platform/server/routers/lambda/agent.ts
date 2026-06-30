@@ -158,6 +158,21 @@ export const agentRouter = router({
         .from(daemonRuntimes)
         .where(eq(daemonRuntimes.userId, ctx.userId));
     }),
+
+  deleteRuntime: agentProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.serverDB
+        .delete(daemonRuntimes)
+        .where(and(eq(daemonRuntimes.id, input.id), eq(daemonRuntimes.userId, ctx.userId)))
+        .returning();
+
+      if (!deleted) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Runtime not found' });
+      }
+
+      return deleted;
+    }),
 });
 
 export type AgentRouter = typeof agentRouter;

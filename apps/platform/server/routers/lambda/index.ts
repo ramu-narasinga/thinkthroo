@@ -12,6 +12,7 @@ import { organizationSettingsRouter } from './organizationSettings';
 import { issueRouter } from './issues';
 import { agentRouter } from './agent';
 import { agentTaskRouter } from './agentTask';
+import { issueCommentRouter } from './issueComment';
 
 export const lambdaRouter = router({
   document: documentRouter,
@@ -27,4 +28,5 @@ export const lambdaRouter = router({
   issues: issueRouter,
   agent: agentRouter,
   agentTask: agentTaskRouter,
+  issueComment: issueCommentRouter,
 });export type LambdaRouter = typeof lambdaRouter;

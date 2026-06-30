@@ -9,6 +9,7 @@ export interface AgentAction {
   createAgent: (input: CreateAgentInput) => Promise<AgentItem>;
   updateAgent: (input: UpdateAgentInput) => Promise<AgentItem>;
   archiveAgent: (id: string) => Promise<void>;
+  deleteRuntime: (id: string) => Promise<void>;
 }
 
 export const createAgentSlice: StateCreator<
@@ -59,6 +60,15 @@ export const createAgentSlice: StateCreator<
       (s) => ({ agents: s.agents.map((a) => (a.id === id ? archived : a)) }),
       false,
       'archiveAgent'
+    );
+  },
+
+  deleteRuntime: async (id) => {
+    await agentClientService.deleteRuntime(id);
+    set(
+      (s) => ({ runtimes: s.runtimes.filter((r) => r.id !== id) }),
+      false,
+      'deleteRuntime'
     );
   },
 });

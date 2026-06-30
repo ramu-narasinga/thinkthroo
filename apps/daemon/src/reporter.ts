@@ -1,0 +1,151 @@
+import { DaemonConfig } from './config.js';
+
+type ProgressType = 'info' | 'output' | 'error';
+
+interface TaskResult {
+  prUrl?: string;
+  summary?: string;
+  branchName?: string;
+}
+
+function headers(config: DaemonConfig): Record<string, string> {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${config.apiKey}`,
+  };
+}
+
+async function post(url: string, body: unknown, config: DaemonConfig): Promise<Response> {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: headers(config),
+    body: JSON.stringify(body),
+  });
+  return res;
+}
+
+async function get(url: string, config: DaemonConfig): Promise<Response> {
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: headers(config),
+  });
+  return res;
+}
+
+export async function heartbeat(config: DaemonConfig): Promise<void> {
+  await post(`${config.platformUrl}/api/daemon/heartbeat`, {}, config);
+}
+
+export async function claimTask(config: DaemonConfig): Promise<ClaimedTask | null> {
+  const res = await post(
+    `${config.platformUrl}/api/daemon/runtimes/${config.runtimeId}/tasks/claim`,
+    {},
+    config
+  );
+  if (res.status === 204) return null;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(`Claim failed: ${err.error ?? res.status}`);
+  }
+  return res.json() as Promise<ClaimedTask>;
+}
+
+export async function startTask(taskId: string, config: DaemonConfig): Promise<void> {
+  await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/start`, {}, config);
+}
+
+export async function reportProgress(
+  taskId: string,
+  message: string,
+  type: ProgressType,
+  config: DaemonConfig
+): Promise<void> {
+  await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/progress`, { message, type }, config).catch(() => {});
+}
+
+export async function reportComment(
+  taskId: string,
+  body: string,
+  config: DaemonConfig
+): Promise<void> {
+  await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/comment`, { body }, config);
+}
+
+export async function fetchIssueComments(
+  taskId: string,
+  config: DaemonConfig
+): Promise<Array<{ authorType: string; body: string; createdAt: string }>> {
+  const res = await get(`${config.platformUrl}/api/daemon/tasks/${taskId}/comments`, config);
+  if (!res.ok) return [];
+  const data = await res.json() as { comments?: Array<{ authorType: string; body: string; createdAt: string }> };
+  return data.comments ?? [];
+}
+
+export async function pinSession(
+  taskId: string,
+  sessionId: string,
+  workDir: string,
+  config: DaemonConfig
+): Promise<void> {
+  await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/session`, { sessionId, workDir }, config);
+}
+
+export async function completeTask(
+  taskId: string,
+  result: TaskResult,
+  config: DaemonConfig
+): Promise<void> {
+  await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/complete`, { result }, config);
+}
+
+export async function failTask(
+  taskId: string,
+  reason: string,
+  config: DaemonConfig
+): Promise<void> {
+  await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/fail`, { reason }, config);
+}
+
+export async function reportUsage(
+  taskId: string,
+  inputTokens: number,
+  outputTokens: number,
+  model: string,
+  config: DaemonConfig,
+  cacheReadTokens = 0,
+  cacheWriteTokens = 0
+): Promise<void> {
+  await post(
+    `${config.platformUrl}/api/daemon/tasks/${taskId}/usage`,
+    { inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens, model },
+    config
+  ).catch(() => {});
+}
+
+// Type returned by the claim endpoint
+export interface ClaimedTask {
+  task: {
+    id: string;
+    agentId: string;
+    runtimeId: string;
+    repositoryId: string;
+    issueNumber: number | null;
+    issueTitle: string | null;
+    issueBody: string | null;
+    issueHtmlUrl: string | null;
+    sessionId: string | null;
+    workDir: string | null;
+    attemptCount: number;
+    userMessage: string | null;
+  };
+  agent: {
+    instructions: string;
+    model: string;
+  } | null;
+  repository: {
+    htmlUrl: string;
+    installationId: string;
+    fullName: string;
+  } | null;
+  githubToken: string | null;
+}

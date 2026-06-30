@@ -23,3 +23,5 @@ export * from './rateLimitOverrides';
 export * from './daemonRuntime';
 export * from './agent';
 export * from './agentTask';
+export * from './agentTaskLog';
+export * from './issueComment';

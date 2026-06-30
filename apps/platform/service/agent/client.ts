@@ -69,6 +69,10 @@ export class AgentClientService {
   getMyRuntimes = async (): Promise<DaemonRuntimeItem[]> => {
     return lambdaClient.agent.getMyRuntimes.query() as Promise<DaemonRuntimeItem[]>;
   };
+
+  deleteRuntime = async (id: string): Promise<DaemonRuntimeItem> => {
+    return lambdaClient.agent.deleteRuntime.mutate({ id }) as Promise<DaemonRuntimeItem>;
+  };
 }
 
 export const agentClientService = new AgentClientService();

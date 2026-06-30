@@ -1,0 +1,29 @@
+{
+  "name": "thinkthroo-daemon",
+  "version": "0.1.0",
+  "description": "Local daemon that polls the thinkthroo platform and runs Claude Code agents on your machine.",
+  "type": "module",
+  "bin": {
+    "thinkthroo-daemon": "dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "execa": "^9.5.2",
+    "fs-extra": "^11.3.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.0.0",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.4.0",
+    "typescript": "^5.0.0"
+  }
+}

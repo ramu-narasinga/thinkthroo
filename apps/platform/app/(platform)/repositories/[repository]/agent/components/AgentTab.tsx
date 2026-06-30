@@ -38,6 +38,11 @@ function TaskStatusBadge({ status }: { status: AgentTaskStatus }) {
       icon: <Loader2 className="h-3 w-3 animate-spin" />,
       className: "bg-muted text-muted-foreground border-muted-foreground/20",
     },
+    waiting_local_directory: {
+      label: "Waiting…",
+      icon: <Loader2 className="h-3 w-3 animate-spin" />,
+      className: "bg-muted text-muted-foreground border-muted-foreground/20",
+    },
     running: {
       label: "Running",
       icon: <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse inline-block" />,

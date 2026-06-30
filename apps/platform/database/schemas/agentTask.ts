@@ -17,7 +17,7 @@ export const agentTasks = pgTable('agent_tasks', {
   issueBody: text('issue_body'),
   issueHtmlUrl: text('issue_html_url'),
 
-  // Lifecycle — 'queued' | 'dispatched' | 'running' | 'completed' | 'failed' | 'cancelled'
+  // Lifecycle — 'queued' | 'dispatched' | 'waiting_local_directory' | 'running' | 'completed' | 'failed' | 'cancelled'
   status: text('status').notNull().default('queued'),
   failureReason: text('failure_reason'),
   result: text('result'),       // JSON: { prUrl, summary, branchName }
@@ -26,10 +26,21 @@ export const agentTasks = pgTable('agent_tasks', {
   // Session resumption
   sessionId: text('session_id'),
   workDir: text('work_dir'),
+  dispatchedAt: timestamp('dispatched_at', { withTimezone: true }),
+  priority: integer('priority').notNull().default(0),
 
   // Retry (max 2 attempts)
   attemptCount: integer('attempt_count').notNull().default(0),
   forceFreshSession: boolean('force_fresh_session').notNull().default(false),
+
+  // Two-phase workflow: user message when re-triggering (null = planning phase, present = implementing phase)
+  userMessage: text('user_message'),
+
+  // Token usage (accumulated across streaming calls)
+  inputTokens: integer('input_tokens').notNull().default(0),
+  outputTokens: integer('output_tokens').notNull().default(0),
+  cacheReadTokens: integer('cache_read_tokens').notNull().default(0),
+  cacheWriteTokens: integer('cache_write_tokens').notNull().default(0),
 
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
