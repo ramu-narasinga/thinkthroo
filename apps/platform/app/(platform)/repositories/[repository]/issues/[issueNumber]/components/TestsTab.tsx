@@ -47,7 +47,6 @@ export function TestsTab({ repositoryFullName, issueNumber, implementationTask, 
     setLiveLogs([]);
 
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channel = (supabase.channel(`task-progress:${latestTestTask.id}`) as any)
       .on(
         "broadcast",
@@ -76,7 +75,6 @@ export function TestsTab({ repositoryFullName, issueNumber, implementationTask, 
       .catch(() => {});
 
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channel = (supabase.channel(`artifacts:${latestTestTask.id}`) as any)
       .on(
         "postgres_changes",
@@ -187,7 +185,7 @@ export function TestsTab({ repositoryFullName, issueNumber, implementationTask, 
       {/* ── Empty state ── */}
       {!latestTestTask && (
         <div className="rounded-lg border border-dashed py-12 text-center text-sm text-muted-foreground">
-          No tests run yet. Click "Generate Tests" to let the agent write and run tests for this issue.
+          No tests run yet. Click &quot;Generate Tests&quot; to let the agent write and run tests for this issue.
         </div>
       )}
 
@@ -240,7 +238,7 @@ export function TestsTab({ repositoryFullName, issueNumber, implementationTask, 
           {latestTestTask?.failureReason && (
             <p className="text-xs text-red-600 mt-1">{latestTestTask.failureReason}</p>
           )}
-          <p className="text-xs text-muted-foreground mt-1">Click "Re-generate & Run" to try again.</p>
+          <p className="text-xs text-muted-foreground mt-1">Click &quot;Re-generate &amp; Run&quot; to try again.</p>
         </div>
       )}
 

@@ -84,7 +84,6 @@ export function IssueAgentBadge({ repositoryFullName, issueNumber, activeAgents 
   // Subscribe to Supabase Realtime for live status updates
   useEffect(() => {
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channel = (supabase.channel(`agent-task-issue:${repositoryFullName}:${issueNumber}`) as any)
       .on(
         "postgres_changes",

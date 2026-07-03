@@ -4,7 +4,8 @@
       "Bash(rm /Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/platform/database/schemas/agentSkill.ts *)",
       "Bash(pnpm drizzle-kit *)",
       "Bash(grep -E \"\\\\.\\(ts|tsx|sql\\)$\")",
-      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(pnpm run *)"
     ],
     "additionalDirectories": [
       "/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/platform/app/(platform)/repositories/[repository]/agent/components"

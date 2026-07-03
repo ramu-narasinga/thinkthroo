@@ -208,7 +208,6 @@ function TaskRow({
     if (!expanded) return;
 
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channel = (supabase.channel(`task-progress:${task.id}`) as any)
       .on(
         "broadcast",
@@ -384,7 +383,6 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
 
   useEffect(() => {
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channel = (supabase.channel(`issue-detail:${repositoryFullName}:${issueNumber}`) as any)
       .on(
         "postgres_changes",
@@ -411,7 +409,6 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
 
   useEffect(() => {
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channel = (supabase.channel(`issue-comments-db:${repositoryFullName}:${issueNumber}`) as any)
       .on(
         "postgres_changes",

@@ -5,8 +5,30 @@ import { authedProcedure, router } from '@/lib/trpc/lambda';
 import { serverDatabase } from '@/lib/trpc/lambda/middleware';
 import { issueBoardStates, repositories, agentTasks, squads } from '@/database/schemas';
 import { enqueueForAgent } from '@/lib/enqueueForAgent';
+import { generateGithubAppJwt } from '@/lib/generate-github-app-jwt';
 
 type KanbanStatus = typeof KANBAN_STATUSES[number];
+
+async function generateInstallationToken(installationId: string): Promise<string> {
+  const response = await fetch(
+    `https://api.github.com/app/installations/${installationId}/access_tokens`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${generateGithubAppJwt()}`,
+        Accept: 'application/vnd.github+json',
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to create installation token: ${JSON.stringify(error)}`);
+  }
+
+  const data = await response.json();
+  return data.token;
+}
 
 function inferKanbanStatus(taskStatus: string | null): KanbanStatus {
   if (!taskStatus) return 'backlog';

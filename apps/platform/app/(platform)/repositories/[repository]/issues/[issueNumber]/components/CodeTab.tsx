@@ -478,7 +478,6 @@ export function CodeTab({ task, repositoryFullName, issueNumber, reviewTasks }: 
   useEffect(() => {
     if (!latestReviewTask) return;
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channel = (supabase.channel(`review-comments:${latestReviewTask.id}`) as any)
       .on(
         "postgres_changes",
