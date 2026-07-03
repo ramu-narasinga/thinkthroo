@@ -141,6 +141,7 @@ export function IssueAgentBadge({ repositoryFullName, issueNumber, activeAgents 
         status: "queued",
         failureReason: null,
         result: null,
+        taskType: "implementation",
         waitReason: null,
         sessionId: null,
         workDir: null,

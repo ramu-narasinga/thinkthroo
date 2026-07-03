@@ -197,6 +197,34 @@
       "when": 1782393282479,
       "tag": "0027_bitter_lady_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1782900594388,
+      "tag": "0028_numerous_leper_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1782981378433,
+      "tag": "0029_chunky_mulholland_black",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1783011147769,
+      "tag": "0030_slimy_titania",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1783011314360,
+      "tag": "0031_bouncy_bloodaxe",
+      "breakpoints": true
     }
   ]
 }

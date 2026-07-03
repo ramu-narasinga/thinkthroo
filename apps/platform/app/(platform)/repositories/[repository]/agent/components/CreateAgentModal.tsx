@@ -20,11 +20,18 @@ import {
 } from "@thinkthroo/ui/components/select";
 import { AGENT_MODELS } from "@/lib/agent-models";
 import { AgentItem, CreateAgentInput, DaemonRuntimeItem, UpdateAgentInput } from "@/service/agent/client";
+import { documentClientService } from "@/service/document/client";
+import { agentDocumentSkillClientService } from "@/service/agentDocumentSkill/client";
+
+interface DocOption {
+  id: string;
+  name: string;
+}
 
 interface CreateAgentModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (input: CreateAgentInput | UpdateAgentInput) => Promise<void>;
+  onSubmit: (input: CreateAgentInput | UpdateAgentInput) => Promise<AgentItem>;
   repositoryFullName: string;
   runtimes: DaemonRuntimeItem[];
   editAgent?: AgentItem | null;
@@ -51,6 +58,9 @@ export function CreateAgentModal({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
+  const [availableDocs, setAvailableDocs] = useState<DocOption[]>([]);
+  const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     if (open) {
       setName(editAgent?.name ?? "");
@@ -60,8 +70,25 @@ export function CreateAgentModal({
       setRuntimeId(editAgent?.runtimeId ?? "");
       setVisibility((editAgent?.visibility as "personal" | "workspace") ?? "personal");
       setError("");
+
+      // Fetch file documents for this repository
+      documentClientService.getRepositoryIdByName(repositoryFullName)
+        .then((repo) => documentClientService.getAllByRepositoryMinimal(repo.id))
+        .then((docs) => setAvailableDocs(
+          docs.filter((d: { type: string; id: string; name: string }) => d.type === 'file')
+            .map((d: { id: string; name: string }) => ({ id: d.id, name: d.name }))
+        ))
+        .catch(() => {});
+
+      if (editAgent) {
+        agentDocumentSkillClientService.getAgentDocumentSkills(editAgent.id)
+          .then((ids) => setSelectedDocIds(new Set(ids)))
+          .catch(() => {});
+      } else {
+        setSelectedDocIds(new Set());
+      }
     }
-  }, [open, editAgent]);
+  }, [open, editAgent, repositoryFullName]);
 
   const handleClose = () => {
     if (pending) return;
@@ -71,8 +98,21 @@ export function CreateAgentModal({
     setModel("claude-sonnet-4-6");
     setRuntimeId("");
     setVisibility("personal");
+    setSelectedDocIds(new Set());
     setError("");
     onClose();
+  };
+
+  const toggleDoc = (id: string) => {
+    setSelectedDocIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   const handleSubmit = async () => {
@@ -87,8 +127,9 @@ export function CreateAgentModal({
     setError("");
     setPending(true);
     try {
+      let agent: AgentItem;
       if (isEdit && editAgent) {
-        await onSubmit({
+        agent = await onSubmit({
           id: editAgent.id,
           name: name.trim(),
           description,
@@ -98,7 +139,7 @@ export function CreateAgentModal({
           runtimeId: runtimeId || null,
         } as UpdateAgentInput);
       } else {
-        await onSubmit({
+        agent = await onSubmit({
           repositoryFullName,
           name: name.trim(),
           description,
@@ -108,6 +149,7 @@ export function CreateAgentModal({
           runtimeId: runtimeId || undefined,
         } as CreateAgentInput);
       }
+      await agentDocumentSkillClientService.setAgentDocumentSkills(agent.id, [...selectedDocIds]);
       handleClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -165,6 +207,29 @@ export function CreateAgentModal({
               className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
             />
           </div>
+
+          {/* Skills */}
+          {availableDocs.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <Label>Skills</Label>
+              <div className="rounded-md border border-input divide-y max-h-40 overflow-y-auto">
+                {availableDocs.map((doc) => (
+                  <label
+                    key={doc.id}
+                    className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-muted/50 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedDocIds.has(doc.id)}
+                      onChange={() => toggleDoc(doc.id)}
+                      className="h-4 w-4 rounded border-input accent-primary"
+                    />
+                    {doc.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Model */}
           <div className="flex flex-col gap-1.5">

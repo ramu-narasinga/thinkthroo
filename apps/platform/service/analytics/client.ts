@@ -1,5 +1,13 @@
 import { lambdaClient } from '@/lib/trpc/client/lambda';
-import { WeeklyMetric, FileHotspot, RuleHotspot } from '@/types/analytics';
+import {
+  WeeklyMetric,
+  FileHotspot,
+  RuleHotspot,
+  AgentTaskSummary,
+  AgentWeeklyActivity,
+  AgentLeaderboardEntry,
+  RepositoryBreakdownEntry,
+} from '@/types/analytics';
 
 export class AnalyticsClientService {
   getWeekly = async (
@@ -26,6 +34,22 @@ export class AnalyticsClientService {
       weeks,
       limit,
     });
+  };
+
+  getAgentSummary = async (weeks: number = 8): Promise<AgentTaskSummary> => {
+    return lambdaClient.analytics.getAgentSummary.query({ weeks });
+  };
+
+  getAgentActivityByWeek = async (weeks: number = 8): Promise<AgentWeeklyActivity[]> => {
+    return lambdaClient.analytics.getAgentActivityByWeek.query({ weeks });
+  };
+
+  getAgentLeaderboard = async (weeks: number = 8): Promise<AgentLeaderboardEntry[]> => {
+    return lambdaClient.analytics.getAgentLeaderboard.query({ weeks });
+  };
+
+  getRepositoryBreakdown = async (weeks: number = 8): Promise<RepositoryBreakdownEntry[]> => {
+    return lambdaClient.analytics.getRepositoryBreakdown.query({ weeks });
   };
 }
 

@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { AppSidebar } from "@/components/app-sidebar";
-import { BetaBanner } from "@/components/beta-banner";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -66,7 +65,6 @@ export default function PlatformLayout({
           </div>
         </header>
         <div className="flex-1 min-h-0 overflow-y-auto flex flex-col p-4 pt-0" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
-          <BetaBanner />
           {children}
         </div>
       </SidebarInset>

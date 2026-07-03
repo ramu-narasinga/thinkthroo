@@ -25,3 +25,7 @@ export * from './agent';
 export * from './agentTask';
 export * from './agentTaskLog';
 export * from './issueComment';
+export * from './issueBoardState';
+export * from './agentTaskArtifact';
+export * from './agentTaskReviewComment';
+export * from './agentDocumentSkill';

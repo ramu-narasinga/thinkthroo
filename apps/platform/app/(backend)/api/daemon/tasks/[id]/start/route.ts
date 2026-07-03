@@ -3,6 +3,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { serverDB } from '@/database';
 import { agentTasks } from '@/database/schemas';
 import { getDaemonRuntime } from '../../../_auth';
+import { updateBoardKanbanStatus } from '@/database/models/issueBoardState';
 
 export async function POST(
   req: NextRequest,
@@ -31,6 +32,18 @@ export async function POST(
 
   if (!updated) {
     return NextResponse.json({ error: 'Task not found or invalid status transition' }, { status: 404 });
+  }
+
+  if (updated.taskType === 'implementation') {
+    try {
+      await updateBoardKanbanStatus(serverDB, {
+        repositoryId: updated.repositoryId,
+        issueNumber: updated.issueNumber,
+        kanbanStatus: 'in_progress',
+      });
+    } catch {
+      // Board sync is best-effort — do not fail the task start
+    }
   }
 
   return NextResponse.json(updated);

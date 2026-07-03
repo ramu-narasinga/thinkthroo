@@ -17,6 +17,9 @@ export const agentTasks = pgTable('agent_tasks', {
   issueBody: text('issue_body'),
   issueHtmlUrl: text('issue_html_url'),
 
+  // 'implementation' | 'test'
+  taskType: text('task_type').notNull().default('implementation'),
+
   // Lifecycle — 'queued' | 'dispatched' | 'waiting_local_directory' | 'running' | 'completed' | 'failed' | 'cancelled'
   status: text('status').notNull().default('queued'),
   failureReason: text('failure_reason'),

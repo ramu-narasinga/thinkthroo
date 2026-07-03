@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm /Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/platform/database/schemas/agentSkill.ts *)",
+      "Bash(pnpm drizzle-kit *)"
+    ],
+    "additionalDirectories": [
+      "/Users/ramunarasinga/Documents/thinkthroo/thinkthroo/apps/platform/app/(platform)/repositories/[repository]/agent/components"
+    ]
+  }
+}

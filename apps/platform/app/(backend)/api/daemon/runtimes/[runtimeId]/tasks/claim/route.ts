@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import { serverDB } from '@/database';
-import { agents, repositories } from '@/database/schemas';
+import { agents, repositories, agentDocumentSkills, documents } from '@/database/schemas';
 import { getDaemonRuntime } from '../../../../_auth';
 import { generateGithubAppJwt } from '@/lib/generate-github-app-jwt';
 
@@ -89,6 +89,7 @@ export async function POST(
     workDir:      raw['work_dir']       as string | null,
     attemptCount: raw['attempt_count']  as number,
     userMessage:  raw['user_message']   as string | null,
+    taskType:     (raw['task_type']     as string | null) ?? 'implementation',
   };
 
   // Fetch agent instructions + model
@@ -97,6 +98,34 @@ export async function POST(
     .from(agents)
     .where(eq(agents.id, task.agentId))
     .limit(1);
+
+  // Fetch document skills for this agent
+  const assocRows = await serverDB
+    .select({ documentId: agentDocumentSkills.documentId })
+    .from(agentDocumentSkills)
+    .where(eq(agentDocumentSkills.agentId, task.agentId));
+
+  let mappedSkills: Array<{ name: string; slug: string; content: string }> = [];
+
+  if (assocRows.length > 0) {
+    const allDocs = await serverDB
+      .select({ id: documents.id, name: documents.name, parentId: documents.parentId, type: documents.type, content: documents.content })
+      .from(documents)
+      .where(eq(documents.repositoryId, task.repositoryId));
+
+    const docMap = new Map(allDocs.map(d => [d.id, d]));
+
+    function getPath(id: string): string {
+      const d = docMap.get(id);
+      if (!d) return '';
+      return d.parentId ? `${getPath(d.parentId)}/${d.name}` : d.name;
+    }
+
+    const selectedIds = new Set(assocRows.map(r => r.documentId));
+    mappedSkills = allDocs
+      .filter(d => d.type === 'file' && selectedIds.has(d.id))
+      .map(d => ({ name: d.name, slug: getPath(d.id), content: d.content ?? '' }));
+  }
 
   // Fetch repository URL + installationId for GitHub token
   const [repo] = await serverDB
@@ -116,7 +145,7 @@ export async function POST(
 
   return NextResponse.json({
     task,
-    agent: agent ?? null,
+    agent: agent ? { ...agent, skills: mappedSkills } : null,
     repository: repo ?? null,
     githubToken,
   });

@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import { DaemonConfig } from './config.js';
 
 type ProgressType = 'info' | 'output' | 'error';
@@ -137,10 +138,12 @@ export interface ClaimedTask {
     workDir: string | null;
     attemptCount: number;
     userMessage: string | null;
+    taskType: string;
   };
   agent: {
     instructions: string;
     model: string;
+    skills: Array<{ name: string; slug: string; content: string }>;
   } | null;
   repository: {
     htmlUrl: string;
@@ -148,4 +151,41 @@ export interface ClaimedTask {
     fullName: string;
   } | null;
   githubToken: string | null;
+}
+
+export interface ReviewCommentInput {
+  filename: string;
+  startLine: number;
+  endLine?: number;
+  body: string;
+  severity: string;
+}
+
+export async function postReviewComments(
+  taskId: string,
+  summary: string,
+  comments: ReviewCommentInput[],
+  config: DaemonConfig
+): Promise<void> {
+  await post(
+    `${config.platformUrl}/api/daemon/tasks/${taskId}/review-comments`,
+    { summary, comments },
+    config
+  ).catch(() => {});
+}
+
+export async function uploadArtifact(
+  taskId: string,
+  type: 'screenshot' | 'video' | 'trace',
+  filename: string,
+  filePath: string,
+  config: DaemonConfig
+): Promise<void> {
+  const data = await fs.readFile(filePath);
+  const base64Data = data.toString('base64');
+  await post(
+    `${config.platformUrl}/api/daemon/tasks/${taskId}/artifacts`,
+    { type, filename, base64Data, capturedAt: new Date().toISOString() },
+    config
+  ).catch(() => {});
 }

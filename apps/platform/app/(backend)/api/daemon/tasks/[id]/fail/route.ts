@@ -3,6 +3,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { serverDB } from '@/database';
 import { agentTasks } from '@/database/schemas';
 import { getDaemonRuntime } from '../../../_auth';
+import { updateBoardKanbanStatus } from '@/database/models/issueBoardState';
 
 const RETRYABLE_REASONS = ['runtime_offline', 'timeout'];
 const MAX_ATTEMPTS = 2;
@@ -75,6 +76,18 @@ export async function POST(
       })
       .returning();
     retryTask = newTask;
+  }
+
+  if (failed.taskType === 'implementation') {
+    try {
+      await updateBoardKanbanStatus(serverDB, {
+        repositoryId: failed.repositoryId,
+        issueNumber: failed.issueNumber,
+        kanbanStatus: 'blocked',
+      });
+    } catch {
+      // Board sync is best-effort — do not fail the task failure handler
+    }
   }
 
   return NextResponse.json({ task: failed, retryTask });
