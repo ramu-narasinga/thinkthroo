@@ -5,7 +5,7 @@ import Image from "next/image";
 import { LoginForm } from "@/components/login-form";
 import { useUmamiTracking } from "@/hooks/useUmamiTracking";
 
-export function LoginPageClient({ error }: { error?: string }) {
+export function LoginPageClient({ error, next }: { error?: string; next?: string }) {
   const { trackEvent } = useUmamiTracking();
 
   useEffect(() => {
@@ -33,6 +33,7 @@ export function LoginPageClient({ error }: { error?: string }) {
           <div className="w-full max-w-sm">
             <LoginForm
               error={error}
+              next={next}
               className="min-h-0 w-full bg-transparent py-0 dark:bg-transparent"
             />
           </div>
@@ -59,12 +60,10 @@ export function LoginPageClient({ error }: { error?: string }) {
           <div className="relative z-20 flex-1 flex items-center justify-center overflow-hidden">
             <div className="max-w-xl text-center">
               <p className="text-4xl font-bold text-black leading-tight">
-                AI Code Review that Enforces Codebase Architecture
+                Your engineering team, multiplied.
               </p>
               <p className="mt-4 text-base text-gray-500">
-                Stop AI slop from reaching your main branch. Think Throo enforces
-                proven architecture patterns, catching violations before they
-                compound into technical debt.
+                Create AI agents, assign them tasks like teammates, and watch them ship code — powered by your own Claude API key.
               </p>
             </div>
           </div>
@@ -86,6 +85,7 @@ export function LoginPageClient({ error }: { error?: string }) {
             <div className="w-full max-w-sm">
               <LoginForm
                 error={error}
+                next={next}
                 className="min-h-0 w-full bg-transparent py-0 dark:bg-transparent"
               />
             </div>

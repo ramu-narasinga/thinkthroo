@@ -2,6 +2,7 @@ import { pgTable, uuid, text, integer, timestamp, unique, pgPolicy } from 'drizz
 import { sql } from 'drizzle-orm';
 import { repositories } from './repository';
 import { agents } from './agent';
+import { squads } from './squad';
 
 export const issueBoardStates = pgTable('issue_board_states', {
   id:           uuid().defaultRandom().primaryKey().notNull(),
@@ -14,10 +15,11 @@ export const issueBoardStates = pgTable('issue_board_states', {
   // 'backlog' | 'todo' | 'in_progress' | 'in_review' | 'done' | 'blocked'
   kanbanStatus: text('kanban_status').notNull().default('backlog'),
 
-  // Assignee — 'agent' | 'member' | null (unassigned)
+  // Assignee — 'agent' | 'member' | 'squad' | null (unassigned)
   assigneeType:     text('assignee_type'),
   assigneeAgentId:  uuid('assignee_agent_id').references(() => agents.id, { onDelete: 'set null' }),
   assigneeMemberId: uuid('assignee_member_id'),
+  assigneeSquadId:  uuid('assignee_squad_id').references(() => squads.id, { onDelete: 'set null' }),
 
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

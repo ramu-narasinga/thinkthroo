@@ -16,21 +16,25 @@ const inviteProcedure = authedProcedure
   });
 
 export const inviteRouter = router({
-  getAll: inviteProcedure.query(async ({ ctx }) => {
-    return ctx.inviteService.getAll();
-  }),
+  getAll: inviteProcedure
+    .input(z.object({ organizationId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.inviteService.getAll(input.organizationId);
+    }),
 
   sendInvite: inviteProcedure
     .input(
       z.object({
         fullName: z.string().min(1),
         email: z.string().email(),
+        organizationId: z.string().uuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       return ctx.inviteService.sendInvite({
         fullName: input.fullName,
         email: input.email,
+        organizationId: input.organizationId,
       });
     }),
 });

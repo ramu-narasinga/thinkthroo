@@ -25,6 +25,7 @@ import { issueSelectors } from "@/store/issues/selectors";
 import { IssueState } from "@/store/issues/initialState";
 import { useAgentStore } from "@/store/agent";
 import { agentSelectors } from "@/store/agent/selectors";
+import { squadClientService, SquadWithMembers } from "@/service/squad/client";
 import { useIssueBoardStateStore } from "@/store/issueBoardState/store";
 import { boardSelectors } from "@/store/issueBoardState/selectors";
 import { IssueAgentBadge } from "./IssueAgentBadge";
@@ -50,6 +51,7 @@ export function IssuesTab() {
 
   const [viewMode, setViewMode] = React.useState<ViewMode>("board");
   const [boardFilter, setBoardFilter] = React.useState<AssigneeFilter>("all");
+  const [squads, setSquads] = React.useState<SquadWithMembers[]>([]);
   const [addingToBoard, setAddingToBoard] = React.useState<number | null>(null);
   const [syncing, setSyncing] = React.useState(false);
   const [showNewIssue, setShowNewIssue] = React.useState(false);
@@ -84,6 +86,9 @@ export function IssuesTab() {
     fetchIssues(repositoryFullName, 1, stateFilter);
     fetchAgents(repositoryFullName);
     fetchBoard(repositoryFullName);
+    squadClientService.getByRepository(repositoryFullName)
+      .then(setSquads)
+      .catch(() => {});
   }, [repositoryFullName, stateFilter, fetchIssues, fetchAgents, fetchBoard]);
 
   const boardIssueNumbers = React.useMemo(
@@ -235,6 +240,7 @@ export function IssuesTab() {
         <KanbanBoard
           repositoryFullName={repositoryFullName}
           agents={activeAgents}
+          squads={squads}
           filter={boardFilter}
           setFilter={setBoardFilter}
         />

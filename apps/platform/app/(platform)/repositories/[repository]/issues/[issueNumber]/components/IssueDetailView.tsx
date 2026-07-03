@@ -16,6 +16,7 @@ import {
   Zap,
   Bot,
   User,
+  Users2,
   Send,
   Code2,
   MessageSquare,
@@ -35,6 +36,9 @@ import {
   issueCommentClientService,
   IssueCommentItem,
 } from "@/service/issueComment/client";
+import { issueBoardStateClientService } from "@/service/issueBoardState/client";
+import { agentClientService } from "@/service/agent/client";
+import { squadClientService } from "@/service/squad/client";
 import { CodeTab } from "./CodeTab";
 import { TestsTab } from "./TestsTab";
 
@@ -340,6 +344,7 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>("activity");
+  const [assigneeDisplay, setAssigneeDisplay] = useState<{ type: 'agent' | 'squad' | null; name: string | null }>({ type: null, name: null });
 
   const encodedRepo = encodeURIComponent(repositoryFullName);
   const backHref = `/repositories/${encodedRepo}/issues`;
@@ -348,6 +353,27 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
     agentTaskClientService.getByIssue(repositoryFullName, issueNumber).then((data) => {
       setTasks(data);
     }).catch(() => {}).finally(() => setIsLoading(false));
+  }, [repositoryFullName, issueNumber]);
+
+  useEffect(() => {
+    async function resolveAssignee() {
+      try {
+        const items = await issueBoardStateClientService.getByRepository(repositoryFullName);
+        const item = items.find((b) => b.issueNumber === issueNumber);
+        if (!item || !item.assigneeType) return;
+
+        if (item.assigneeType === 'agent' && item.assigneeAgentId) {
+          const agents = await agentClientService.getByRepository(repositoryFullName);
+          const agent = agents.find((a) => a.id === item.assigneeAgentId);
+          setAssigneeDisplay({ type: 'agent', name: agent?.name ?? null });
+        } else if (item.assigneeType === 'squad' && item.assigneeSquadId) {
+          const squads = await squadClientService.getByRepository(repositoryFullName);
+          const squad = squads.find((s) => s.id === item.assigneeSquadId);
+          setAssigneeDisplay({ type: 'squad', name: squad?.name ?? null });
+        }
+      } catch { /* silent */ }
+    }
+    resolveAssignee();
   }, [repositoryFullName, issueNumber]);
 
   useEffect(() => {
@@ -793,6 +819,26 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
                   {statusCfg.icon}
                   {statusCfg.label}
                 </span>
+              </div>
+
+              {/* Assignee */}
+              <div className="px-4 py-3 space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Assignee
+                </p>
+                {assigneeDisplay.type === 'agent' && assigneeDisplay.name ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs">
+                    <Bot className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    {assigneeDisplay.name}
+                  </span>
+                ) : assigneeDisplay.type === 'squad' && assigneeDisplay.name ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs">
+                    <Users2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    {assigneeDisplay.name}
+                  </span>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Unassigned</p>
+                )}
               </div>
 
               {/* Pull Requests */}

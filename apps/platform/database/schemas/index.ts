@@ -29,3 +29,6 @@ export * from './issueBoardState';
 export * from './agentTaskArtifact';
 export * from './agentTaskReviewComment';
 export * from './agentDocumentSkill';
+export * from './squad';
+export * from './squadMember';
+export * from './license';

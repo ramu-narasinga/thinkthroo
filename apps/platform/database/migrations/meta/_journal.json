@@ -225,6 +225,20 @@
       "when": 1783011314360,
       "tag": "0031_bouncy_bloodaxe",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1751500800000,
+      "tag": "0032_add_squads",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1751587200000,
+      "tag": "0033_invite_org_scope",
+      "breakpoints": true
     }
   ]
 }

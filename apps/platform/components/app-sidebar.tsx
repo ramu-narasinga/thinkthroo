@@ -118,13 +118,13 @@ const data = {
       url: "/runtime",
       icon: Server,
     },
-  ],
-  manage: [
     {
       name: "Analytics",
       url: "/analytics",
       icon: LayoutDashboard,
     },
+  ],
+  manage: [
     {
       name: "Integrations",
       url: "/integrations",

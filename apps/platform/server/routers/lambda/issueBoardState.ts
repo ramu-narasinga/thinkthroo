@@ -3,8 +3,8 @@ import { eq, and, inArray, desc } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
 import { authedProcedure, router } from '@/lib/trpc/lambda';
 import { serverDatabase } from '@/lib/trpc/lambda/middleware';
-import { issueBoardStates, repositories, agents, daemonRuntimes, agentTasks } from '@/database/schemas';
-import { generateGithubAppJwt } from '@/lib/generate-github-app-jwt';
+import { issueBoardStates, repositories, agentTasks, squads } from '@/database/schemas';
+import { enqueueForAgent } from '@/lib/enqueueForAgent';
 
 type KanbanStatus = typeof KANBAN_STATUSES[number];
 
@@ -38,106 +38,6 @@ async function resolveRepo(
     .where(and(eq(repositories.fullName, repositoryFullName), eq(repositories.userId, userId)))
     .limit(1);
   return repo ?? null;
-}
-
-async function generateInstallationToken(installationId: string): Promise<string> {
-  const res = await fetch(
-    `https://api.github.com/app/installations/${installationId}/access_tokens`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${generateGithubAppJwt()}`,
-        Accept: 'application/vnd.github+json',
-      },
-    }
-  );
-  if (!res.ok) throw new Error('Failed to generate installation token');
-  const data = await res.json();
-  return data.token;
-}
-
-/**
- * Auto-enqueue a task for the assigned agent when an issue is moved to "todo".
- * Returns the new task record, or null if the agent/runtime is not ready.
- */
-async function enqueueForAgent(
-  db: typeof import('@/database').serverDB,
-  {
-    agentId,
-    repoId,
-    repoFullName,
-    repoInstallationId,
-    issueNumber,
-    issueTitle,
-    issueHtmlUrl,
-    userId,
-  }: {
-    agentId: string;
-    repoId: string;
-    repoFullName: string;
-    repoInstallationId: string;
-    issueNumber: number;
-    issueTitle: string;
-    issueHtmlUrl: string | null;
-    userId: string;
-  }
-) {
-  const [agent] = await db
-    .select({ id: agents.id, runtimeId: agents.runtimeId, status: agents.status })
-    .from(agents)
-    .where(
-      and(
-        eq(agents.id, agentId),
-        eq(agents.userId, userId),
-        eq(agents.repositoryId, repoId)
-      )
-    )
-    .limit(1);
-
-  if (!agent || agent.status !== 'active' || !agent.runtimeId) return null;
-
-  const [runtime] = await db
-    .select({ status: daemonRuntimes.status })
-    .from(daemonRuntimes)
-    .where(and(eq(daemonRuntimes.id, agent.runtimeId), eq(daemonRuntimes.userId, userId)))
-    .limit(1);
-
-  if (!runtime || runtime.status !== 'online') return null;
-
-  // Fetch issue body from GitHub
-  const [owner, repo] = repoFullName.split('/');
-  let issueBody: string | null = null;
-  try {
-    const token = await generateInstallationToken(repoInstallationId);
-    const issueRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`,
-      { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' } }
-    );
-    if (issueRes.ok) {
-      const data = await issueRes.json() as { body: string | null };
-      issueBody = data.body;
-    }
-  } catch {
-    // Issue body is non-critical — proceed without it
-  }
-
-  const [task] = await db
-    .insert(agentTasks)
-    .values({
-      agentId: agent.id,
-      runtimeId: agent.runtimeId,
-      repositoryId: repoId,
-      userId,
-      issueNumber,
-      issueTitle,
-      issueBody,
-      issueHtmlUrl,
-      status: 'queued',
-      taskType: 'implementation',
-    })
-    .returning();
-
-  return task;
 }
 
 /**
@@ -256,7 +156,6 @@ export const issueBoardStateRouter = router({
       let enqueuedTask = null;
 
       if (input.kanbanStatus === 'todo') {
-        // Auto-enqueue only if an agent is assigned
         if (current.assigneeType === 'agent' && current.assigneeAgentId) {
           enqueuedTask = await enqueueForAgent(ctx.serverDB, {
             agentId: current.assigneeAgentId,
@@ -268,6 +167,25 @@ export const issueBoardStateRouter = router({
             issueHtmlUrl: current.issueHtmlUrl,
             userId: ctx.userId,
           });
+        } else if (current.assigneeType === 'squad' && current.assigneeSquadId) {
+          // Resolve squad leader then enqueue for them
+          const [squad] = await ctx.serverDB
+            .select({ leaderAgentId: squads.leaderAgentId })
+            .from(squads)
+            .where(and(eq(squads.id, current.assigneeSquadId), eq(squads.userId, ctx.userId)))
+            .limit(1);
+          if (squad?.leaderAgentId) {
+            enqueuedTask = await enqueueForAgent(ctx.serverDB, {
+              agentId: squad.leaderAgentId,
+              repoId: repo.id,
+              repoFullName: repo.fullName,
+              repoInstallationId: repo.installationId,
+              issueNumber: input.issueNumber,
+              issueTitle: current.issueTitle,
+              issueHtmlUrl: current.issueHtmlUrl,
+              userId: ctx.userId,
+            });
+          }
         }
         // member assignee or unassigned → no auto-trigger, just update the column
       }
@@ -289,9 +207,10 @@ export const issueBoardStateRouter = router({
       z.object({
         repositoryFullName: z.string().min(1),
         issueNumber: z.number().int().positive(),
-        assigneeType: z.enum(['agent', 'member']).nullable(),
+        assigneeType: z.enum(['agent', 'member', 'squad']).nullable(),
         assigneeAgentId: z.string().uuid().nullable().optional(),
         assigneeMemberId: z.string().uuid().nullable().optional(),
+        assigneeSquadId: z.string().uuid().nullable().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -304,6 +223,7 @@ export const issueBoardStateRouter = router({
           assigneeType: input.assigneeType,
           assigneeAgentId: input.assigneeAgentId ?? null,
           assigneeMemberId: input.assigneeMemberId ?? null,
+          assigneeSquadId: input.assigneeSquadId ?? null,
           updatedAt: new Date(),
         })
         .where(

@@ -178,21 +178,21 @@ export function Problem() {
   const problems = [
     {
       icon: AlertCircle,
-      title: "Inconsistent Patterns Multiply",
+      title: "Your backlog never clears",
       description:
-        "Each developer introduces their own approach. What starts as one shortcut becomes 10+ scattered implementations across your codebase.",
+        "Every sprint ends with carryover. There's always more to build than capacity to build it. Features get deprioritized, not because they don't matter, but because the team is stretched.",
     },
     {
       icon: GitPullRequest,
-      title: "Human Review Can't Scale",
+      title: "Hiring doesn't scale",
       description:
-        "Senior developers spend 20% of PR review time catching architecture violations. Direct API calls, duplicate utilities, and bypassed patterns slip through anyway.",
+        "Recruiting takes months. Onboarding takes more. By the time the new hire is productive, the roadmap has already shifted. You needed them yesterday.",
     },
     {
       icon: Zap,
-      title: "Technical Debt Compounds",
+      title: "Senior time is wasted",
       description:
-        "When that endpoint changes, you're hunting down 7 different implementations. What should be a one-line fix becomes 3+ hours of debugging.",
+        "Your best engineers spend hours on boilerplate, repetitive tests, and routine fixes that block the team but don't need their expertise.",
     },
   ]
 
@@ -210,10 +210,10 @@ export function Problem() {
             <span className="text-sm font-semibold text-foreground">The Problem</span>
           </div>
           <h1 className="text-foreground leading-tighter max-w-2xl mb-6 mx-auto text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] lg:font-semibold xl:text-5xl xl:tracking-tighter">
-            Inconsistent Code Patterns Are Costing You Weeks
+            Your roadmap is bigger than your team.
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance">
-            Inconsistent patterns slip through code review, creating technical debt that compounds silently. One violation today means hours of debugging tomorrow.
+            Implementation capacity is the bottleneck. The backlog grows faster than you can hire. And your best engineers are stuck on work that shouldn&apos;t need them.
           </p>
         </div>
 
@@ -245,110 +245,44 @@ export function Problem() {
         <Card className="relative border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background p-8 lg:p-12 overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -z-10"></div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left content */}
-            <div>
-              <h3 className="text-2xl lg:text-3xl font-bold text-foreground mb-6">The Pattern Violation Cycle</h3>
+          <h3 className="text-2xl lg:text-3xl font-bold text-foreground mb-8">A week without agents</h3>
 
-              <div className="space-y-4">
-                <div className="flex gap-4 items-start">
-                  <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-lg bg-primary/20 text-primary font-semibold text-sm">
-                    1
-                  </div>
-                  <p className="text-foreground/80 pt-1">New developer joins team with established service layer architecture</p>
-                </div>
-
-                <div className="flex gap-4 items-start">
-                  <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-lg bg-primary/20 text-primary font-semibold text-sm">
-                    2
-                  </div>
-                  <p className="text-foreground/80 pt-1">Submits PR with direct API call in page.tsx—bypassing existing userService.ts</p>
-                </div>
-
-                <div className="flex gap-4 items-start">
-                  <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-sm">
-                    3
-                  </div>
-                  <p className="text-foreground/80 pt-1">
-                    Reviewers miss it. Code looks fine. <span className="font-medium">Gets merged to production</span>
-                  </p>
-                </div>
-
-                <div className="flex gap-4 items-start">
-                  <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-lg bg-destructive/20 text-destructive font-semibold text-sm">
-                    4
-                  </div>
-                  <div className="text-foreground/80 pt-1">
-                    <p className="mb-2">Three months later: API endpoint changes</p>
-                    <ul className="space-y-1 text-sm text-muted-foreground ml-4">
-                      <li>• 7 scattered implementations to track down</li>
-                      <li>• 3+ hours of debugging and fixes</li>
-                      <li>• Production incident that could've been prevented</li>
-                    </ul>
-                  </div>
-                </div>
+          <div className="space-y-4">
+            <div className="flex gap-4 items-start">
+              <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-lg bg-primary/20 text-primary font-semibold text-sm">
+                1
               </div>
-
-              <div className="mt-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                <p className="text-sm text-foreground/90">
-                  <span className="font-semibold">The hidden cost?</span> Your senior developers become pattern police, spending hours in reviews catching violations that automated tools should catch instantly.
-                </p>
-              </div>
+              <p className="text-foreground/80 pt-1">Sprint planning adds 8 tickets. Team capacity is 5. Three tickets are pushed to next sprint before work even starts.</p>
             </div>
 
-            {/* Right - Code example */}
-            <div className="relative">
-              <div className="bg-card border border-border/50 rounded-lg p-6 font-mono text-sm overflow-x-auto">
-                <div className="text-muted-foreground/70 mb-4">{"// ❌ What gets merged"}</div>
-                <div className="space-y-2 text-foreground/90">
-                  <div>
-                    <span className="text-primary">export default</span>
-                    <span> </span>
-                    <span className="text-cyan-400">async function</span>
-                    <span> Page() {"{"}</span>
-                  </div>
-                  <div className="ml-4">
-                    <span className="text-amber-400">const</span>
-                    <span> response = </span>
-                    <span className="text-purple-400">await</span>
-                    <span> </span>
-                    <span className="text-yellow-400">fetch</span>
-                    <span className="text-foreground/70">(</span>
-                    <span className="text-green-400">'/api/users'</span>
-                    <span className="text-foreground/70">)</span>
-                  </div>
-                  <div className="ml-4">
-                    <span className="text-muted-foreground/60">// userService.ts already exists 😅</span>
-                  </div>
-                  <div>{"}"}</div>
-                </div>
-
-                <div className="text-muted-foreground/70 mt-6 mb-4 pt-4 border-t border-border/30">
-                  {"// ✅ Should have used"}
-                </div>
-                <div className="space-y-2 text-green-400/90">
-                  <div>
-                    <span className="text-amber-400">import</span>
-                    <span> {"{ "}</span>
-                    <span>getUsers</span>
-                    <span> {"} "}</span>
-                    <span className="text-amber-400">from</span>
-                    <span className="text-green-400"> '@/services/user'</span>
-                  </div>
-                  <div>
-                    <span className="text-amber-400">const</span>
-                    <span> users = </span>
-                    <span className="text-purple-400">await</span>
-                    <span> </span>
-                    <span className="text-yellow-400">getUsers</span>
-                    <span>()</span>
-                  </div>
-                  <div className="ml-0 mt-3 text-muted-foreground/60 text-xs">
-                    <span>Centralized, reusable, one place to update</span>
-                  </div>
-                </div>
+            <div className="flex gap-4 items-start">
+              <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-lg bg-primary/20 text-primary font-semibold text-sm">
+                2
               </div>
+              <p className="text-foreground/80 pt-1">Senior engineers context-switch between writing code and reviewing PRs. Neither gets the focus it needs.</p>
             </div>
+
+            <div className="flex gap-4 items-start">
+              <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-sm">
+                3
+              </div>
+              <p className="text-foreground/80 pt-1">
+                2 more tickets carry over. Deadline slips. <span className="font-medium">Stakeholders ask for a status update.</span>
+              </p>
+            </div>
+
+            <div className="flex gap-4 items-start">
+              <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-lg bg-destructive/20 text-destructive font-semibold text-sm">
+                4
+              </div>
+              <p className="text-foreground/80 pt-1">Team decides to hire. Recruiting takes 3 months. Onboarding takes 2 more. The backlog is now twice as long.</p>
+            </div>
+          </div>
+
+          <div className="mt-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <p className="text-sm text-foreground/90">
+              <span className="font-semibold">The real bottleneck isn&apos;t talent.</span> It&apos;s capacity. AI agents don&apos;t replace your engineers — they multiply what each engineer can ship.
+            </p>
           </div>
         </Card>
       </div>

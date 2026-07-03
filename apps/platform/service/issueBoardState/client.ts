@@ -10,9 +10,10 @@ export interface IssueBoardItem {
   issueTitle: string;
   issueHtmlUrl: string | null;
   kanbanStatus: KanbanStatus;
-  assigneeType: 'agent' | 'member' | null;
+  assigneeType: 'agent' | 'member' | 'squad' | null;
   assigneeAgentId: string | null;
   assigneeMemberId: string | null;
+  assigneeSquadId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,9 +46,10 @@ export class IssueBoardStateClientService {
   updateAssignee = async (input: {
     repositoryFullName: string;
     issueNumber: number;
-    assigneeType: 'agent' | 'member' | null;
+    assigneeType: 'agent' | 'member' | 'squad' | null;
     assigneeAgentId?: string | null;
     assigneeMemberId?: string | null;
+    assigneeSquadId?: string | null;
   }): Promise<IssueBoardItem> => {
     return lambdaClient.issueBoardState.updateAssignee.mutate(input) as Promise<IssueBoardItem>;
   };

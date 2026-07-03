@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { serverDB } from '@/database';
-import { agentTasks, issueComments } from '@/database/schemas';
+import { agentTasks, issueComments, issueBoardStates, repositories } from '@/database/schemas';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import { getDaemonRuntime } from '../../../_auth';
+import { enqueueForAgentByName } from '@/lib/enqueueForAgent';
 
 export async function POST(
   req: NextRequest,
@@ -65,6 +66,50 @@ export async function POST(
     event: 'new-comment',
     payload: { comment },
   });
+
+  // Squad delegation: when the leader agent posts a comment on a squad-assigned issue,
+  // scan for @AgentName mentions and auto-queue tasks for matched agents.
+  try {
+    const [boardState] = await serverDB
+      .select({ assigneeType: issueBoardStates.assigneeType, issueTitle: issueBoardStates.issueTitle, issueHtmlUrl: issueBoardStates.issueHtmlUrl })
+      .from(issueBoardStates)
+      .where(
+        and(
+          eq(issueBoardStates.repositoryId, task.repositoryId),
+          eq(issueBoardStates.issueNumber, task.issueNumber!),
+          eq(issueBoardStates.userId, task.userId)
+        )
+      )
+      .limit(1);
+
+    if (boardState?.assigneeType === 'squad') {
+      const mentions = [...commentBody.matchAll(/@([\w][\w\s-]*[\w]|[\w]+)/g)].map((m) => m[1].trim());
+      if (mentions.length > 0) {
+        const [repo] = await serverDB
+          .select({ fullName: repositories.fullName, installationId: repositories.installationId })
+          .from(repositories)
+          .where(eq(repositories.id, task.repositoryId))
+          .limit(1);
+
+        if (repo) {
+          for (const name of mentions) {
+            await enqueueForAgentByName(serverDB, {
+              agentName: name,
+              repositoryId: task.repositoryId,
+              repoFullName: repo.fullName,
+              repoInstallationId: repo.installationId,
+              issueNumber: task.issueNumber!,
+              issueTitle: boardState.issueTitle ?? '',
+              issueHtmlUrl: boardState.issueHtmlUrl ?? null,
+              userId: task.userId,
+            }).catch(() => {/* best-effort */});
+          }
+        }
+      }
+    }
+  } catch {
+    // Non-fatal — squad delegation is best-effort
+  }
 
   return NextResponse.json({ ok: true, commentId: comment.id });
 }

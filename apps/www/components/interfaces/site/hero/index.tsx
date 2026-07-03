@@ -18,12 +18,12 @@ export function Hero() {
     <PageHeader>
       <Announcement />
       <PageHeaderHeading className="text-foreground">
-        AI Code Review that Enforces Codebase Architecture
+        Your engineering team, multiplied.
       </PageHeaderHeading>
       <PageHeaderDescription>
-        Stop AI slop from reaching your main branch. Think Throo enforces proven
-        architecture patterns, catching violations before they compound into
-        technical debt.
+        Think Throo turns GitHub issues into shipped code. Create AI agents,
+        assign them tasks like teammates, and watch them execute autonomously —
+        powered by your own Claude API key.
       </PageHeaderDescription>
 
       <PageActions>
@@ -33,17 +33,17 @@ export function Hero() {
             rel="noreferrer"
             href={siteConfig.links.learningPlatform}
             onClick={() => {
-              track("get-started", {
-                button: "Get Started",
+              track("start-free-trial", {
+                button: "Start free trial",
                 href: siteConfig.links.learningPlatform,
               });
-              posthog.capture("hero_get_started_clicked", {
-                button: "Get Started",
+              posthog.capture("hero_start_trial_clicked", {
+                button: "Start free trial",
                 href: siteConfig.links.learningPlatform,
               });
             }}
           >
-            Get Started
+            Start free trial
           </Link>
         </Button>
         <Button asChild size="sm" variant="outline">
@@ -51,7 +51,7 @@ export function Hero() {
             target="_blank"
             rel="noreferrer"
             href={siteConfig.links.consultation}
-             onClick={() => {
+            onClick={() => {
               track("book-a-demo", {
                 button: "Book a demo",
                 href: siteConfig.links.consultation,
@@ -66,6 +66,7 @@ export function Hero() {
           </Link>
         </Button>
       </PageActions>
+      <p className="text-sm text-muted-foreground">7-day free trial · No credit card required</p>
     </PageHeader>
   );
 }

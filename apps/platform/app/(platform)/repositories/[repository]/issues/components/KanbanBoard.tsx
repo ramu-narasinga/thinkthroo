@@ -2,9 +2,7 @@
 
 import React, { useMemo, useState } from "react"; // useState still needed for assigneePopover
 import { DndContext, DragEndEvent, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Bot, User, X } from "lucide-react";
-import { Button } from "@thinkthroo/ui/components/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@thinkthroo/ui/components/popover";
+import { Bot, Users2, X } from "lucide-react";
 import { useIssueBoardStateStore } from "@/store/issueBoardState/store";
 import { boardSelectors } from "@/store/issueBoardState/selectors";
 import { useAgentTaskStore } from "@/store/agentTask/store";
@@ -12,6 +10,7 @@ import { agentTaskSelectors } from "@/store/agentTask/selectors";
 import { KanbanStatus, IssueBoardItem } from "@/service/issueBoardState/client";
 import { AgentItem } from "@/service/agent/client";
 import { AgentTaskItem } from "@/service/agentTask/client";
+import { SquadWithMembers } from "@/service/squad/client";
 import { KanbanColumn } from "./KanbanColumn";
 
 const COLUMN_ORDER: KanbanStatus[] = ["backlog", "todo", "in_progress", "in_review", "done", "blocked"];
@@ -21,11 +20,12 @@ type AssigneeFilter = "all" | "agents" | "members";
 interface Props {
   repositoryFullName: string;
   agents: AgentItem[];
+  squads: SquadWithMembers[];
   filter: AssigneeFilter;
   setFilter: (f: AssigneeFilter) => void;
 }
 
-export function KanbanBoard({ repositoryFullName, agents, filter, setFilter }: Props) {
+export function KanbanBoard({ repositoryFullName, agents, squads, filter, setFilter }: Props) {
   const boardItems = useIssueBoardStateStore(boardSelectors.boardItems);
   const isLoading = useIssueBoardStateStore(boardSelectors.isLoading);
   const moveCard = useIssueBoardStateStore((s) => s.moveCard);
@@ -85,12 +85,17 @@ export function KanbanBoard({ repositoryFullName, agents, filter, setFilter }: P
   }
 
   function handleAssignAgent(item: IssueBoardItem, agent: AgentItem) {
-    updateAssignee(repositoryFullName, item.issueNumber, "agent", agent.id, null);
+    updateAssignee(repositoryFullName, item.issueNumber, "agent", agent.id, null, null);
+    setAssigneePopover(null);
+  }
+
+  function handleAssignSquad(item: IssueBoardItem, squad: SquadWithMembers) {
+    updateAssignee(repositoryFullName, item.issueNumber, "squad", null, null, squad.id);
     setAssigneePopover(null);
   }
 
   function handleClearAssignee(item: IssueBoardItem) {
-    updateAssignee(repositoryFullName, item.issueNumber, null, null, null);
+    updateAssignee(repositoryFullName, item.issueNumber, null, null, null, null);
     setAssigneePopover(null);
   }
 
@@ -126,7 +131,9 @@ export function KanbanBoard({ repositoryFullName, agents, filter, setFilter }: P
         <AssigneePopover
           item={assigneePopover}
           agents={agents}
+          squads={squads}
           onAssignAgent={handleAssignAgent}
+          onAssignSquad={handleAssignSquad}
           onClearAssignee={handleClearAssignee}
           onClose={() => setAssigneePopover(null)}
         />
@@ -138,12 +145,14 @@ export function KanbanBoard({ repositoryFullName, agents, filter, setFilter }: P
 interface AssigneePopoverProps {
   item: IssueBoardItem;
   agents: AgentItem[];
+  squads: SquadWithMembers[];
   onAssignAgent: (item: IssueBoardItem, agent: AgentItem) => void;
+  onAssignSquad: (item: IssueBoardItem, squad: SquadWithMembers) => void;
   onClearAssignee: (item: IssueBoardItem) => void;
   onClose: () => void;
 }
 
-function AssigneePopover({ item, agents, onAssignAgent, onClearAssignee, onClose }: AssigneePopoverProps) {
+function AssigneePopover({ item, agents, squads, onAssignAgent, onAssignSquad, onClearAssignee, onClose }: AssigneePopoverProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/20"
@@ -179,6 +188,25 @@ function AssigneePopover({ item, agents, onAssignAgent, onClearAssignee, onClose
             </button>
           ))}
         </div>
+
+        {squads.length > 0 && (
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground px-1">Squads</p>
+            {squads.map((squad) => (
+              <button
+                key={squad.id}
+                type="button"
+                onClick={() => onAssignSquad(item, squad)}
+                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm hover:bg-muted transition-colors text-left ${
+                  item.assigneeSquadId === squad.id ? "bg-muted font-medium" : ""
+                }`}
+              >
+                <Users2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                {squad.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {item.assigneeType && (
           <button

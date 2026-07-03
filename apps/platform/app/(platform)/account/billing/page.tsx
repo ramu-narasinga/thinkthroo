@@ -1,266 +1,134 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { Button } from "@thinkthroo/ui/components/button"
 import { Badge } from "@thinkthroo/ui/components/badge"
-import { Switch } from "@thinkthroo/ui/components/switch"
-import { Separator } from "@thinkthroo/ui/components/separator"
 import { PricingFeatureList } from "@thinkthroo/ui/components/pricing-feature-list"
-import { CreditBundleGrid } from "@thinkthroo/ui/components/credit-bundle-grid"
-import { ArchitectureStorageGrid } from "@thinkthroo/ui/components/architecture-storage-grid"
-import { freeFeatures, proFeatures, creditBundles, pricing } from "@thinkthroo/ui/lib/pricing"
-import { cn } from "@/lib/utils"
+import { freeFeatures, proFeatures, pricing } from "@thinkthroo/ui/lib/pricing"
 import { toast } from "sonner"
-import { BuyCreditsModal } from "@/components/buy-credits-modal"
-import { DowngradeModal } from "./components/downgrade-modal"
+import { BuyLicenseButton } from "@/components/billing-page-client"
 import { useOrganizationStore } from "@/store/organization"
 import { organizationSelectors } from "@/store/organization/selectors"
 import { useUserStore } from "@/store/user"
 import { userSelectors } from "@/store/user/selectors"
-import { DataTable } from "./components/subscription-table/data-table"
-import { columns } from "./components/subscription-table/columns"
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
 
 function BillingPageContent() {
-  const [billedYearly, setBilledYearly] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
-  const [downgradeOpen, setDowngradeOpen] = useState(false)
-
   const searchParams = useSearchParams()
 
   const activeOrgId = useOrganizationStore(organizationSelectors.activeOrgId)
   const currentPlan = useOrganizationStore(organizationSelectors.currentPlanName)
-  const creditBalance = useOrganizationStore(organizationSelectors.creditBalance)
-  const activeOrg = useOrganizationStore(organizationSelectors.activeOrg)
-  const userEmail = useUserStore(userSelectors.email)
-  const invoices = useOrganizationStore(organizationSelectors.invoices)
-  const isInvoicesLoading = useOrganizationStore(organizationSelectors.isInvoicesLoading)
-  const fetchInvoices = useOrganizationStore((s) => s.fetchInvoices)
+  const planExpiresAt = useOrganizationStore(organizationSelectors.planExpiresAt)
   const fetchOrganizations = useOrganizationStore((s) => s.fetchOrganizations)
+  const userEmail = useUserStore(userSelectors.email)
 
-  useEffect(() => {
-    if (!activeOrgId) return
-    fetchInvoices(activeOrgId)
-  }, [activeOrgId, fetchInvoices])
+  const isPro = currentPlan === 'pro'
 
-  // Show toast when returning from Dodo checkout
   useEffect(() => {
     const success = searchParams.get("success") === "true"
+    const type = searchParams.get("type")
     const failed = searchParams.get("status") === "failed"
 
     if (!success && !failed) return
 
     if (failed) {
       toast.error("Payment failed. Please try again or use a different payment method.")
-    } else {
-      toast.success("You're now on Pro! 500 credits have been added to your account.")
+    } else if (type === 'license') {
+      toast.success("Payment successful — you're now on Pro!")
       fetchOrganizations()
-      const amount = parseFloat(searchParams.get("amount") ?? "0")
-      if (typeof window !== "undefined" && (window as unknown as { rdt?: (a: string, e: string, d?: object) => void }).rdt && amount > 0) {
-        (window as unknown as { rdt: (a: string, e: string, d: object) => void }).rdt("track", "Purchase", { value: amount, currency: "USD" })
-      }
     }
 
     window.history.replaceState({}, "", "/account/billing")
   }, [searchParams, fetchOrganizations])
 
-  const monthlyProductId = process.env.NEXT_PUBLIC_DODO_PRO_MONTHLY_PRODUCT_ID
-  const yearlyProductId = process.env.NEXT_PUBLIC_DODO_PRO_YEARLY_PRODUCT_ID
-  const productId = billedYearly ? yearlyProductId : monthlyProductId
-
-  async function handleUpgrade() {
-    if (!productId || !activeOrgId || !userEmail) {
-      toast.error("Checkout unavailable — missing configuration")
-      return
-    }
-    setLoading(true)
-    try {
-      const res = await fetch("/api/dodo/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId,
-          quantity: 1,
-          organizationId: activeOrgId,
-          userEmail,
-          type: "subscription",
-          amount: billedYearly ? 180 : 15,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.checkoutUrl) {
-        toast.error("Failed to start checkout")
-        setLoading(false)
-        return
-      }
-      window.location.href = data.checkoutUrl
-    } catch {
-      toast.error("Failed to start checkout")
-      setLoading(false)
-    }
-  }
-
   return (
-    <div className="max-w-5xl space-y-10">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold">Billing</h1>
-          <p className="text-muted-foreground">
-            Simple, usage-based pricing. Upgrade or top-up credits any time.
-          </p>
-          {currentPlan === "pro" && (
-            <Badge className="bg-[#7000FF] text-white">You are on Pro</Badge>
-          )}
-        </div>
+    <div className="max-w-3xl space-y-10">
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold">Billing</h1>
+        <p className="text-muted-foreground">
+          One annual license fee covers the platform — updates, bug fixes, and support included. Your Claude API costs go directly to Anthropic.
+        </p>
+      </div>
 
-        {/* Yearly toggle */}
-        <div className="flex items-center gap-3">
-          <span className={cn("text-sm", !billedYearly && "font-semibold")}>Monthly</span>
-          <Switch
-  checked={billedYearly}
-  onCheckedChange={setBilledYearly}
-  className="cursor-pointer"
-/>
-          <span className={cn("text-sm", billedYearly && "font-semibold")}>
-            Yearly
+      {/* Plan status banner */}
+      {isPro ? (
+        <div className="rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 px-4 py-3 flex items-center gap-3">
+          <Badge className="bg-[#7000FF] text-white">Pro</Badge>
+          <span className="text-sm text-green-800 dark:text-green-300">
+            Active{planExpiresAt ? ` · Renews on ${formatDate(planExpiresAt)}` : ''}
           </span>
         </div>
+      ) : (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-4 py-3 flex items-center gap-3">
+          <Badge variant="outline">Free Trial</Badge>
+          <span className="text-sm text-blue-800 dark:text-blue-300">
+            Upgrade to Pro for year-long access — $49 one-time.
+          </span>
+        </div>
+      )}
 
-        {/* Plan cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Free */}
-          <div className="rounded-xl border border-border p-6 flex flex-col gap-5">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold text-lg">Free</span>
-                {currentPlan === "free" && (
-                  <Badge variant="outline" className="text-xs">Current plan</Badge>
-                )}
-              </div>
-              <p className="text-3xl font-bold">
-                $0
-                <span className="text-base font-normal text-muted-foreground"> / month</span>
-              </p>
-            </div>
-
-            {currentPlan === "free" ? (
-              <Button variant="outline" disabled className="w-full cursor-not-allowed text-muted-foreground">
-                Current plan
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                className="w-full border-destructive text-destructive hover:bg-destructive/5"
-                onClick={() => setDowngradeOpen(true)}
-              >
-                Downgrade to Free
-              </Button>
-            )}
-
-            <PricingFeatureList features={freeFeatures} />
-          </div>
-
-          {/* Pro */}
-          <div className="rounded-xl border-2 border-[#7000FF] p-6 flex flex-col gap-5 relative">
-            <div className="absolute -top-3 left-6">
-              <Badge className="bg-[#7000FF] text-white text-xs">Most popular</Badge>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold text-lg">Pro</span>
-                {currentPlan === "pro" && (
-                  <Badge variant="outline" className="text-xs">Current plan</Badge>
-                )}
-              </div>
-              <p className="text-3xl font-bold">
-                {billedYearly ? pricing.yearly.amount : pricing.monthly.amount}
-                <span className="text-base font-normal text-muted-foreground"> {pricing.monthly.label}</span>
-              </p>
-              {billedYearly && (
-                <p className="text-sm text-green-600 font-medium mt-0.5">{pricing.yearly.note}</p>
+      {/* Plan cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Free */}
+        <div className="rounded-xl border border-border p-6 flex flex-col gap-5">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-semibold text-lg">Free Trial</span>
+              {!isPro && (
+                <Badge variant="outline" className="text-xs">Current plan</Badge>
               )}
             </div>
+            <p className="text-3xl font-bold">
+              {pricing.free.amount}
+              <span className="text-base font-normal text-muted-foreground"> {pricing.free.label}</span>
+            </p>
+          </div>
+          <PricingFeatureList features={freeFeatures} />
+        </div>
 
-            <Button
-              className={cn(
-                "w-full font-semibold transition-all cursor-pointer",
-                currentPlan === "pro"
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-[#7000FF] text-white hover:bg-[#7000FF]/90 hover:brightness-110 hover:scale-[1.02]"
+        {/* Pro */}
+        <div className="rounded-xl border-2 border-[#7000FF] p-6 flex flex-col gap-5 relative">
+          <div className="absolute -top-3 left-6">
+            <Badge className="bg-[#7000FF] text-white text-xs">Most popular</Badge>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-semibold text-lg">Pro</span>
+              {isPro && (
+                <Badge variant="outline" className="text-xs">Current plan</Badge>
               )}
-              disabled={loading || currentPlan === "pro"}
-              onClick={handleUpgrade}
-              >
-                {loading
-                  ? "Opening checkout…"
-                  : currentPlan === "pro"
-                    ? "Current plan"
-                    : "Upgrade to Pro"}
-            </Button>
-
-            <PricingFeatureList features={proFeatures} iconColor="text-[#7000FF]" />
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Architecture storage section */}
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl font-semibold">Architecture storage</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Each repository gets its own private vector index. Your rules are stored and scoped
-              to your org — no cross-org leakage, ever.
+            </div>
+            <p className="text-3xl font-bold">
+              {pricing.pro.amount}
+              <span className="text-base font-normal text-muted-foreground"> {pricing.pro.label}</span>
             </p>
+            <p className="text-xs text-muted-foreground mt-1">One-time payment · Annual license</p>
           </div>
-          <ArchitectureStorageGrid />
-        </div>
 
-        <Separator />
-
-        {/* Credit top-up section */}
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl font-semibold">Credit top-ups</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Each PR review costs credits based on token usage. If you run out mid-month, buy a
-              one-time top-up — no subscription required. 1 credit = $0.10 USD.
-            </p>
-            {activeOrg && (
-              <p className="text-sm mt-2">
-                Your current balance:{" "}
-                <span className="font-semibold">{creditBalance.toFixed(0)} credits</span>
-              </p>
-            )}
-          </div>
-          <CreditBundleGrid bundles={creditBundles} />
-         <Button
-            className="bg-[#7000FF] text-white hover:bg-[#7000FF]/90 hover:brightness-110 hover:scale-[1.02] cursor-pointer"
-            onClick={() => setBuyCreditsOpen(true)}
-          >
-            Buy credits
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Custom amount: enter any value between $5 and $100 using the buy credits dialog.
-            10 credits are added per $1 spent.
-          </p>
-        </div>
-
-        <Separator />
-
-        {/* Invoices */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Invoices</h2>
-          {isInvoicesLoading ? (
-            <p className="text-sm text-muted-foreground">Loading invoices…</p>
+          {isPro ? (
+            <div className="w-full rounded-md border border-border bg-muted px-4 py-2 text-center text-sm text-muted-foreground">
+              {planExpiresAt ? `Active until ${formatDate(planExpiresAt)}` : 'Active'}
+            </div>
           ) : (
-            <DataTable columns={columns} data={invoices} />
+            <BuyLicenseButton
+              orgId={activeOrgId ?? ''}
+              email={userEmail ?? ''}
+              disabled={!activeOrgId || !userEmail}
+            />
           )}
-        </div>
 
-        <BuyCreditsModal open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
-        <DowngradeModal open={downgradeOpen} onOpenChange={setDowngradeOpen} />
+          <PricingFeatureList features={proFeatures} iconColor="text-[#7000FF]" />
+        </div>
+      </div>
+
+      {/* AI cost callout */}
+      <p className="text-sm text-muted-foreground">
+        You pay Anthropic directly for Claude API usage. Think Throo never touches your AI costs.
+      </p>
     </div>
   )
 }

@@ -10,9 +10,10 @@ export interface IssueBoardStateAction {
   updateAssignee: (
     repositoryFullName: string,
     issueNumber: number,
-    assigneeType: 'agent' | 'member' | null,
+    assigneeType: 'agent' | 'member' | 'squad' | null,
     assigneeAgentId?: string | null,
-    assigneeMemberId?: string | null
+    assigneeMemberId?: string | null,
+    assigneeSquadId?: string | null
   ) => Promise<void>;
   removeFromBoard: (repositoryFullName: string, issueNumber: number) => Promise<void>;
   upsertBoardItem: (item: IssueBoardItem) => void;
@@ -95,13 +96,14 @@ export const createIssueBoardStateSlice: StateCreator<
     }
   },
 
-  updateAssignee: async (repositoryFullName, issueNumber, assigneeType, assigneeAgentId, assigneeMemberId) => {
+  updateAssignee: async (repositoryFullName, issueNumber, assigneeType, assigneeAgentId, assigneeMemberId, assigneeSquadId) => {
     const updated = await issueBoardStateClientService.updateAssignee({
       repositoryFullName,
       issueNumber,
       assigneeType,
       assigneeAgentId,
       assigneeMemberId,
+      assigneeSquadId,
     });
     set(
       (s) => ({
