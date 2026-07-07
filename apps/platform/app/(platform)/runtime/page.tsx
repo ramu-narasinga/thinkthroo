@@ -8,7 +8,7 @@ export default function RuntimePage() {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">Runtime</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage local machines running the thinkthroo-daemon process.
+          Manage local machines running the thinkthroo process.
         </p>
       </div>
       <RuntimesCard />

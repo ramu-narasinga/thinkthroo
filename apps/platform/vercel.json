@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/daemon/sweeper",
+      "schedule": "*/2 * * * *"
+    }
+  ]
+}

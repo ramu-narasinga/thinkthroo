@@ -11,6 +11,7 @@ import {
 } from "@/components/interfaces/page/header";
 import { Button } from "@thinkthroo/ui/components/button";
 import { Card } from "@thinkthroo/ui/components/card";
+import { siteConfig } from "@/lib/config";
 
 function rdtTrack(event: string) {
   if (
@@ -122,7 +123,7 @@ export default function SkillsPage() {
         </div>
 
         <PageHeaderHeading className="text-foreground">
-          Production-grade codebase architecture for your team
+          Teach your coding agents to ship production-grade code
         </PageHeaderHeading>
 
         <PageHeaderDescription>
@@ -346,7 +347,7 @@ export default function SkillsPage() {
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto text-balance mb-8">
             Install the skill, let your AI write to your architecture standards,
-            and connect PR review when your team is ready.
+            and set up a Runtime to ship fixes autonomously when your team is ready.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
             <Button asChild size="sm" variant="default">
@@ -361,12 +362,12 @@ export default function SkillsPage() {
             </Button>
             <Button asChild size="sm" variant="outline">
               <Link
-                href="https://github.com/apps/thinkthroo"
+                href={siteConfig.links.appLogin}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => handleCta("bottom_pr_review")}
               >
-                Already using skills? Connect PR review →
+                Already using skills? Set up your first Runtime →
               </Link>
             </Button>
           </div>

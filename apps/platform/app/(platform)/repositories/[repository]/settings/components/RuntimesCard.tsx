@@ -114,7 +114,7 @@ export function RuntimesCard() {
   };
 
   const configureCommand = registered
-    ? `thinkthroo-daemon configure \\\n  --runtime-id ${registered.runtimeId} \\\n  --api-key ${registered.apiKey} \\\n  --platform-url ${registered.platformUrl}`
+    ? `thinkthroo configure \\\n  --runtime-id ${registered.runtimeId} \\\n  --api-key ${registered.apiKey} \\\n  --platform-url ${registered.platformUrl}`
     : "";
 
   return (
@@ -124,7 +124,7 @@ export function RuntimesCard() {
           <div>
             <CardTitle className="text-base">Daemon Runtimes</CardTitle>
             <CardDescription className="mt-1 text-sm">
-              Local machines running the <code className="text-xs bg-muted px-1 py-0.5 rounded">thinkthroo-daemon</code> process. Agents use runtimes to execute tasks on your machine.
+              Local machines running the <code className="text-xs bg-muted px-1 py-0.5 rounded">thinkthroo</code> process. Agents use runtimes to execute tasks on your machine.
             </CardDescription>
           </div>
           <Button size="sm" variant="outline" onClick={() => setRegisterOpen(true)}>
@@ -142,7 +142,7 @@ export function RuntimesCard() {
               </p>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted rounded-md px-3 py-2 mt-1 font-mono">
                 <Terminal className="h-3.5 w-3.5 shrink-0" />
-                npm install -g thinkthroo-daemon
+                npm install -g thinkthroo
               </div>
             </div>
           ) : (
@@ -247,7 +247,7 @@ export function RuntimesCard() {
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Then run <code className="bg-muted px-1 py-0.5 rounded">thinkthroo-daemon start</code> to begin processing tasks.
+                  Then run <code className="bg-muted px-1 py-0.5 rounded">thinkthroo start</code> to begin processing tasks.
                 </p>
               </div>
 

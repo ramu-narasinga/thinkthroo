@@ -49,7 +49,6 @@
     "remotion": "^4.0.466",
     "rimraf": "^6.0.1",
     "tailwind-merge": "^2.5.2",
-    "thinkthroo": "*",
     "www": "file:"
   },
   "devDependencies": {

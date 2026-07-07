@@ -4,23 +4,24 @@ import { useState } from "react"
 import { Card, CardContent } from "@thinkthroo/ui/components/card"
 import { Button } from "@thinkthroo/ui/components/button"
 import { ArrowRight } from "lucide-react"
+import { siteConfig } from "@/lib/config"
 
 const promoMessages = [
   {
-    heading: "Need help implementing best practices at your company?",
-    body: "We've studied how the best open-source codebases are built. We help teams adopt the same patterns to reduce tech debt and ship with confidence.",
+    heading: "Stop writing every fix yourself",
+    body: "Register your machine as a Runtime, point it at your repo, and let coding agents pick up GitHub issues — they write the fix, you just review and merge.",
   },
   {
-    heading: "Keep Your Entire Team Aligned on Architecture",
-    body: "We built a GitHub app that reviews every PR against architecture rules inspired by large OSS codebases, so your team stays consistent without manual reviews.",
+    heading: "Your engineering team, multiplied",
+    body: "Create AI agents, assign them tasks like teammates, and watch them execute autonomously — powered by your own Claude API key.",
   },
   {
-    heading: "Your Codebase Deserves Consistent Patterns",
-    body: "After studying patterns across large open-source projects, we help teams implement the same best practices, and enforce them with an automated PR reviewer.",
+    heading: "From issue to PR, hands-off",
+    body: "Agents clone the repo, write the fix, open the pull request. No babysitting, no manual triage.",
   },
   {
-    heading: "Reduce Tech Debt Before It Piles Up",
-    body: "We help teams define consistent architecture rules inspired by OSS and enforce them on every PR with a GitHub app, so best practices stick across the whole team.",
+    heading: "Bring your own compute, ship faster",
+    body: "Runtime runs on your own machine. Agents do the work; you keep full control and review every PR before it merges.",
   },
 ]
 
@@ -40,9 +41,9 @@ export function PromoCard() {
           <div className="mt-2 h-32 rounded-md border bg-background p-3 overflow-hidden">
   <div className="space-y-2 text-xs">
     <div className="flex items-center justify-between">
-      <span>PR #421</span>
+      <span>Issue #421</span>
       <span className="text-yellow-500 animate-pulse">
-        Reviewing...
+        Agent working...
       </span>
     </div>
 
@@ -51,11 +52,11 @@ export function PromoCard() {
     </div>
 
     <div className="space-y-1">
-      <div>✓ Folder structure</div>
-      <div>✓ Naming conventions</div>
-      <div>✓ Architecture rules</div>
+      <div>✓ Agent picked up issue</div>
+      <div>✓ Fix written</div>
+      <div>✓ Branch pushed</div>
       <div className="text-green-500 font-medium">
-        ✓ Approved
+        ✓ PR opened
       </div>
     </div>
   </div>
@@ -68,7 +69,7 @@ export function PromoCard() {
             size="sm"
             onClick={() =>
               window.open(
-                "https://app.thinkthroo.com/skills-library",
+                siteConfig.links.appLogin,
                 "_blank",
                 "noopener,noreferrer"
               )

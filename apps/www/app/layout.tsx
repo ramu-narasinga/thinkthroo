@@ -19,9 +19,9 @@ export const metadata: Metadata = {
     "Tailwind CSS",
     "TypeScript",
     "JavaScript",
-    "Code Review",
-    "Github App",
-    "Codebase Architecture"
+    "AI Agents",
+    "Coding Agents",
+    "GitHub Issue Automation"
   ],
   authors: [
     {

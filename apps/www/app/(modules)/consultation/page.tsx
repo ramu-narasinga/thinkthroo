@@ -112,7 +112,7 @@ export default function HomePage() {
               Enquiry
             </button>
             <button className="px-4 py-2 border rounded-xl font-medium text-sm">
-              Codebase Architecture Review
+              Agent Setup
             </button>
           </div>
 
@@ -187,10 +187,10 @@ export default function HomePage() {
                   {/* Title & Description */}
                   <div className="space-y-2 mb-14 mt-6">
                     <h3 className="text-gray-700 font-bold text-2xl">
-                      Codebase architecture review.
+                      Agent onboarding help.
                     </h3>
                     <p className="text-gray-600">
-                      Want me to review your codebase architecture?
+                      Want help setting up your coding agents?
                     </p>
                   </div>
 

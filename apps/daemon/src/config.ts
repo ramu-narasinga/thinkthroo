@@ -15,7 +15,7 @@ export async function loadConfig(): Promise<DaemonConfig> {
   if (!(await fs.pathExists(CONFIG_FILE))) {
     throw new Error(
       `No daemon config found at ${CONFIG_FILE}.\n` +
-      `Run: thinkthroo-daemon configure --runtime-id <id> --api-key <key> --platform-url <url>`
+      `Run: thinkthroo setup`
     );
   }
   const raw = await fs.readJson(CONFIG_FILE);

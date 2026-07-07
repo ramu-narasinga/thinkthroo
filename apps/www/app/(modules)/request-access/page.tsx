@@ -71,9 +71,8 @@ export default function RequestAccessPage() {
         </div>
 
         <p className="text-muted-foreground">
-          Think Throo GitHub App AI features — PR reviews, architecture checks —
-          are currently in <strong>invite-only</strong> mode. Fill out the form
-          below and we&apos;ll get back to you.
+          Think Throo&apos;s coding agents are currently in <strong>invite-only</strong> mode.
+          Fill out the form below and we&apos;ll get back to you.
         </p>
 
         <form onSubmit={handleSubmit} className="w-full space-y-5">

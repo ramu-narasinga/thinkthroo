@@ -37,6 +37,10 @@ export async function heartbeat(config: DaemonConfig): Promise<void> {
   await post(`${config.platformUrl}/api/daemon/heartbeat`, {}, config);
 }
 
+export async function deregister(config: DaemonConfig): Promise<void> {
+  await post(`${config.platformUrl}/api/daemon/deregister`, {}, config).catch(() => {});
+}
+
 export async function claimTask(config: DaemonConfig): Promise<ClaimedTask | null> {
   const res = await post(
     `${config.platformUrl}/api/daemon/runtimes/${config.runtimeId}/tasks/claim`,

@@ -6,6 +6,7 @@ import {
   startTask,
   completeTask,
   failTask,
+  deregister,
 } from './reporter.js';
 import { executeTask } from './executor.js';
 
@@ -26,17 +27,23 @@ export async function runDaemon(config: DaemonConfig): Promise<void> {
   const pollTimer = setInterval(() => poll(config), POLL_INTERVAL_MS);
 
   // Keep the process alive
-  process.on('SIGINT', () => {
-    console.log('\n' + chalk.yellow('Shutting down…'));
+  const shutdown = async (): Promise<void> => {
     clearInterval(heartbeatTimer);
     clearInterval(pollTimer);
+    await Promise.race([
+      deregister(config),
+      new Promise((resolve) => setTimeout(resolve, 3_000)),
+    ]);
     process.exit(0);
+  };
+
+  process.on('SIGINT', () => {
+    console.log('\n' + chalk.yellow('Shutting down…'));
+    void shutdown();
   });
 
   process.on('SIGTERM', () => {
-    clearInterval(heartbeatTimer);
-    clearInterval(pollTimer);
-    process.exit(0);
+    void shutdown();
   });
 }
 

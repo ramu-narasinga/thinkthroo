@@ -19,7 +19,7 @@ export async function prepareWorkDir(
     return existingWorkDir;
   }
 
-  const workDir = path.join(os.tmpdir(), 'thinkthroo-daemon', repoFullName.replace('/', '-'), Date.now().toString());
+  const workDir = path.join(os.tmpdir(), 'thinkthroo', repoFullName.replace('/', '-'), Date.now().toString());
   await fs.ensureDir(workDir);
 
   await execa('git', ['clone', '--depth=1', authedUrl, workDir]);
@@ -62,7 +62,7 @@ export async function commitAndPush(
     await execa('git', [
       'commit',
       '-m', commitMessage ?? `fix: resolve issue #${issueNumber}`,
-      '--author', 'thinkthroo-daemon <daemon@thinkthroo.com>',
+      '--author', 'thinkthroo <daemon@thinkthroo.com>',
     ], { cwd: workDir });
   }
 

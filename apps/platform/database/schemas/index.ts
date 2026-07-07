@@ -21,6 +21,7 @@ export * from './organizationSettings';
 export * from './rateLimitPlanDefaults';
 export * from './rateLimitOverrides';
 export * from './daemonRuntime';
+export * from './daemonCliAuthRequest';
 export * from './agent';
 export * from './agentTask';
 export * from './agentTaskLog';
