@@ -18,10 +18,10 @@ export function Hero() {
     <PageHeader>
       <Announcement />
       <PageHeaderHeading className="text-foreground">
-        Your engineering team, multiplied.
+        Build your agent team. Ship more code.
       </PageHeaderHeading>
       <PageHeaderDescription>
-        Think Throo turns GitHub issues into shipped code. Create AI agents,
+        Think Throo turns your tasks into shipped code. Create AI agents,
         assign them tasks like teammates, and watch them execute autonomously —
         powered by your own Claude API key.
       </PageHeaderDescription>
