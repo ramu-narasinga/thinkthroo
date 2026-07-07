@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       quantity?: number;
       organizationId: string;
       userEmail: string;
-      type: 'subscription' | 'topup';
+      type: 'subscription' | 'topup' | 'license';
       amount?: number;
     };
 
@@ -22,7 +22,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/account/billing?success=true&type=${type}${amount ? `&amount=${amount}` : ''}`;
+    const returnUrl = type === 'license'
+      ? `${process.env.NEXT_PUBLIC_SITE_URL}/account/billing?success=true&type=license`
+      : `${process.env.NEXT_PUBLIC_SITE_URL}/account/billing?success=true&type=${type}${amount ? `&amount=${amount}` : ''}`;
 
     const session = await client.checkoutSessions.create({
       product_cart: [{ product_id: productId, quantity: quantity ?? 1 }],

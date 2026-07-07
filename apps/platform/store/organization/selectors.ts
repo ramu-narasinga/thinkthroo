@@ -19,6 +19,10 @@ export const organizationSelectors = {
     const org = s.organizations.find((o) => o.id === s.activeOrgId);
     return (org?.currentPlanName ?? 'free') === 'pro';
   },
+  planExpiresAt: (s: OrganizationStore) => {
+    const org = s.organizations.find((o) => o.id === s.activeOrgId);
+    return org?.planExpiresAt ?? null;
+  },
   invoices: (s: OrganizationStore) => s.invoices,
   isInvoicesLoading: (s: OrganizationStore) => s.isInvoicesLoading,
 };

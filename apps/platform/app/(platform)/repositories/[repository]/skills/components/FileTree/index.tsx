@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { PanelLeftClose, PanelLeft } from 'lucide-react';
+import { PanelLeftClose, PanelLeft, FileText } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDocumentStore } from '@/store/document';
 import { useDocumentTree } from '../../hooks/useDocumentTree';
@@ -88,7 +88,7 @@ export function FileTree({
     <aside className="w-80 border-r px-3 py-4 bg-white flex flex-col gap-3 shrink-0" style={{ minHeight: 'calc(100vh - 160px)' }}>
       {/* Header with actions */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Architecture</h3>
+        <h3 className="text-sm font-semibold">Skills</h3>
         <div className="flex items-center gap-1">
           <FileTreeActions
             onCreateFile={() => onCreateFile()}
@@ -113,8 +113,20 @@ export function FileTree({
             Loading…
           </div>
         ) : tree.length === 0 ? (
-          <div className="py-6 text-center text-sm text-slate-500">
-            No files yet — create one.
+          <div className="flex flex-col items-center justify-center py-10 gap-3 text-center px-4">
+            <FileText className="h-8 w-8 text-slate-300" />
+            <div>
+              <p className="text-sm font-medium text-slate-600">No skills yet</p>
+              <p className="text-xs text-slate-400 mt-0.5">Create a file to add reusable context for agents</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onCreateFile()}
+              disabled={isLoading}
+              className="text-xs text-blue-600 hover:underline disabled:opacity-40"
+            >
+              + New file
+            </button>
           </div>
         ) : (
           <ul role="tree" className="space-y-0.5" aria-label="Document tree">

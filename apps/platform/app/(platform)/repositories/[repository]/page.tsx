@@ -6,5 +6,5 @@ export default async function RepositoryPage({
   params: Promise<{ repository: string }>;
 }) {
   const { repository } = await params;
-  redirect(`/repositories/${repository}/architecture`);
+  redirect(`/repositories/${repository}/agent`);
 }

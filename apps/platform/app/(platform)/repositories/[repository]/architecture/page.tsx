@@ -1,12 +1,10 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import dynamic from 'next/dynamic';
-import ArchitectureSkeleton from './components/ArchitectureSkeleton';
-
-const ArchitectureTab = dynamic(() => import('./components/ArchitectureTab'), {
-  loading: () => <ArchitectureSkeleton />,
-});
-
-export default function ArchitecturePage() {
-  return <ArchitectureTab />;
+export default async function ArchitecturePage({
+  params,
+}: {
+  params: Promise<{ repository: string }>;
+}) {
+  const { repository } = await params;
+  redirect(`/repositories/${repository}/skills`);
 }

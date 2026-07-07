@@ -33,7 +33,7 @@ export const Footer = () => {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-y-12 gap-x-6 lg:gap-x-16 mt-12">
                     <div>
                         <h3 className="text-foreground font-semibold text-sm leading-5">
-                            Codebase Architecture
+                            Product
                         </h3>
                         <ul role="list" className="mt-6 space-y-4">
                             <li>

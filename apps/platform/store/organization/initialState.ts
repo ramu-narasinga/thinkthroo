@@ -12,6 +12,7 @@ export interface OrganizationItem {
   dodoCustomerId?: string;
   prsReviewed?: number;
   docStorageUsedMB?: number;
+  planExpiresAt?: string | null;
 }
 
 export interface InvoiceItem {

@@ -7,7 +7,7 @@ export const siteConfig = {
   name: "Think Throo",
   url: "https://thinkthroo.com",
   ogImage: "https://thinkthroo.com/logo.jpg",
-  description: "Enforce codebase architecture in your pull requests",
+  description: "Think Throo turns GitHub issues into shipped code — create AI agents, assign them tasks like teammates, and watch them execute autonomously.",
   links: {
     twitter: "https://x.com/thinkthroo",
     github: "https://github.com/ramu-narasinga/thinkthroo",

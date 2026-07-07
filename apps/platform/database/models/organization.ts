@@ -117,6 +117,7 @@ export class OrganizationModel {
         creditBalance: organizations.creditBalance,
         dodoCustomerId: organizations.dodoCustomerId,
         docStorageUsedMb: organizations.docStorageUsedMb,
+        planExpiresAt: organizations.planExpiresAt,
       })
       .from(organizations)
       .where(eq(organizations.userId, this.userId))

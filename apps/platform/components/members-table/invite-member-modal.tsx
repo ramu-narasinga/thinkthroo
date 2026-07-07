@@ -15,9 +15,10 @@ import { inviteClientService } from "@/service/invite"
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  organizationId?: string
 }
 
-export function InviteMemberModal({ open, onOpenChange }: Props) {
+export function InviteMemberModal({ open, onOpenChange, organizationId }: Props) {
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
@@ -31,10 +32,14 @@ export function InviteMemberModal({ open, onOpenChange }: Props) {
       toast.error("Email is required")
       return
     }
+    if (!organizationId) {
+      toast.error("No active organization selected")
+      return
+    }
 
     setLoading(true)
     try {
-      await inviteClientService.sendInvite({ fullName, email })
+      await inviteClientService.sendInvite({ fullName, email, organizationId })
       toast.success(`Invite sent to ${email}`)
       setFullName("")
       setEmail("")

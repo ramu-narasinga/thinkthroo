@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import DodoPayments from 'dodopayments';
 import { eq, sql } from 'drizzle-orm';
 import { getServerDB } from '@/database/core/db-adaptor';
-import { organizations, subscriptions, customers, creditTransactions, creditTopups } from '@/database/schemas';
+import { organizations, subscriptions, customers, creditTransactions, creditTopups, licensePurchases } from '@/database/schemas';
 
 const client = new DodoPayments({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY,
@@ -174,6 +174,45 @@ export async function POST(req: NextRequest) {
     case 'payment.succeeded': {
       const payment = data;
       console.log(`[payment.succeeded] paymentId=${payment.payment_id} metadata.type=${payment.metadata?.type}`);
+
+      // Handle one-time Pro license purchase
+      if (payment.metadata?.type === 'license') {
+        const orgId = payment.metadata?.organizationId as string;
+        const paymentId: string = payment.payment_id;
+
+        if (!orgId || !paymentId) {
+          console.warn('[payment.succeeded/license] Missing orgId or paymentId — skipping');
+          break;
+        }
+
+        const existing = await db.query.licensePurchases.findFirst({
+          where: eq(licensePurchases.dodoPaymentId, paymentId),
+        });
+        if (existing) {
+          console.warn(`[payment.succeeded/license] Already processed paymentId=${paymentId} — skipping`);
+          break;
+        }
+
+        const now = new Date();
+        const expiresAt = new Date(now);
+        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+        await db.transaction(async (tx) => {
+          await tx.insert(licensePurchases).values({
+            organizationId: orgId,
+            dodoPaymentId: paymentId,
+            amountUsd: '49.00',
+            licenseStartsAt: now,
+            licenseExpiresAt: expiresAt,
+          });
+          await tx.update(organizations)
+            .set({ currentPlanName: 'pro', planExpiresAt: expiresAt.toISOString() })
+            .where(eq(organizations.id, orgId));
+        });
+
+        console.log(`[payment.succeeded/license] Upgraded org id=${orgId} to pro, expires=${expiresAt.toISOString()}`);
+        break;
+      }
 
       // Only handle one-time credit top-ups
       if (payment.metadata?.type !== 'topup') {

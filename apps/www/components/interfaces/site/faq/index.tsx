@@ -6,34 +6,34 @@ import { cn } from "@/lib/utils"
 
 const FAQS = [
   {
-    question: "What is ThinkThroo?",
+    question: "What AI model do agents use?",
     answer:
-      "ThinkThroo is a platform that helps developers understand the architecture of large open-source projects like shadcn/ui and Supabase. We provide in-depth codebase walkthroughs, best practices, and patterns used in production-grade projects.",
+      "Agents run using your own Claude API key. Think Throo is the management layer — you control which model runs and pay Anthropic directly with no markup.",
   },
   {
-    question: "Who is this for?",
+    question: "Do I need to install anything?",
     answer:
-      "ThinkThroo is built for developers who want to level up by studying how top-tier open-source codebases are structured — whether you're a mid-level developer looking to grow or a senior engineer wanting to validate patterns.",
+      "Yes. You install the Think Throo CLI on your machine, which connects it as a runtime. Agents then run on your own hardware and your code never leaves your network.",
   },
   {
-    question: "What open-source projects do you cover?",
+    question: "How is this different from using Claude Code directly?",
     answer:
-      "We currently cover shadcn/ui and Supabase codebase architectures, with more projects being added regularly. Each course walks through tooling, folder structure, patterns, and key architectural decisions.",
+      "Claude Code handles one-off sessions. Think Throo adds persistent agents with profiles, issue tracking, a skills library, multi-agent squads, and deep GitHub integration — so agents act as ongoing teammates, not one-off tools.",
   },
   {
-    question: "Is there a free plan?",
+    question: "Can agents work on long-running tasks autonomously?",
     answer:
-      "Yes. The Open Source plan is free and gives you access to foundational content. Upgrade to Pro for full access to all codebase architecture courses and production-grade project deep-dives.",
+      "Yes. Agents run via a daemon process and manage full task lifecycles — from picking up an issue to opening a PR. They report blockers proactively and you see real-time progress updates.",
   },
   {
-    question: "How is this different from reading the source code myself?",
+    question: "Is my code safe?",
     answer:
-      "Reading raw source code without context is time-consuming and often confusing. ThinkThroo curates and explains the why behind every architectural decision, saving you hours of reverse-engineering.",
+      "Agents run on your own machine via the local runtime. Your source code never leaves your network unless you explicitly configure cloud runtimes.",
   },
   {
-    question: "Do you offer a newsletter?",
+    question: "What does the free trial include?",
     answer:
-      "Yes! Subscribe to our newsletter above to get a weekly summary of OSS code reviews, best practices, and patterns used in large open-source projects — straight to your inbox.",
+      "7 days of full access — no credit card required. Connect your runtime, create agents, and assign your first GitHub issue during the trial. No limits.",
   },
 ]
 
@@ -47,7 +47,7 @@ export function FAQ() {
           Frequently Asked Questions
         </h2>
         <p className="mt-3 text-muted-foreground text-base max-w-xl mx-auto">
-          Everything you need to know about ThinkThroo.
+          Everything you need to know about Think Throo.
         </p>
       </div>
 

@@ -6,12 +6,17 @@ import { DataTable } from "@/components/members-table/data-table"
 import { columns } from "@/components/members-table/columns"
 import type { Member } from "@/components/members-table/columns"
 import { inviteClientService } from "@/service/invite"
+import { useOrganizationStore } from "@/store/organization"
+import { organizationSelectors } from "@/store/organization/selectors"
 
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([])
+  const activeOrgId = useOrganizationStore(organizationSelectors.activeOrgId)
 
   useEffect(() => {
-    inviteClientService.getAll().then((invitations) => {
+    if (!activeOrgId) return
+
+    inviteClientService.getAll(activeOrgId).then((invitations) => {
       setMembers(
         invitations.map((inv) => ({
           id: inv.id,
@@ -24,7 +29,7 @@ export default function MembersPage() {
         }))
       )
     })
-  }, [])
+  }, [activeOrgId])
 
   return (
     <PrivatePageGuard>

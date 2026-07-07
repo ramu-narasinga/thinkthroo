@@ -15,7 +15,7 @@ import {
   handleImagePaste,
   getAllContent,
 } from "@thinkthroo/editor";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { defaultExtensions } from "./extensions";
 import { ColorSelector } from "./selectors/color-selector";
@@ -32,10 +32,7 @@ import { TextButtons } from "./selectors/text-buttons";
 import { slashCommand, suggestionItems } from "./slash-command";
 
 import posthog from "posthog-js";
-import { Button } from "@thinkthroo/ui/components/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thinkthroo/ui/components/tooltip";
-import { useFileStore } from "@/store/file";
-import { fileManagerSelectors } from "@/store/file/slices/fileManager/selectors";
 import { useOrganizationStore } from "@/store/organization";
 import { organizationSelectors } from "@/store/organization/selectors";
 
@@ -52,23 +49,18 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
   const document = useDocumentStore(documentByIdSelector(documentId));
   const fetchDocumentById = useDocumentStore((s) => s.fetchDocumentById);
   const internal_updateSingleDocument = useDocumentStore((s) => s.internal_updateSingleDocument);
-  const publishFile = useFileStore((s) => s.publishFile);
   const activeOrgId = useOrganizationStore(organizationSelectors.activeOrg)?.id;
 
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'Saving…' | 'Saved'>('Saved');
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [charsCount, setCharsCount] = useState();
-  const [isPublishing, setIsPublishing] = useState(false);
-
-  // Tracks whether a content edit has reverted a published doc back to draft
-  const revertToDraftRef = useRef(false);
 
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
-  
+
   const defaultEditorContent: JSONContent = useMemo(
     () => ({
       type: "doc",
@@ -114,34 +106,34 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
   // Calculate initial content from document
   const initialContent: JSONContent = useMemo(() => {
     if (!document) return defaultEditorContent;
-    
+
     if (document.editorData) {
       return document.editorData as JSONContent;
     }
-    
+
     if (document.content) {
       return {
         type: 'doc',
         content: [{ type: 'paragraph', content: [{ type: 'text', text: document.content }] }],
       };
     }
-    
+
     return defaultEditorContent;
   }, [document, defaultEditorContent]);
 
   const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
     if (!document) return;
-    
+
     const json = editor.getJSON();
     setCharsCount(editor.storage.characterCount.words());
     const markdownContent = getAllContent(editor);
-    
+
     // Update store immediately (optimistic update)
     internal_updateSingleDocument(document.id, {
       content: markdownContent,
       editorData: json,
     });
-    
+
     // Then save to API
     try {
       const updatePayload: UpdateDocumentInput = {
@@ -149,11 +141,6 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
         editorData: json,
         organizationId: activeOrgId,
       };
-      // If content was edited while status was 'published', persist the revert to draft
-      if (revertToDraftRef.current) {
-        updatePayload.status = 'draft';
-        revertToDraftRef.current = false;
-      }
       await useDocumentStore.getState().updateDocument(document.id, updatePayload);
       setLastSavedAt(new Date());
       setSaveStatus('Saved');
@@ -204,41 +191,9 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
           </Tooltip>
         </TooltipProvider>
 
-        {/* Draft / Published badge — driven by document.status in the DB */}
-        {document.status === 'draft' ? (
-          <div className="rounded-lg bg-yellow-100 text-yellow-700 px-2 py-1 text-sm font-medium select-none">
-            Draft
-          </div>
-        ) : (
-          <div className="rounded-lg bg-green-100 text-green-700 px-2 py-1 text-sm font-medium select-none">
-            Published
-          </div>
-        )}
-
         <div className={charsCount ? "rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground" : "hidden"}>
           {charsCount} Words
         </div>
-
-        {/* Only show Publish when document is still in draft */}
-        {document.status === 'draft' && (
-          <Button
-            size="sm"
-            disabled={isPublishing}
-            onClick={async () => {
-              setIsPublishing(true);
-              try {
-                await publishFile(documentId);
-                // Optimistically reflect published status in the store
-                internal_updateSingleDocument(documentId, { status: 'published' });
-              } finally {
-                setIsPublishing(false);
-              }
-            }}
-            className="h-7 text-xs cursor-pointer disabled:cursor-not-allowed"
-          >
-            {isPublishing ? 'Publishing…' : 'Publish'}
-          </Button>
-        )}
       </div>
       <EditorRoot key={document.id}>
         <EditorContent
@@ -260,11 +215,6 @@ export default function EditorPanel({ documentId }: EditorPanelProps) {
           onUpdate={({ editor }) => {
             debouncedUpdates(editor);
             setSaveStatus('Saving…');
-            // If document was published, revert it to draft on content change
-            if (document.status === 'published') {
-              internal_updateSingleDocument(document.id, { status: 'draft' });
-              revertToDraftRef.current = true;
-            }
           }}
           slotAfter={<ImageResizer />}
         >

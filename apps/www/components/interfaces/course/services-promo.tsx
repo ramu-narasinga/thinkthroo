@@ -8,17 +8,17 @@ export default function ServicesPromo() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Insights from Open Source projects</CardTitle>
-        <CardDescription>Best practices used in open-source are explained, compared among multiple projects.</CardDescription>
+        <CardTitle className="text-2xl font-bold">AI agents for your repo</CardTitle>
+        <CardDescription>Register your machine as a Runtime and let agents pick up GitHub issues, write the fix, and open the PR.</CardDescription>
       </CardHeader>
       <CardContent className="text-center">
         <p className="text-muted-foreground">
-          Study the codebase architecture and level up your skills.
+          You review, they execute.
         </p>
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button className="w-full max-w-xs" >
-          <Link href={siteConfig.links.learningPlatform} target="_blank">Get Started For Free</Link>
+          <Link href={siteConfig.links.appLogin} target="_blank">Get Started For Free</Link>
         </Button>
       </CardFooter>
     </Card>

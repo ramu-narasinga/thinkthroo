@@ -14,7 +14,8 @@ export const config = {
      * - favicon.ico (favicon file)
      * - api/credits, api/rate-limits, api/review-settings, api/dodo/webhook
      *   (internal routes authenticated via x-internal-secret — no Supabase session needed)
+     * - api/daemon (daemon routes use their own bearer-token auth, not Supabase session)
      */
-    "/((?!_next/static|_next/image|favicon.ico|api/credits|api/rate-limits|api/review-settings|api/dodo/webhook|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/credits|api/rate-limits|api/review-settings|api/dodo/webhook|api/daemon|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

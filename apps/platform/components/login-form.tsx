@@ -16,8 +16,9 @@ import posthog from "posthog-js";
 export function LoginForm({
   className,
   error,
+  next,
   ...props
-}: React.ComponentProps<"div"> & { error?: string }) {
+}: React.ComponentProps<"div"> & { error?: string; next?: string }) {
   const { trackEvent } = useUmamiTracking();
 
   const handleLoginClick = () => {
@@ -50,6 +51,7 @@ export function LoginForm({
 
         <CardContent>
           <form>
+            <input type="hidden" name="next" value={next ?? ''} />
             <div className="flex flex-col gap-6">
               <Button
                 type="submit"

@@ -113,6 +113,7 @@ export function SettingsTab() {
   const disabled = useOrgSettings
 
   return (
+    <div className="space-y-6">
     <Card>
       <CardHeader>
         <CardTitle>Settings</CardTitle>
@@ -359,6 +360,7 @@ export function SettingsTab() {
         </Button>
       </CardFooter>
     </Card>
+    </div>
   )
 }
 

@@ -1,6 +1,9 @@
+import { randomUUID } from 'crypto';
 import { resend } from '@/lib/resend';
 import { TeamInvitationModel } from '@/database/models/teamInvitation';
 import { ThinkThrooDatabase } from '@/database/type';
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.thinkthroo.com';
 
 export class InviteService {
   private teamInvitationModel: TeamInvitationModel;
@@ -9,11 +12,22 @@ export class InviteService {
     this.teamInvitationModel = new TeamInvitationModel(db);
   }
 
-  async getAll() {
-    return this.teamInvitationModel.getAll();
+  async getAll(organizationId: string) {
+    return this.teamInvitationModel.getAll(organizationId);
   }
 
-  async sendInvite({ fullName, email }: { fullName: string; email: string }) {
+  async sendInvite({
+    fullName,
+    email,
+    organizationId,
+  }: {
+    fullName: string;
+    email: string;
+    organizationId: string;
+  }) {
+    const inviteToken = randomUUID();
+    const acceptUrl = `${APP_URL}/api/invite/accept?token=${inviteToken}`;
+
     const { data, error } = await resend.emails.send({
       from: 'Think Throo <invite@thinkthroo.com>',
       to: [email],
@@ -24,7 +38,7 @@ export class InviteService {
           <p>You've been invited to join a team on <strong>Think Throo</strong>.</p>
           <p>Click the button below to accept the invitation and get started.</p>
           <a
-          href="https://app.thinkthroo.com/login"
+            href="${acceptUrl}"
             style="display:inline-block;padding:12px 24px;background:#7c3aed;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;"
           >
             Accept Invitation
@@ -44,6 +58,8 @@ export class InviteService {
       fullName,
       email,
       invitedByUserId: this.userId,
+      organizationId,
+      inviteToken,
       status: 'pending',
     });
 

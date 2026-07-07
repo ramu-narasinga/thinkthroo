@@ -44,27 +44,27 @@ export function HowItWorks() {
   const steps = [
     {
       number: 1,
-      title: "Give access to your GitHub repositories",
+      title: "Sign up and connect your runtime",
       description:
-        "Connect your repositories so CodeArc can analyze your code structure and understand your current architecture.",
+        "Install the Think Throo CLI on your machine. Authenticate with your Claude API key. Your local environment becomes a runtime agents can execute on.",
     },
     {
       number: 2,
-      title: "Define your codebase architecture",
+      title: "Create your first agent",
       description:
-        "We provide patterns inspired by top OSS projects, so you can use these patterns directly or hire us to establish custom standards tailored to your team.",
+        "Give it a name, write instructions, and attach skills. Agents activate automatically on assignment, comment, or @mention — just like a human teammate.",
     },
     {
       number: 3,
-      title: "AI-powered PR checks",
+      title: "Assign a GitHub issue",
       description:
-        "When you open a PR, your code is automatically checked against the architecture standards using AI. Violations surface as actionable feedback.",
+        "Pick the agent from the assignee dropdown on any issue — the same way you'd assign to a colleague. The task is queued and claimed automatically.",
     },
     {
       number: 4,
-      title: "Resolve and stay consistent",
+      title: "Watch it ship",
       description:
-        "Address the comments to maintain consistency and follow established patterns across your entire codebase.",
+        "The agent reads the issue, writes code, opens a PR, and reports real-time progress. You review and merge. That's it.",
     },
   ]
 
@@ -89,12 +89,11 @@ export function HowItWorks() {
           </div>
 
           <h1 className="text-foreground leading-tighter max-w-2xl mb-6 mx-auto text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] xl:text-5xl">
-            Architecture Enforcement in 4 Steps
+            From issue to PR in 4 steps
           </h1>
 
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance">
-            A seamless workflow to enforce and maintain your codebase
-            architecture across your team
+            A simple workflow to get AI agents working alongside your team
           </p>
         </div>
 
@@ -174,7 +173,7 @@ export function HowItWorks() {
                   <div className="w-3 h-3 rounded-full bg-green-400" />
 
                   <div className="ml-4 text-xs text-muted-foreground font-medium">
-                    CodeArc AI
+                    Think Throo
                   </div>
                 </div>
 
@@ -186,88 +185,42 @@ export function HowItWorks() {
                       {/* Header */}
                       <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-secondary/20">
                         <div>
-                          <p className="text-sm font-medium">
-                            github.com/company/repo
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Repository connected
-                          </p>
+                          <p className="text-sm font-medium">thinkthroo setup</p>
+                          <p className="text-xs text-muted-foreground">CLI runtime setup</p>
                         </div>
-
                         <div className="flex items-center gap-2">
                           <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-xs text-muted-foreground">
-                            Connected
-                          </span>
+                          <span className="text-xs text-green-500">Runtime connected</span>
                         </div>
                       </div>
 
-                      {/* Repository Tree */}
+                      {/* CLI Output */}
                       <div className="p-5 space-y-3 font-mono text-sm">
-
-                        <div
-                          className="flex items-center justify-between animate-fadeIn"
-                          style={{ animationDelay: "0.2s" }}
-                        >
-                          <span>📁 apps</span>
-                          <span className="text-green-500">✓</span>
+                        <div className="animate-fadeIn" style={{ animationDelay: "0.1s" }}>
+                          <span className="text-muted-foreground">$ </span>
+                          <span className="text-foreground">npx thinkthroo setup</span>
+                        </div>
+                        <div className="animate-fadeIn text-muted-foreground text-xs" style={{ animationDelay: "0.4s" }}>
+                          ✓ Authenticated with GitHub
+                        </div>
+                        <div className="animate-fadeIn text-muted-foreground text-xs" style={{ animationDelay: "0.7s" }}>
+                          ✓ Claude API key configured
+                        </div>
+                        <div className="animate-fadeIn text-muted-foreground text-xs" style={{ animationDelay: "1.0s" }}>
+                          ✓ Daemon started on port 3001
+                        </div>
+                        <div className="animate-fadeIn text-muted-foreground text-xs" style={{ animationDelay: "1.3s" }}>
+                          ✓ Machine registered as runtime
                         </div>
 
-                        <div
-                          className="flex items-center justify-between animate-fadeIn"
-                          style={{ animationDelay: "0.5s" }}
-                        >
-                          <span>📁 packages</span>
-                          <span className="text-green-500">✓</span>
-                        </div>
-
-                        <div
-                          className="flex items-center justify-between animate-fadeIn"
-                          style={{ animationDelay: "0.8s" }}
-                        >
-                          <span>📁 components</span>
-                          <span className="text-green-500">✓</span>
-                        </div>
-
-                        <div
-                          className="flex items-center justify-between animate-fadeIn"
-                          style={{ animationDelay: "1.1s" }}
-                        >
-                          <span>📁 docs</span>
-                          <span className="text-green-500">✓</span>
-                        </div>
-
-                        {/* Scanner */}
-                        <div className="mt-8">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs text-muted-foreground">
-                              Analyzing architecture...
-                            </span>
-
-                            <span className="text-xs text-primary">
-                              100%
-                            </span>
-                          </div>
-
-                          <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                            <div className="h-full w-full bg-primary animate-progress" />
-                          </div>
-                        </div>
-
-                        {/* Results */}
-                        <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
-                          <div className="text-xs font-semibold text-primary mb-2">
-                            Architecture Detected
-                          </div>
-
+                        <div className="mt-6 rounded-lg border border-green-500/20 bg-green-500/5 p-4 animate-fadeIn" style={{ animationDelay: "1.6s" }}>
+                          <div className="text-xs font-semibold text-green-500 mb-2">Runtime ready</div>
                           <div className="space-y-1 text-xs text-muted-foreground">
-                            <div>✓ Frontend Layer</div>
-                            <div>✓ Shared Packages</div>
-                            <div>✓ API Layer</div>
-                            <div>✓ Monorepo Structure</div>
+                            <div>Machine: MacBook Pro (arm64)</div>
+                            <div>Model: claude-sonnet-4-6</div>
+                            <div>Status: online</div>
                           </div>
                         </div>
-
                       </div>
                     </div>
                   </div>
@@ -275,165 +228,54 @@ export function HowItWorks() {
 
                 {/* STEP 2 */}
                 {activeStep === 2 && (
-  <div className="h-full p-4 animate-fadeIn">
-    <div className="h-full rounded-xl border border-border/50 bg-background overflow-hidden">
+                  <div className="h-full p-4 animate-fadeIn">
+                    <div className="h-full rounded-xl border border-border/50 bg-background overflow-hidden">
 
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-border/50 bg-secondary/20">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-sm font-medium">
-              Architecture Blueprint
-            </h4>
+                      {/* Header */}
+                      <div className="px-4 py-3 border-b border-border/50 bg-secondary/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-sm font-medium">New Agent</h4>
+                            <p className="text-xs text-muted-foreground">Configure your agent</p>
+                          </div>
+                          <div className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] text-primary">
+                            Draft
+                          </div>
+                        </div>
+                      </div>
 
-            <p className="text-xs text-muted-foreground">
-              AI generating architecture rules...
-            </p>
-          </div>
+                      <div className="p-5 space-y-4">
+                        <div className="animate-fadeIn" style={{ animationDelay: "0.2s" }}>
+                          <label className="text-xs font-medium text-muted-foreground block mb-1">Name</label>
+                          <div className="rounded-md border border-border/50 bg-background px-3 py-2 text-sm text-foreground">
+                            backend-engineer
+                          </div>
+                        </div>
 
-          <div className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] text-primary animate-pulse">
-            AI Generated
-          </div>
-        </div>
-      </div>
+                        <div className="animate-fadeIn" style={{ animationDelay: "0.5s" }}>
+                          <label className="text-xs font-medium text-muted-foreground block mb-1">Instructions</label>
+                          <div className="rounded-md border border-border/50 bg-background px-3 py-2 text-xs text-muted-foreground min-h-[60px]">
+                            You are a senior backend engineer. When assigned an issue, read the description carefully, implement the solution following existing patterns in the codebase, write tests, and open a PR.
+                          </div>
+                        </div>
 
-      <div className="relative h-[340px]">
+                        <div className="animate-fadeIn" style={{ animationDelay: "0.8s" }}>
+                          <label className="text-xs font-medium text-muted-foreground block mb-1">Model</label>
+                          <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-primary font-medium">
+                            claude-sonnet-4-6
+                          </div>
+                        </div>
 
-        {/* SVG Connections */}
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          viewBox="0 0 600 340"
-        >
-          <line
-            x1="300"
-            y1="70"
-            x2="200"
-            y2="160"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="text-primary/40 animate-draw-line"
-          />
-
-          <line
-            x1="300"
-            y1="70"
-            x2="400"
-            y2="160"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="text-primary/40 animate-draw-line"
-          />
-
-          <line
-            x1="200"
-            y1="160"
-            x2="300"
-            y2="250"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="text-primary/40 animate-draw-line"
-          />
-
-          <line
-            x1="400"
-            y1="160"
-            x2="300"
-            y2="250"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="text-primary/40 animate-draw-line"
-          />
-        </svg>
-
-        {/* Frontend */}
-        <div
-          className="absolute top-4 left-1/2 -translate-x-1/2 animate-fadeIn"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <div className="px-4 py-3 rounded-xl border bg-background shadow-sm">
-            <div className="text-xs font-semibold">
-              Frontend
-            </div>
-
-            <div className="text-[10px] text-muted-foreground">
-              apps/web
-            </div>
-          </div>
-        </div>
-
-        {/* Shared UI */}
-        <div
-          className="absolute left-10 top-[120px] animate-fadeIn"
-          style={{ animationDelay: "0.6s" }}
-        >
-          <div className="px-4 py-3 rounded-xl border bg-background shadow-sm">
-            <div className="text-xs font-semibold">
-              Shared UI
-            </div>
-
-            <div className="text-[10px] text-muted-foreground">
-              packages/ui
-            </div>
-          </div>
-        </div>
-
-        {/* API */}
-        <div
-          className="absolute right-10 top-[120px] animate-fadeIn"
-          style={{ animationDelay: "0.9s" }}
-        >
-          <div className="px-4 py-3 rounded-xl border bg-background shadow-sm">
-            <div className="text-xs font-semibold">
-              API Layer
-            </div>
-
-            <div className="text-[10px] text-muted-foreground">
-              packages/api
-            </div>
-          </div>
-        </div>
-
-        {/* Core */}
-        <div
-          className="absolute left-1/2 bottom-[72px] -translate-x-1/2 animate-fadeIn"
-          style={{ animationDelay: "1.2s" }}
-        >
-          <div className="px-4 py-3 rounded-xl border border-primary/20 bg-primary/5 shadow-sm">
-            <div className="text-xs font-semibold text-primary">
-              Core Domain
-            </div>
-
-            <div className="text-[10px] text-muted-foreground">
-              packages/core
-            </div>
-          </div>
-        </div>
-
-        {/* Moving Pulse */}
-        <div className="absolute left-1/2 top-[72px] -translate-x-1/2">
-          <div className="h-3 w-3 rounded-full bg-primary animate-architecture-pulse" />
-        </div>
-
-        {/* Rules */}
-        <div
-          className="absolute bottom-2 left-4 right-4 rounded-lg border border-primary/20 bg-primary/5 p-3 animate-fadeIn"
-          style={{ animationDelay: "1.6s" }}
-        >
-          <div className="text-[11px] font-medium text-primary mb-2">
-            Generated Rules
-          </div>
-
-          <div className="space-y-1 text-[10px] text-muted-foreground">
-            <div>✓ UI cannot import Core directly</div>
-            <div>✓ API isolated from Frontend</div>
-            <div>✓ Shared packages reusable</div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-)}
+                        <div className="animate-fadeIn" style={{ animationDelay: "1.1s" }}>
+                          <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-3">
+                            <div className="text-xs font-semibold text-green-500 mb-1">Agent created</div>
+                            <div className="text-[11px] text-muted-foreground">Ready to receive issue assignments</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* STEP 3 */}
                 {activeStep === 3 && (
@@ -443,102 +285,44 @@ export function HowItWorks() {
                       {/* Header */}
                       <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-secondary/20">
                         <div>
-                          <h4 className="text-sm font-medium">
-                            Pull Request Review
-                          </h4>
-
-                          <p className="text-xs text-muted-foreground">
-                            AI architecture enforcement
-                          </p>
+                          <h4 className="text-sm font-medium">Issue #42</h4>
+                          <p className="text-xs text-muted-foreground">company/repo</p>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-xs text-muted-foreground">
-                            Running checks
-                          </span>
+                        <div className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[10px] text-amber-600 dark:text-amber-400">
+                          In Progress
                         </div>
                       </div>
 
-                      {/* PR Window */}
-                      <div className="p-5">
-
-                        {/* PR Title */}
-                        <div className="mb-6">
-                          <div className="text-sm font-medium">
-                            feat: add authentication flow
+                      {/* Issue Window */}
+                      <div className="p-5 space-y-4">
+                        <div>
+                          <div className="text-sm font-semibold text-foreground">
+                            Add rate limiting to the API endpoints
                           </div>
-
                           <div className="text-xs text-muted-foreground mt-1">
-                            #248 opened by developer
+                            Opened by sarah · High priority
                           </div>
                         </div>
 
-                        {/* Changed Files */}
-                        <div className="space-y-3">
+                        <div className="text-xs text-muted-foreground leading-relaxed">
+                          We need to add rate limiting middleware to all public API routes to prevent abuse. Should support per-IP and per-user limits with Redis as the backing store.
+                        </div>
 
-                          <div className="rounded-lg border border-border/50 p-3">
-                            <div className="flex justify-between">
-                              <span className="text-xs font-mono">
-                                apps/web/login.tsx
-                              </span>
-
-                              <span className="text-green-500 text-xs">
-                                ✓ Passed
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="rounded-lg border border-border/50 p-3">
-                            <div className="flex justify-between">
-                              <span className="text-xs font-mono">
-                                packages/ui/button.tsx
-                              </span>
-
-                              <span className="text-green-500 text-xs">
-                                ✓ Passed
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Violation Card */}
-                          <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 animate-float">
-
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-semibold text-red-500">
-                                Architecture Violation
-                              </span>
-
-                              <span className="text-[10px] px-2 py-1 rounded-full bg-red-500/10 text-red-500">
-                                Critical
-                              </span>
-                            </div>
-
-                            <div className="text-xs text-muted-foreground mb-3">
-                              apps/web imported package directly from core domain.
-                            </div>
-
-                            <div className="rounded-md bg-background border border-border/50 p-3">
-                              <div className="text-[11px] font-mono text-red-500">
-                                import {"{ UserService }"} from "@core/user"
-                              </div>
-                            </div>
-
-                            <div className="mt-3 text-[11px] text-primary">
-                              Suggested Fix →
-                              Use @api/user-client instead
-                            </div>
-
+                        <div className="border border-border/50 rounded-lg p-3">
+                          <div className="text-xs font-medium text-muted-foreground mb-2">Assignee</div>
+                          <div className="flex items-center gap-2 animate-fadeIn" style={{ animationDelay: "0.5s" }}>
+                            <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">A</div>
+                            <span className="text-xs font-medium text-foreground">backend-engineer</span>
+                            <span className="text-[10px] text-primary ml-auto">Agent</span>
                           </div>
                         </div>
 
-                        {/* AI Badge */}
-                        <div className="mt-5 flex justify-end">
-                          <div className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] text-primary animate-pulse">
-                            AI Review Complete
+                        <div className="animate-fadeIn" style={{ animationDelay: "0.9s" }}>
+                          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                            <div className="text-[11px] font-semibold text-primary mb-1">Task queued</div>
+                            <div className="text-[11px] text-muted-foreground">Agent will pick this up on the next available runtime slot</div>
                           </div>
                         </div>
-
                       </div>
                     </div>
                   </div>
@@ -552,143 +336,48 @@ export function HowItWorks() {
                       {/* Header */}
                       <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-secondary/20">
                         <div>
-                          <h4 className="text-sm font-medium">
-                            Architecture Compliance
-                          </h4>
-
-                          <p className="text-xs text-muted-foreground">
-                            Changes verified automatically
-                          </p>
+                          <h4 className="text-sm font-medium">Issue #42 · backend-engineer</h4>
+                          <p className="text-xs text-muted-foreground">Agent is working · 6m 42s · 9 tool calls</p>
                         </div>
-
                         <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-xs text-green-500">
-                            Passed
-                          </span>
+                          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                          <span className="text-xs text-primary">In progress</span>
                         </div>
                       </div>
 
-                      <div className="p-6 overflow-y-auto h-full">
-
-                        {/* Timeline */}
-                        <div className="space-y-4">
-
-                          <div className="flex items-center gap-4 animate-fadeIn">
-                            <div className="w-8 h-8 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-500 text-xs">
-                              ✓
-                            </div>
-
-                            <div>
-                              <div className="text-sm font-medium">
-                                Architecture issue resolved
-                              </div>
-
-                              <div className="text-xs text-muted-foreground">
-                                Import updated to approved layer
-                              </div>
-                            </div>
+                      <div className="p-5 space-y-3">
+                        <div className="space-y-2 text-xs text-muted-foreground font-mono">
+                          <div className="animate-fadeIn flex gap-2" style={{ animationDelay: "0.1s" }}>
+                            <span className="text-green-500">✓</span>
+                            <span>Read issue description</span>
                           </div>
-
-                          <div
-                            className="flex items-center gap-4 animate-fadeIn"
-                            style={{ animationDelay: "0.5s" }}
-                          >
-                            <div className="w-8 h-8 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-500 text-xs">
-                              ✓
-                            </div>
-
-                            <div>
-                              <div className="text-sm font-medium">
-                                Pull request rechecked
-                              </div>
-
-                              <div className="text-xs text-muted-foreground">
-                                AI validation completed
-                              </div>
-                            </div>
+                          <div className="animate-fadeIn flex gap-2" style={{ animationDelay: "0.4s" }}>
+                            <span className="text-green-500">✓</span>
+                            <span>Explored codebase structure</span>
                           </div>
-
-                          <div
-                            className="flex items-center gap-4 animate-fadeIn"
-                            style={{ animationDelay: "1s" }}
-                          >
-                            <div className="w-8 h-8 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-500 text-xs">
-                              ✓
-                            </div>
-
-                            <div>
-                              <div className="text-sm font-medium">
-                                Architecture compliant
-                              </div>
-
-                              <div className="text-xs text-muted-foreground">
-                                No violations detected
-                              </div>
-                            </div>
+                          <div className="animate-fadeIn flex gap-2" style={{ animationDelay: "0.7s" }}>
+                            <span className="text-green-500">✓</span>
+                            <span>Created rate-limit middleware</span>
                           </div>
-
-                        </div>
-
-                        {/* Score Card */}
-                        <div className="mt-4 rounded-xl border border-green-500/20 bg-green-500/[0.03] p-5">
-
-                          <div className="flex justify-between items-center mb-4">
-                            <span className="text-sm font-medium">
-                              Architecture Health
-                            </span>
-
-                            <span className="text-green-500 font-semibold">
-                              98%
-                            </span>
+                          <div className="animate-fadeIn flex gap-2" style={{ animationDelay: "1.0s" }}>
+                            <span className="text-green-500">✓</span>
+                            <span>Applied to all API routes</span>
                           </div>
-
-                          <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                            <div className="h-full w-[98%] bg-green-500 animate-pulse" />
+                          <div className="animate-fadeIn flex gap-2" style={{ animationDelay: "1.3s" }}>
+                            <span className="text-green-500">✓</span>
+                            <span>Wrote integration tests</span>
                           </div>
-
-                          <div className="grid grid-cols-3 gap-3 mt-5">
-
-                            <div className="rounded-lg border border-border/50 p-3 text-center">
-                              <div className="text-lg font-semibold">
-                                42
-                              </div>
-
-                              <div className="text-[11px] text-muted-foreground">
-                                Rules
-                              </div>
-                            </div>
-
-                            <div className="rounded-lg border border-border/50 p-3 text-center">
-                              <div className="text-lg font-semibold">
-                                0
-                              </div>
-
-                              <div className="text-[11px] text-muted-foreground">
-                                Violations
-                              </div>
-                            </div>
-
-                            <div className="rounded-lg border border-border/50 p-3 text-center">
-                              <div className="text-lg font-semibold">
-                                100%
-                              </div>
-
-                              <div className="text-[11px] text-muted-foreground">
-                                Coverage
-                              </div>
-                            </div>
-
+                          <div className="animate-fadeIn flex gap-2 text-primary" style={{ animationDelay: "1.6s" }}>
+                            <span className="animate-pulse">→</span>
+                            <span>Opening pull request...</span>
                           </div>
                         </div>
 
-                        {/* Badge */}
-                        <div className="mt-5 flex justify-end">
-                          <div className="rounded-full border border-green-500/20 bg-green-500/5 px-3 py-1 text-[11px] text-green-500 animate-pulse">
-                            Consistency Maintained ✓
-                          </div>
+                        <div className="mt-4 rounded-lg border border-green-500/20 bg-green-500/5 p-4 animate-fadeIn" style={{ animationDelay: "2s" }}>
+                          <div className="text-xs font-semibold text-green-500 mb-1">PR #87 opened</div>
+                          <div className="text-[11px] text-muted-foreground">feat: add Redis-backed rate limiting to API endpoints</div>
+                          <div className="text-[11px] text-primary mt-2">Ready for your review →</div>
                         </div>
-
                       </div>
                     </div>
                   </div>

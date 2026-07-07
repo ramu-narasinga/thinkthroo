@@ -6,14 +6,18 @@ import {
   Bot,
   CreditCard,
   DollarSign,
+  FlaskConical,
   LayoutDashboard,
   MessageSquare,
+  Server,
   Settings,
   SquareTerminal,
   Users,
+  Users2,
 } from "lucide-react";
 
 import { NavProjects } from "@/components/nav-projects";
+import { NavWorkspace } from "@/components/nav-workspace";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -98,17 +102,29 @@ const data = {
     },
   ],
   navSecondary: [],
-  codearc: [
+  workspace: [
     {
       name: "Repositories",
       url: "/repositories",
       icon: BookMarked,
     },
     {
+      name: "Squad",
+      url: "/squad",
+      icon: Users2,
+    },
+    {
+      name: "Runtime",
+      url: "/runtime",
+      icon: Server,
+    },
+    {
       name: "Analytics",
       url: "/analytics",
       icon: LayoutDashboard,
     },
+  ],
+  manage: [
     {
       name: "Integrations",
       url: "/integrations",
@@ -181,12 +197,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavProjects projects={data.codearc} label="" />
+        <NavWorkspace projects={data.workspace} label="Workspace" />
+        <NavProjects projects={data.manage} label="Manage" />
         <NavProjects projects={data.learn} label="Learn" />
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarOptInForm />
+        {/* <SidebarOptInForm /> */}
+        <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
+          <FlaskConical className="h-3 w-3 shrink-0" />
+          <span>Think Throo is in Beta</span>
+        </div>
         <NavUser />
       </SidebarFooter>
     </Sidebar>

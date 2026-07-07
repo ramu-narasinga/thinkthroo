@@ -136,7 +136,7 @@ export function DataTable<TData, TValue>({
           <Button size="sm" className="gap-1.5 cursor-pointer" onClick={() => setInviteOpen(true)}>
             + Invite Member
           </Button>
-          <InviteMemberModal open={inviteOpen} onOpenChange={setInviteOpen} />
+          <InviteMemberModal open={inviteOpen} onOpenChange={setInviteOpen} organizationId={activeOrgId} />
           <Button variant="outline" size="icon" className="h-9 w-9 cursor-pointer" onClick={() => setSettingsOpen(true)}>
             <Settings className="w-4 h-4" />
           </Button>

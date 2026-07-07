@@ -9,6 +9,13 @@ import { slackRouter } from './slack';
 import { inviteRouter } from './invite';
 import { repositorySettingsRouter } from './repositorySettings';
 import { organizationSettingsRouter } from './organizationSettings';
+import { issueRouter } from './issues';
+import { agentRouter } from './agent';
+import { agentTaskRouter } from './agentTask';
+import { issueCommentRouter } from './issueComment';
+import { issueBoardStateRouter } from './issueBoardState';
+import { agentDocumentSkillRouter } from './agentDocumentSkill';
+import { squadRouter } from './squad';
 
 export const lambdaRouter = router({
   document: documentRouter,
@@ -21,4 +28,11 @@ export const lambdaRouter = router({
   invite: inviteRouter,
   repositorySettings: repositorySettingsRouter,
   organizationSettings: organizationSettingsRouter,
+  issues: issueRouter,
+  agent: agentRouter,
+  agentTask: agentTaskRouter,
+  issueComment: issueCommentRouter,
+  issueBoardState: issueBoardStateRouter,
+  agentDocumentSkill: agentDocumentSkillRouter,
+  squad: squadRouter,
 });export type LambdaRouter = typeof lambdaRouter;
