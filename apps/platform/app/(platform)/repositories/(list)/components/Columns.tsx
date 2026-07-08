@@ -26,7 +26,7 @@ export type Repo = {
 function ConfigureRepoButton({ repoName, hasAccess }: { repoName: string; hasAccess: boolean }) {
   const { track } = useUmami();
   return (
-    <Link href={`/repositories/${encodeURIComponent(repoName)}/architecture`}>
+    <Link href={`/repositories/${encodeURIComponent(repoName)}/agent`}>
       <Button
         variant="outline"
         size="sm"
