@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name('thinkthroo')
   .description('Local daemon that runs Claude Code agents for thinkthroo')
-  .version('1.0.0');
+  .version('0.1.0');
 
 // ─── start ───────────────────────────────────────────────────────────────────
 program
@@ -117,31 +117,6 @@ service
       console.log(await serviceStatus());
     } catch (err) {
       console.error(chalk.red('Error:'), (err as Error).message);
-      process.exit(1);
-    }
-  });
-
-// ─── configure ───────────────────────────────────────────────────────────────
-program
-  .command('configure')
-  .description('Save daemon credentials obtained from the thinkthroo platform settings')
-  .requiredOption('--runtime-id <id>', 'Runtime ID shown after registering in the UI')
-  .requiredOption('--api-key <key>', 'API key shown once after registering in the UI')
-  .option('--platform-url <url>', 'Platform URL', 'https://app.thinkthroo.com')
-  .action(async (opts: { runtimeId: string; apiKey: string; platformUrl: string }) => {
-    const spinner = ora('Saving config…').start();
-    try {
-      await saveConfig({
-        runtimeId: opts.runtimeId,
-        apiKey: opts.apiKey,
-        platformUrl: opts.platformUrl,
-      });
-      spinner.succeed(`Config saved to ${configPath()}`);
-      console.log('');
-      console.log('Run ' + chalk.bold('thinkthroo start') + ' to begin polling for tasks.');
-    } catch (err) {
-      spinner.fail('Failed to save config');
-      console.error((err as Error).message);
       process.exit(1);
     }
   });
