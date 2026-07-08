@@ -10,6 +10,12 @@ export interface AuthResult {
 
 const TIMEOUT_MS = 5 * 60 * 1000;
 
+// Lets the daemon's server-to-server redeem call through Vercel Deployment
+// Protection on app.thinkthroo.com, which otherwise blocks requests that
+// lack browser cookies. Not a security boundary — just distinguishes known
+// automation traffic from the public web, per Vercel's documented mechanism.
+const VERCEL_PROTECTION_BYPASS = process.env.VERCEL_PROTECTION_BYPASS ?? '';
+
 export async function runBrowserAuth(platformUrl: string): Promise<AuthResult> {
   const state = crypto.randomBytes(32).toString('hex');
 
@@ -89,7 +95,10 @@ export async function runBrowserAuth(platformUrl: string): Promise<AuthResult> {
 async function redeemCode(platformUrl: string, code: string): Promise<AuthResult> {
   const res = await fetch(`${platformUrl}/api/daemon/cli-auth/redeem`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-vercel-protection-bypass': VERCEL_PROTECTION_BYPASS,
+    },
     body: JSON.stringify({ code }),
   });
 

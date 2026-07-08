@@ -9,10 +9,13 @@ interface TaskResult {
   branchName?: string;
 }
 
+const VERCEL_PROTECTION_BYPASS = process.env.VERCEL_PROTECTION_BYPASS ?? '';
+
 function headers(config: DaemonConfig): Record<string, string> {
   return {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${config.apiKey}`,
+    'x-vercel-protection-bypass': VERCEL_PROTECTION_BYPASS,
   };
 }
 

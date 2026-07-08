@@ -1,6 +1,6 @@
 {
   "name": "thinkthroo",
-  "version": "1.0.0",
+  "version": "0.1.1",
   "description": "Local daemon that polls the thinkthroo platform and runs Claude Code agents on your machine.",
   "type": "module",
   "bin": {
@@ -31,6 +31,7 @@
   "homepage": "https://github.com/ramu-narasinga/thinkthroo#readme",
   "scripts": {
     "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist"
