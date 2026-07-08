@@ -1,6 +1,6 @@
 {
   "name": "thinkthroo",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Local daemon that polls the thinkthroo platform and runs Claude Code agents on your machine.",
   "type": "module",
   "bin": {
