@@ -16,14 +16,20 @@ export const agentTasks = pgTable('agent_tasks', {
   issueTitle: text('issue_title'),
   issueBody: text('issue_body'),
   issueHtmlUrl: text('issue_html_url'),
+  // JSON: { priority, labels: string[], assignees: string[], attachments: { url, fileName }[] }
+  context: text('context'),
 
-  // 'implementation' | 'test'
+  // 'implementation' | 'test' | 'review' | 'planning'
   taskType: text('task_type').notNull().default('implementation'),
 
-  // Lifecycle — 'queued' | 'dispatched' | 'waiting_local_directory' | 'running' | 'completed' | 'failed' | 'cancelled'
+  // 'plan' | 'auto_accept_edits' | 'ask_before_edits' | 'auto' — frozen snapshot of the
+  // issue board's execution_mode at the time this task was enqueued.
+  executionMode: text('execution_mode').notNull().default('auto_accept_edits'),
+
+  // Lifecycle — 'queued' | 'dispatched' | 'waiting_local_directory' | 'running' | 'completed' | 'failed' | 'cancelled' | 'waiting_for_user'
   status: text('status').notNull().default('queued'),
   failureReason: text('failure_reason'),
-  result: text('result'),       // JSON: { prUrl, summary, branchName }
+  result: text('result'),       // JSON: { prUrl, summary, branchName, phase?: 'planning' | 'question', question? }
   waitReason: text('wait_reason'),
 
   // Session resumption
@@ -36,7 +42,8 @@ export const agentTasks = pgTable('agent_tasks', {
   attemptCount: integer('attempt_count').notNull().default(0),
   forceFreshSession: boolean('force_fresh_session').notNull().default(false),
 
-  // Two-phase workflow: user message when re-triggering (null = planning phase, present = implementing phase)
+  // Follow-up message when re-triggering a paused run (a completed 'planning' run awaiting
+  // refinement, or an 'implementation' run paused on result.phase === 'question')
   userMessage: text('user_message'),
 
   // Token usage (accumulated across streaming calls)

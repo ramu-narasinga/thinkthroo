@@ -1,0 +1,2 @@
+ALTER TABLE "agent_tasks" ADD COLUMN "execution_mode" text DEFAULT 'auto_accept_edits' NOT NULL;--> statement-breakpoint
+ALTER TABLE "issue_board_states" ADD COLUMN "execution_mode" text DEFAULT 'auto_accept_edits' NOT NULL;

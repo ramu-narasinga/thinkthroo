@@ -8,6 +8,8 @@ export interface CreateDocumentInput {
   name: string;
   type: 'file' | 'folder';
   content?: string;
+  editorData?: Record<string, any>;
+  metadata?: Record<string, any>;
 }
 
 export interface UpdateDocumentInput {

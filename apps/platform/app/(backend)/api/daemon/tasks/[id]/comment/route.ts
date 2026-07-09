@@ -71,7 +71,7 @@ export async function POST(
   // scan for @AgentName mentions and auto-queue tasks for matched agents.
   try {
     const [boardState] = await serverDB
-      .select({ assigneeType: issueBoardStates.assigneeType, issueTitle: issueBoardStates.issueTitle, issueHtmlUrl: issueBoardStates.issueHtmlUrl })
+      .select({ assigneeSquadId: issueBoardStates.assigneeSquadId, issueTitle: issueBoardStates.issueTitle, issueHtmlUrl: issueBoardStates.issueHtmlUrl })
       .from(issueBoardStates)
       .where(
         and(
@@ -82,7 +82,7 @@ export async function POST(
       )
       .limit(1);
 
-    if (boardState?.assigneeType === 'squad') {
+    if (boardState?.assigneeSquadId) {
       const mentions = [...commentBody.matchAll(/@([\w][\w\s-]*[\w]|[\w]+)/g)].map((m) => m[1].trim());
       if (mentions.length > 0) {
         const [repo] = await serverDB

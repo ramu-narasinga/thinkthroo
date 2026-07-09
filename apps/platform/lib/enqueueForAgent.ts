@@ -1,5 +1,16 @@
-import { and, eq } from 'drizzle-orm';
-import { agents, agentTasks, daemonRuntimes, repositories } from '@/database/schemas';
+import { and, eq, inArray } from 'drizzle-orm';
+import {
+  agents,
+  agentTasks,
+  daemonRuntimes,
+  repositories,
+  issueBoardStates,
+  issueLabels,
+  issueBoardStateLabels,
+  issueAssignees,
+  issueAttachments,
+  teamInvitations,
+} from '@/database/schemas';
 import { generateGithubAppJwt } from './generate-github-app-jwt';
 
 type DB = typeof import('@/database').serverDB;
@@ -31,6 +42,9 @@ export async function enqueueForAgent(
     issueTitle,
     issueHtmlUrl,
     userId,
+    issueBoardStateId,
+    taskType = 'implementation',
+    executionMode = 'auto_accept_edits',
   }: {
     agentId: string;
     repoId: string;
@@ -40,6 +54,9 @@ export async function enqueueForAgent(
     issueTitle: string;
     issueHtmlUrl: string | null;
     userId: string;
+    issueBoardStateId?: string;
+    taskType?: 'implementation' | 'planning';
+    executionMode?: 'plan' | 'auto_accept_edits' | 'ask_before_edits' | 'auto';
   }
 ) {
   const [agent] = await db
@@ -80,6 +97,11 @@ export async function enqueueForAgent(
     // Non-critical — proceed without body
   }
 
+  let context: string | null = null;
+  if (issueBoardStateId) {
+    context = await buildIssueContext(db, issueBoardStateId, userId);
+  }
+
   const [task] = await db
     .insert(agentTasks)
     .values({
@@ -92,11 +114,58 @@ export async function enqueueForAgent(
       issueBody,
       issueHtmlUrl,
       status: 'queued',
-      taskType: 'implementation',
+      taskType,
+      executionMode,
+      context,
     })
     .returning();
 
   return task;
+}
+
+/** Assemble priority/labels/assignees/attachments for an issue board row into a JSON blob for the daemon prompt. */
+async function buildIssueContext(db: DB, issueBoardStateId: string, userId: string): Promise<string | null> {
+  const [board] = await db
+    .select({ priority: issueBoardStates.priority })
+    .from(issueBoardStates)
+    .where(eq(issueBoardStates.id, issueBoardStateId))
+    .limit(1);
+  if (!board) return null;
+
+  const [labelRows, assigneeRows, attachmentRows] = await Promise.all([
+    db
+      .select({ name: issueLabels.name })
+      .from(issueBoardStateLabels)
+      .innerJoin(issueLabels, eq(issueBoardStateLabels.labelId, issueLabels.id))
+      .where(eq(issueBoardStateLabels.issueBoardStateId, issueBoardStateId)),
+    db.select().from(issueAssignees).where(eq(issueAssignees.issueBoardStateId, issueBoardStateId)),
+    db
+      .select({ url: issueAttachments.url, fileName: issueAttachments.fileName })
+      .from(issueAttachments)
+      .where(eq(issueAttachments.issueBoardStateId, issueBoardStateId)),
+  ]);
+
+  const agentIds = assigneeRows.filter((a) => a.assigneeType === 'agent' && a.assigneeAgentId).map((a) => a.assigneeAgentId!);
+  const memberIds = assigneeRows.filter((a) => a.assigneeType === 'member' && a.assigneeMemberId).map((a) => a.assigneeMemberId!);
+
+  const [agentNameRows, memberNameRows] = await Promise.all([
+    agentIds.length ? db.select({ id: agents.id, name: agents.name }).from(agents).where(inArray(agents.id, agentIds)) : [],
+    memberIds.length
+      ? db.select({ id: teamInvitations.id, fullName: teamInvitations.fullName }).from(teamInvitations).where(inArray(teamInvitations.id, memberIds))
+      : [],
+  ]);
+
+  const assigneeNames = [
+    ...agentNameRows.map((a) => a.name),
+    ...memberNameRows.map((m) => m.fullName),
+  ];
+
+  return JSON.stringify({
+    priority: board.priority,
+    labels: labelRows.map((l) => l.name),
+    assignees: assigneeNames,
+    attachments: attachmentRows.map((a) => ({ url: a.url, fileName: a.fileName })),
+  });
 }
 
 export async function enqueueForAgentByName(

@@ -11,6 +11,7 @@ import {
 } from "@thinkthroo/ui/components/dialog";
 import { Input } from "@thinkthroo/ui/components/input";
 import { Label } from "@thinkthroo/ui/components/label";
+import { FileText, Search } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -26,6 +27,7 @@ import { agentDocumentSkillClientService } from "@/service/agentDocumentSkill/cl
 interface DocOption {
   id: string;
   name: string;
+  description?: string;
 }
 
 interface CreateAgentModalProps {
@@ -60,6 +62,7 @@ export function CreateAgentModal({
 
   const [availableDocs, setAvailableDocs] = useState<DocOption[]>([]);
   const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
+  const [skillSearch, setSkillSearch] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -70,13 +73,18 @@ export function CreateAgentModal({
       setRuntimeId(editAgent?.runtimeId ?? "");
       setVisibility((editAgent?.visibility as "personal" | "workspace") ?? "personal");
       setError("");
+      setSkillSearch("");
 
       // Fetch file documents for this repository
       documentClientService.getRepositoryIdByName(repositoryFullName)
         .then((repo) => documentClientService.getAllByRepositoryMinimal(repo.id))
         .then((docs) => setAvailableDocs(
-          docs.filter((d: { type: string; id: string; name: string }) => d.type === 'file')
-            .map((d: { id: string; name: string }) => ({ id: d.id, name: d.name }))
+          docs.filter((d: { type: string; id: string; name: string; metadata?: { description?: string } | null }) => d.type === 'file')
+            .map((d: { id: string; name: string; metadata?: { description?: string } | null }) => ({
+              id: d.id,
+              name: d.name,
+              description: d.metadata?.description,
+            }))
         ))
         .catch(() => {});
 
@@ -99,6 +107,7 @@ export function CreateAgentModal({
     setRuntimeId("");
     setVisibility("personal");
     setSelectedDocIds(new Set());
+    setSkillSearch("");
     setError("");
     onClose();
   };
@@ -114,6 +123,15 @@ export function CreateAgentModal({
       return next;
     });
   };
+
+  const filteredDocs = availableDocs.filter((doc) => {
+    const query = skillSearch.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      doc.name.toLowerCase().includes(query) ||
+      (doc.description ?? "").toLowerCase().includes(query)
+    );
+  });
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -212,21 +230,47 @@ export function CreateAgentModal({
           {availableDocs.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <Label>Skills</Label>
-              <div className="rounded-md border border-input divide-y max-h-40 overflow-y-auto">
-                {availableDocs.map((doc) => (
-                  <label
-                    key={doc.id}
-                    className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-muted/50 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedDocIds.has(doc.id)}
-                      onChange={() => toggleDoc(doc.id)}
-                      className="h-4 w-4 rounded border-input accent-primary"
-                    />
-                    {doc.name}
-                  </label>
-                ))}
+              <div className="rounded-md border border-input overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-input px-3 py-2">
+                  <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search skills..."
+                    value={skillSearch}
+                    onChange={(e) => setSkillSearch(e.target.value)}
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                  />
+                </div>
+                <div className="divide-y max-h-52 overflow-y-auto">
+                  {filteredDocs.length === 0 ? (
+                    <p className="px-3 py-4 text-sm text-muted-foreground text-center">
+                      No skills found.
+                    </p>
+                  ) : (
+                    filteredDocs.map((doc) => (
+                      <label
+                        key={doc.id}
+                        className="flex items-start gap-2.5 px-3 py-2 cursor-pointer hover:bg-muted/50"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedDocIds.has(doc.id)}
+                          onChange={() => toggleDoc(doc.id)}
+                          className="h-4 w-4 mt-0.5 rounded border-input accent-primary shrink-0"
+                        />
+                        <FileText className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{doc.name}</p>
+                          {doc.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {doc.description}
+                            </p>
+                          )}
+                        </div>
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           )}

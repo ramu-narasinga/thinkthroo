@@ -118,7 +118,7 @@ export default function ArchitectureTab() {
   }, []);
 
   const handleCreate = useCallback(
-    async (name: string) => {
+    async (name: string, description?: string) => {
       if (!repositoryId || !organizationId) return;
       await createDocument({
         repositoryId,
@@ -127,6 +127,7 @@ export default function ArchitectureTab() {
         name,
         type: modals.create.type || 'file',
         content: modals.create.type === 'file' ? '' : undefined,
+        metadata: description ? { description } : undefined,
       });
     },
     [createDocument, repositoryId, organizationId, modals.create]

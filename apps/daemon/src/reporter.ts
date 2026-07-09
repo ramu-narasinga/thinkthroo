@@ -7,6 +7,17 @@ interface TaskResult {
   prUrl?: string;
   summary?: string;
   branchName?: string;
+  phase?: 'planning' | 'question';
+  question?: string;
+}
+
+export interface StructuredEventInput {
+  eventType: 'agent_text' | 'tool_call' | 'tool_result' | 'error';
+  toolName?: string;
+  toolUseId?: string;
+  toolInput?: string;
+  preview?: string;
+  raw: string;
 }
 
 const VERCEL_PROTECTION_BYPASS = process.env.VERCEL_PROTECTION_BYPASS ?? '';
@@ -69,6 +80,14 @@ export async function reportProgress(
   config: DaemonConfig
 ): Promise<void> {
   await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/progress`, { message, type }, config).catch(() => {});
+}
+
+export async function reportStructuredEvent(
+  taskId: string,
+  event: StructuredEventInput,
+  config: DaemonConfig
+): Promise<void> {
+  await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/events`, event, config).catch(() => {});
 }
 
 export async function reportComment(
@@ -146,6 +165,8 @@ export interface ClaimedTask {
     attemptCount: number;
     userMessage: string | null;
     taskType: string;
+    executionMode: string;
+    context: string | null;
   };
   agent: {
     instructions: string;

@@ -18,6 +18,12 @@ export interface IssueItem {
   updatedAt: string;
 }
 
+export interface IssueDetail {
+  title: string;
+  body: string | null;
+  htmlUrl: string;
+}
+
 export class IssueClientService {
   getByRepository = async (
     repositoryFullName: string,
@@ -29,6 +35,16 @@ export class IssueClientService {
       page,
       perPage: 25,
       state,
+    });
+  };
+
+  getByNumber = async (
+    repositoryFullName: string,
+    issueNumber: number
+  ): Promise<IssueDetail> => {
+    return lambdaClient.issues.getByNumber.query({
+      repositoryFullName,
+      issueNumber,
     });
   };
 }

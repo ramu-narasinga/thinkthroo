@@ -246,6 +246,27 @@
       "when": 1783400544060,
       "tag": "0034_daemon_cli_auth_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1783508404465,
+      "tag": "0035_issue_labels_priority_assignees_attachments",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1783512764475,
+      "tag": "0036_agent_task_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1783598235133,
+      "tag": "0037_add_execution_mode",
+      "breakpoints": true
     }
   ]
 }

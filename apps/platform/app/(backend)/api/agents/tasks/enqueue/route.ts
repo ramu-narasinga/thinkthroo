@@ -33,14 +33,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let body: { agentId?: string; issueNumber?: number; repositoryFullName?: string; userMessage?: string };
+  let body: {
+    agentId?: string;
+    issueNumber?: number;
+    repositoryFullName?: string;
+    userMessage?: string;
+    sessionId?: string;
+    workDir?: string;
+    taskType?: 'implementation' | 'planning';
+    executionMode?: 'plan' | 'auto_accept_edits' | 'ask_before_edits' | 'auto';
+  };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { agentId, issueNumber, repositoryFullName, userMessage } = body;
+  const { agentId, issueNumber, repositoryFullName, userMessage, sessionId, workDir, taskType, executionMode } = body;
   if (!agentId || !issueNumber || !repositoryFullName) {
     return NextResponse.json(
       { error: 'agentId, issueNumber, and repositoryFullName are required' },
@@ -153,6 +162,10 @@ export async function POST(req: NextRequest) {
       issueBody,
       issueHtmlUrl,
       userMessage: userMessage ?? null,
+      sessionId: sessionId ?? null,
+      workDir: workDir ?? null,
+      taskType: taskType ?? 'implementation',
+      executionMode: executionMode ?? 'auto_accept_edits',
       status: 'queued',
     })
     .returning();

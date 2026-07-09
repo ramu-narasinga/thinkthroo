@@ -9,6 +9,8 @@ interface TaskResult {
   prUrl?: string;
   summary?: string;
   branchName?: string;
+  phase?: 'planning' | 'question';
+  question?: string;
 }
 
 export async function POST(
@@ -36,10 +38,12 @@ export async function POST(
 
   const { id } = await params;
 
+  const isPausedOnQuestion = result.phase === 'question';
+
   const [updated] = await serverDB
     .update(agentTasks)
     .set({
-      status: 'completed',
+      status: isPausedOnQuestion ? 'waiting_for_user' : 'completed',
       completedAt: new Date(),
       result: JSON.stringify(result),
     })
@@ -56,12 +60,14 @@ export async function POST(
     return NextResponse.json({ error: 'Task not found or not in running state' }, { status: 404 });
   }
 
+  // Planning-task completions are intentionally left in the 'planning' column — the
+  // human decides when to drag the card to 'todo' to kick off implementation.
   if (updated.taskType === 'implementation') {
     try {
       await updateBoardKanbanStatus(serverDB, {
         repositoryId: updated.repositoryId,
         issueNumber: updated.issueNumber,
-        kanbanStatus: 'in_review',
+        kanbanStatus: isPausedOnQuestion ? 'waiting_for_user' : 'in_review',
       });
     } catch {
       // Board sync is best-effort — do not fail the task completion

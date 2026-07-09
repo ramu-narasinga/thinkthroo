@@ -14,6 +14,7 @@ import { agentRouter } from './agent';
 import { agentTaskRouter } from './agentTask';
 import { issueCommentRouter } from './issueComment';
 import { issueBoardStateRouter } from './issueBoardState';
+import { issueLabelRouter } from './issueLabel';
 import { agentDocumentSkillRouter } from './agentDocumentSkill';
 import { squadRouter } from './squad';
 
@@ -33,6 +34,7 @@ export const lambdaRouter = router({
   agentTask: agentTaskRouter,
   issueComment: issueCommentRouter,
   issueBoardState: issueBoardStateRouter,
+  issueLabel: issueLabelRouter,
   agentDocumentSkill: agentDocumentSkillRouter,
   squad: squadRouter,
 });export type LambdaRouter = typeof lambdaRouter;

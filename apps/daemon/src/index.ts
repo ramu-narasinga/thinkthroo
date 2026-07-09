@@ -7,13 +7,14 @@ import { runDaemon } from './daemon.js';
 import { runBrowserAuth } from './auth.js';
 import { installService, uninstallService, serviceStatus } from './service.js';
 import { deregister } from './reporter.js';
+import { version } from '../package.json';
 
 const program = new Command();
 
 program
   .name('thinkthroo')
   .description('Local daemon that runs Claude Code agents for thinkthroo')
-  .version('0.1.0');
+  .version(version);
 
 // ─── start ───────────────────────────────────────────────────────────────────
 program
