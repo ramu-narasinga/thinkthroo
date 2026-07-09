@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bot, Clock, Loader2, CheckCircle2, XCircle, Ban, ExternalLink } from "lucide-react";
+import { Bot, Clock, Loader2, CheckCircle2, XCircle, Ban, ExternalLink, MessageSquare } from "lucide-react";
 import { Button } from "@thinkthroo/ui/components/button";
 import {
   DropdownMenu,
@@ -62,6 +62,11 @@ const STATUS_CONFIGS: Record<AgentTaskStatus, BadgeConfig> = {
     label: "Cancelled",
     icon: <Ban className="h-3 w-3" />,
     className: "bg-muted text-muted-foreground border-muted-foreground/20",
+  },
+  waiting_for_user: {
+    label: "Needs input",
+    icon: <MessageSquare className="h-3 w-3" />,
+    className: "bg-amber-50 text-amber-700 border-amber-200",
   },
 };
 
@@ -141,6 +146,7 @@ export function IssueAgentBadge({ repositoryFullName, issueNumber, activeAgents 
         failureReason: null,
         result: null,
         taskType: "implementation",
+        executionMode: "auto_accept_edits",
         waitReason: null,
         sessionId: null,
         workDir: null,

@@ -7,12 +7,17 @@ export type AgentTaskStatus =
   | 'running'
   | 'completed'
   | 'failed'
-  | 'cancelled';
+  | 'cancelled'
+  | 'waiting_for_user';
+
+export type ExecutionMode = 'plan' | 'auto_accept_edits' | 'ask_before_edits' | 'auto';
 
 export interface AgentTaskResult {
   prUrl?: string;
   summary?: string;
   branchName?: string;
+  phase?: 'planning' | 'question';
+  question?: string;
 }
 
 export interface AgentTaskItem {
@@ -26,7 +31,8 @@ export interface AgentTaskItem {
   issueBody: string | null;
   issueHtmlUrl: string | null;
   status: AgentTaskStatus;
-  taskType: 'implementation' | 'test' | 'review';
+  taskType: 'implementation' | 'test' | 'review' | 'planning';
+  executionMode: ExecutionMode;
   failureReason: string | null;
   result: string | null; // JSON-encoded AgentTaskResult
   waitReason: string | null;
@@ -61,6 +67,19 @@ export interface AgentTaskLogItem {
   userId: string;
   type: 'info' | 'output' | 'error';
   message: string;
+  createdAt: Date;
+}
+
+export interface AgentTaskEventItem {
+  id: string;
+  taskId: string;
+  userId: string;
+  eventType: 'agent_text' | 'tool_call' | 'tool_result' | 'error';
+  toolName: string | null;
+  toolUseId: string | null;
+  toolInput: string | null;
+  preview: string | null;
+  raw: string | null;
   createdAt: Date;
 }
 
@@ -108,6 +127,10 @@ export class AgentTaskClientService {
 
   getLogs = async (taskId: string): Promise<AgentTaskLogItem[]> => {
     return lambdaClient.agentTask.getLogs.query({ taskId }) as Promise<AgentTaskLogItem[]>;
+  };
+
+  getEvents = async (taskId: string): Promise<AgentTaskEventItem[]> => {
+    return lambdaClient.agentTask.getEvents.query({ taskId }) as Promise<AgentTaskEventItem[]>;
   };
 
   cancel = async (id: string): Promise<AgentTaskItem> => {

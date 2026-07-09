@@ -90,6 +90,8 @@ async function poll(config: DaemonConfig): Promise<void> {
         prUrl: result.prUrl,
         summary: result.summary,
         branchName: result.branchName,
+        phase: result.phase,
+        question: result.question,
       }, config);
       console.log(chalk.green('✓') + ` Completed ${label}` + (result.prUrl ? ` — ${result.prUrl}` : ''));
     } else {

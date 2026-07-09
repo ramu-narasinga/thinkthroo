@@ -2,9 +2,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execa, ExecaError } from 'execa';
 import { DaemonConfig } from './config.js';
-import { ClaimedTask, reportProgress, pinSession, reportComment, fetchIssueComments, uploadArtifact, postReviewComments, ReviewCommentInput } from './reporter.js';
+import { ClaimedTask, reportProgress, reportStructuredEvent, pinSession, reportComment, fetchIssueComments, uploadArtifact, postReviewComments, ReviewCommentInput } from './reporter.js';
 import { prepareWorkDir, branchName, createBranch, commitAndPush } from './git.js';
 import { createPullRequest } from './github.js';
+import { trustWorkDir } from './trust.js';
 
 export interface ExecutionResult {
   success: boolean;
@@ -12,9 +13,134 @@ export interface ExecutionResult {
   branchName?: string;
   summary?: string;
   failureReason?: string;
+  phase?: 'planning' | 'question';
+  question?: string;
 }
 
-function buildPrompt(task: ClaimedTask['task'], comments: Array<{ authorType: string; body: string }>): string {
+// A clarifying question is signaled by the agent as the last non-empty output line.
+const QUESTION_PREFIX = 'QUESTION:';
+
+function extractQuestion(outputLines: string[]): string | null {
+  for (let i = outputLines.length - 1; i >= 0; i--) {
+    const line = outputLines[i].trim();
+    if (!line) continue;
+    if (line.startsWith(QUESTION_PREFIX)) {
+      return line.slice(QUESTION_PREFIX.length).trim();
+    }
+    break; // only the very last non-empty line counts as the sentinel
+  }
+  return null;
+}
+
+// The agent's actual last word — mirrors extractQuestion's "only the last non-empty
+// entry counts" scan, so the posted comment/PR body reflects the real final message
+// instead of an arbitrary tail slice of streamed text chunks.
+function extractFinalSummary(outputLines: string[]): string {
+  for (let i = outputLines.length - 1; i >= 0; i--) {
+    const text = outputLines[i].trim();
+    if (text) return text;
+  }
+  return '';
+}
+
+interface PermissionDenial {
+  tool_name?: string;
+  tool_input?: Record<string, unknown>;
+}
+
+// In 'ask_before_edits' mode the CLI denies the gated tool call instantly and ends the
+// turn — the final stream-json line is the {"type":"result",...} object carrying the
+// denials. Only the very last non-empty line counts (mirrors extractQuestion).
+function extractPermissionDenials(outputLines: string[]): string | null {
+  for (let i = outputLines.length - 1; i >= 0; i--) {
+    const line = outputLines[i].trim();
+    if (!line) continue;
+
+    let obj: any;
+    try {
+      obj = JSON.parse(line);
+    } catch {
+      return null;
+    }
+
+    const denials: PermissionDenial[] = obj?.permission_denials;
+    if (obj?.type !== 'result' || !Array.isArray(denials) || denials.length === 0) return null;
+
+    const summaries = denials.map((d) => {
+      const toolName = d.tool_name ?? 'a tool';
+      const input = d.tool_input ?? {};
+      const detail = (input.file_path as string) ?? (input.command as string) ?? JSON.stringify(input).slice(0, 200);
+      return `${toolName}: ${detail}`;
+    });
+
+    return `Wants to run:\n${summaries.map((s) => `- ${s}`).join('\n')}\n\nReply to approve or give feedback.`;
+  }
+  return null;
+}
+
+// Maps the issue's chosen execution mode to the claude CLI flags for an implementation run.
+// 'plan' isn't handled here — it's routed to executePlanningTask via taskType before this runs.
+function permissionArgsForMode(executionMode: string): string[] {
+  switch (executionMode) {
+    case 'ask_before_edits':
+      return ['--permission-mode', 'default'];
+    case 'auto_accept_edits':
+      return ['--permission-mode', 'acceptEdits'];
+    case 'auto':
+    default:
+      return ['--dangerously-skip-permissions'];
+  }
+}
+
+interface IssueContext {
+  priority?: string;
+  labels?: string[];
+  assignees?: string[];
+  attachments?: Array<{ url: string; fileName: string }>;
+  attachmentPaths?: string[];
+}
+
+function parseIssueContext(raw: string | null): IssueContext | null {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as IssueContext;
+  } catch {
+    return null;
+  }
+}
+
+async function downloadAttachments(
+  attachments: Array<{ url: string; fileName: string }>,
+  workDir: string
+): Promise<string[]> {
+  if (attachments.length === 0) return [];
+
+  const dir = path.join(workDir, '.issue-attachments');
+  await fs.mkdir(dir, { recursive: true }).catch(() => {});
+
+  const paths: string[] = [];
+  for (let i = 0; i < attachments.length; i++) {
+    const { url, fileName } = attachments[i];
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const buffer = Buffer.from(await res.arrayBuffer());
+      const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const relativePath = path.join('.issue-attachments', `${i}-${safeName}`);
+      await fs.writeFile(path.join(workDir, relativePath), buffer);
+      paths.push(relativePath);
+    } catch {
+      // Non-critical — skip attachments that fail to download
+    }
+  }
+  return paths;
+}
+
+function buildPrompt(
+  task: ClaimedTask['task'],
+  comments: Array<{ authorType: string; body: string }>,
+  context: IssueContext | null
+): string {
   const lines: string[] = [];
   lines.push(`You are a coding agent assigned to issue #${task.issueNumber}: ${task.issueTitle ?? '(no title)'}`);
   lines.push('');
@@ -22,6 +148,27 @@ function buildPrompt(task: ClaimedTask['task'], comments: Array<{ authorType: st
     lines.push('## Issue description');
     lines.push('');
     lines.push(task.issueBody);
+  }
+
+  if (context?.priority && context.priority !== 'no_priority') {
+    lines.push('');
+    lines.push(`**Priority:** ${context.priority}`);
+  }
+  if (context?.labels?.length) {
+    lines.push('');
+    lines.push(`**Labels:** ${context.labels.join(', ')}`);
+  }
+  if (context?.assignees?.length) {
+    lines.push('');
+    lines.push(`**Assigned to:** ${context.assignees.join(', ')}`);
+  }
+  if (context?.attachmentPaths?.length) {
+    lines.push('');
+    lines.push('## Attached images');
+    lines.push('');
+    for (const p of context.attachmentPaths) {
+      lines.push(`- ${p}`);
+    }
   }
 
   if (comments.length > 0) {
@@ -41,6 +188,9 @@ function buildPrompt(task: ClaimedTask['task'], comments: Array<{ authorType: st
   }
 
   lines.push('Implement the fix for this issue. Make the necessary code changes, ensure tests pass if applicable, and keep the changes focused on the issue.');
+  lines.push('');
+  lines.push(`If — and only if — something is genuinely ambiguous or blocking and you cannot reasonably proceed with a sensible default, stop and output on the very last line: ${QUESTION_PREFIX} <your question>`);
+  lines.push('Otherwise proceed autonomously to a full implementation; do not ask about trivial or cosmetic choices.');
   return lines.join('\n');
 }
 
@@ -50,14 +200,76 @@ function extractSessionId(line: string): string | null {
   return match ? match[1] : null;
 }
 
+// Best-effort parse of a Claude Code CLI `--output-format stream-json` line into a
+// structured transcript event. Returns null for lines that aren't recognized JSON events
+// (banner text, blank lines, etc) so callers can fall back to raw-text reporting.
+interface StructuredEvent {
+  eventType: 'agent_text' | 'tool_call' | 'tool_result' | 'error';
+  toolName?: string;
+  toolUseId?: string;
+  toolInput?: string;
+  preview?: string;
+  raw: string;
+}
+
+function parseStreamJsonLine(line: string): { events: StructuredEvent[]; sessionId?: string; text?: string } | null {
+  let obj: any;
+  try {
+    obj = JSON.parse(line);
+  } catch {
+    return null;
+  }
+
+  if (obj?.type === 'system' && obj?.subtype === 'init' && typeof obj.session_id === 'string') {
+    return { events: [], sessionId: obj.session_id };
+  }
+
+  const events: StructuredEvent[] = [];
+  let text: string | undefined;
+
+  const content = obj?.message?.content;
+  if (Array.isArray(content)) {
+    for (const block of content) {
+      if (block?.type === 'text' && typeof block.text === 'string') {
+        events.push({ eventType: 'agent_text', preview: block.text.slice(0, 200), raw: line });
+        text = (text ?? '') + block.text;
+      } else if (block?.type === 'tool_use') {
+        const inputStr = (() => { try { return JSON.stringify(block.input); } catch { return undefined; } })();
+        events.push({
+          eventType: 'tool_call',
+          toolName: block.name,
+          toolUseId: block.id,
+          toolInput: inputStr,
+          preview: inputStr ? inputStr.slice(0, 200) : undefined,
+          raw: line,
+        });
+      } else if (block?.type === 'tool_result') {
+        const resultText = typeof block.content === 'string' ? block.content : JSON.stringify(block.content ?? '');
+        events.push({
+          eventType: 'tool_result',
+          toolUseId: block.tool_use_id,
+          preview: resultText.slice(0, 200),
+          raw: line,
+        });
+      }
+    }
+  }
+
+  if (events.length === 0 && !text) return null;
+  return { events, text };
+}
+
 async function runClaude(
   args: string[],
   workDir: string,
   task: ClaimedTask['task'],
-  config: DaemonConfig
+  config: DaemonConfig,
+  opts: { structured?: boolean } = {}
 ): Promise<{ outputLines: string[]; success: boolean; errorMessage?: string }> {
   const outputLines: string[] = [];
   let sessionPinned = false;
+
+  await trustWorkDir(workDir).catch(() => {});
 
   try {
     const proc = execa('claude', args, {
@@ -72,6 +284,23 @@ async function runClaude(
       const text = chunk.toString();
       for (const line of text.split('\n')) {
         if (!line.trim()) continue;
+
+        if (opts.structured) {
+          const parsed = parseStreamJsonLine(line);
+          if (parsed) {
+            if (parsed.sessionId && !sessionPinned) {
+              await pinSession(task.id, parsed.sessionId, workDir, config).catch(() => {});
+              sessionPinned = true;
+            }
+            if (parsed.text) outputLines.push(parsed.text);
+            for (const event of parsed.events) {
+              await reportStructuredEvent(task.id, event, config);
+            }
+            continue;
+          }
+          // Not a recognized JSON event — fall through to legacy raw-line handling below.
+        }
+
         outputLines.push(line);
 
         if (!sessionPinned) {
@@ -359,6 +588,8 @@ async function executeReviewTask(
 
   // Use buffered stdout (not streaming) to guarantee full output is available before parsing.
   // runClaude's async data handler can race with `await proc`, leaving outputLines incomplete.
+  await trustWorkDir(workDir).catch(() => {});
+
   let fullOutput = '';
   try {
     const result = await execa('claude', reviewArgs, {
@@ -403,6 +634,110 @@ async function executeReviewTask(
   return { success: true, branchName: currentBranch, summary: `${comments.length} review comment(s) posted.` };
 }
 
+// ─── Planning task execution ──────────────────────────────────────────────────
+
+function buildPlanningPrompt(
+  task: ClaimedTask['task'],
+  comments: Array<{ authorType: string; body: string }>,
+  context: IssueContext | null
+): string {
+  const lines: string[] = [];
+  lines.push(`You are a coding agent asked to investigate and plan a fix for issue #${task.issueNumber}: ${task.issueTitle ?? '(no title)'}`);
+  lines.push('');
+  if (task.issueBody) {
+    lines.push('## Issue description');
+    lines.push('');
+    lines.push(task.issueBody);
+  }
+
+  if (context?.priority && context.priority !== 'no_priority') {
+    lines.push('');
+    lines.push(`**Priority:** ${context.priority}`);
+  }
+  if (context?.labels?.length) {
+    lines.push('');
+    lines.push(`**Labels:** ${context.labels.join(', ')}`);
+  }
+  if (context?.attachmentPaths?.length) {
+    lines.push('');
+    lines.push('## Attached images');
+    lines.push('');
+    for (const p of context.attachmentPaths) {
+      lines.push(`- ${p}`);
+    }
+  }
+
+  if (comments.length > 0) {
+    lines.push('');
+    lines.push('## Conversation so far');
+    lines.push('');
+    for (const c of comments) {
+      const author = c.authorType === 'agent' ? 'Agent' : 'User';
+      lines.push(`**${author}:** ${c.body}`);
+      lines.push('');
+    }
+  }
+
+  if (task.userMessage) {
+    lines.push(`**User:** ${task.userMessage}`);
+    lines.push('');
+  }
+
+  lines.push('Investigate the codebase (read files, grep, check git log — do NOT make any code changes) and produce a clear implementation plan for this issue.');
+  lines.push('Your entire final response will be posted verbatim as the plan for a human to review, so write it as a standalone plan, not a narration of your investigation.');
+  return lines.join('\n');
+}
+
+async function executePlanningTask(
+  claimed: ClaimedTask,
+  config: DaemonConfig
+): Promise<ExecutionResult> {
+  const { task, agent, repository, githubToken } = claimed;
+
+  if (!repository || !githubToken) {
+    return { success: false, failureReason: 'agent_error' };
+  }
+
+  const model = agent?.model ?? 'claude-sonnet-4-6';
+  const instructions = agent?.instructions ?? '';
+
+  let workDir: string;
+  try {
+    workDir = await prepareWorkDir(repository.fullName, repository.htmlUrl, githubToken, task.workDir);
+  } catch (err) {
+    await reportProgress(task.id, `Failed to prepare work directory: ${(err as Error).message}`, 'error', config);
+    return { success: false, failureReason: 'agent_error' };
+  }
+
+  const skills = agent?.skills ?? [];
+  if (skills.length > 0) {
+    await writeSkillFiles(workDir, skills);
+  }
+
+  const comments = await fetchIssueComments(task.id, config).catch(() => []);
+  const issueContext = parseIssueContext(task.context);
+  const attachmentPaths = await downloadAttachments(issueContext?.attachments ?? [], workDir);
+
+  const prompt = buildPlanningPrompt(task, comments, { ...issueContext, attachmentPaths });
+  const planArgs = ['--print', '--model', model, '--dangerously-skip-permissions'];
+  if (instructions) planArgs.push('--system-prompt', instructions);
+  if (task.sessionId) planArgs.push('--resume', task.sessionId);
+  planArgs.push(prompt);
+
+  await reportProgress(task.id, 'Starting planning run…', 'info', config);
+
+  const { outputLines, success: claudeSuccess } = await runClaude(planArgs, workDir, task, config);
+
+  if (!claudeSuccess) {
+    return { success: false, failureReason: 'agent_error' };
+  }
+
+  const planText = outputLines.join('\n').trim();
+  await reportComment(task.id, planText || 'The agent did not produce a plan.', config).catch(() => {});
+
+  return { success: true, phase: 'planning', summary: planText };
+}
+
 // ─── Implementation task execution ───────────────────────────────────────────
 
 export async function executeTask(
@@ -414,6 +749,9 @@ export async function executeTask(
   }
   if (claimed.task.taskType === 'review') {
     return executeReviewTask(claimed, config);
+  }
+  if (claimed.task.taskType === 'planning') {
+    return executePlanningTask(claimed, config);
   }
 
   const { task, agent, repository, githubToken } = claimed;
@@ -449,16 +787,34 @@ export async function executeTask(
   // Fetch conversation thread from platform for context
   const comments = await fetchIssueComments(task.id, config).catch(() => []);
 
-  const prompt = buildPrompt(task, comments);
-  const implArgs = ['--model', model, '--dangerously-skip-permissions'];
+  const issueContext = parseIssueContext(task.context);
+  const attachmentPaths = await downloadAttachments(issueContext?.attachments ?? [], workDir);
+
+  const prompt = buildPrompt(task, comments, { ...issueContext, attachmentPaths });
+  const permissionArgs = permissionArgsForMode(task.executionMode);
+  const implArgs = ['--model', model, ...permissionArgs, '--output-format', 'stream-json', '--verbose'];
   if (instructions) implArgs.push('--system-prompt', instructions);
   if (task.sessionId) implArgs.push('--resume', task.sessionId);
   implArgs.push(prompt);
 
-  const { outputLines, success: claudeSuccess } = await runClaude(implArgs, workDir, task, config);
+  const { outputLines, success: claudeSuccess } = await runClaude(implArgs, workDir, task, config, { structured: true });
 
   if (!claudeSuccess) {
     return { success: false, failureReason: 'agent_error' };
+  }
+
+  if (task.executionMode === 'ask_before_edits') {
+    const denialSummary = extractPermissionDenials(outputLines);
+    if (denialSummary) {
+      await reportComment(task.id, denialSummary, config).catch(() => {});
+      return { success: true, phase: 'question', question: denialSummary };
+    }
+  }
+
+  const question = extractQuestion(outputLines);
+  if (question) {
+    await reportComment(task.id, question, config).catch(() => {});
+    return { success: true, phase: 'question', question };
   }
 
   // Commit and push
@@ -476,7 +832,7 @@ export async function executeTask(
   }
 
   // Create PR
-  const summary = outputLines.slice(-5).join('\n');
+  const summary = extractFinalSummary(outputLines) || outputLines.slice(-5).join('\n');
   let prUrl: string | undefined;
   try {
     const pr = await createPullRequest(

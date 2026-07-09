@@ -1,24 +1,31 @@
 import { StateCreator } from 'zustand/vanilla';
 import { IssueBoardStateStore } from '../../store';
 import { IssueBoardItem } from '../../initialState';
-import { issueBoardStateClientService, KanbanStatus } from '@/service/issueBoardState/client';
+import {
+  issueBoardStateClientService,
+  KanbanStatus,
+  Priority,
+  CreateIssueInput,
+} from '@/service/issueBoardState/client';
 
 export interface IssueBoardStateAction {
   fetchBoard: (repositoryFullName: string) => Promise<void>;
   addToBoard: (repositoryFullName: string, issue: { number: number; title: string; htmlUrl: string }) => Promise<IssueBoardItem>;
-  moveCard: (repositoryFullName: string, issueNumber: number, kanbanStatus: KanbanStatus) => Promise<{ enqueuedTask: unknown | null }>;
-  updateAssignee: (
+  moveCard: (repositoryFullName: string, issueNumber: number, kanbanStatus: KanbanStatus) => Promise<{ enqueuedTasks: unknown[] }>;
+  updatePriority: (repositoryFullName: string, issueNumber: number, priority: Priority) => Promise<void>;
+  addAssignee: (
     repositoryFullName: string,
     issueNumber: number,
-    assigneeType: 'agent' | 'member' | 'squad' | null,
-    assigneeAgentId?: string | null,
-    assigneeMemberId?: string | null,
-    assigneeSquadId?: string | null
+    assignee: { assigneeType: 'agent' | 'member'; assigneeAgentId?: string; assigneeMemberId?: string }
   ) => Promise<void>;
+  removeAssignee: (repositoryFullName: string, issueNumber: number, assigneeId: string) => Promise<void>;
+  updateSquadAssignee: (repositoryFullName: string, issueNumber: number, assigneeSquadId: string | null) => Promise<void>;
+  addLabelToIssue: (repositoryFullName: string, issueNumber: number, labelId: string) => Promise<void>;
+  removeLabelFromIssue: (repositoryFullName: string, issueNumber: number, labelId: string) => Promise<void>;
   removeFromBoard: (repositoryFullName: string, issueNumber: number) => Promise<void>;
   upsertBoardItem: (item: IssueBoardItem) => void;
   syncFromGitHub: (repositoryFullName: string) => Promise<{ synced: number }>;
-  createIssue: (repositoryFullName: string, title: string, body?: string) => Promise<IssueBoardItem>;
+  createIssue: (repositoryFullName: string, input: Omit<CreateIssueInput, 'repositoryFullName'>) => Promise<IssueBoardItem>;
 }
 
 export const createIssueBoardStateSlice: StateCreator<
@@ -88,7 +95,7 @@ export const createIssueBoardStateSlice: StateCreator<
         false,
         'moveCard/success'
       );
-      return { enqueuedTask: result.enqueuedTask };
+      return { enqueuedTasks: result.enqueuedTasks };
     } catch (error) {
       console.error('[IssueBoardStateStore] Error moving card:', error);
       // Revert optimistic update by re-fetching is handled by the component
@@ -96,21 +103,57 @@ export const createIssueBoardStateSlice: StateCreator<
     }
   },
 
-  updateAssignee: async (repositoryFullName, issueNumber, assigneeType, assigneeAgentId, assigneeMemberId, assigneeSquadId) => {
-    const updated = await issueBoardStateClientService.updateAssignee({
-      repositoryFullName,
-      issueNumber,
-      assigneeType,
-      assigneeAgentId,
-      assigneeMemberId,
-      assigneeSquadId,
-    });
+  updatePriority: async (repositoryFullName, issueNumber, priority) => {
+    const updated = await issueBoardStateClientService.updatePriority({ repositoryFullName, issueNumber, priority });
     set(
-      (s) => ({
-        boardItems: s.boardItems.map((b) => (b.issueNumber === issueNumber ? updated : b)),
-      }),
+      (s) => ({ boardItems: s.boardItems.map((b) => (b.issueNumber === issueNumber ? updated : b)) }),
       false,
-      'updateAssignee'
+      'updatePriority'
+    );
+  },
+
+  addAssignee: async (repositoryFullName, issueNumber, assignee) => {
+    const updated = await issueBoardStateClientService.addAssignee({ repositoryFullName, issueNumber, ...assignee });
+    set(
+      (s) => ({ boardItems: s.boardItems.map((b) => (b.issueNumber === issueNumber ? updated : b)) }),
+      false,
+      'addAssignee'
+    );
+  },
+
+  removeAssignee: async (repositoryFullName, issueNumber, assigneeId) => {
+    const updated = await issueBoardStateClientService.removeAssignee({ repositoryFullName, issueNumber, assigneeId });
+    set(
+      (s) => ({ boardItems: s.boardItems.map((b) => (b.issueNumber === issueNumber ? updated : b)) }),
+      false,
+      'removeAssignee'
+    );
+  },
+
+  updateSquadAssignee: async (repositoryFullName, issueNumber, assigneeSquadId) => {
+    const updated = await issueBoardStateClientService.updateSquadAssignee({ repositoryFullName, issueNumber, assigneeSquadId });
+    set(
+      (s) => ({ boardItems: s.boardItems.map((b) => (b.issueNumber === issueNumber ? updated : b)) }),
+      false,
+      'updateSquadAssignee'
+    );
+  },
+
+  addLabelToIssue: async (repositoryFullName, issueNumber, labelId) => {
+    const updated = await issueBoardStateClientService.addLabelToIssue({ repositoryFullName, issueNumber, labelId });
+    set(
+      (s) => ({ boardItems: s.boardItems.map((b) => (b.issueNumber === issueNumber ? updated : b)) }),
+      false,
+      'addLabelToIssue'
+    );
+  },
+
+  removeLabelFromIssue: async (repositoryFullName, issueNumber, labelId) => {
+    const updated = await issueBoardStateClientService.removeLabelFromIssue({ repositoryFullName, issueNumber, labelId });
+    set(
+      (s) => ({ boardItems: s.boardItems.map((b) => (b.issueNumber === issueNumber ? updated : b)) }),
+      false,
+      'removeLabelFromIssue'
     );
   },
 
@@ -146,8 +189,8 @@ export const createIssueBoardStateSlice: StateCreator<
     return result;
   },
 
-  createIssue: async (repositoryFullName, title, body) => {
-    const item = await issueBoardStateClientService.createIssue({ repositoryFullName, title, body });
+  createIssue: async (repositoryFullName, input) => {
+    const item = await issueBoardStateClientService.createIssue({ repositoryFullName, ...input });
     set(
       (s) => ({ boardItems: [...s.boardItems, item] }),
       false,

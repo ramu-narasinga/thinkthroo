@@ -108,6 +108,57 @@ export const issueRouter = router({
         hasMore: onlyIssues.length === perPage,
       };
     }),
+
+  getByNumber: issueProcedure
+    .input(
+      z.object({
+        repositoryFullName: z.string().min(1),
+        issueNumber: z.number().int().positive(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { repositoryFullName, issueNumber } = input;
+
+      const [repo] = await ctx.serverDB
+        .select({ installationId: repositories.installationId })
+        .from(repositories)
+        .where(
+          and(
+            eq(repositories.fullName, repositoryFullName),
+            eq(repositories.userId, ctx.userId)
+          )
+        )
+        .limit(1);
+
+      if (!repo) {
+        throw new Error(`Repository not found: ${repositoryFullName}`);
+      }
+
+      const token = await generateInstallationToken(repo.installationId);
+      const [owner, repoName] = repositoryFullName.split('/');
+
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repoName}/issues/${issueNumber}`,
+        { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' } }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Failed to fetch issue: ${JSON.stringify(error)}`);
+      }
+
+      const issue = await response.json() as {
+        title: string;
+        body: string | null;
+        html_url: string;
+      };
+
+      return {
+        title: issue.title,
+        body: issue.body,
+        htmlUrl: issue.html_url,
+      };
+    }),
 });
 
 export type IssueRouter = typeof issueRouter;

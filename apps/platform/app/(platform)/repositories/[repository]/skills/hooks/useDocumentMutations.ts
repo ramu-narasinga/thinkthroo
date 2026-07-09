@@ -12,6 +12,7 @@ export interface CreateDocumentInput {
   name: string;
   type: 'file' | 'folder';
   content?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface UpdateDocumentInput {

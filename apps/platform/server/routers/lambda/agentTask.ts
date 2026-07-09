@@ -3,7 +3,7 @@ import { eq, and, desc, asc } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
 import { authedProcedure, router } from '@/lib/trpc/lambda';
 import { serverDatabase } from '@/lib/trpc/lambda/middleware';
-import { agentTasks, agentTaskLogs, repositories, agentTaskArtifacts, agentTaskReviewComments } from '@/database/schemas';
+import { agentTasks, agentTaskLogs, agentTaskEvents, repositories, agentTaskArtifacts, agentTaskReviewComments } from '@/database/schemas';
 import { generateGithubAppJwt } from '@/lib/generate-github-app-jwt';
 
 async function generateInstallationToken(installationId: string): Promise<string> {
@@ -105,6 +105,24 @@ export const agentTaskRouter = router({
         .from(agentTaskLogs)
         .where(eq(agentTaskLogs.taskId, input.taskId))
         .orderBy(asc(agentTaskLogs.createdAt));
+    }),
+
+  getEvents: agentTaskProcedure
+    .input(z.object({ taskId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const [task] = await ctx.serverDB
+        .select({ id: agentTasks.id })
+        .from(agentTasks)
+        .where(and(eq(agentTasks.id, input.taskId), eq(agentTasks.userId, ctx.userId)))
+        .limit(1);
+
+      if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
+
+      return ctx.serverDB
+        .select()
+        .from(agentTaskEvents)
+        .where(eq(agentTaskEvents.taskId, input.taskId))
+        .orderBy(asc(agentTaskEvents.createdAt));
     }),
 
   cancel: agentTaskProcedure

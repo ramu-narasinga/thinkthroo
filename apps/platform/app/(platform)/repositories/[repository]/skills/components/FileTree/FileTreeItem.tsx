@@ -146,14 +146,9 @@ export function FileTreeItem({
                 Delete
               </DropdownMenuItem>
               {isFolder && (
-                <>
-                  <DropdownMenuItem onClick={() => onCreateFile(node.id)}>
-                    Add File
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onCreateFolder(node.id)}>
-                    Add Folder
-                  </DropdownMenuItem>
-                </>
+                <DropdownMenuItem onClick={() => onCreateFile(node.id)}>
+                  Add File
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

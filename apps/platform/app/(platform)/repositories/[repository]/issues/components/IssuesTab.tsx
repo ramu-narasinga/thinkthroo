@@ -17,19 +17,23 @@ import {
   Plus,
 } from "lucide-react";
 import { Button } from "@thinkthroo/ui/components/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@thinkthroo/ui/components/dialog";
-import { Input } from "@thinkthroo/ui/components/input";
-import { Label } from "@thinkthroo/ui/components/label";
 import { useIssueStore } from "@/store/issues";
 import { issueSelectors } from "@/store/issues/selectors";
 import { IssueState } from "@/store/issues/initialState";
 import { useAgentStore } from "@/store/agent";
 import { agentSelectors } from "@/store/agent/selectors";
-import { squadClientService, SquadWithMembers } from "@/service/squad/client";
 import { useIssueBoardStateStore } from "@/store/issueBoardState/store";
 import { boardSelectors } from "@/store/issueBoardState/selectors";
+import {
+  issueBoardStateClientService,
+  AssignableMember,
+  KanbanStatus,
+  IssueLabelItem,
+} from "@/service/issueBoardState/client";
+import { issueLabelClientService } from "@/service/issueLabel/client";
 import { IssueAgentBadge } from "./IssueAgentBadge";
 import { KanbanBoard } from "./KanbanBoard";
+import { NewIssueModal } from "./NewIssueModal";
 
 function formatRelativeDate(isoDate: string): string {
   const today = new Date();
@@ -51,13 +55,12 @@ export function IssuesTab() {
 
   const [viewMode, setViewMode] = React.useState<ViewMode>("board");
   const [boardFilter, setBoardFilter] = React.useState<AssigneeFilter>("all");
-  const [squads, setSquads] = React.useState<SquadWithMembers[]>([]);
   const [addingToBoard, setAddingToBoard] = React.useState<number | null>(null);
   const [syncing, setSyncing] = React.useState(false);
   const [showNewIssue, setShowNewIssue] = React.useState(false);
-  const [newTitle, setNewTitle] = React.useState("");
-  const [newBody, setNewBody] = React.useState("");
-  const [creating, setCreating] = React.useState(false);
+  const [newIssueStatus, setNewIssueStatus] = React.useState<KanbanStatus>("backlog");
+  const [members, setMembers] = React.useState<AssignableMember[]>([]);
+  const [labels, setLabels] = React.useState<IssueLabelItem[]>([]);
 
   const issues = useIssueStore(issueSelectors.issues);
   const isLoading = useIssueStore(issueSelectors.isLoading);
@@ -82,14 +85,17 @@ export function IssuesTab() {
     [agents]
   );
 
+  const refetchLabels = React.useCallback(() => {
+    issueLabelClientService.getByRepository(repositoryFullName).then(setLabels).catch(() => {});
+  }, [repositoryFullName]);
+
   React.useEffect(() => {
     fetchIssues(repositoryFullName, 1, stateFilter);
     fetchAgents(repositoryFullName);
     fetchBoard(repositoryFullName);
-    squadClientService.getByRepository(repositoryFullName)
-      .then(setSquads)
-      .catch(() => {});
-  }, [repositoryFullName, stateFilter, fetchIssues, fetchAgents, fetchBoard]);
+    issueBoardStateClientService.getAssignableMembers(repositoryFullName).then(setMembers).catch(() => {});
+    refetchLabels();
+  }, [repositoryFullName, stateFilter, fetchIssues, fetchAgents, fetchBoard, refetchLabels]);
 
   const boardIssueNumbers = React.useMemo(
     () => new Set(boardItems.map((b) => b.issueNumber)),
@@ -118,18 +124,9 @@ export function IssuesTab() {
     }
   }
 
-  async function handleCreateIssue(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newTitle.trim()) return;
-    setCreating(true);
-    try {
-      await createIssue(repositoryFullName, newTitle.trim(), newBody.trim() || undefined);
-      setShowNewIssue(false);
-      setNewTitle("");
-      setNewBody("");
-    } finally {
-      setCreating(false);
-    }
+  function handleOpenNewIssue(status: KanbanStatus) {
+    setNewIssueStatus(status);
+    setShowNewIssue(true);
   }
 
   return (
@@ -200,7 +197,7 @@ export function IssuesTab() {
           </Button>
 
           {/* New Issue */}
-          <Button size="sm" onClick={() => setShowNewIssue(true)}>
+          <Button size="sm" onClick={() => handleOpenNewIssue("backlog")}>
             <Plus className="h-3.5 w-3.5 mr-1.5" />
             New Issue
           </Button>
@@ -240,9 +237,10 @@ export function IssuesTab() {
         <KanbanBoard
           repositoryFullName={repositoryFullName}
           agents={activeAgents}
-          squads={squads}
+          members={members}
           filter={boardFilter}
           setFilter={setBoardFilter}
+          onAddIssue={handleOpenNewIssue}
         />
       )}
 
@@ -383,45 +381,19 @@ export function IssuesTab() {
         </>
       )}
 
-      {/* ── New Issue dialog ── */}
-      <Dialog open={showNewIssue} onOpenChange={setShowNewIssue}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>New Issue</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleCreateIssue} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="issue-title">Title</Label>
-              <Input
-                id="issue-title"
-                placeholder="Issue title"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="issue-body">Description <span className="text-muted-foreground">(optional)</span></Label>
-              <textarea
-                id="issue-body"
-                rows={5}
-                placeholder="Describe the issue…"
-                value={newBody}
-                onChange={(e) => setNewBody(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
-              />
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowNewIssue(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={creating || !newTitle.trim()}>
-                {creating ? "Creating…" : "Create Issue"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* ── New Issue modal ── */}
+      <NewIssueModal
+        open={showNewIssue}
+        onClose={() => setShowNewIssue(false)}
+        repositoryFullName={repositoryFullName}
+        defaultKanbanStatus={newIssueStatus}
+        agents={activeAgents}
+        members={members}
+        labels={labels}
+        onLabelsChanged={refetchLabels}
+        onCreate={(input) => createIssue(repositoryFullName, input)}
+        onCreated={() => {}}
+      />
     </div>
   );
 }

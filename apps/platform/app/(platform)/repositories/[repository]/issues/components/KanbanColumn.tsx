@@ -1,26 +1,14 @@
 "use client";
 
 import React from "react";
+import { Plus } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
 import { KanbanStatus, IssueBoardItem } from "@/service/issueBoardState/client";
 import { AgentTaskItem } from "@/service/agentTask/client";
 import { AgentItem } from "@/service/agent/client";
+import { AssignableMember } from "@/service/issueBoardState/client";
+import { COLUMN_CONFIG } from "./kanbanConfig";
 import { IssueCard } from "./IssueCard";
-
-interface ColumnConfig {
-  label: string;
-  dotColor: string;
-  bg: string;
-}
-
-const COLUMN_CONFIG: Record<KanbanStatus, ColumnConfig> = {
-  backlog:     { label: "Backlog",     dotColor: "bg-muted-foreground",  bg: "bg-muted/30" },
-  todo:        { label: "Todo",        dotColor: "bg-yellow-400",        bg: "bg-yellow-50/50 dark:bg-yellow-950/20" },
-  in_progress: { label: "In Progress", dotColor: "bg-blue-500",          bg: "bg-blue-50/50 dark:bg-blue-950/20" },
-  in_review:   { label: "In Review",   dotColor: "bg-purple-500",        bg: "bg-purple-50/50 dark:bg-purple-950/20" },
-  done:        { label: "Done",        dotColor: "bg-green-500",         bg: "bg-green-50/50 dark:bg-green-950/20" },
-  blocked:     { label: "Blocked",     dotColor: "bg-red-500",           bg: "bg-red-50/50 dark:bg-red-950/20" },
-};
 
 interface Props {
   status: KanbanStatus;
@@ -28,10 +16,11 @@ interface Props {
   repositoryFullName: string;
   tasksByIssue: Record<number, AgentTaskItem | undefined>;
   agents: AgentItem[];
-  onAssigneeClick: (item: IssueBoardItem) => void;
+  members: AssignableMember[];
+  onAddIssue: (status: KanbanStatus) => void;
 }
 
-export function KanbanColumn({ status, items, repositoryFullName, tasksByIssue, agents, onAssigneeClick }: Props) {
+export function KanbanColumn({ status, items, repositoryFullName, tasksByIssue, agents, members, onAddIssue }: Props) {
   const config = COLUMN_CONFIG[status];
 
   const { setNodeRef, isOver } = useDroppable({ id: status });
@@ -45,6 +34,14 @@ export function KanbanColumn({ status, items, repositoryFullName, tasksByIssue, 
         <span className="ml-auto text-xs text-muted-foreground font-medium tabular-nums">
           {items.length}
         </span>
+        <button
+          type="button"
+          onClick={() => onAddIssue(status)}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+          title={`New issue in ${config.label}`}
+        >
+          <Plus className="h-3.5 w-3.5" />
+        </button>
       </div>
 
       {/* Drop zone */}
@@ -61,7 +58,7 @@ export function KanbanColumn({ status, items, repositoryFullName, tasksByIssue, 
             repositoryFullName={repositoryFullName}
             latestTask={tasksByIssue[item.issueNumber]}
             agents={agents}
-            onAssigneeClick={onAssigneeClick}
+            members={members}
           />
         ))}
 

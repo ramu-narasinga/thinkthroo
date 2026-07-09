@@ -1,7 +1,6 @@
 import { pgTable, uuid, text, integer, timestamp, unique, pgPolicy } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { repositories } from './repository';
-import { agents } from './agent';
 import { squads } from './squad';
 
 export const issueBoardStates = pgTable('issue_board_states', {
@@ -12,14 +11,17 @@ export const issueBoardStates = pgTable('issue_board_states', {
   issueTitle:   text('issue_title').notNull(),
   issueHtmlUrl: text('issue_html_url'),
 
-  // 'backlog' | 'todo' | 'in_progress' | 'in_review' | 'done' | 'blocked'
+  // 'backlog' | 'planning' | 'todo' | 'in_progress' | 'in_review' | 'done' | 'blocked' | 'waiting_for_user'
   kanbanStatus: text('kanban_status').notNull().default('backlog'),
 
-  // Assignee — 'agent' | 'member' | 'squad' | null (unassigned)
-  assigneeType:     text('assignee_type'),
-  assigneeAgentId:  uuid('assignee_agent_id').references(() => agents.id, { onDelete: 'set null' }),
-  assigneeMemberId: uuid('assignee_member_id'),
-  assigneeSquadId:  uuid('assignee_squad_id').references(() => squads.id, { onDelete: 'set null' }),
+  // 'no_priority' | 'urgent' | 'high' | 'medium' | 'low'
+  priority: text('priority').notNull().default('no_priority'),
+
+  // 'plan' | 'auto_accept_edits' | 'ask_before_edits' | 'auto' — chosen at creation, editable.
+  executionMode: text('execution_mode').notNull().default('auto_accept_edits'),
+
+  // Multi-assignee (agent/member) lives in issue_assignees. Squad assignment stays single-select here.
+  assigneeSquadId: uuid('assignee_squad_id').references(() => squads.id, { onDelete: 'set null' }),
 
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

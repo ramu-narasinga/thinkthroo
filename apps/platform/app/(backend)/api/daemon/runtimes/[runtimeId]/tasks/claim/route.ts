@@ -90,6 +90,8 @@ export async function POST(
     attemptCount: raw['attempt_count']  as number,
     userMessage:  raw['user_message']   as string | null,
     taskType:     (raw['task_type']     as string | null) ?? 'implementation',
+    executionMode: (raw['execution_mode'] as string | null) ?? 'auto_accept_edits',
+    context:      raw['context']        as string | null,
   };
 
   // Fetch agent instructions + model
