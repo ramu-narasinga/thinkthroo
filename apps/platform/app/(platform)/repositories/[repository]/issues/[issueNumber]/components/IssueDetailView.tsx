@@ -58,6 +58,7 @@ import { AssigneePicker } from "../../components/AssigneePicker";
 import { LabelPicker } from "../../components/LabelPicker";
 import { PriorityPicker } from "../../components/PriorityPicker";
 import { ModePicker } from "../../components/ModePicker";
+import { IssueDetailSkeleton } from "./IssueDetailSkeleton";
 import { StatusPicker } from "../../components/StatusPicker";
 import { PRIORITY_CONFIG, EXECUTION_MODE_CONFIG, COLUMN_CONFIG } from "../../components/kanbanConfig";
 
@@ -918,6 +919,10 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
   async function handleApproval(decision: "approve" | "deny") {
     const body = decision === "approve" ? "Approved — go ahead." : "Denied — please don't do that, try a different approach.";
     await handleSubmitComment(body);
+  }
+
+  if (isLoading && loadingComments) {
+    return <IssueDetailSkeleton />;
   }
 
   return (
