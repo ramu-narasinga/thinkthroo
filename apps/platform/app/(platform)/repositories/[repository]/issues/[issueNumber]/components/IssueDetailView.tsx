@@ -58,7 +58,8 @@ import { AssigneePicker } from "../../components/AssigneePicker";
 import { LabelPicker } from "../../components/LabelPicker";
 import { PriorityPicker } from "../../components/PriorityPicker";
 import { ModePicker } from "../../components/ModePicker";
-import { PRIORITY_CONFIG, EXECUTION_MODE_CONFIG } from "../../components/kanbanConfig";
+import { StatusPicker } from "../../components/StatusPicker";
+import { PRIORITY_CONFIG, EXECUTION_MODE_CONFIG, COLUMN_CONFIG } from "../../components/kanbanConfig";
 
 interface Props {
   repositoryFullName: string;
@@ -694,6 +695,11 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
     refetchBoardItem();
   }
 
+  async function handleKanbanStatusChange(kanbanStatus: IssueBoardItem["kanbanStatus"]) {
+    await issueBoardStateClientService.updateKanbanStatus({ repositoryFullName, issueNumber, kanbanStatus });
+    refetchBoardItem();
+  }
+
   async function handleToggleLabel(label: IssueLabelItem) {
     const has = boardItem?.labels.some((l) => l.id === label.id);
     if (has) {
@@ -1167,6 +1173,25 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
                   {statusCfg.label}
                 </span>
               </div>
+
+              {/* Column (kanban status) */}
+              {boardItem && (
+                <div className="px-4 py-3 space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Column
+                  </p>
+                  <StatusPicker
+                    value={boardItem.kanbanStatus}
+                    onChange={handleKanbanStatusChange}
+                    trigger={
+                      <button type="button" className="inline-flex items-center gap-1.5 text-xs hover:text-foreground transition-colors">
+                        <span className={`h-2 w-2 rounded-full shrink-0 ${COLUMN_CONFIG[boardItem.kanbanStatus].dotColor}`} />
+                        {COLUMN_CONFIG[boardItem.kanbanStatus].label}
+                      </button>
+                    }
+                  />
+                </div>
+              )}
 
               {/* Priority */}
               <div className="px-4 py-3 space-y-2">
