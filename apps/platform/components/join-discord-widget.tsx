@@ -11,7 +11,7 @@ export function JoinDiscordWidget() {
   return (
     <div className="mx-2 mb-2 flex items-start gap-3 rounded-lg bg-muted/60 px-3 py-3">
       <a
-        href="https://discord.gg/thinkthroo"
+        href="https://discord.gg/gEKDBj8m6p"
         target="_blank"
         rel="noopener noreferrer"
         className="flex flex-1 items-start gap-3 min-w-0"
