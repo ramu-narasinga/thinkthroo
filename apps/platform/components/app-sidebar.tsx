@@ -30,6 +30,7 @@ import {
 import { SidebarOptInForm } from "./tokens-usage";
 import { OrgSwitcher } from "./org-switcher";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { JoinDiscordWidget } from "./join-discord-widget";
 
 const data = {
   user: {
@@ -204,6 +205,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarFooter>
         {/* <SidebarOptInForm /> */}
+        <JoinDiscordWidget />
         <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
           <FlaskConical className="h-3 w-3 shrink-0" />
           <span>Think Throo is in Beta</span>
