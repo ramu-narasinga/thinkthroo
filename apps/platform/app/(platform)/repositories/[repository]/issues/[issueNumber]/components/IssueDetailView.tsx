@@ -47,6 +47,7 @@ import {
 import {
   issueBoardStateClientService,
   IssueBoardItem,
+  IssueAssigneeItem,
   AssignableMember,
   IssueLabelItem,
 } from "@/service/issueBoardState/client";
@@ -663,52 +664,124 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
 
   async function handleToggleAgentAssignee(agent: AgentItem) {
     const existing = agentAssignees.find((a) => a.assigneeAgentId === agent.id);
+    const prev = boardItem;
     if (existing) {
-      await issueBoardStateClientService.removeAssignee({ repositoryFullName, issueNumber, assigneeId: existing.id });
+      setBoardItem(prev ? { ...prev, assignees: prev.assignees.filter((a) => a.id !== existing.id) } : null);
+      try {
+        await issueBoardStateClientService.removeAssignee({ repositoryFullName, issueNumber, assigneeId: existing.id });
+        refetchBoardItem();
+      } catch {
+        setBoardItem(prev);
+      }
     } else {
-      await issueBoardStateClientService.addAssignee({ repositoryFullName, issueNumber, assigneeType: "agent", assigneeAgentId: agent.id });
+      const optimisticAssignee: IssueAssigneeItem = {
+        id: `optimistic-${agent.id}`,
+        assigneeType: "agent",
+        assigneeAgentId: agent.id,
+        assigneeMemberId: null,
+      };
+      setBoardItem(prev ? { ...prev, assignees: [...(prev.assignees ?? []), optimisticAssignee] } : null);
+      try {
+        await issueBoardStateClientService.addAssignee({ repositoryFullName, issueNumber, assigneeType: "agent", assigneeAgentId: agent.id });
+        refetchBoardItem();
+      } catch {
+        setBoardItem(prev);
+      }
     }
-    refetchBoardItem();
   }
 
   async function handleToggleMemberAssignee(member: AssignableMember) {
     const existing = memberAssignees.find((a) => a.assigneeMemberId === member.id);
+    const prev = boardItem;
     if (existing) {
-      await issueBoardStateClientService.removeAssignee({ repositoryFullName, issueNumber, assigneeId: existing.id });
+      setBoardItem(prev ? { ...prev, assignees: prev.assignees.filter((a) => a.id !== existing.id) } : null);
+      try {
+        await issueBoardStateClientService.removeAssignee({ repositoryFullName, issueNumber, assigneeId: existing.id });
+        refetchBoardItem();
+      } catch {
+        setBoardItem(prev);
+      }
     } else {
-      await issueBoardStateClientService.addAssignee({ repositoryFullName, issueNumber, assigneeType: "member", assigneeMemberId: member.id });
+      const optimisticAssignee: IssueAssigneeItem = {
+        id: `optimistic-${member.id}`,
+        assigneeType: "member",
+        assigneeAgentId: null,
+        assigneeMemberId: member.id,
+      };
+      setBoardItem(prev ? { ...prev, assignees: [...(prev.assignees ?? []), optimisticAssignee] } : null);
+      try {
+        await issueBoardStateClientService.addAssignee({ repositoryFullName, issueNumber, assigneeType: "member", assigneeMemberId: member.id });
+        refetchBoardItem();
+      } catch {
+        setBoardItem(prev);
+      }
     }
-    refetchBoardItem();
   }
 
   async function handleSquadChange(squadId: string | null) {
-    await issueBoardStateClientService.updateSquadAssignee({ repositoryFullName, issueNumber, assigneeSquadId: squadId });
-    refetchBoardItem();
+    const prev = boardItem;
+    setBoardItem(prev ? { ...prev, assigneeSquadId: squadId } : null);
+    try {
+      await issueBoardStateClientService.updateSquadAssignee({ repositoryFullName, issueNumber, assigneeSquadId: squadId });
+      refetchBoardItem();
+    } catch {
+      setBoardItem(prev);
+    }
   }
 
   async function handlePriorityChange(priority: IssueBoardItem["priority"]) {
-    await issueBoardStateClientService.updatePriority({ repositoryFullName, issueNumber, priority });
-    refetchBoardItem();
+    const prev = boardItem;
+    setBoardItem(prev ? { ...prev, priority } : null);
+    try {
+      await issueBoardStateClientService.updatePriority({ repositoryFullName, issueNumber, priority });
+      refetchBoardItem();
+    } catch {
+      setBoardItem(prev);
+    }
   }
 
   async function handleExecutionModeChange(executionMode: IssueBoardItem["executionMode"]) {
-    await issueBoardStateClientService.updateExecutionMode({ repositoryFullName, issueNumber, executionMode });
-    refetchBoardItem();
+    const prev = boardItem;
+    setBoardItem(prev ? { ...prev, executionMode } : null);
+    try {
+      await issueBoardStateClientService.updateExecutionMode({ repositoryFullName, issueNumber, executionMode });
+      refetchBoardItem();
+    } catch {
+      setBoardItem(prev);
+    }
   }
 
   async function handleKanbanStatusChange(kanbanStatus: IssueBoardItem["kanbanStatus"]) {
-    await issueBoardStateClientService.updateKanbanStatus({ repositoryFullName, issueNumber, kanbanStatus });
-    refetchBoardItem();
+    const prev = boardItem;
+    setBoardItem(prev ? { ...prev, kanbanStatus } : null);
+    try {
+      await issueBoardStateClientService.updateKanbanStatus({ repositoryFullName, issueNumber, kanbanStatus });
+      refetchBoardItem();
+    } catch {
+      setBoardItem(prev);
+    }
   }
 
   async function handleToggleLabel(label: IssueLabelItem) {
     const has = boardItem?.labels.some((l) => l.id === label.id);
+    const prev = boardItem;
     if (has) {
-      await issueBoardStateClientService.removeLabelFromIssue({ repositoryFullName, issueNumber, labelId: label.id });
+      setBoardItem(prev ? { ...prev, labels: prev.labels.filter((l) => l.id !== label.id) } : null);
+      try {
+        await issueBoardStateClientService.removeLabelFromIssue({ repositoryFullName, issueNumber, labelId: label.id });
+        refetchBoardItem();
+      } catch {
+        setBoardItem(prev);
+      }
     } else {
-      await issueBoardStateClientService.addLabelToIssue({ repositoryFullName, issueNumber, labelId: label.id });
+      setBoardItem(prev ? { ...prev, labels: [...(prev.labels ?? []), label] } : null);
+      try {
+        await issueBoardStateClientService.addLabelToIssue({ repositoryFullName, issueNumber, labelId: label.id });
+        refetchBoardItem();
+      } catch {
+        setBoardItem(prev);
+      }
     }
-    refetchBoardItem();
   }
 
   async function handleCreateLabel(name: string, color: string): Promise<IssueLabelItem> {
