@@ -298,6 +298,35 @@ async function runClaude(
             }
             continue;
           }
+          // Not a recognized JSON event.
+          // Intercept the final {"type":"result",...} stream-json line before it reaches
+          // outputLines as raw JSON (which would make it appear verbatim in completion
+          // comments). Two sub-cases:
+          //   1. Has permission_denials → keep raw JSON so extractPermissionDenials can
+          //      scan and parse it from outputLines.
+          //   2. Normal completion → push only the clean result text (skip the raw JSON).
+          try {
+            const resultObj = JSON.parse(line);
+            if (resultObj?.type === 'result') {
+              const hasDenials =
+                Array.isArray(resultObj.permission_denials) &&
+                resultObj.permission_denials.length > 0;
+              if (hasDenials) {
+                outputLines.push(line); // raw JSON kept for extractPermissionDenials
+              } else {
+                const cleanResult =
+                  typeof resultObj.result === 'string' ? resultObj.result.trim() : '';
+                const lastCaptured =
+                  outputLines.length > 0 ? outputLines[outputLines.length - 1].trim() : '';
+                if (cleanResult && cleanResult !== lastCaptured) {
+                  outputLines.push(cleanResult);
+                }
+              }
+              continue;
+            }
+          } catch {
+            // not JSON — fall through to normal line handling
+          }
           // Not a recognized JSON event — fall through to legacy raw-line handling below.
         }
 
