@@ -59,6 +59,7 @@ import { LabelPicker } from "../../components/LabelPicker";
 import { PriorityPicker } from "../../components/PriorityPicker";
 import { ModePicker } from "../../components/ModePicker";
 import { PRIORITY_CONFIG, EXECUTION_MODE_CONFIG } from "../../components/kanbanConfig";
+import { IssueDetailSkeleton } from "./IssueDetailSkeleton";
 
 interface Props {
   repositoryFullName: string;
@@ -912,6 +913,10 @@ export function IssueDetailView({ repositoryFullName, issueNumber }: Props) {
   async function handleApproval(decision: "approve" | "deny") {
     const body = decision === "approve" ? "Approved — go ahead." : "Denied — please don't do that, try a different approach.";
     await handleSubmitComment(body);
+  }
+
+  if (isLoading && loadingComments) {
+    return <IssueDetailSkeleton />;
   }
 
   return (

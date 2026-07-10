@@ -11,6 +11,7 @@ import { AgentItem } from "@/service/agent/client";
 import { AgentTaskItem } from "@/service/agentTask/client";
 import { COLUMN_ORDER, FOLDED_INTO_IN_PROGRESS } from "./kanbanConfig";
 import { KanbanColumn } from "./KanbanColumn";
+import KanbanBoardSkeleton from "./KanbanBoardSkeleton";
 
 type AssigneeFilter = "all" | "agents" | "members";
 
@@ -81,9 +82,7 @@ export function KanbanBoard({ repositoryFullName, agents, members, filter, onAdd
   }
 
   if (isLoading) {
-    return (
-      <div className="py-16 text-center text-sm text-muted-foreground">Loading board…</div>
-    );
+    return <KanbanBoardSkeleton />;
   }
 
   return (
