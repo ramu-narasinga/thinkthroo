@@ -61,11 +61,7 @@ export async function POST(
 
   // Broadcast so the UI updates in real time
   const supabase = createServiceRoleClient();
-  await supabase.channel(`issue-comments:${task.repositoryId}:${task.issueNumber}`).send({
-    type: 'broadcast',
-    event: 'new-comment',
-    payload: { comment },
-  });
+  await supabase.channel(`issue-comments:${task.repositoryId}:${task.issueNumber}`).httpSend('new-comment', { comment });
 
   // Squad delegation: when the leader agent posts a comment on a squad-assigned issue,
   // scan for @AgentName mentions and auto-queue tasks for matched agents.

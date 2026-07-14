@@ -69,11 +69,7 @@ export async function POST(
 
   // Broadcast for live UI subscribers (transcript modal)
   const supabase = createServiceRoleClient();
-  await supabase.channel(`task-events:${id}`).send({
-    type: 'broadcast',
-    event: 'event',
-    payload: event,
-  });
+  await supabase.channel(`task-events:${id}`).httpSend('event', event);
 
   return NextResponse.json({ ok: true });
 }

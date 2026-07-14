@@ -54,10 +54,8 @@ export async function POST(
 
   // Broadcast for live UI subscribers
   const supabase = createServiceRoleClient();
-  await supabase.channel(`task-progress:${id}`).send({
-    type: 'broadcast',
-    event: 'progress',
-    payload: { message, type, taskId: id, timestamp: new Date().toISOString() },
+  await supabase.channel(`task-progress:${id}`).httpSend('progress', {
+    message, type, taskId: id, timestamp: new Date().toISOString(),
   });
 
   return NextResponse.json({ ok: true });

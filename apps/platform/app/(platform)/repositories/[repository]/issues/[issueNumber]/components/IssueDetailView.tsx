@@ -343,6 +343,31 @@ function TranscriptModal({
   }, [taskId]);
 
   useEffect(() => {
+    const supabase = createClient();
+    const channel = (supabase.channel(`task-progress:${taskId}`) as any)
+      .on(
+        "broadcast",
+        { event: "progress" },
+        (payload: { payload: { message: string; type: "info" | "output" | "error"; timestamp: string } }) => {
+          setLogs((prev) => [
+            ...(prev ?? []),
+            {
+              id: `live-${Date.now()}-${Math.random()}`,
+              taskId,
+              userId: "",
+              message: payload.payload.message,
+              type: payload.payload.type,
+              createdAt: new Date(payload.payload.timestamp),
+            },
+          ]);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [taskId]);
+
+  useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
