@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, ne } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
 import { authedProcedure, router } from '@/lib/trpc/lambda';
 import { serverDatabase } from '@/lib/trpc/lambda/middleware';
@@ -73,7 +73,8 @@ export const agentRouter = router({
         .where(
           and(
             eq(agents.repositoryId, repo.id),
-            eq(agents.userId, ctx.userId)
+            eq(agents.userId, ctx.userId),
+            ne(agents.status, 'archived')
           )
         );
     }),
