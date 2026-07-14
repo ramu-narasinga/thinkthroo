@@ -45,7 +45,12 @@ export function AssigneePicker({
                 <CommandItem key={agent.id} value={agent.name} onSelect={() => onToggleAgent(agent)} className="gap-2">
                   <Checkbox checked={selectedAgentIds.includes(agent.id)} className="pointer-events-none" />
                   <Bot className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="truncate">{agent.name}</span>
+                  <span className="truncate flex-1">{agent.name}</span>
+                  {agent.status === "paused" && (
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200 shrink-0">
+                      paused
+                    </span>
+                  )}
                 </CommandItem>
               ))}
             </CommandGroup>
