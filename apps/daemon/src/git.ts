@@ -75,6 +75,23 @@ export async function commitAndPush(
     return false; // Nothing to push
   }
 
+  // Reconcile with a remote branch that moved on since this workDir was last synced
+  // (e.g. a prior run already pushed from this same branch) so the push below fast-forwards.
+  await execa('git', ['fetch', 'origin', branch], { cwd: workDir, reject: false });
+  const { exitCode: remoteBranchExists } = await execa(
+    'git', ['rev-parse', '--verify', `origin/${branch}`],
+    { cwd: workDir, reject: false }
+  );
+  if (remoteBranchExists === 0) {
+    const rebase = await execa('git', ['rebase', `origin/${branch}`], { cwd: workDir, reject: false });
+    if (rebase.exitCode !== 0) {
+      await execa('git', ['rebase', '--abort'], { cwd: workDir, reject: false });
+      throw new Error(
+        `Local branch diverged from origin/${branch} and could not be rebased automatically: ${rebase.stderr || rebase.stdout}`
+      );
+    }
+  }
+
   const authedUrl = `https://x-access-token:${githubToken}@github.com/${repoFullName}.git`;
   await execa('git', ['remote', 'set-url', 'origin', authedUrl], { cwd: workDir });
 

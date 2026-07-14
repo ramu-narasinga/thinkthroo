@@ -854,8 +854,9 @@ export async function executeTask(
   try {
     pushed = await commitAndPush(workDir, branch, task.issueNumber ?? 0, githubToken, repository.fullName);
   } catch (err) {
-    await reportProgress(task.id, `Git push failed: ${(err as Error).message}`, 'error', config);
-    return { success: false, failureReason: 'agent_error' };
+    const msg = `Git push failed: ${(err as Error).message}`;
+    await reportProgress(task.id, msg, 'error', config);
+    return { success: false, failureReason: 'agent_error', failureMessage: msg };
   }
 
   if (!pushed) {

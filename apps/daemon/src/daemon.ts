@@ -95,7 +95,7 @@ async function poll(config: DaemonConfig): Promise<void> {
       }, config);
       console.log(chalk.green('✓') + ` Completed ${label}` + (result.prUrl ? ` — ${result.prUrl}` : ''));
     } else {
-      await failTask(task.id, result.failureReason ?? 'agent_error', config);
+      await failTask(task.id, result.failureReason ?? 'agent_error', config, result.failureMessage);
       console.log(chalk.red('✗') + ` Failed ${label}: ${result.failureReason}`);
     }
   } catch (err) {

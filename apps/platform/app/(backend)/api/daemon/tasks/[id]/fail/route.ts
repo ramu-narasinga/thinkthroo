@@ -19,14 +19,14 @@ export async function POST(
     return errResponse as NextResponse;
   }
 
-  let body: { reason?: string };
+  let body: { reason?: string; message?: string };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { reason } = body;
+  const { reason, message } = body;
   if (!reason || typeof reason !== 'string') {
     return NextResponse.json({ error: 'reason is required' }, { status: 400 });
   }
@@ -39,6 +39,7 @@ export async function POST(
       status: 'failed',
       completedAt: new Date(),
       failureReason: reason,
+      failureMessage: message ?? null,
       waitReason: null,
     })
     .where(
