@@ -326,9 +326,11 @@ async function runClaude(
               continue;
             }
           } catch {
-            // not JSON — fall through to normal line handling
+            // not JSON — skip in structured mode below.
           }
-          // Not a recognized JSON event — fall through to legacy raw-line handling below.
+          // Not a recognized stream-json event — skip it so raw JSON / banner lines
+          // never reach outputLines and end up verbatim in comments or PR bodies.
+          continue;
         }
 
         outputLines.push(line);
@@ -751,20 +753,23 @@ async function executePlanningTask(
   const attachmentPaths = await downloadAttachments(issueContext?.attachments ?? [], workDir);
 
   const prompt = buildPlanningPrompt(task, comments, { ...issueContext, attachmentPaths });
-  const planArgs = ['--print', '--model', model, '--dangerously-skip-permissions'];
+  const planArgs = ['--model', model, '--dangerously-skip-permissions', '--output-format', 'stream-json', '--verbose'];
   if (instructions) planArgs.push('--system-prompt', instructions);
   if (task.sessionId) planArgs.push('--resume', task.sessionId);
   planArgs.push(prompt);
 
   await reportProgress(task.id, 'Starting planning run…', 'info', config);
 
-  const { outputLines, success: claudeSuccess } = await runClaude(planArgs, workDir, task, config);
+  const { outputLines, success: claudeSuccess } = await runClaude(planArgs, workDir, task, config, { structured: true });
 
   if (!claudeSuccess) {
     return { success: false, failureReason: 'agent_error' };
   }
 
-  const planText = outputLines.join('\n').trim();
+  // outputLines contains only clean agent text (stream-json banner/metadata lines are
+  // filtered out by the structured parser). Join with a blank line between paragraphs
+  // so multi-section plans render correctly in markdown comments.
+  const planText = outputLines.join('\n\n').trim();
   await reportComment(task.id, planText || 'The agent did not produce a plan.', config).catch(() => {});
 
   return { success: true, phase: 'planning', summary: planText };
