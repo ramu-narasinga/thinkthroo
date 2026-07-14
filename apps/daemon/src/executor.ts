@@ -13,6 +13,7 @@ export interface ExecutionResult {
   branchName?: string;
   summary?: string;
   failureReason?: string;
+  failureMessage?: string;
   phase?: 'planning' | 'question';
   question?: string;
 }
@@ -438,20 +439,22 @@ async function executeTestTask(
   const { task, agent, repository, githubToken } = claimed;
 
   if (!repository || !githubToken) {
-    return { success: false, failureReason: 'agent_error' };
+    return { success: false, failureReason: 'agent_error', failureMessage: 'Repository or GitHub token unavailable.' };
   }
 
   if (!task.workDir) {
-    await reportProgress(task.id, 'No work directory set for this test task. Cannot proceed.', 'error', config);
-    return { success: false, failureReason: 'agent_error' };
+    const msg = 'No work directory set for this test task. Cannot proceed.';
+    await reportProgress(task.id, msg, 'error', config);
+    return { success: false, failureReason: 'agent_error', failureMessage: msg };
   }
 
   // Verify the work directory exists
   try {
     await fs.access(task.workDir);
   } catch {
-    await reportProgress(task.id, `Work directory not found: ${task.workDir}. The implementation checkout may have been cleaned up.`, 'error', config);
-    return { success: false, failureReason: 'agent_error' };
+    const msg = `Work directory not found: ${task.workDir}. The implementation checkout may have been cleaned up.`;
+    await reportProgress(task.id, msg, 'error', config);
+    return { success: false, failureReason: 'agent_error', failureMessage: msg };
   }
 
   // Write skill files before running Claude

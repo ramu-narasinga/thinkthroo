@@ -1,0 +1,1 @@
+ALTER TABLE "agent_tasks" ADD COLUMN "failure_message" text;

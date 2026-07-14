@@ -128,9 +128,10 @@ export async function completeTask(
 export async function failTask(
   taskId: string,
   reason: string,
-  config: DaemonConfig
+  config: DaemonConfig,
+  message?: string
 ): Promise<void> {
-  await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/fail`, { reason }, config);
+  await post(`${config.platformUrl}/api/daemon/tasks/${taskId}/fail`, { reason, message }, config);
 }
 
 export async function reportUsage(
