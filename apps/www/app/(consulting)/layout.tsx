@@ -1,5 +1,6 @@
-import { MinimalHeader } from "@/components/interfaces/consulting/minimal-header";
-import { MinimalFooter } from "@/components/interfaces/consulting/minimal-footer";
+import { Footer } from "@/components/interfaces/site/footer";
+import { SiteHeader } from "@/components/interfaces/site/header";
+import { BetaTopBanner } from "@/components/interfaces/site/beta-top-banner";
 import { CalInit } from "@/components/interfaces/consulting/cal-init";
 import { AttributionCapture } from "@/components/interfaces/consulting/attribution-capture";
 
@@ -12,9 +13,10 @@ export default function ConsultingLayout({
     <>
       <AttributionCapture />
       <CalInit />
-      <MinimalHeader />
+      <BetaTopBanner />
+      <SiteHeader />
       <main className="flex-1">{children}</main>
-      <MinimalFooter />
+      <Footer />
     </>
   );
 }
