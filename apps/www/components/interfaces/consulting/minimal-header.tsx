@@ -1,23 +1,20 @@
 import Link from "next/link";
-import Image from "next/image";
+import { Icons } from "@/components/icons";
 import { BookCallButton } from "./book-call-button";
 
 export function MinimalHeader() {
   return (
-    <header className="bg-background sticky top-0 z-50 w-full border-b">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
-        <Link href="/consulting" className="flex items-center gap-2">
-          <Image
-            src="/favicon.ico"
-            alt="Think Throo"
-            width={28}
-            height={28}
-            className="rounded-full"
-            unoptimized
-          />
-          <span className="font-semibold">Think Throo</span>
-        </Link>
-        <BookCallButton label="Book a free call" size="sm" />
+    <header className="bg-background sticky top-0 z-50 w-full border-b border-border/50">
+      <div className="container-wrapper px-6">
+        <div className="flex h-(--header-height) items-center justify-between">
+          <Link href="/consulting" className="flex items-center gap-2">
+            <Icons.logo className="h-7 w-7" />
+            <span className="font-semibold tracking-tight text-foreground">
+              Think Throo
+            </span>
+          </Link>
+          <BookCallButton label="Book a free call" size="sm" />
+        </div>
       </div>
     </header>
   );

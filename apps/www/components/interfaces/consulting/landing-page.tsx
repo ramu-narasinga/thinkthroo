@@ -1,4 +1,3 @@
-import { Separator } from "@thinkthroo/ui/components/separator";
 import { Hero } from "./sections/hero";
 import { Proof } from "./sections/proof";
 import { WhoYoullWorkWith } from "./sections/who-you-work-with";
@@ -14,15 +13,13 @@ export function LandingPage({ content }: { content: LandingPageContent }) {
     <div>
       <Hero content={content} />
       <Proof caseStudySlugs={content.caseStudySlugs} />
-      <Separator className="mx-auto max-w-3xl" />
       <WhoYoullWorkWith />
-      <Separator className="mx-auto max-w-3xl" />
       <Offer offer={content.offer} />
-      <Process steps={content.process} />
-      <Separator className="mx-auto max-w-3xl" />
-      <IndiaAngle indiaAngle={content.indiaAngle} />
+      <div className="bg-gradient-to-b from-background to-secondary/5">
+        <Process steps={content.process} />
+        <IndiaAngle indiaAngle={content.indiaAngle} />
+      </div>
       <Faq items={content.faq} />
-      <Separator className="mx-auto max-w-3xl" />
       <FinalCta finalCta={content.finalCta} pageSlug={content.slug} />
     </div>
   );

@@ -39,9 +39,14 @@ export function ThankYouClient() {
   if (!ready) return null;
 
   return (
-    <div className="mx-auto max-w-lg px-6 py-24 text-center">
-      <h1 className="text-2xl font-bold tracking-tight">Thanks — got it.</h1>
-      <p className="mt-4 text-muted-foreground">
+    <div className="mx-auto max-w-lg px-4 py-24 text-center sm:px-6 lg:px-8">
+      <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-xl text-primary">
+        ✓
+      </div>
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+        Thanks — got it.
+      </h1>
+      <p className="mt-4 text-muted-foreground leading-relaxed">
         I'll review what you sent and reply by email, usually within a
         business day. If it's easier to just talk it through, you can still
         book a free 20-minute call.

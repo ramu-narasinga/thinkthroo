@@ -1,4 +1,5 @@
 import { LeadForm } from "../lead-form";
+import { SectionHeading } from "../section-heading";
 import type { LandingPageContent } from "@/lib/data/consulting/types";
 
 export function FinalCta({
@@ -9,12 +10,9 @@ export function FinalCta({
   pageSlug: string;
 }) {
   return (
-    <section className="mx-auto max-w-lg px-6 py-16">
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold">{finalCta.heading}</h2>
-        <p className="mt-2 text-muted-foreground">{finalCta.subhead}</p>
-      </div>
-      <div className="mt-8">
+    <section className="mx-auto max-w-lg px-4 py-16 sm:px-6 lg:px-8">
+      <SectionHeading badge="Get started" title={finalCta.heading} description={finalCta.subhead} />
+      <div className="rounded-2xl border border-border/50 bg-card/30 p-8">
         <LeadForm pageSlug={pageSlug} />
       </div>
     </section>

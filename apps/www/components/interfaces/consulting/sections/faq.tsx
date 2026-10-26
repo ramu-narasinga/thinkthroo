@@ -1,25 +1,42 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@thinkthroo/ui/components/accordion";
+"use client";
+
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { SectionHeading } from "../section-heading";
 import type { FaqItem } from "@/lib/data/consulting/types";
 
 export function Faq({ items }: { items: FaqItem[] }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   return (
-    <section className="mx-auto max-w-3xl px-6 py-12">
-      <h2 className="text-center text-2xl font-semibold">
-        Frequently asked questions
-      </h2>
-      <Accordion type="single" collapsible className="mt-8">
-        {items.map((item) => (
-          <AccordionItem key={item.question} value={item.question}>
-            <AccordionTrigger>{item.question}</AccordionTrigger>
-            <AccordionContent>{item.answer}</AccordionContent>
-          </AccordionItem>
+    <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+      <SectionHeading badge="FAQ" title="Frequently asked questions" />
+      <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
+        {items.map((item, index) => (
+          <div key={item.question}>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-muted/40 transition-colors"
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              aria-expanded={openIndex === index}
+            >
+              <span className="font-medium text-foreground">{item.question}</span>
+              <ChevronDown
+                className={cn(
+                  "ml-4 h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
+                  openIndex === index && "rotate-180"
+                )}
+              />
+            </button>
+            {openIndex === index && (
+              <div className="px-6 pb-5 text-muted-foreground text-sm leading-relaxed">
+                {item.answer}
+              </div>
+            )}
+          </div>
         ))}
-      </Accordion>
+      </div>
     </section>
   );
 }
