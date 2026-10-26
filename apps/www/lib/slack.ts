@@ -67,4 +67,40 @@ export const SlackNotifier = {
         },
       ],
     }),
+
+  consultingLeadReceived: (fields: {
+    name: string;
+    workEmail: string;
+    pageSlug: string;
+    projectType: string;
+    budgetRange: string;
+    description: string;
+    gclid?: string;
+    utmSource?: string;
+    utmCampaign?: string;
+  }) =>
+    sendSlackNotification({
+      text: `:moneybag: *New Consulting Lead* (${fields.pageSlug})`,
+      attachments: [
+        {
+          color: "#2eb67d",
+          fields: [
+            { title: "Name", value: fields.name, short: true },
+            { title: "Email", value: fields.workEmail, short: true },
+            { title: "Project type", value: fields.projectType, short: true },
+            { title: "Budget", value: fields.budgetRange, short: true },
+            { title: "Description", value: fields.description, short: false },
+            ...(fields.gclid ? [{ title: "gclid", value: fields.gclid, short: true }] : []),
+            ...(fields.utmSource
+              ? [{ title: "utm_source", value: fields.utmSource, short: true }]
+              : []),
+            ...(fields.utmCampaign
+              ? [{ title: "utm_campaign", value: fields.utmCampaign, short: true }]
+              : []),
+          ],
+          footer: "Think Throo Consulting",
+          ts: Math.floor(Date.now() / 1000),
+        },
+      ],
+    }),
 };
