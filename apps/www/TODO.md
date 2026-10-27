@@ -29,14 +29,15 @@ case study, say so and I'll add a template with `{{TODO: ...}}` fields.
 
 ## 3. Booking
 
-- [ ] **Fix the Cal.com event itself** (Cal dashboard, not code). The public
-  `consultation` event is currently set to **45 min** and titled "Next.js
-  consultation" (read off the live booking page). The page says **30 minutes**
-  everywhere, and the event title shows inside the inline picker — set the length
-  to 30 and rename it (e.g. "AI automation consultation") so the copy and the
-  picker agree.
-- [ ] Set `NEXT_PUBLIC_CONSULTING_BOOKING_URL` in `.env` to your real Cal.com link.
-  - If unset, it falls back to the existing `siteConfig.links.consultation` cal.com URL.
+- [x] **Booking event:** the inline picker uses the same 30-minute event the `/contact`
+  page embeds — `cal.com/ramu-narasinga-rqy5ut/30min` ("30 Min Meeting", Cal Video;
+  30 min confirmed off the live booking page) — so the "30-minute call" copy matches.
+  The old default, `siteConfig.links.consultation`, is a 45-min "Next.js consultation"
+  event; the homepage hero still uses it, untouched.
+- [ ] `NEXT_PUBLIC_CONSULTING_BOOKING_URL` — optional override. **If it's already set
+  in `.env` or Vercel, it wins over the default above**, so make sure it points at the
+  30-minute event too (or delete it).
+  - If unset, it falls back to the `/contact` page's 30-minute event.
   - The booking form embeds Cal's picker **inline**, right on the page, after someone
     submits their details — this only works for a `cal.com/...` URL. If you switch to
     a non-cal.com scheduler (e.g. Calendly), the page falls back to a plain link in a
