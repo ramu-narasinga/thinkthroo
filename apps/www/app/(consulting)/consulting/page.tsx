@@ -1,5 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import {
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderHeading,
+} from "@/components/interfaces/page/header";
 import { landingPages } from "@/lib/data/consulting/pages";
 import { caseStudies } from "@/lib/data/consulting/case-studies";
 import { siteConfig } from "@/lib/config";
@@ -15,45 +20,47 @@ export const metadata: Metadata = {
 
 export default function ConsultingIndexPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-xl text-center">
-        <h1 className="text-3xl font-semibold tracking-tight text-balance text-foreground lg:text-4xl">
+    <div>
+      <PageHeader>
+        <PageHeaderHeading className="text-foreground">
           AI development services
-        </h1>
-        <p className="mt-4 text-muted-foreground text-balance">
+        </PageHeaderHeading>
+        <PageHeaderDescription>
           Pick the closest match to what you need. Every page ends with the
           same thing: a free 20-minute scoping call.
-        </p>
-      </div>
+        </PageHeaderDescription>
+      </PageHeader>
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-2">
-        {Object.values(landingPages).map((page) => (
-          <Link key={page.slug} href={`/consulting/${page.slug}`} className="group">
-            <div className="h-full rounded-lg border border-border/50 bg-card/50 p-6 transition-all duration-300 hover:border-primary/30 hover:bg-card/70">
-              <h2 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                {page.hero.h1}
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                {page.hero.subhead}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
+      <div className="mx-auto max-w-4xl px-4 pb-16 sm:px-6 lg:px-8">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {Object.values(landingPages).map((page) => (
+            <Link key={page.slug} href={`/consulting/${page.slug}`} className="group">
+              <div className="h-full rounded-lg border border-border/50 bg-card/50 p-6 transition-all duration-300 hover:border-primary/30 hover:bg-card/70">
+                <h2 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                  {page.hero.h1}
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  {page.hero.subhead}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
 
-      <h2 className="mt-16 text-center text-xl font-semibold text-foreground">
-        Case studies
-      </h2>
-      <div className="mt-6 flex flex-col items-center gap-3">
-        {caseStudies.map((caseStudy) => (
-          <Link
-            key={caseStudy.slug}
-            href={`/consulting/case-studies/${caseStudy.slug}`}
-            className="text-sm text-primary hover:underline"
-          >
-            {caseStudy.title}
-          </Link>
-        ))}
+        <h2 className="mt-16 text-center text-xl font-semibold text-foreground">
+          Case studies
+        </h2>
+        <div className="mt-6 flex flex-col items-center gap-3">
+          {caseStudies.map((caseStudy) => (
+            <Link
+              key={caseStudy.slug}
+              href={`/consulting/case-studies/${caseStudy.slug}`}
+              className="text-sm text-primary hover:underline"
+            >
+              {caseStudy.title}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
