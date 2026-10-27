@@ -7,9 +7,9 @@ export const consultingContent: ConsultingContent = {
     "AI chatbots, agents, apps, RAG systems, and white-label delivery capacity for small US businesses and agencies, built by a senior dev team at a fixed price.",
 
   hero: {
-    h1: "Custom AI, Built by a Senior Dev Team",
+    h1: "AI Features, Shipped in Weeks",
     subhead:
-      "Chatbots, AI apps, RAG search, or extra delivery capacity for your agency — scoped and priced on a free 20-minute call.",
+      "Chatbots, AI apps, RAG search, or extra delivery capacity for your agency — scoped on a free 20-minute call, built by a senior dev team.",
     trustLine: "Senior dev team · Fixed-price pilots · Fast turnaround",
   },
 
@@ -17,9 +17,9 @@ export const consultingContent: ConsultingContent = {
     title: "This page is the case study",
     tagline: "No invented client story — just what's actually running.",
     whatWeBuilt: [
-      "Blog, docs, and a searchable skills/components catalog",
-      "A courses platform teaching patterns from real open-source codebases",
-      "This lead form and booking flow, end to end",
+      "A blog and skills library built from studying real open-source codebases",
+      "Architecture courses teaching the patterns behind them",
+      "This lead form and booking flow — Supabase, Cal.com, and conversion tracking, end to end",
     ],
     stack: ["Next.js 16", "Tailwind CSS v4", "Supabase", "Cal.com"],
     result: "You're looking at the result right now.",

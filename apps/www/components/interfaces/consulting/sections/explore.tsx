@@ -20,6 +20,7 @@ const LINKS = [
     icon: Blocks,
     title: "Skills library",
     description: "Skills built from real codebase architecture patterns.",
+    stat: "20+ skills for codebase architecture",
   },
   {
     href: siteConfig.links.learningPlatform,
@@ -27,6 +28,7 @@ const LINKS = [
     icon: GraduationCap,
     title: "Codebase architecture breakdowns",
     description: "Real production codebases, studied in detail.",
+    stat: "6+ open-source codebases studied",
   },
 ];
 
