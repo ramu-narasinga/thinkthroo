@@ -24,6 +24,12 @@ with `{{TODO: ...}}` fields for problem/built/stack/result.
 
 ## 3. Booking
 
+- [ ] **Fix the Cal.com event itself** (Cal dashboard, not code). The public
+  `consultation` event is currently set to **45 min** and titled "Next.js
+  consultation" (read off the live booking page). The page says **30 minutes**
+  everywhere, and the event title shows inside the inline picker — set the length
+  to 30 and rename it (e.g. "AI automation consultation") so the copy and the
+  picker agree.
 - [ ] Set `NEXT_PUBLIC_CONSULTING_BOOKING_URL` in `.env` to your real Cal.com link.
   - If unset, it falls back to the existing `siteConfig.links.consultation` cal.com URL.
   - The booking form embeds Cal's picker **inline**, right on the page, after someone
@@ -63,17 +69,25 @@ the site (phone call, email back-and-forth, etc.) — the `submission_id` /
 
 ## 7. Content I deliberately did NOT write
 
-- No testimonials, client logos, review scores, or "years of experience" claims anywhere.
+- No testimonials, client logos, review scores, or consulting-experience claims. The one
+  time-based line ("4 years studying large open-source projects") is your own stated
+  fact about studying OSS, not client work — keep the wording as is.
 - No specific cost-saving percentages anywhere (per your rule).
-- No invented metrics on the case study (visitor counts, signups, etc.) — it makes a
-  verifiable claim ("you're looking at it right now") instead of a number.
+- No invented metrics. Every number on the page — 1,000+ monthly readers, 150+
+  signups, 20+ skills, 6+ codebases studied (`sections/explore.tsx`) and the "4 years"
+  line (`content.ts`) — is a figure you gave me directly. They'll go stale, so update
+  them there as they grow.
 
 ## Notes on a few judgment calls
 
 - **Team voice, not solo.** All copy now says "we"/"our team" instead of "I" — no
   individual name, photo, or bio anywhere. The India-specific "Built in India, run on
-  US hours" section is gone entirely (you asked to cut it); the hero trust line now
-  reads "Senior dev team · Fixed-price pilots · Fast turnaround" instead.
+  US hours" section is gone entirely (you asked to cut it).
+- **Audience = small US businesses.** Hero, SEO title/description, and the form's
+  project-type dropdown (new "AI workflow automation" option) now lead with
+  automation and AI workflows for small businesses. Agency/white-label copy still
+  lives in the FAQ and the dropdown for the white-label ad group — cut it if that
+  ad group is dead.
 - **Booking form appears twice**, not behind a CTA button: once right under the hero,
   once again after the case study — so most visitors hit it without scrolling far.
   Each instance works independently (its own form state); filling out both would

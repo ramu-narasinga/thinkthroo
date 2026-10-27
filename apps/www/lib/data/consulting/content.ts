@@ -2,27 +2,28 @@ import { consultingConfig } from "./config";
 import type { ConsultingContent } from "./types";
 
 export const consultingContent: ConsultingContent = {
-  seoTitle: "AI Development Services, Built by a Senior Dev Team | Think Throo",
+  seoTitle: "AI Automation for Small US Businesses | Think Throo",
   seoDescription:
-    "AI chatbots, agents, apps, RAG systems, and white-label delivery capacity for small US businesses and agencies, built by a senior dev team at a fixed price.",
+    "Custom AI automation, workflows, chatbots, and apps for small US businesses. Built by a senior dev team at a fixed price. Book a free 30-minute call.",
 
   hero: {
-    h1: "AI Features, Shipped in Weeks",
+    h1: "Custom AI Automation for Small US Businesses",
     subhead:
-      "Chatbots, AI apps, RAG search, or extra delivery capacity for your agency — scoped on a free 20-minute call, built by a senior dev team.",
-    trustLine: "Senior dev team · Fixed-price pilots · Fast turnaround",
+      "Tell us the work that's eating your time. We build the AI workflow, chatbot, or app that handles it — connected to the tools you already use, at a fixed price.",
+    trustLine: "4 years studying large open-source projects · Read our work before you book · Senior dev team",
   },
 
   caseStudy: {
-    title: "This page is the case study",
-    tagline: "No invented client story — just what's actually running.",
+    title: "Our portfolio is the proof",
+    tagline:
+      "4 years studying how large open-source projects are built — and we write up what we learn. Read it before you hire us.",
     whatWeBuilt: [
       "A blog and skills library built from studying real open-source codebases",
       "Architecture courses teaching the patterns behind them",
       "This lead form and booking flow — Supabase, Cal.com, and conversion tracking, end to end",
     ],
     stack: ["Next.js 16", "Tailwind CSS v4", "Supabase", "Cal.com"],
-    result: "You're looking at the result right now.",
+    result: "It's all live — read it, then judge the engineering yourself.",
   },
 
   offer: {
@@ -39,7 +40,7 @@ export const consultingContent: ConsultingContent = {
   process: [
     {
       title: "1. Scoping call",
-      description: "20 minutes on a call. You describe what you need, we confirm feasibility and rough timeline.",
+      description: "30 minutes on a call. You describe what you need, we confirm feasibility and rough timeline.",
     },
     {
       title: "2. Fixed-scope proposal",
@@ -91,7 +92,7 @@ export const consultingContent: ConsultingContent = {
   ],
 
   booking: {
-    heading: "Get a fixed price in 20 minutes",
-    subhead: "Tell us what you need. We'll scope it and pick a time to talk.",
+    heading: "Get a fixed price in 30 minutes",
+    subhead: "Tell us what you need, then pick a time. The call is free.",
   },
 };

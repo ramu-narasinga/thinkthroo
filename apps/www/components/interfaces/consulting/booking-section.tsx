@@ -166,6 +166,7 @@ export function BookingSection({
                 <SelectValue placeholder="Select a project type" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="workflow-automation">AI workflow automation</SelectItem>
                 <SelectItem value="ai-chatbot-agent">AI chatbot / agent</SelectItem>
                 <SelectItem value="ai-app">AI app development</SelectItem>
                 <SelectItem value="rag-document-ai">RAG / document AI</SelectItem>
