@@ -129,8 +129,13 @@ export class AgentTaskClientService {
     return lambdaClient.agentTask.getLogs.query({ taskId }) as Promise<AgentTaskLogItem[]>;
   };
 
+  /** List query - each item's `raw` is omitted (fetch it on demand with getEventRaw). */
   getEvents = async (taskId: string): Promise<AgentTaskEventItem[]> => {
     return lambdaClient.agentTask.getEvents.query({ taskId }) as Promise<AgentTaskEventItem[]>;
+  };
+
+  getEventRaw = async (eventId: string): Promise<{ raw: string | null }> => {
+    return lambdaClient.agentTask.getEventRaw.query({ eventId });
   };
 
   cancel = async (id: string): Promise<AgentTaskItem> => {
