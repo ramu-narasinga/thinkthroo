@@ -31,10 +31,14 @@ function getCalLink(bookingUrl: string): string | undefined {
 export function BookingSection({
   heading,
   subhead,
+  instanceId,
 }: {
   heading: string;
   subhead: string;
+  /** Suffixes field/section ids so two BookingSection instances can render on one page. */
+  instanceId: string;
 }) {
+  const fieldId = (name: string) => `${name}-${instanceId}`;
   const { track } = useUmami();
   const [formState, setFormState] = useState<"idle" | "submitting" | "submitted" | "error">("idle");
   const [serverError, setServerError] = useState<string | null>(null);
@@ -107,7 +111,7 @@ export function BookingSection({
   }
 
   return (
-    <section id="book" className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
+    <section id={`book-${instanceId}`} className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
       <SectionHeading badge="Get started" title={heading} description={subhead} />
 
       {formState !== "submitted" ? (
@@ -123,9 +127,9 @@ export function BookingSection({
 
           {/* Honeypot - hidden from real users via CSS, bots that auto-fill forms will trip it */}
           <div className="absolute left-[-9999px]" aria-hidden="true">
-            <label htmlFor="company">Company</label>
+            <label htmlFor={fieldId("company")}>Company</label>
             <input
-              id="company"
+              id={fieldId("company")}
               name="company"
               type="text"
               tabIndex={-1}
@@ -136,14 +140,14 @@ export function BookingSection({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
+            <Label htmlFor={fieldId("name")}>Name</Label>
+            <Input id={fieldId("name")} required value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="work-email">Work email</Label>
+            <Label htmlFor={fieldId("work-email")}>Work email</Label>
             <Input
-              id="work-email"
+              id={fieldId("work-email")}
               type="email"
               required
               value={workEmail}
@@ -152,9 +156,9 @@ export function BookingSection({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="project-type">Project type</Label>
+            <Label htmlFor={fieldId("project-type")}>Project type</Label>
             <Select value={projectType} onValueChange={setProjectType} required>
-              <SelectTrigger id="project-type" className="w-full">
+              <SelectTrigger id={fieldId("project-type")} className="w-full">
                 <SelectValue placeholder="Select a project type" />
               </SelectTrigger>
               <SelectContent>
@@ -168,9 +172,9 @@ export function BookingSection({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="budget-range">Budget range</Label>
+            <Label htmlFor={fieldId("budget-range")}>Budget range</Label>
             <Select value={budgetRange} onValueChange={setBudgetRange} required>
-              <SelectTrigger id="budget-range" className="w-full">
+              <SelectTrigger id={fieldId("budget-range")} className="w-full">
                 <SelectValue placeholder="Select a budget range" />
               </SelectTrigger>
               <SelectContent>
@@ -184,9 +188,9 @@ export function BookingSection({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">What do you need built?</Label>
+            <Label htmlFor={fieldId("description")}>What do you need built?</Label>
             <Textarea
-              id="description"
+              id={fieldId("description")}
               required
               rows={4}
               value={description}

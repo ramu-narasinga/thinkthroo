@@ -10,18 +10,17 @@ Google Ads campaign until this list is clear.**
 
 ## 1. Global content (`lib/data/consulting/config.ts`)
 
-- [ ] `engineerName` — your name
-- [ ] `engineerPhoto` — path to a real photo, e.g. `/consulting/me.jpg` (drop the file in `public/consulting/`)
-- [ ] `engineerBio` — 2-3 sentence bio
 - [ ] `pilotPriceFrom` — real starting price for a pilot project, e.g. `"$1,500"` (used in the Offer section and FAQ)
+
+The page speaks as a team now, not a named individual — no bio/photo field
+needed, so there's nothing else to fill in here.
 
 ## 2. Case study (`lib/data/consulting/content.ts`, `caseStudy` field)
 
-This case study is about thinkthroo.com itself, not a client — so most of it
-is already real content, not a placeholder. One line still references
-`consultingConfig.engineerName`, so it resolves once item 1 is done. If you'd
-rather use a real client case study instead, say so and I'll swap this back
-to a template with `{{TODO: ...}}` fields for problem/built/stack/result.
+This case study is about thinkthroo.com itself, not a client — it's real
+content already, not a placeholder, nothing to fill in. If you'd rather use a
+real client case study instead, say so and I'll swap this back to a template
+with `{{TODO: ...}}` fields for problem/built/stack/result.
 
 ## 3. Booking
 
@@ -71,6 +70,18 @@ the site (phone call, email back-and-forth, etc.) — the `submission_id` /
 
 ## Notes on a few judgment calls
 
+- **Team voice, not solo.** All copy now says "we"/"our team" instead of "I" — no
+  individual name, photo, or bio anywhere. The India-specific "Built in India, run on
+  US hours" section is gone entirely (you asked to cut it); the hero trust line now
+  reads "Senior dev team · Fixed-price pilots · Fast turnaround" instead.
+- **Booking form appears twice**, not behind a CTA button: once right under the hero,
+  once again after the case study — so most visitors hit it without scrolling far.
+  Each instance works independently (its own form state); filling out both would
+  create two lead rows, which is an acceptable edge case, not something worth
+  engineering around.
+- **Copy trimmed across the board** (case study, offer, process, FAQ down from 10
+  questions to 7) to cut reading before the form, per your "straight to the point"
+  instruction.
 - **One page, not five.** All 5 ad groups (chatbots, apps, RAG, white-label/offshore,
   general) now point at the single `/consulting` page instead of a dedicated page
   each. Message-match/Quality Score per keyword is weaker than five tailored pages

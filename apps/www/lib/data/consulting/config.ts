@@ -9,9 +9,5 @@ export const consultingConfig = {
     process.env.NEXT_PUBLIC_CONSULTING_BOOKING_URL ||
     siteConfig.links.consultation,
 
-  engineerName: `{{TODO: your name}}`,
-  engineerPhoto: `{{TODO: /path/to/photo.jpg}}`,
-  engineerBio: `{{TODO: 2-3 sentence bio - background, years building production software, what you specialize in}}`,
-
   pilotPriceFrom: `{{TODO: pilot starting price, e.g. "$1,500"}}`,
 };

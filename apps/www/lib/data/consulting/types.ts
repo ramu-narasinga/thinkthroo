@@ -11,8 +11,7 @@ export interface ProcessStep {
 export interface CaseStudyContent {
   title: string;
   tagline: string;
-  problem: string;
-  whatIBuilt: string[];
+  whatWeBuilt: string[];
   stack: string[];
   result: string;
 }
@@ -23,8 +22,7 @@ export interface ConsultingContent {
   hero: {
     h1: string;
     subhead: string;
-    primaryCtaLabel: string;
-    secondaryCtaLabel: string;
+    trustLine: string;
   };
   caseStudy: CaseStudyContent;
   offer: {
@@ -34,10 +32,6 @@ export interface ConsultingContent {
     priceLabel: string;
   };
   process: ProcessStep[];
-  indiaAngle: {
-    heading: string;
-    body: string[];
-  };
   faq: FaqItem[];
   booking: {
     heading: string;

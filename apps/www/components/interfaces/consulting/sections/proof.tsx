@@ -1,17 +1,13 @@
-import { TodoText } from "../todo-text";
 import { SectionHeading } from "../section-heading";
 import type { CaseStudyContent } from "@/lib/data/consulting/types";
 
 export function Proof({ caseStudy }: { caseStudy: CaseStudyContent }) {
   return (
-    <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
       <SectionHeading badge="Proof" title={caseStudy.title} description={caseStudy.tagline} />
       <div className="rounded-2xl border border-border/50 bg-card/30 p-8 lg:p-10">
-        <p className="text-muted-foreground leading-relaxed">{caseStudy.problem}</p>
-
-        <h3 className="mt-6 text-sm font-semibold text-foreground">What's actually running</h3>
-        <ul className="mt-3 space-y-2">
-          {caseStudy.whatIBuilt.map((item) => (
+        <ul className="space-y-2">
+          {caseStudy.whatWeBuilt.map((item) => (
             <li key={item} className="flex gap-3 text-sm text-muted-foreground">
               <span
                 aria-hidden
@@ -19,9 +15,7 @@ export function Proof({ caseStudy }: { caseStudy: CaseStudyContent }) {
               >
                 ✓
               </span>
-              <span>
-                <TodoText>{item}</TodoText>
-              </span>
+              <span>{item}</span>
             </li>
           ))}
         </ul>
@@ -37,9 +31,7 @@ export function Proof({ caseStudy }: { caseStudy: CaseStudyContent }) {
           ))}
         </div>
 
-        <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-6">
-          <p className="text-sm text-muted-foreground leading-relaxed">{caseStudy.result}</p>
-        </div>
+        <p className="mt-6 text-sm font-medium text-foreground">{caseStudy.result}</p>
       </div>
     </section>
   );
