@@ -38,38 +38,45 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, spam: true }, { status: 201 });
     }
 
-    const supabase = createAdminClient();
+    // Supabase egress quota is used up until it resets (Mon 2026-11-02), so for now leads
+    // skip the DB and Slack is the only record. Set CONSULTING_LEADS_SAVE_TO_DB=true to
+    // resume writing to consulting_leads (Slack keeps posting either way).
+    const saveToDb = process.env.CONSULTING_LEADS_SAVE_TO_DB === "true";
 
-    const { error } = await supabase.from("consulting_leads").insert({
-      submission_id,
-      page_slug,
-      name: name.trim(),
-      work_email: work_email.trim(),
-      project_type,
-      budget_range,
-      description: description.trim(),
-      gclid: gclid || null,
-      utm_source: utm_source || null,
-      utm_medium: utm_medium || null,
-      utm_campaign: utm_campaign || null,
-      utm_term: utm_term || null,
-      utm_content: utm_content || null,
-    });
+    if (saveToDb) {
+      const supabase = createAdminClient();
 
-    if (error) {
-      if (error.code === "23505") {
-        // Duplicate submission_id (e.g. retried request) - already stored, treat as success.
-        return NextResponse.json({ success: true }, { status: 201 });
+      const { error } = await supabase.from("consulting_leads").insert({
+        submission_id,
+        page_slug,
+        name: name.trim(),
+        work_email: work_email.trim(),
+        project_type,
+        budget_range,
+        description: description.trim(),
+        gclid: gclid || null,
+        utm_source: utm_source || null,
+        utm_medium: utm_medium || null,
+        utm_campaign: utm_campaign || null,
+        utm_term: utm_term || null,
+        utm_content: utm_content || null,
+      });
+
+      if (error) {
+        if (error.code === "23505") {
+          // Duplicate submission_id (e.g. retried request) - already stored, treat as success.
+          return NextResponse.json({ success: true }, { status: 201 });
+        }
+
+        console.error("[consulting-lead] Supabase error:", error);
+        return NextResponse.json(
+          { error: "Failed to save your request. Please try again." },
+          { status: 500 }
+        );
       }
-
-      console.error("[consulting-lead] Supabase error:", error);
-      return NextResponse.json(
-        { error: "Failed to save your request. Please try again." },
-        { status: 500 }
-      );
     }
 
-    await SlackNotifier.consultingLeadReceived({
+    const notified = await SlackNotifier.consultingLeadReceived({
       name: name.trim(),
       workEmail: work_email.trim(),
       pageSlug: page_slug,
@@ -78,8 +85,22 @@ export async function POST(request: NextRequest) {
       description: description.trim(),
       gclid,
       utmSource: utm_source,
+      utmMedium: utm_medium,
       utmCampaign: utm_campaign,
+      utmTerm: utm_term,
+      utmContent: utm_content,
+      submissionId: submission_id,
     });
+
+    // With DB writes off, Slack holds the only copy of the lead - fail loudly rather than
+    // telling the visitor it worked when nobody was notified.
+    if (!saveToDb && !notified) {
+      console.error("[consulting-lead] Lead was neither saved nor sent to Slack:", { submission_id });
+      return NextResponse.json(
+        { error: "Failed to send your request. Please try again." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (err) {

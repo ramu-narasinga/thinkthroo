@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/interfaces/consulting/sections/hero";
-import { Proof } from "@/components/interfaces/consulting/sections/proof";
+import { CaseStudies } from "@/components/interfaces/consulting/sections/case-studies";
 import { Explore } from "@/components/interfaces/consulting/sections/explore";
 import { Offer } from "@/components/interfaces/consulting/sections/offer";
 import { Process } from "@/components/interfaces/consulting/sections/process";
@@ -15,7 +15,7 @@ export default function ConsultingPage() {
   return (
     <div>
       <Hero content={consultingContent} />
-      <Proof caseStudy={consultingContent.caseStudy} />
+      <CaseStudies content={consultingContent.caseStudies} />
       <Explore />
       <BookingSection
         instanceId="mid"

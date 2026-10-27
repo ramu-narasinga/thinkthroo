@@ -24,10 +24,14 @@ export function Offer({ offer }: { offer: ConsultingContent["offer"] }) {
               </li>
             ))}
           </ul>
-          <p className="mt-6 text-sm text-muted-foreground">{offer.timeline}</p>
-          <p className="mt-2 text-xl font-semibold text-foreground">
-            <TodoText>{offer.priceLabel}</TodoText>
-          </p>
+          <div className="mt-6 border-t border-border/50 pt-6">
+            <p className="text-2xl font-semibold text-foreground">
+              <TodoText>{offer.priceLabel}</TodoText>
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {offer.priceNote} {offer.timeline}
+            </p>
+          </div>
         </div>
       </div>
     </section>

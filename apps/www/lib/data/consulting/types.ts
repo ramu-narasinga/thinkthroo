@@ -8,12 +8,21 @@ export interface ProcessStep {
   description: string;
 }
 
-export interface CaseStudyContent {
+export interface CaseStudy {
+  /** Short category tag shown above the title, e.g. "AI agents". */
+  label: string;
   title: string;
-  tagline: string;
-  whatWeBuilt: string[];
+  summary: string;
+  howItWorks: string[];
   stack: string[];
   result: string;
+}
+
+export interface CaseStudiesContent {
+  title: string;
+  tagline: string;
+  items: CaseStudy[];
+  footnote: string;
 }
 
 export interface ConsultingContent {
@@ -24,12 +33,13 @@ export interface ConsultingContent {
     subhead: string;
     trustLine: string;
   };
-  caseStudy: CaseStudyContent;
+  caseStudies: CaseStudiesContent;
   offer: {
     heading: string;
     scope: string[];
     timeline: string;
     priceLabel: string;
+    priceNote: string;
   };
   process: ProcessStep[];
   faq: FaqItem[];

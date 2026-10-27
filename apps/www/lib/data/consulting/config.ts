@@ -9,5 +9,5 @@ export const consultingConfig = {
     process.env.NEXT_PUBLIC_CONSULTING_BOOKING_URL ||
     siteConfig.links.consultation,
 
-  pilotPriceFrom: `{{TODO: pilot starting price, e.g. "$1,500"}}`,
+  pilotPriceFrom: "$2,000",
 };

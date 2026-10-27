@@ -13,28 +13,55 @@ export const consultingContent: ConsultingContent = {
     trustLine: "Backed by 4 years of studying how large open-source projects are built. Read our work before you book.",
   },
 
-  caseStudy: {
+  caseStudies: {
     title: "Our portfolio is the proof",
-    tagline:
-      "4 years studying how large open-source projects are built — and we write up what we learn. Read it before you hire us.",
-    whatWeBuilt: [
-      "A blog and skills library built from studying real open-source codebases",
-      "Architecture courses teaching the patterns behind them",
-      "This lead form and booking flow — Supabase, Cal.com, and conversion tracking, end to end",
+    tagline: "Two products we built ourselves, and how they work under the hood.",
+    items: [
+      {
+        label: "Content platform",
+        title: "How the Think Throo blog is built",
+        summary:
+          "Writers work in an editor, not in code. Every article is pre-built for speed and ships with search and social-sharing previews.",
+        howItWorks: [
+          "Articles are written in a hosted editor (Sanity) — no code needed to publish.",
+          "Each article is pre-built as a static page, so it loads fast.",
+          "The sidebar, table of contents, and sharing previews generate themselves from the content.",
+          "Email sign-up and in-article prompts capture readers who want more.",
+        ],
+        stack: ["Next.js", "Sanity CMS", "Tailwind CSS", "Supabase"],
+        result:
+          "The same approach works for your site: your team updates content from a simple editor, and visitors get fast pages.",
+      },
+      {
+        label: "AI agents",
+        title: "How the Think Throo software factory is built",
+        summary:
+          "AI agents take a written task and hand back a pull request to review, with a person in control at every step.",
+        howItWorks: [
+          "Assign a task to an agent. It plans, writes code, adds tests, or reviews a pull request.",
+          "Agents run on a machine you control — nothing executes on our servers.",
+          "Every step is recorded in a transcript you can follow. You set how much freedom the agent has, and it stops to ask when something's unclear.",
+          "A companion GitHub app reviews pull requests against codebase-architecture standards.",
+        ],
+        stack: ["Next.js", "tRPC", "Postgres", "Claude Code", "GitHub App", "Upstash"],
+        result:
+          "The same pattern works for your business: AI does the task, shows its work, and checks in before it matters.",
+      },
     ],
-    stack: ["Next.js 16", "Tailwind CSS v4", "Supabase", "Cal.com"],
-    result: "It's all live — read it, then judge the engineering yourself.",
+    footnote:
+      "Even the form on this page is a small automation: your details reach our team instantly, then you pick a time on our calendar.",
   },
 
   offer: {
     heading: "Start with a fixed-price pilot",
     scope: [
-      "One chatbot, agent, app feature, RAG pipeline, or delivery sprint — clearly scoped",
+      "One automation, AI workflow, chatbot, document search, or app feature — clearly scoped",
       "Connected to your tools or data where needed",
       "Delivered with docs, or kept running with ongoing support",
     ],
     timeline: "Typical pilot: 2-4 weeks.",
-    priceLabel: `Projects from ${consultingConfig.pilotPriceFrom}`,
+    priceLabel: `Projects start at ${consultingConfig.pilotPriceFrom}`,
+    priceNote: "Fixed price, agreed before any work starts.",
   },
 
   process: [
@@ -92,7 +119,8 @@ export const consultingContent: ConsultingContent = {
   ],
 
   booking: {
-    heading: "Get a fixed price in 30 minutes",
-    subhead: "Tell us what you need, then pick a time. The call is free.",
+    heading: "Find out what AI can automate in your business",
+    subhead:
+      "Free 30-minute call. Tell us what's slowing you down — we'll map the fix and follow up with a fixed price.",
   },
 };

@@ -25,11 +25,12 @@ export interface SlackMessage {
   attachments?: SlackAttachment[];
 }
 
-async function sendSlackNotification(message: SlackMessage): Promise<void> {
+/** Resolves true only if Slack accepted the message; false if unconfigured or the post failed. */
+async function sendSlackNotification(message: SlackMessage): Promise<boolean> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
   if (!webhookUrl) {
-    return;
+    return false;
   }
 
   try {
@@ -44,11 +45,19 @@ async function sendSlackNotification(message: SlackMessage): Promise<void> {
         status: response.status,
         statusText: response.statusText,
       });
+      return false;
     }
+
+    return true;
   } catch (err: any) {
     console.error("[Slack] Error sending notification", { error: err.message });
+    return false;
   }
 }
+
+// Optional attribution rows - skipped when empty.
+const optionalField = (title: string, value?: string): SlackField[] =>
+  value ? [{ title, value, short: true }] : [];
 
 export const SlackNotifier = {
   accessRequested: (githubLogin: string, email: string, note?: string) =>
@@ -77,7 +86,11 @@ export const SlackNotifier = {
     description: string;
     gclid?: string;
     utmSource?: string;
+    utmMedium?: string;
     utmCampaign?: string;
+    utmTerm?: string;
+    utmContent?: string;
+    submissionId?: string;
   }) =>
     sendSlackNotification({
       text: `:moneybag: *New Consulting Lead* (${fields.pageSlug})`,
@@ -90,13 +103,13 @@ export const SlackNotifier = {
             { title: "Project type", value: fields.projectType, short: true },
             { title: "Budget", value: fields.budgetRange, short: true },
             { title: "Description", value: fields.description, short: false },
-            ...(fields.gclid ? [{ title: "gclid", value: fields.gclid, short: true }] : []),
-            ...(fields.utmSource
-              ? [{ title: "utm_source", value: fields.utmSource, short: true }]
-              : []),
-            ...(fields.utmCampaign
-              ? [{ title: "utm_campaign", value: fields.utmCampaign, short: true }]
-              : []),
+            ...optionalField("gclid", fields.gclid),
+            ...optionalField("utm_source", fields.utmSource),
+            ...optionalField("utm_medium", fields.utmMedium),
+            ...optionalField("utm_campaign", fields.utmCampaign),
+            ...optionalField("utm_term", fields.utmTerm),
+            ...optionalField("utm_content", fields.utmContent),
+            ...optionalField("submission_id", fields.submissionId),
           ],
           footer: "Think Throo Consulting",
           ts: Math.floor(Date.now() / 1000),

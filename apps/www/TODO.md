@@ -10,17 +10,22 @@ Google Ads campaign until this list is clear.**
 
 ## 1. Global content (`lib/data/consulting/config.ts`)
 
-- [ ] `pilotPriceFrom` — real starting price for a pilot project, e.g. `"$1,500"` (used in the Offer section and FAQ)
+- [x] `pilotPriceFrom` — set to `"$2,000"` (used in the Offer section and FAQ). No
+  `{{TODO}}` placeholders are left in the content, so the page is now indexable —
+  `noindex` no longer applies. The ads / Cal / env items below still gate paid traffic.
 
 The page speaks as a team now, not a named individual — no bio/photo field
 needed, so there's nothing else to fill in here.
 
-## 2. Case study (`lib/data/consulting/content.ts`, `caseStudy` field)
+## 2. Case studies (`lib/data/consulting/content.ts`, `caseStudies` field)
 
-This case study is about thinkthroo.com itself, not a client — it's real
-content already, not a placeholder, nothing to fill in. If you'd rather use a
-real client case study instead, say so and I'll swap this back to a template
-with `{{TODO: ...}}` fields for problem/built/stack/result.
+Two case studies — how the Think Throo blog is built, and how the software factory
+(platform + daemon + GitHub app) is built — written from reading the actual code in
+`apps/www`, `apps/sanity-studio`, `apps/platform`, `apps/daemon` and `apps/github-app`.
+They describe architecture only, with no client stories and no invented results. The
+framing ("what it is / why it matters to you") is my reading of the code, so skim
+them and cut anything you wouldn't say yourself. If you'd rather use a real client
+case study, say so and I'll add a template with `{{TODO: ...}}` fields.
 
 ## 3. Booking
 
@@ -50,14 +55,22 @@ for form fills, one for booked calls). All 5 ad groups now point at the same
 `/consulting` URL — differentiate them by ad group/keyword in Ads, not by
 landing page.
 
-## 5. Database
+## 5. Leads: Slack now, database later
 
+**DB saving is OFF for now** — the Supabase egress quota is used up until it resets
+on Monday 2026-11-02. `/api/consulting-lead` skips the `consulting_leads` insert and
+posts the whole lead (contact details, the request, gclid and every UTM) to Slack
+instead, then the visitor goes straight on to pick a time on the inline Cal picker.
+
+- [ ] **`SLACK_WEBHOOK_URL` must be set in production while DB saving is off** — it's
+  the only record of a lead. If Slack isn't configured or the post fails, the form
+  shows an error rather than silently dropping the lead.
+- [ ] **After Monday 2026-11-02:** set `CONSULTING_LEADS_SAVE_TO_DB=true` to start
+  writing leads to the table again (Slack keeps posting either way).
 - [ ] Run `supabase/consulting_leads.sql` once in the Supabase SQL editor for
   the project behind your existing `NEXT_PUBLIC_SUPABASE_URL` /
-  `SUPABASE_SERVICE_ROLE_KEY`. This creates the `consulting_leads` table the
-  API route writes to.
-- [ ] `SLACK_WEBHOOK_URL` (already a repo env var) — if set, you'll get a Slack
-  message for every lead. Leave unset to just rely on the DB table.
+  `SUPABASE_SERVICE_ROLE_KEY` if you haven't yet — it creates the table, and it has
+  to exist before DB saving goes back on.
 
 ## 6. Offline conversion import (optional, for later)
 
@@ -65,7 +78,9 @@ Every lead row in `consulting_leads` stores `gclid` + `created_at` alongside
 the rest of the fields, specifically so you can do a manual Google Ads
 offline conversion import (CSV upload) later for leads that convert outside
 the site (phone call, email back-and-forth, etc.) — the `submission_id` /
-`gclid` / `created_at` columns are what that CSV needs.
+`gclid` / `created_at` columns are what that CSV needs. While DB saving is off
+(section 5), the same values are in each Slack lead message instead — keep those
+for the CSV.
 
 ## 7. Content I deliberately did NOT write
 
@@ -115,9 +130,9 @@ the site (phone call, email back-and-forth, etc.) — the `submission_id` /
   conversions on `budget_range` — I took that as "just fire `form_submit`
   unconditionally," so there's no separate qualified-tier event. `budget_range`
   is still captured and stored on every lead if you want to build that later.
-- **Lead storage = Supabase table**, not a Google Sheet or email, to match the
-  existing `request-access` pattern already in this repo (service-role client
-  + Slack notification). Say so if you'd rather have a Sheet instead.
+- **Lead storage = Supabase table** (paused — see section 5), not a Google Sheet or
+  email, to match the existing `request-access` pattern already in this repo
+  (service-role client + Slack notification). Say so if you'd rather have a Sheet.
 - **Attribution (gclid/UTMs) persists via `sessionStorage`**, not a cookie —
   first-touch only. This avoids adding a persistent tracking cookie / consent-banner
   question, but it means attribution resets if the visitor's session is reset (new

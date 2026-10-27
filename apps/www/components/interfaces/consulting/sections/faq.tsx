@@ -16,7 +16,7 @@ export function Faq({ items }: { items: FaqItem[] }) {
 
       <div className="relative mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
         <SectionHeading badge="FAQ" title="Frequently asked questions" />
-        <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
+        <div className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 dark:shadow-black/30">
           {items.map((item, index) => (
             <div key={item.question}>
               <button
