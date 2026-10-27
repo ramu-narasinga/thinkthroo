@@ -83,11 +83,11 @@ the site (phone call, email back-and-forth, etc.) — the `submission_id` /
 - **Team voice, not solo.** All copy now says "we"/"our team" instead of "I" — no
   individual name, photo, or bio anywhere. The India-specific "Built in India, run on
   US hours" section is gone entirely (you asked to cut it).
-- **Audience = small US businesses.** Hero, SEO title/description, and the form's
-  project-type dropdown (new "AI workflow automation" option) now lead with
-  automation and AI workflows for small businesses. Agency/white-label copy still
-  lives in the FAQ and the dropdown for the white-label ad group — cut it if that
-  ad group is dead.
+- **Audience = businesses, no "small"/"US" qualifier.** Hero and SEO title/description
+  say "businesses" (you asked to drop the narrower wording) and lead with automation
+  and AI workflows; the form's project-type dropdown has a matching "AI workflow
+  automation" option. Agency/white-label copy still lives in the FAQ and the dropdown
+  for the white-label ad group — cut it if that ad group is dead.
 - **Booking form appears twice**, not behind a CTA button: once right under the hero,
   once again after the case study — so most visitors hit it without scrolling far.
   Each instance works independently (its own form state); filling out both would

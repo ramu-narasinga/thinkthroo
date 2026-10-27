@@ -2,15 +2,15 @@ import { consultingConfig } from "./config";
 import type { ConsultingContent } from "./types";
 
 export const consultingContent: ConsultingContent = {
-  seoTitle: "AI Automation for Small US Businesses | Think Throo",
+  seoTitle: "Custom AI Automation for Businesses | Think Throo",
   seoDescription:
-    "Custom AI automation, workflows, chatbots, and apps for small US businesses. Built by a senior dev team at a fixed price. Book a free 30-minute call.",
+    "Custom AI automation, workflows, chatbots, and apps for your business, at a fixed price. Book a free 30-minute call to scope it.",
 
   hero: {
-    h1: "Custom AI Automation for Small US Businesses",
+    h1: "Custom AI Automation for Businesses",
     subhead:
       "Tell us the work that's eating your time. We build the AI workflow, chatbot, or app that handles it — connected to the tools you already use, at a fixed price.",
-    trustLine: "4 years studying large open-source projects · Read our work before you book · Senior dev team",
+    trustLine: "Backed by 4 years of studying how large open-source projects are built. Read our work before you book.",
   },
 
   caseStudy: {
