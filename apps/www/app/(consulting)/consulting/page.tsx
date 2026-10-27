@@ -14,11 +14,6 @@ export default function ConsultingPage() {
   return (
     <div>
       <Hero content={consultingContent} />
-      <BookingSection
-        instanceId="top"
-        heading={consultingContent.booking.heading}
-        subhead={consultingContent.booking.subhead}
-      />
       <Proof caseStudy={consultingContent.caseStudy} />
       <BookingSection
         instanceId="mid"

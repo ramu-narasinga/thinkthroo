@@ -32,11 +32,14 @@ export function BookingSection({
   heading,
   subhead,
   instanceId,
+  variant = "section",
 }: {
   heading: string;
   subhead: string;
   /** Suffixes field/section ids so two BookingSection instances can render on one page. */
   instanceId: string;
+  /** "section": standalone section with its own heading/padding. "compact": just the card, for dropping into a custom layout (e.g. beside the hero). */
+  variant?: "section" | "compact";
 }) {
   const fieldId = (name: string) => `${name}-${instanceId}`;
   const { track } = useUmami();
@@ -110,14 +113,12 @@ export function BookingSection({
     }
   }
 
-  return (
-    <section id={`book-${instanceId}`} className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
-      <SectionHeading badge="Get started" title={heading} description={subhead} />
-
+  const card = (
+    <>
       {formState !== "submitted" ? (
         <form
           onSubmit={handleSubmit}
-          className="space-y-5 rounded-2xl border border-border/50 bg-card/30 p-8"
+          className="space-y-5 rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-8 dark:shadow-black/30"
         >
           {serverError && (
             <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
@@ -203,7 +204,7 @@ export function BookingSection({
           </Button>
         </form>
       ) : (
-        <div className="rounded-2xl border border-border/50 bg-card/30 p-4 sm:p-6">
+        <div className="rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-4 dark:shadow-black/30 sm:p-6">
           <p className="mb-4 text-center text-sm text-muted-foreground">
             Got your details{name ? `, ${name.split(" ")[0]}` : ""}. Pick a time that works:
           </p>
@@ -235,6 +236,23 @@ export function BookingSection({
           )}
         </div>
       )}
+    </>
+  );
+
+  if (variant === "compact") {
+    return (
+      <div id={`book-${instanceId}`}>
+        <h2 className="text-lg font-semibold text-foreground">{heading}</h2>
+        <p className="mt-1 mb-4 text-sm text-muted-foreground">{subhead}</p>
+        {card}
+      </div>
+    );
+  }
+
+  return (
+    <section id={`book-${instanceId}`} className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
+      <SectionHeading badge="Get started" title={heading} description={subhead} />
+      {card}
     </section>
   );
 }

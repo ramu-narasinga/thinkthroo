@@ -7,9 +7,9 @@ export const consultingContent: ConsultingContent = {
     "AI chatbots, agents, apps, RAG systems, and white-label delivery capacity for small US businesses and agencies, built by a senior dev team at a fixed price.",
 
   hero: {
-    h1: "AI Development, Built by a Senior Dev Team",
+    h1: "Custom AI, Built by a Senior Dev Team",
     subhead:
-      "Chatbots and agents, AI-powered apps, RAG and document search, or extra delivery capacity for your agency — scoped, priced, and built fast.",
+      "Chatbots, AI apps, RAG search, or extra delivery capacity for your agency — scoped and priced on a free 20-minute call.",
     trustLine: "Senior dev team · Fixed-price pilots · Fast turnaround",
   },
 
@@ -91,7 +91,7 @@ export const consultingContent: ConsultingContent = {
   ],
 
   booking: {
-    heading: "Ready to talk?",
-    subhead: "Tell us what you need, then pick a time.",
+    heading: "Get a fixed price in 20 minutes",
+    subhead: "Tell us what you need. We'll scope it and pick a time to talk.",
   },
 };
