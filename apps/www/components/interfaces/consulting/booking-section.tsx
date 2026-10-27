@@ -213,19 +213,20 @@ export function BookingSection({
             Got your details{name ? `, ${name.split(" ")[0]}` : ""}. Pick a time that works:
           </p>
           {calLink ? (
-            <div className="overflow-hidden rounded-lg">
-              <Cal
-                namespace={CAL_NAMESPACE}
-                calLink={calLink}
-                style={{ width: "100%", height: "600px" }}
-                config={{
-                  layout: "month_view",
-                  name,
-                  email: workEmail,
-                  notes: description,
-                }}
-              />
-            </div>
+            // Same sizing as the /contact page embed. Cal sizes its iframe to the picker's content,
+            // so a fixed height or an overflow-hidden parent clips the time slots / confirm step
+            // with nothing left to scroll.
+            <Cal
+              namespace={CAL_NAMESPACE}
+              calLink={calLink}
+              style={{ width: "100%", height: "100%", overflow: "scroll" }}
+              config={{
+                layout: "month_view",
+                name,
+                email: workEmail,
+                notes: description,
+              }}
+            />
           ) : (
             <p className="text-center text-sm text-muted-foreground">
               <a
