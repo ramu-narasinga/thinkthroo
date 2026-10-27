@@ -10,7 +10,9 @@ const LINKS = [
     external: false,
     icon: BookOpen,
     title: "Blog",
-    description: "Writing on what we build and how.",
+    description:
+      "We study real open-source codebases and write about the patterns, best practices, and code quality behind them.",
+    stat: "1,000+ monthly readers · 150+ signups",
   },
   {
     href: "https://app.thinkthroo.com/skills-library",
@@ -49,6 +51,9 @@ export function Explore() {
                 {link.title}
               </h3>
               <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{link.description}</p>
+              {"stat" in link && (
+                <p className="mt-3 text-xs font-medium text-primary">{link.stat}</p>
+              )}
             </Link>
           ))}
         </div>
