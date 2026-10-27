@@ -38,8 +38,9 @@ case study, say so and I'll add a template with `{{TODO: ...}}` fields.
   in `.env` or Vercel, it wins over the default above**, so make sure it points at the
   30-minute event too (or delete it).
   - If unset, it falls back to the `/contact` page's 30-minute event.
-  - The booking form embeds Cal's picker **inline**, right on the page, after someone
-    submits their details — this only works for a `cal.com/...` URL. If you switch to
+  - The booking form opens Cal's picker in a **modal** right after someone submits their
+    details (a "Pick a time" button reopens it) — this only works for a `cal.com/...`
+    URL. If you switch to
     a non-cal.com scheduler (e.g. Calendly), the page falls back to a plain link in a
     new tab, and `booked_call` won't fire (no confirmation callback available).
   - The embed is prefilled with the name/email/description the visitor already typed,
@@ -61,7 +62,7 @@ landing page.
 **DB saving is OFF for now** — the Supabase egress quota is used up until it resets
 on Monday 2026-11-02. `/api/consulting-lead` skips the `consulting_leads` insert and
 posts the whole lead (contact details, the request, gclid and every UTM) to Slack
-instead, then the visitor goes straight on to pick a time on the inline Cal picker.
+instead, then the visitor goes straight on to pick a time in the Cal picker modal.
 
 - [ ] **`SLACK_WEBHOOK_URL` must be set in production while DB saving is off** — it's
   the only record of a lead. If Slack isn't configured or the post fails, the form
@@ -116,15 +117,17 @@ for the CSV.
   general) now point at the single `/consulting` page instead of a dedicated page
   each. Message-match/Quality Score per keyword is weaker than five tailored pages
   would be, but that was an explicit tradeoff for simplicity over per-keyword tuning.
-- **Booking is now inline, not a popup.** The old "Book a call" button that opened a
-  Cal.com popup is gone. Now: fill in the lead-form fields → submit → Cal's own
-  picker renders inline on the same page, prefilled. `form_submit` fires right after
+- **Booking happens in a modal, right after the form.** The old "Book a call" button
+  that opened a Cal.com popup is gone. Now: fill in the lead-form fields → submit →
+  a modal opens with Cal's own picker, prefilled (it was briefly inline on the page,
+  but the picker is too big for the hero column and broke the layout). Closing the
+  modal leaves a "Pick a time" button to reopen it. `form_submit` fires right after
   the form POST succeeds (regardless of whether they go on to book), `booked_call`
   fires separately when the Cal booking actually completes — same two conversion
   events as before, just triggered from one combined flow instead of two separate
   CTAs.
 - **`/thank-you` page removed.** It existed only to fire `form_submit` after a
-  redirect; now that the booking widget appears inline on the same page instead of
+  redirect; now that the booking picker opens in a modal on the same page instead of
   redirecting, the conversion fires directly in the submit handler. `/booked` still
   exists as the redirect target after an actual Cal booking confirms.
 - **`qualified_lead` event dropped.** Your earlier instructions said not to gate

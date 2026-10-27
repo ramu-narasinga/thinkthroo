@@ -13,6 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@thinkthroo/ui/components/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@thinkthroo/ui/components/dialog";
+import { CheckCircle2 } from "lucide-react";
 import { getAttribution } from "@/lib/attribution";
 import { useUmami } from "@/hooks/use-umami";
 import { setEnhancedConversionEmail, reportConversion } from "@/lib/gtag";
@@ -45,6 +53,7 @@ export function BookingSection({
   const fieldId = (name: string) => `${name}-${instanceId}`;
   const { track } = useUmami();
   const [formState, setFormState] = useState<"idle" | "submitting" | "submitted" | "error">("idle");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [workEmail, setWorkEmail] = useState("");
@@ -108,6 +117,7 @@ export function BookingSection({
       }
 
       setFormState("submitted");
+      setPickerOpen(true);
     } catch {
       setServerError("Network error. Please check your connection and try again.");
       setFormState("error");
@@ -209,37 +219,61 @@ export function BookingSection({
         </form>
       ) : (
         <div className={resultClass}>
-          <p className="mb-4 text-center text-sm text-muted-foreground">
-            Got your details{name ? `, ${name.split(" ")[0]}` : ""}. Pick a time that works:
-          </p>
-          {calLink ? (
-            // Same sizing as the /contact page embed. Cal sizes its iframe to the picker's content,
-            // so a fixed height or an overflow-hidden parent clips the time slots / confirm step
-            // with nothing left to scroll.
-            <Cal
-              namespace={CAL_NAMESPACE}
-              calLink={calLink}
-              style={{ width: "100%", height: "100%", overflow: "scroll" }}
-              config={{
-                layout: "month_view",
-                name,
-                email: workEmail,
-                notes: description,
-              }}
-            />
-          ) : (
-            <p className="text-center text-sm text-muted-foreground">
+          <div className="flex flex-col items-center gap-4 py-4 text-center">
+            <CheckCircle2 className="h-10 w-10 text-primary" aria-hidden />
+            <div>
+              <p className="font-semibold text-foreground">
+                Got your details{name ? `, ${name.split(" ")[0]}` : ""}.
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Pick a time to lock in your free 30-minute call.
+              </p>
+            </div>
+            {calLink ? (
+              <Button type="button" onClick={() => setPickerOpen(true)}>
+                Pick a time
+              </Button>
+            ) : (
               <a
                 href={consultingConfig.bookingUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-primary hover:underline"
+                className="text-sm text-primary hover:underline"
               >
                 Book a time here →
               </a>
-            </p>
-          )}
+            )}
+          </div>
         </div>
+      )}
+
+      {calLink && formState === "submitted" && (
+        <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+          {/* The body scrolls and the header stays put. Cal sizes its iframe to the picker's
+              content, so the embed gets no fixed height - a fixed height clips the time slots
+              and the confirm step with nothing left to scroll. */}
+          <DialogContent className="flex max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+            <DialogHeader className="shrink-0 px-6 pt-6 pr-12 pb-4">
+              <DialogTitle>Pick a time for your call</DialogTitle>
+              <DialogDescription>
+                Free 30-minute call. Your details are already filled in.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 sm:px-4">
+              <Cal
+                namespace={CAL_NAMESPACE}
+                calLink={calLink}
+                style={{ width: "100%", height: "100%", overflow: "scroll" }}
+                config={{
+                  layout: "month_view",
+                  name,
+                  email: workEmail,
+                  notes: description,
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );
@@ -250,8 +284,12 @@ export function BookingSection({
         id={`book-${instanceId}`}
         className="rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-6 dark:shadow-black/30 lg:p-8"
       >
-        <h2 className="text-lg font-semibold text-foreground">{heading}</h2>
-        <p className="mt-1 mb-6 text-sm text-muted-foreground">{subhead}</p>
+        {formState !== "submitted" && (
+          <>
+            <h2 className="text-lg font-semibold text-foreground">{heading}</h2>
+            <p className="mt-1 mb-6 text-sm text-muted-foreground">{subhead}</p>
+          </>
+        )}
         {card}
       </div>
     );
