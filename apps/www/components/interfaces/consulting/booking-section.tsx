@@ -18,6 +18,7 @@ import { useUmami } from "@/hooks/use-umami";
 import { setEnhancedConversionEmail, reportConversion } from "@/lib/gtag";
 import { consultingConfig } from "@/lib/data/consulting/config";
 import { CAL_NAMESPACE } from "./cal-init";
+import { GridBackground } from "./grid-background";
 import { SectionHeading } from "./section-heading";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -113,13 +114,15 @@ export function BookingSection({
     }
   }
 
+  // "compact" nests inside a single card the caller already draws (see the variant==="compact"
+  // branch below), so the form/result block here stays unstyled to avoid a card-in-a-card.
+  const formClass = variant === "compact" ? "space-y-5" : "space-y-5 rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-8 dark:shadow-black/30";
+  const resultClass = variant === "compact" ? "" : "rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-4 dark:shadow-black/30 sm:p-6";
+
   const card = (
     <>
       {formState !== "submitted" ? (
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5 rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-8 dark:shadow-black/30"
-        >
+        <form onSubmit={handleSubmit} className={formClass}>
           {serverError && (
             <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
               {serverError}
@@ -204,7 +207,7 @@ export function BookingSection({
           </Button>
         </form>
       ) : (
-        <div className="rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-4 dark:shadow-black/30 sm:p-6">
+        <div className={resultClass}>
           <p className="mb-4 text-center text-sm text-muted-foreground">
             Got your details{name ? `, ${name.split(" ")[0]}` : ""}. Pick a time that works:
           </p>
@@ -241,18 +244,25 @@ export function BookingSection({
 
   if (variant === "compact") {
     return (
-      <div id={`book-${instanceId}`}>
+      <div
+        id={`book-${instanceId}`}
+        className="rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-6 dark:shadow-black/30 lg:p-8"
+      >
         <h2 className="text-lg font-semibold text-foreground">{heading}</h2>
-        <p className="mt-1 mb-4 text-sm text-muted-foreground">{subhead}</p>
+        <p className="mt-1 mb-6 text-sm text-muted-foreground">{subhead}</p>
         {card}
       </div>
     );
   }
 
   return (
-    <section id={`book-${instanceId}`} className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
-      <SectionHeading badge="Get started" title={heading} description={subhead} />
-      {card}
+    <section id={`book-${instanceId}`} className="relative w-full">
+      <GridBackground />
+
+      <div className="relative mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
+        <SectionHeading badge="Get started" title={heading} description={subhead} />
+        {card}
+      </div>
     </section>
   );
 }

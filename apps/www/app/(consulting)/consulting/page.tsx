@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/interfaces/consulting/sections/hero";
 import { Proof } from "@/components/interfaces/consulting/sections/proof";
+import { Explore } from "@/components/interfaces/consulting/sections/explore";
 import { Offer } from "@/components/interfaces/consulting/sections/offer";
 import { Process } from "@/components/interfaces/consulting/sections/process";
 import { Faq } from "@/components/interfaces/consulting/sections/faq";
@@ -15,15 +16,14 @@ export default function ConsultingPage() {
     <div>
       <Hero content={consultingContent} />
       <Proof caseStudy={consultingContent.caseStudy} />
+      <Explore />
       <BookingSection
         instanceId="mid"
         heading={consultingContent.booking.heading}
         subhead={consultingContent.booking.subhead}
       />
       <Offer offer={consultingContent.offer} />
-      <div className="bg-gradient-to-b from-background to-secondary/5">
-        <Process steps={consultingContent.process} />
-      </div>
+      <Process steps={consultingContent.process} />
       <Faq items={consultingContent.faq} />
     </div>
   );
