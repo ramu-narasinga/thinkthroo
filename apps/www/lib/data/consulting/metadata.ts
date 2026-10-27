@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config";
 import { pageIsIndexable } from "./page-readiness";
-import type { LandingPageContent } from "./types";
+import type { ConsultingContent } from "./types";
 
-export function buildLandingPageMetadata(
-  content: LandingPageContent,
+export function buildConsultingMetadata(
+  content: ConsultingContent,
   path: string
 ): Metadata {
   const url = `${siteConfig.url}${path}`;

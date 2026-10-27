@@ -1,10 +1,10 @@
 import { SectionHeading } from "../section-heading";
-import type { LandingPageContent } from "@/lib/data/consulting/types";
+import type { ConsultingContent } from "@/lib/data/consulting/types";
 
 export function IndiaAngle({
   indiaAngle,
 }: {
-  indiaAngle: LandingPageContent["indiaAngle"];
+  indiaAngle: ConsultingContent["indiaAngle"];
 }) {
   return (
     <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">

@@ -1,38 +1,38 @@
-# Consulting landing pages - TODO before launch
+# Consulting page - TODO before launch
 
 Everything below is a placeholder I (Claude) was explicitly told not to invent.
-Nothing here is fake — these are the real inputs needed to finish the pages.
+Nothing here is fake — these are the real inputs needed to finish the page.
 Run `pnpm build` (or `npm run build`) and check the console: it prints every
-unresolved `{{TODO: ...}}` it finds, and any page still containing one ships
-with `robots: noindex` automatically until it's filled in.
+unresolved `{{TODO: ...}}` it finds, and the page ships with `robots: noindex`
+automatically until they're filled in. **`noindex` only blocks Google's
+organic crawler — it does nothing to a paid click, so don't turn on any
+Google Ads campaign until this list is clear.**
 
 ## 1. Global content (`lib/data/consulting/config.ts`)
 
 - [ ] `engineerName` — your name
 - [ ] `engineerPhoto` — path to a real photo, e.g. `/consulting/me.jpg` (drop the file in `public/consulting/`)
 - [ ] `engineerBio` — 2-3 sentence bio
-- [ ] `pilotPriceFrom` — real starting price for a pilot project, e.g. `"$1,500"` (used in the Offer section and FAQ on every landing page)
+- [ ] `pilotPriceFrom` — real starting price for a pilot project, e.g. `"$1,500"` (used in the Offer section and FAQ)
 
-## 2. Case studies (`lib/data/consulting/case-studies.ts`)
+## 2. Case study (`lib/data/consulting/content.ts`, `caseStudy` field)
 
-Three placeholder entries exist (`support-chatbot`, `document-rag`,
-`internal-ai-app`) — replace with real past work, or delete entries you don't
-have material for (and remove their slugs from the `caseStudySlugs` array in
-`lib/data/consulting/pages.ts`). Each needs:
+This case study is about thinkthroo.com itself, not a client — so most of it
+is already real content, not a placeholder. One line still references
+`consultingConfig.engineerName`, so it resolves once item 1 is done. If you'd
+rather use a real client case study instead, say so and I'll swap this back
+to a template with `{{TODO: ...}}` fields for problem/built/stack/result.
 
-- [ ] `title`, `industry`, `summary`
-- [ ] `problem` — what the client's situation was before
-- [ ] `whatIBuilt` — what you actually built
-- [ ] `stack` — real technologies used
-- [ ] `result` — a true, concrete result. **No invented percentages or numbers.**
-- [ ] `screenshot` (optional) — path under `public/` if you have one
+## 3. Booking
 
-## 3. Booking link
-
-- [ ] Set `NEXT_PUBLIC_CONSULTING_BOOKING_URL` in `.env` to your real Cal.com (or Calendly) link.
+- [ ] Set `NEXT_PUBLIC_CONSULTING_BOOKING_URL` in `.env` to your real Cal.com link.
   - If unset, it falls back to the existing `siteConfig.links.consultation` cal.com URL.
-  - If it's a `cal.com/...` URL, the booking button opens an in-page Cal.com popup and fires the `booked_call` conversion automatically on confirmation.
-  - If it's not a cal.com URL (e.g. Calendly), the button becomes a plain link to that URL in a new tab, and `booked_call` won't fire (no confirmation callback available) — tell me if you want Calendly support added.
+  - The booking form embeds Cal's picker **inline**, right on the page, after someone
+    submits their details — this only works for a `cal.com/...` URL. If you switch to
+    a non-cal.com scheduler (e.g. Calendly), the page falls back to a plain link in a
+    new tab, and `booked_call` won't fire (no confirmation callback available).
+  - The embed is prefilled with the name/email/description the visitor already typed,
+    so they don't retype anything before picking a slot.
 
 ## 4. Google Ads tracking (new env vars, all optional — tracking is a no-op if unset)
 
@@ -41,7 +41,9 @@ have material for (and remove their slugs from the `caseStudySlugs` array in
 - [ ] `NEXT_PUBLIC_GOOGLE_ADS_LABEL_BOOKED_CALL` — conversion label for a confirmed booking
 
 Both labels come from the "conversion actions" you create in Google Ads (one
-for form fills, one for booked calls).
+for form fills, one for booked calls). All 5 ad groups now point at the same
+`/consulting` URL — differentiate them by ad group/keyword in Ads, not by
+landing page.
 
 ## 5. Database
 
@@ -64,11 +66,27 @@ the site (phone call, email back-and-forth, etc.) — the `submission_id` /
 
 - No testimonials, client logos, review scores, or "years of experience" claims anywhere.
 - No specific cost-saving percentages anywhere (per your rule).
-- Case study `result` fields are TODO, not invented numbers.
+- No invented metrics on the case study (visitor counts, signups, etc.) — it makes a
+  verifiable claim ("you're looking at it right now") instead of a number.
 
 ## Notes on a few judgment calls
 
-- **`qualified_lead` event dropped.** Your later instructions said not to gate
+- **One page, not five.** All 5 ad groups (chatbots, apps, RAG, white-label/offshore,
+  general) now point at the single `/consulting` page instead of a dedicated page
+  each. Message-match/Quality Score per keyword is weaker than five tailored pages
+  would be, but that was an explicit tradeoff for simplicity over per-keyword tuning.
+- **Booking is now inline, not a popup.** The old "Book a call" button that opened a
+  Cal.com popup is gone. Now: fill in the lead-form fields → submit → Cal's own
+  picker renders inline on the same page, prefilled. `form_submit` fires right after
+  the form POST succeeds (regardless of whether they go on to book), `booked_call`
+  fires separately when the Cal booking actually completes — same two conversion
+  events as before, just triggered from one combined flow instead of two separate
+  CTAs.
+- **`/thank-you` page removed.** It existed only to fire `form_submit` after a
+  redirect; now that the booking widget appears inline on the same page instead of
+  redirecting, the conversion fires directly in the submit handler. `/booked` still
+  exists as the redirect target after an actual Cal booking confirms.
+- **`qualified_lead` event dropped.** Your earlier instructions said not to gate
   conversions on `budget_range` — I took that as "just fire `form_submit`
   unconditionally," so there's no separate qualified-tier event. `budget_range`
   is still captured and stored on every lead if you want to build that later.
@@ -76,8 +94,7 @@ the site (phone call, email back-and-forth, etc.) — the `submission_id` /
   existing `request-access` pattern already in this repo (service-role client
   + Slack notification). Say so if you'd rather have a Sheet instead.
 - **Attribution (gclid/UTMs) persists via `sessionStorage`**, not a cookie —
-  first-touch only (first page in the session that has UTM params wins; later
-  consulting pages visited in the same session don't overwrite it). This
-  avoids adding a persistent tracking cookie / consent-banner question, but it
-  means attribution resets if the visitor's session is reset (new tab after
-  closing the browser, etc.). Tell me if you need cross-session persistence instead.
+  first-touch only. This avoids adding a persistent tracking cookie / consent-banner
+  question, but it means attribution resets if the visitor's session is reset (new
+  tab after closing the browser, etc.). Tell me if you need cross-session persistence
+  instead.

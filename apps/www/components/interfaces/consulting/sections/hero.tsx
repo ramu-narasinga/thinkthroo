@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@thinkthroo/ui/components/button";
 import {
   PageActions,
@@ -7,10 +5,9 @@ import {
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/interfaces/page/header";
-import { BookCallButton } from "../book-call-button";
-import type { LandingPageContent } from "@/lib/data/consulting/types";
+import type { ConsultingContent } from "@/lib/data/consulting/types";
 
-export function Hero({ content }: { content: LandingPageContent }) {
+export function Hero({ content }: { content: ConsultingContent }) {
   return (
     <PageHeader>
       <PageHeaderHeading className="text-foreground">
@@ -18,9 +15,11 @@ export function Hero({ content }: { content: LandingPageContent }) {
       </PageHeaderHeading>
       <PageHeaderDescription>{content.hero.subhead}</PageHeaderDescription>
       <PageActions>
-        <BookCallButton label={content.hero.primaryCtaLabel} size="sm" />
+        <Button size="sm" asChild>
+          <a href="#book">{content.hero.primaryCtaLabel}</a>
+        </Button>
         <Button size="sm" variant="outline" asChild>
-          <a href="#lead-form">{content.hero.secondaryCtaLabel}</a>
+          <a href="#offer">{content.hero.secondaryCtaLabel}</a>
         </Button>
       </PageActions>
       <p className="text-sm text-muted-foreground">

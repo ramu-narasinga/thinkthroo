@@ -8,22 +8,16 @@ export interface ProcessStep {
   description: string;
 }
 
-export interface CaseStudy {
-  slug: string;
+export interface CaseStudyContent {
   title: string;
-  industry: string;
-  summary: string;
+  tagline: string;
   problem: string;
-  whatIBuilt: string;
+  whatIBuilt: string[];
   stack: string[];
   result: string;
-  screenshot?: string;
 }
 
-export interface LandingPageContent {
-  slug: string;
-  /** Google Ads ad group(s) this page targets, for reference only. */
-  adGroups: string[];
+export interface ConsultingContent {
   seoTitle: string;
   seoDescription: string;
   hero: {
@@ -32,7 +26,7 @@ export interface LandingPageContent {
     primaryCtaLabel: string;
     secondaryCtaLabel: string;
   };
-  caseStudySlugs: string[];
+  caseStudy: CaseStudyContent;
   offer: {
     heading: string;
     scope: string[];
@@ -45,7 +39,7 @@ export interface LandingPageContent {
     body: string[];
   };
   faq: FaqItem[];
-  finalCta: {
+  booking: {
     heading: string;
     subhead: string;
   };
