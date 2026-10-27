@@ -1,10 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Button } from "@thinkthroo/ui/components/button";
 import {
+  PageActions,
   PageHeader,
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/interfaces/page/header";
+import { BookCallButton } from "@/components/interfaces/consulting/book-call-button";
+import { FinalCta } from "@/components/interfaces/consulting/sections/final-cta";
 import { landingPages } from "@/lib/data/consulting/pages";
 import { caseStudies } from "@/lib/data/consulting/case-studies";
 import { siteConfig } from "@/lib/config";
@@ -29,6 +33,15 @@ export default function ConsultingIndexPage() {
           Pick the closest match to what you need. Every page ends with the
           same thing: a free 20-minute scoping call.
         </PageHeaderDescription>
+        <PageActions>
+          <BookCallButton label="Book a free 20-min scoping call" size="sm" />
+          <Button size="sm" variant="outline" asChild>
+            <a href="#lead-form">Send a few details instead</a>
+          </Button>
+        </PageActions>
+        <p className="text-sm text-muted-foreground">
+          Built in India · US-hours overlap · Fixed-price pilots
+        </p>
       </PageHeader>
 
       <div className="mx-auto max-w-4xl px-4 pb-16 sm:px-6 lg:px-8">
@@ -62,6 +75,14 @@ export default function ConsultingIndexPage() {
           ))}
         </div>
       </div>
+
+      <FinalCta
+        pageSlug="consulting"
+        finalCta={{
+          heading: "Not sure which page fits?",
+          subhead: "Tell me what you need built. I'll point you to the right scope, or tell you if it's not a fit.",
+        }}
+      />
     </div>
   );
 }
