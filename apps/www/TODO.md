@@ -127,7 +127,7 @@ Update them in Sanity before paid traffic:
   saying you may call or text people about their request.
 - [ ] Terms: add a consulting section (the proposal governs each project, fixed price and
   payment, IP, confidentiality, AI outputs, liability, governing law) and say consulting is
-  invoiced by the company directly (there are no card payments on the site or platform).
+  invoiced by the company directly, not through Dodo Payments (Dodo only handles Pro licence purchases).
 - [ ] Refund Policy: add consulting (it only covers subscriptions, credits and courses).
 
 ## Notes on a few judgment calls
