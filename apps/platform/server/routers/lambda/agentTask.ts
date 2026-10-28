@@ -118,11 +118,38 @@ export const agentTaskRouter = router({
 
       if (!task) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
 
+      // `raw` is the full tool-output text and can be large per row - leave it out of the
+      // list query (which pulls every event for the task) and fetch it on demand per-row
+      // via getEventRaw when a user actually expands that row. See getEventRaw below.
       return ctx.serverDB
-        .select()
+        .select({
+          id: agentTaskEvents.id,
+          taskId: agentTaskEvents.taskId,
+          userId: agentTaskEvents.userId,
+          eventType: agentTaskEvents.eventType,
+          toolName: agentTaskEvents.toolName,
+          toolUseId: agentTaskEvents.toolUseId,
+          toolInput: agentTaskEvents.toolInput,
+          preview: agentTaskEvents.preview,
+          createdAt: agentTaskEvents.createdAt,
+        })
         .from(agentTaskEvents)
         .where(eq(agentTaskEvents.taskId, input.taskId))
         .orderBy(asc(agentTaskEvents.createdAt));
+    }),
+
+  getEventRaw: agentTaskProcedure
+    .input(z.object({ eventId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const [event] = await ctx.serverDB
+        .select({ raw: agentTaskEvents.raw })
+        .from(agentTaskEvents)
+        .where(and(eq(agentTaskEvents.id, input.eventId), eq(agentTaskEvents.userId, ctx.userId)))
+        .limit(1);
+
+      if (!event) throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' });
+
+      return event;
     }),
 
   cancel: agentTaskProcedure

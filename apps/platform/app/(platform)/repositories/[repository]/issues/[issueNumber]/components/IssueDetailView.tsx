@@ -290,6 +290,18 @@ function formatTime(d: Date | string): string {
   return new Date(d).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
+function isTerminalStatus(status: AgentTaskStatus): boolean {
+  return status === "completed" || status === "failed" || status === "cancelled";
+}
+
+// Module-scope so it survives remounts within the same page session. Only ever populated
+// for finished tasks (see isTerminalStatus) - a running task's transcript keeps growing, so
+// it's always re-fetched fresh instead of served stale from here.
+const transcriptCache = new Map<
+  string,
+  { events: AgentTaskEventItem[] } | { logs: AgentTaskLogItem[] }
+>();
+
 function TranscriptModal({
   taskId,
   task,
@@ -305,18 +317,33 @@ function TranscriptModal({
   const [sortOldestFirst, setSortOldestFirst] = useState(true);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState(false);
+  // `raw` is left out of getEvents' list query (it can be large) - fetched per-row here
+  // only once a row is actually expanded.
+  const [rawCache, setRawCache] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let cancelled = false;
+    const cacheable = isTerminalStatus(task.status);
+
+    const cached = cacheable ? transcriptCache.get(taskId) : undefined;
+    if (cached) {
+      if ("events" in cached) setEvents(cached.events); else setLogs(cached.logs);
+      setLoading(false);
+      return;
+    }
+
     (async () => {
       try {
         const eventData = await agentTaskClientService.getEvents(taskId);
         if (cancelled) return;
         if (eventData.length > 0) {
           setEvents(eventData);
+          if (cacheable) transcriptCache.set(taskId, { events: eventData });
         } else {
           const logData = await agentTaskClientService.getLogs(taskId);
-          if (!cancelled) setLogs(logData);
+          if (cancelled) return;
+          setLogs(logData);
+          if (cacheable) transcriptCache.set(taskId, { logs: logData });
         }
       } catch {
         if (!cancelled) setLogs([]);
@@ -325,7 +352,7 @@ function TranscriptModal({
       }
     })();
     return () => { cancelled = true; };
-  }, [taskId]);
+  }, [taskId, task.status]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -414,7 +441,7 @@ function TranscriptModal({
             Icon,
             time: formatTime(event.createdAt),
             summary: event.preview ?? "",
-            full: event.toolInput ?? event.raw ?? event.preview ?? "",
+            full: event.toolInput ?? rawCache[event.id] ?? event.preview ?? "",
           };
         });
     }
@@ -440,9 +467,23 @@ function TranscriptModal({
           full: parsed ? JSON.stringify(parsed, null, 2) : log.message,
         };
       });
-  }, [events, logs, sortOldestFirst]);
+  }, [events, logs, sortOldestFirst, rawCache]);
 
   const allExpanded = rows.length > 0 && rows.every((r) => expandedIds.has(r.id));
+
+  // Events only - logs' `full` is already in the row (no separate raw field to defer).
+  const fetchRawIfNeeded = (id: string) => {
+    if (!events || rawCache[id]) return;
+    const event = events.find((e) => e.id === id);
+    if (!event || event.toolInput) return; // toolInput already covers the expand detail
+
+    agentTaskClientService
+      .getEventRaw(id)
+      .then(({ raw }) => {
+        if (raw) setRawCache((prev) => ({ ...prev, [id]: raw }));
+      })
+      .catch(() => {});
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -451,10 +492,13 @@ function TranscriptModal({
       else next.add(id);
       return next;
     });
+    fetchRawIfNeeded(id);
   };
 
   const toggleExpandAll = () => {
-    setExpandedIds(allExpanded ? new Set() : new Set(rows.map((r) => r.id)));
+    const expanding = !allExpanded;
+    setExpandedIds(expanding ? new Set(rows.map((r) => r.id)) : new Set());
+    if (expanding) rows.forEach((r) => fetchRawIfNeeded(r.id));
   };
 
   const handleCopyAll = () => {

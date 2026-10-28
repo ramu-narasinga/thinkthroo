@@ -12,6 +12,10 @@ export const MENU = [
     href: "/pricing",
   },
   {
+    name: "Consulting",
+    href: "/consulting",
+  },
+  {
     name: "Docs",
     href: "/docs",
   },
