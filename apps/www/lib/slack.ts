@@ -80,6 +80,7 @@ export const SlackNotifier = {
   consultingLeadReceived: (fields: {
     name: string;
     workEmail: string;
+    phone?: string;
     pageSlug: string;
     projectType: string;
     budgetRange: string;
@@ -100,6 +101,7 @@ export const SlackNotifier = {
           fields: [
             { title: "Name", value: fields.name, short: true },
             { title: "Email", value: fields.workEmail, short: true },
+            ...optionalField("Phone", fields.phone),
             { title: "Project type", value: fields.projectType, short: true },
             { title: "Budget", value: fields.budgetRange, short: true },
             { title: "Description", value: fields.description, short: false },

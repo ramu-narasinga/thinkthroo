@@ -10,9 +10,13 @@ Google Ads campaign until this list is clear.**
 
 ## 1. Global content (`lib/data/consulting/config.ts`)
 
-- [x] `pilotPriceFrom` — set to `"$2,000"` (used in the Offer section and FAQ). No
-  `{{TODO}}` placeholders are left in the content, so the page is now indexable —
-  `noindex` no longer applies. The ads / Cal / env items below still gate paid traffic.
+- [x] **No price on the page.** You asked for the $2,000 starting price to come off the
+  Offer card, so the Offer and the FAQ now say "fixed price, agreed before any work
+  starts" with no number, and `pilotPriceFrom` is gone from the config. (The budget
+  dropdown in the form still has its ranges: those are the visitor's budget, not a
+  price.) No `{{TODO}}` placeholders are left in the content, so the page is indexable
+  — `noindex` no longer applies. The ads / Cal / env items below still gate paid
+  traffic, and ads must not quote a price either.
 
 The page speaks as a team now, not a named individual — no bio/photo field
 needed, so there's nothing else to fill in here.
@@ -20,8 +24,8 @@ needed, so there's nothing else to fill in here.
 ## 2. Case studies (`lib/data/consulting/content.ts`, `caseStudies` field)
 
 Two case studies — how the Think Throo blog is built, and how the software factory
-(platform + daemon + GitHub app) is built — written from reading the actual code in
-`apps/www`, `apps/sanity-studio`, `apps/platform`, `apps/daemon` and `apps/github-app`.
+(platform + local daemon) is built — written from reading the actual code in
+`apps/www`, `apps/sanity-studio`, `apps/platform` and `apps/daemon`.
 They describe architecture only, with no client stories and no invented results. The
 framing ("what it is / why it matters to you") is my reading of the code, so skim
 them and cut anything you wouldn't say yourself. If you'd rather use a real client
@@ -38,8 +42,9 @@ case study, say so and I'll add a template with `{{TODO: ...}}` fields.
   in `.env` or Vercel, it wins over the default above**, so make sure it points at the
   30-minute event too (or delete it).
   - If unset, it falls back to the `/contact` page's 30-minute event.
-  - The booking form embeds Cal's picker **inline**, right on the page, after someone
-    submits their details — this only works for a `cal.com/...` URL. If you switch to
+  - The booking form opens Cal's picker in a **modal** right after someone submits their
+    details (a "Pick a time" button reopens it) — this only works for a `cal.com/...`
+    URL. If you switch to
     a non-cal.com scheduler (e.g. Calendly), the page falls back to a plain link in a
     new tab, and `booked_call` won't fire (no confirmation callback available).
   - The embed is prefilled with the name/email/description the visitor already typed,
@@ -61,17 +66,22 @@ landing page.
 **DB saving is OFF for now** — the Supabase egress quota is used up until it resets
 on Monday 2026-11-02. `/api/consulting-lead` skips the `consulting_leads` insert and
 posts the whole lead (contact details, the request, gclid and every UTM) to Slack
-instead, then the visitor goes straight on to pick a time on the inline Cal picker.
+instead, then the visitor goes straight on to pick a time in the Cal picker modal.
 
 - [ ] **`SLACK_WEBHOOK_URL` must be set in production while DB saving is off** — it's
   the only record of a lead. If Slack isn't configured or the post fails, the form
   shows an error rather than silently dropping the lead.
 - [ ] **After Monday 2026-11-02:** set `CONSULTING_LEADS_SAVE_TO_DB=true` to start
   writing leads to the table again (Slack keeps posting either way).
-- [ ] Run `supabase/consulting_leads.sql` once in the Supabase SQL editor for
-  the project behind your existing `NEXT_PUBLIC_SUPABASE_URL` /
-  `SUPABASE_SERVICE_ROLE_KEY` if you haven't yet — it creates the table, and it has
-  to exist before DB saving goes back on.
+- [ ] Run `supabase/consulting_leads.sql` in the Supabase SQL editor for the project
+  behind your existing `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`. It
+  creates the table, and it adds the new `phone` column if the table already exists
+  (safe to re-run). Do this before DB saving goes back on, or inserts that include
+  `phone` will fail.
+- The lead form has a **required US phone field** with a fixed `+1` prefix (10 digits,
+  stored as `+1XXXXXXXXXX`). It shows in the Slack message. The API treats it as
+  optional so a stale form never gets a 400; drop `required` on the input in
+  `booking-section.tsx` if you'd rather it be optional.
 
 ## 6. Offline conversion import (optional, for later)
 
@@ -116,17 +126,21 @@ for the CSV.
   general) now point at the single `/consulting` page instead of a dedicated page
   each. Message-match/Quality Score per keyword is weaker than five tailored pages
   would be, but that was an explicit tradeoff for simplicity over per-keyword tuning.
-- **Booking is now inline, not a popup.** The old "Book a call" button that opened a
-  Cal.com popup is gone. Now: fill in the lead-form fields → submit → Cal's own
-  picker renders inline on the same page, prefilled. `form_submit` fires right after
+- **Booking happens in a modal, right after the form.** The old "Book a call" button
+  that opened a Cal.com popup is gone. Now: fill in the lead-form fields → submit →
+  a modal opens with Cal's own picker, prefilled (it was briefly inline on the page,
+  but the picker is too big for the hero column and broke the layout). Closing the
+  modal leaves a "Pick a time" button to reopen it. `form_submit` fires right after
   the form POST succeeds (regardless of whether they go on to book), `booked_call`
   fires separately when the Cal booking actually completes — same two conversion
   events as before, just triggered from one combined flow instead of two separate
   CTAs.
-- **`/thank-you` page removed.** It existed only to fire `form_submit` after a
-  redirect; now that the booking widget appears inline on the same page instead of
-  redirecting, the conversion fires directly in the submit handler. `/booked` still
-  exists as the redirect target after an actual Cal booking confirms.
+- **`/thank-you` and `/booked` pages removed.** `/thank-you` existed only to fire
+  `form_submit` after a redirect; now that the booking picker opens in a modal on the
+  same page instead of redirecting, the conversion fires directly in the submit
+  handler. When Cal confirms a booking, the booking card swaps in place to a "Call
+  booked." message (CalInit announces it on `window`, no redirect) and `booked_call`
+  still fires from that same listener.
 - **`qualified_lead` event dropped.** Your earlier instructions said not to gate
   conversions on `budget_range` — I took that as "just fire `form_submit`
   unconditionally," so there's no separate qualified-tier event. `budget_range`

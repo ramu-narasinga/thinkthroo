@@ -28,9 +28,7 @@ export function Offer({ offer }: { offer: ConsultingContent["offer"] }) {
             <p className="text-2xl font-semibold text-foreground">
               <TodoText>{offer.priceLabel}</TodoText>
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {offer.priceNote} {offer.timeline}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{offer.timeline}</p>
           </div>
         </div>
       </div>

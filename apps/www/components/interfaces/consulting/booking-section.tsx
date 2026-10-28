@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Cal from "@calcom/embed-react";
 import { Button } from "@thinkthroo/ui/components/button";
 import { Input } from "@thinkthroo/ui/components/input";
@@ -13,11 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@thinkthroo/ui/components/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@thinkthroo/ui/components/dialog";
+import { CheckCircle2 } from "lucide-react";
 import { getAttribution } from "@/lib/attribution";
 import { useUmami } from "@/hooks/use-umami";
 import { setEnhancedConversionEmail, reportConversion } from "@/lib/gtag";
 import { consultingConfig } from "@/lib/data/consulting/config";
-import { CAL_NAMESPACE } from "./cal-init";
+import { CAL_NAMESPACE, CALL_BOOKED_EVENT } from "./cal-init";
 import { GridBackground } from "./grid-background";
 import { SectionHeading } from "./section-heading";
 
@@ -27,6 +35,18 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function getCalLink(bookingUrl: string): string | undefined {
   const match = bookingUrl.match(/cal\.com\/(.+)$/);
   return match?.[1];
+}
+
+/** US numbers only: the form shows a fixed "+1" prefix, so keep just the 10 national digits (a typed or pasted leading 1 is the country code). */
+function usPhoneDigits(value: string): string {
+  return value.replace(/\D/g, "").replace(/^1/, "").slice(0, 10);
+}
+
+function formatUsPhone(value: string): string {
+  const d = usPhoneDigits(value);
+  if (d.length < 4) return d;
+  if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 }
 
 export function BookingSection({
@@ -44,10 +64,12 @@ export function BookingSection({
 }) {
   const fieldId = (name: string) => `${name}-${instanceId}`;
   const { track } = useUmami();
-  const [formState, setFormState] = useState<"idle" | "submitting" | "submitted" | "error">("idle");
+  const [formState, setFormState] = useState<"idle" | "submitting" | "submitted" | "booked" | "error">("idle");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [workEmail, setWorkEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [projectType, setProjectType] = useState("");
   const [budgetRange, setBudgetRange] = useState("");
   const [description, setDescription] = useState("");
@@ -55,11 +77,28 @@ export function BookingSection({
 
   const calLink = getCalLink(consultingConfig.bookingUrl);
 
+  // CalInit (mounted once in the layout) announces a confirmed booking on window. Swap the card
+  // for the confirmation in place rather than redirecting to a separate page.
+  useEffect(() => {
+    const onBooked = () => {
+      setFormState("booked");
+      setPickerOpen(false);
+    };
+    window.addEventListener(CALL_BOOKED_EVENT, onBooked);
+    return () => window.removeEventListener(CALL_BOOKED_EVENT, onBooked);
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (!EMAIL_RE.test(workEmail)) {
       setServerError("Enter a valid work email.");
+      return;
+    }
+
+    const phoneDigits = usPhoneDigits(phone);
+    if (phoneDigits.length !== 10) {
+      setServerError("Enter a 10-digit US phone number.");
       return;
     }
 
@@ -81,6 +120,7 @@ export function BookingSection({
           page_slug: "consulting",
           name,
           work_email: workEmail,
+          phone: `+1${phoneDigits}`,
           project_type: projectType,
           budget_range: budgetRange,
           description,
@@ -108,6 +148,7 @@ export function BookingSection({
       }
 
       setFormState("submitted");
+      setPickerOpen(true);
     } catch {
       setServerError("Network error. Please check your connection and try again.");
       setFormState("error");
@@ -121,7 +162,7 @@ export function BookingSection({
 
   const card = (
     <>
-      {formState !== "submitted" ? (
+      {formState !== "submitted" && formState !== "booked" ? (
         <form onSubmit={handleSubmit} className={formClass}>
           {serverError && (
             <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
@@ -157,6 +198,26 @@ export function BookingSection({
               value={workEmail}
               onChange={(e) => setWorkEmail(e.target.value)}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={fieldId("phone")}>Phone</Label>
+            <div className="flex">
+              <span className="inline-flex items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
+                +1
+              </span>
+              <Input
+                id={fieldId("phone")}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel-national"
+                placeholder="(555) 123-4567"
+                required
+                className="rounded-l-none"
+                value={phone}
+                onChange={(e) => setPhone(formatUsPhone(e.target.value))}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -209,15 +270,61 @@ export function BookingSection({
         </form>
       ) : (
         <div className={resultClass}>
-          <p className="mb-4 text-center text-sm text-muted-foreground">
-            Got your details{name ? `, ${name.split(" ")[0]}` : ""}. Pick a time that works:
-          </p>
-          {calLink ? (
-            <div className="overflow-hidden rounded-lg">
+          {formState === "booked" ? (
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <CheckCircle2 className="h-10 w-10 text-primary" aria-hidden />
+              <p className="text-xl font-semibold text-foreground">Call booked.</p>
+              <p className="text-sm text-muted-foreground">
+                You&apos;ll get a calendar invite with a video link. See you then.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4 py-4 text-center">
+              <CheckCircle2 className="h-10 w-10 text-primary" aria-hidden />
+              <div>
+                <p className="font-semibold text-foreground">
+                  Got your details{name ? `, ${name.split(" ")[0]}` : ""}.
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Pick a time to lock in your free 30-minute call.
+                </p>
+              </div>
+              {calLink ? (
+                <Button type="button" onClick={() => setPickerOpen(true)}>
+                  Pick a time
+                </Button>
+              ) : (
+                <a
+                  href={consultingConfig.bookingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Book a time here →
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {calLink && formState === "submitted" && (
+        <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+          {/* The body scrolls and the header stays put. Cal sizes its iframe to the picker's
+              content, so the embed gets no fixed height - a fixed height clips the time slots
+              and the confirm step with nothing left to scroll. */}
+          <DialogContent className="flex max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+            <DialogHeader className="shrink-0 px-6 pt-6 pr-12 pb-4">
+              <DialogTitle>Pick a time for your call</DialogTitle>
+              <DialogDescription>
+                Free 30-minute call. Your details are already filled in.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 sm:px-4">
               <Cal
                 namespace={CAL_NAMESPACE}
                 calLink={calLink}
-                style={{ width: "100%", height: "600px" }}
+                style={{ width: "100%", height: "100%", overflow: "scroll" }}
                 config={{
                   layout: "month_view",
                   name,
@@ -226,19 +333,8 @@ export function BookingSection({
                 }}
               />
             </div>
-          ) : (
-            <p className="text-center text-sm text-muted-foreground">
-              <a
-                href={consultingConfig.bookingUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary hover:underline"
-              >
-                Book a time here →
-              </a>
-            </p>
-          )}
-        </div>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );
@@ -249,8 +345,12 @@ export function BookingSection({
         id={`book-${instanceId}`}
         className="rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-6 dark:shadow-black/30 lg:p-8"
       >
-        <h2 className="text-lg font-semibold text-foreground">{heading}</h2>
-        <p className="mt-1 mb-6 text-sm text-muted-foreground">{subhead}</p>
+        {formState !== "submitted" && formState !== "booked" && (
+          <>
+            <h2 className="text-lg font-semibold text-foreground">{heading}</h2>
+            <p className="mt-1 mb-6 text-sm text-muted-foreground">{subhead}</p>
+          </>
+        )}
         {card}
       </div>
     );
@@ -261,7 +361,9 @@ export function BookingSection({
       <GridBackground />
 
       <div className="relative mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
-        <SectionHeading badge="Get started" title={heading} description={subhead} />
+        {formState !== "booked" && (
+          <SectionHeading badge="Get started" title={heading} description={subhead} />
+        )}
         {card}
       </div>
     </section>

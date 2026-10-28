@@ -11,6 +11,7 @@ create table if not exists consulting_leads (
   page_slug text not null,
   name text not null,
   work_email text not null,
+  phone text,
   project_type text not null,
   budget_range text not null,
   description text not null,
@@ -22,6 +23,10 @@ create table if not exists consulting_leads (
   utm_content text,
   created_at timestamptz not null default now()
 );
+
+-- The phone column was added after the first version of this table. This makes the file safe
+-- to re-run against a table that already exists (create table if not exists skips it).
+alter table consulting_leads add column if not exists phone text;
 
 alter table consulting_leads enable row level security;
 

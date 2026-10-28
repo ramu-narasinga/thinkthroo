@@ -9,6 +9,4 @@ export const consultingConfig = {
   bookingUrl:
     process.env.NEXT_PUBLIC_CONSULTING_BOOKING_URL ||
     "https://cal.com/ramu-narasinga-rqy5ut/30min",
-
-  pilotPriceFrom: "$2,000",
 };
