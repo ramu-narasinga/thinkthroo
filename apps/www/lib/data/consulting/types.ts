@@ -32,6 +32,9 @@ export interface ConsultingContent {
     h1: string;
     subhead: string;
     trustLine: string;
+    /** Desktop-only blocks that fill the column beside the form. */
+    callBenefits: { heading: string; items: string[] };
+    ideas: { heading: string; items: string[] };
   };
   caseStudies: CaseStudiesContent;
   offer: {
@@ -39,7 +42,6 @@ export interface ConsultingContent {
     scope: string[];
     timeline: string;
     priceLabel: string;
-    priceNote: string;
   };
   process: ProcessStep[];
   faq: FaqItem[];

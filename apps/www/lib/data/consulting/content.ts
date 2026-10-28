@@ -1,4 +1,3 @@
-import { consultingConfig } from "./config";
 import type { ConsultingContent } from "./types";
 
 export const consultingContent: ConsultingContent = {
@@ -11,6 +10,23 @@ export const consultingContent: ConsultingContent = {
     subhead:
       "Tell us the work that's eating your time. We build the AI workflow, chatbot, or app that handles it — connected to the tools you already use, at a fixed price.",
     trustLine: "Backed by 4 years of studying how large open-source projects are built. Read our work before you book.",
+    callBenefits: {
+      heading: "What you get on the call",
+      items: [
+        "An honest read on whether your idea is feasible",
+        "A rough timeline for building it",
+        "A short written proposal with a fixed price, sent after the call",
+      ],
+    },
+    ideas: {
+      heading: "Not sure what to automate? Bring one of these.",
+      items: [
+        "Answering the same customer questions again and again",
+        "Copying data from emails, invoices or forms into another tool",
+        "Searching through documents to find one answer",
+        "Follow-ups and reminders that slip through the cracks",
+      ],
+    },
   },
 
   caseStudies: {
@@ -59,8 +75,7 @@ export const consultingContent: ConsultingContent = {
       "Delivered with docs, or kept running with ongoing support",
     ],
     timeline: "Typical pilot: 2-4 weeks.",
-    priceLabel: `Projects start at ${consultingConfig.pilotPriceFrom}`,
-    priceNote: "Fixed price, agreed before any work starts.",
+    priceLabel: "Fixed price, agreed before any work starts",
   },
 
   process: [
@@ -105,7 +120,8 @@ export const consultingContent: ConsultingContent = {
     },
     {
       question: "How does pricing work?",
-      answer: `Pilots start at ${consultingConfig.pilotPriceFrom} for a fixed, agreed scope — priced before any work starts.`,
+      answer:
+        "Every project gets a fixed price for an agreed scope, in writing, before any work starts. No hourly billing.",
     },
     {
       question: "Who owns the code and IP?",

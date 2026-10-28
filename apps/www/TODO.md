@@ -10,9 +10,13 @@ Google Ads campaign until this list is clear.**
 
 ## 1. Global content (`lib/data/consulting/config.ts`)
 
-- [x] `pilotPriceFrom` — set to `"$2,000"` (used in the Offer section and FAQ). No
-  `{{TODO}}` placeholders are left in the content, so the page is now indexable —
-  `noindex` no longer applies. The ads / Cal / env items below still gate paid traffic.
+- [x] **No price on the page.** You asked for the $2,000 starting price to come off the
+  Offer card, so the Offer and the FAQ now say "fixed price, agreed before any work
+  starts" with no number, and `pilotPriceFrom` is gone from the config. (The budget
+  dropdown in the form still has its ranges: those are the visitor's budget, not a
+  price.) No `{{TODO}}` placeholders are left in the content, so the page is indexable
+  — `noindex` no longer applies. The ads / Cal / env items below still gate paid
+  traffic, and ads must not quote a price either.
 
 The page speaks as a team now, not a named individual — no bio/photo field
 needed, so there's nothing else to fill in here.
