@@ -132,9 +132,6 @@ export const Footer = () => {
                     <p>
                         Think Throo is operated by ThinkFiling Private Limited (CIN U62011TS2026PTC223493).
                     </p>
-                    <p>
-                        Registered office: H.No 6-3-1093/406, V V Vintage Boulevard, Somajiguda, Nampally, Hyderabad - 500082, Telangana, India.
-                    </p>
                 </div>
             </footer>
         </div>

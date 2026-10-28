@@ -106,8 +106,8 @@ for the CSV.
 
 ## 8. Legal pages (live in Sanity, not in this repo)
 
-The footer now names the operating company (ThinkFiling Private Limited, CIN and
-registered office). The published Privacy Policy, Terms and Refund Policy are still the
+The footer now names the operating company (ThinkFiling Private Limited and its CIN; the
+registered office is deliberately not shown there). The published Privacy Policy, Terms and Refund Policy are still the
 May 2025 versions written for the learning platform and the code-review tool: they do
 not mention the consulting form, the trackers the marketing site loads, or the company.
 Update them in Sanity before paid traffic:
