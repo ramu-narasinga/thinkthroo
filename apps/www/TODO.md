@@ -104,6 +104,32 @@ for the CSV.
   line (`content.ts`) — is a figure you gave me directly. They'll go stale, so update
   them there as they grow.
 
+## 8. Legal pages (live in Sanity, not in this repo)
+
+The footer now names the operating company (ThinkFiling Private Limited, CIN and
+registered office). The published Privacy Policy, Terms and Refund Policy are still the
+May 2025 versions written for the learning platform and the code-review tool: they do
+not mention the consulting form, the trackers the marketing site loads, or the company.
+Update them in Sanity before paid traffic:
+
+- [ ] All three: name the company ("ThinkFiling Private Limited, CIN U62011TS2026PTC223493,
+  trading as Think Throo"), add its registered office, use a company email instead of a
+  personal one, and show an effective date (the Terms refer to one that is not there).
+- [ ] Privacy: add the consulting inquiry data (name, work email, US phone, project type,
+  budget, description), where it goes (Slack, Cal.com, Supabase once DB saving is on) and
+  how long you keep it for people who never create an account.
+- [ ] Privacy: add the trackers the marketing site really loads: Google Ads conversion
+  tracking with enhanced conversions (a hashed email goes to Google), the Reddit pixel and
+  Umami. The policy only names PostHog, which is the platform's.
+- [ ] Privacy: add Google, Reddit, Umami, Cal.com and Slack to the providers table, fix the
+  Pinecone link (it points at pinecode.ai), and say data is processed in India and the US.
+- [ ] Privacy: add a rights and contact section with a named grievance officer, and a line
+  saying you may call or text people about their request.
+- [ ] Terms: add a consulting section (the proposal governs each project, fixed price and
+  payment, IP, confidentiality, AI outputs, liability, governing law) and say consulting is
+  invoiced by the company directly, not through Paddle.
+- [ ] Refund Policy: add consulting (it only covers subscriptions, credits and courses).
+
 ## Notes on a few judgment calls
 
 - **Team voice, not solo.** All copy now says "we"/"our team" instead of "I" — no
