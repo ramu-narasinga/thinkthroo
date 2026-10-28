@@ -6,7 +6,6 @@ import {
   Bot,
   CreditCard,
   DollarSign,
-  FlaskConical,
   Inbox,
   LayoutDashboard,
   MessageSquare,
@@ -217,10 +216,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         {/* <SidebarOptInForm /> */}
         <JoinDiscordWidget />
-        <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
-          <FlaskConical className="h-3 w-3 shrink-0" />
-          <span>Think Throo is in Beta</span>
-        </div>
         <NavUser />
       </SidebarFooter>
     </Sidebar>
