@@ -1,21 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { getCalApi } from "@calcom/embed-react";
 import { setEnhancedConversionEmail, reportConversion } from "@/lib/gtag";
 import { useUmami } from "@/hooks/use-umami";
 
 export const CAL_NAMESPACE = "consulting";
 
+/** Fired on window once Cal confirms a booking, so every BookingSection can swap its card for the confirmation. */
+export const CALL_BOOKED_EVENT = "consulting:call-booked";
+
 /**
  * Initializes the Cal.com embed once per page and registers the booking-confirmation
- * listener. Mounted once in the (consulting) layout - BookCallButton instances just
- * render data-cal-link triggers, so multiple buttons on one page never double-register
- * this listener (which would double-fire the booked_call conversion).
+ * listener. Mounted once in the (consulting) layout - BookingSection instances only render
+ * the picker, so multiple instances on one page never double-register this listener (which
+ * would double-fire the booked_call conversion). It announces the booking on window instead
+ * of redirecting; each BookingSection swaps its card for the confirmation in place.
  */
 export function CalInit() {
-  const router = useRouter();
   const { track } = useUmami();
 
   useEffect(() => {
@@ -29,11 +31,11 @@ export function CalInit() {
           if (email) setEnhancedConversionEmail(email);
           reportConversion("booked_call");
           track("consulting_booked_call");
-          router.push("/booked");
+          window.dispatchEvent(new Event(CALL_BOOKED_EVENT));
         },
       });
     })();
-  }, [router, track]);
+  }, [track]);
 
   return null;
 }

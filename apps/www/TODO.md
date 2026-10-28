@@ -126,10 +126,12 @@ for the CSV.
   fires separately when the Cal booking actually completes — same two conversion
   events as before, just triggered from one combined flow instead of two separate
   CTAs.
-- **`/thank-you` page removed.** It existed only to fire `form_submit` after a
-  redirect; now that the booking picker opens in a modal on the same page instead of
-  redirecting, the conversion fires directly in the submit handler. `/booked` still
-  exists as the redirect target after an actual Cal booking confirms.
+- **`/thank-you` and `/booked` pages removed.** `/thank-you` existed only to fire
+  `form_submit` after a redirect; now that the booking picker opens in a modal on the
+  same page instead of redirecting, the conversion fires directly in the submit
+  handler. When Cal confirms a booking, the booking card swaps in place to a "Call
+  booked." message (CalInit announces it on `window`, no redirect) and `booked_call`
+  still fires from that same listener.
 - **`qualified_lead` event dropped.** Your earlier instructions said not to gate
   conversions on `budget_range` — I took that as "just fire `form_submit`
   unconditionally," so there's no separate qualified-tier event. `budget_range`

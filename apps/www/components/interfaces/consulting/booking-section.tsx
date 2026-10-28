@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Cal from "@calcom/embed-react";
 import { Button } from "@thinkthroo/ui/components/button";
 import { Input } from "@thinkthroo/ui/components/input";
@@ -25,7 +25,7 @@ import { getAttribution } from "@/lib/attribution";
 import { useUmami } from "@/hooks/use-umami";
 import { setEnhancedConversionEmail, reportConversion } from "@/lib/gtag";
 import { consultingConfig } from "@/lib/data/consulting/config";
-import { CAL_NAMESPACE } from "./cal-init";
+import { CAL_NAMESPACE, CALL_BOOKED_EVENT } from "./cal-init";
 import { GridBackground } from "./grid-background";
 import { SectionHeading } from "./section-heading";
 
@@ -52,7 +52,7 @@ export function BookingSection({
 }) {
   const fieldId = (name: string) => `${name}-${instanceId}`;
   const { track } = useUmami();
-  const [formState, setFormState] = useState<"idle" | "submitting" | "submitted" | "error">("idle");
+  const [formState, setFormState] = useState<"idle" | "submitting" | "submitted" | "booked" | "error">("idle");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -63,6 +63,17 @@ export function BookingSection({
   const [company, setCompany] = useState(""); // honeypot - real users never see or fill this
 
   const calLink = getCalLink(consultingConfig.bookingUrl);
+
+  // CalInit (mounted once in the layout) announces a confirmed booking on window. Swap the card
+  // for the confirmation in place rather than redirecting to a separate page.
+  useEffect(() => {
+    const onBooked = () => {
+      setFormState("booked");
+      setPickerOpen(false);
+    };
+    window.addEventListener(CALL_BOOKED_EVENT, onBooked);
+    return () => window.removeEventListener(CALL_BOOKED_EVENT, onBooked);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -131,7 +142,7 @@ export function BookingSection({
 
   const card = (
     <>
-      {formState !== "submitted" ? (
+      {formState !== "submitted" && formState !== "booked" ? (
         <form onSubmit={handleSubmit} className={formClass}>
           {serverError && (
             <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
@@ -219,31 +230,41 @@ export function BookingSection({
         </form>
       ) : (
         <div className={resultClass}>
-          <div className="flex flex-col items-center gap-4 py-4 text-center">
-            <CheckCircle2 className="h-10 w-10 text-primary" aria-hidden />
-            <div>
-              <p className="font-semibold text-foreground">
-                Got your details{name ? `, ${name.split(" ")[0]}` : ""}.
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Pick a time to lock in your free 30-minute call.
+          {formState === "booked" ? (
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <CheckCircle2 className="h-10 w-10 text-primary" aria-hidden />
+              <p className="text-xl font-semibold text-foreground">Call booked.</p>
+              <p className="text-sm text-muted-foreground">
+                You&apos;ll get a calendar invite with a video link. See you then.
               </p>
             </div>
-            {calLink ? (
-              <Button type="button" onClick={() => setPickerOpen(true)}>
-                Pick a time
-              </Button>
-            ) : (
-              <a
-                href={consultingConfig.bookingUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm text-primary hover:underline"
-              >
-                Book a time here →
-              </a>
-            )}
-          </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4 py-4 text-center">
+              <CheckCircle2 className="h-10 w-10 text-primary" aria-hidden />
+              <div>
+                <p className="font-semibold text-foreground">
+                  Got your details{name ? `, ${name.split(" ")[0]}` : ""}.
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Pick a time to lock in your free 30-minute call.
+                </p>
+              </div>
+              {calLink ? (
+                <Button type="button" onClick={() => setPickerOpen(true)}>
+                  Pick a time
+                </Button>
+              ) : (
+                <a
+                  href={consultingConfig.bookingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Book a time here →
+                </a>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -284,7 +305,7 @@ export function BookingSection({
         id={`book-${instanceId}`}
         className="rounded-2xl border border-border/50 bg-card shadow-xl shadow-black/5 p-6 dark:shadow-black/30 lg:p-8"
       >
-        {formState !== "submitted" && (
+        {formState !== "submitted" && formState !== "booked" && (
           <>
             <h2 className="text-lg font-semibold text-foreground">{heading}</h2>
             <p className="mt-1 mb-6 text-sm text-muted-foreground">{subhead}</p>
@@ -300,7 +321,9 @@ export function BookingSection({
       <GridBackground />
 
       <div className="relative mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
-        <SectionHeading badge="Get started" title={heading} description={subhead} />
+        {formState !== "booked" && (
+          <SectionHeading badge="Get started" title={heading} description={subhead} />
+        )}
         {card}
       </div>
     </section>
