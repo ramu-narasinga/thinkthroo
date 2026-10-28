@@ -41,7 +41,6 @@ export const consultingContent: ConsultingContent = {
           "Assign a task to an agent. It plans, writes code, adds tests, or reviews a pull request.",
           "Agents run on a machine you control — nothing executes on our servers.",
           "Every step is recorded in a transcript you can follow. You set how much freedom the agent has, and it stops to ask when something's unclear.",
-          "A companion GitHub app reviews pull requests against codebase-architecture standards.",
         ],
         stack: ["Next.js", "tRPC", "Postgres", "Claude Code", "GitHub App", "Upstash"],
         result:

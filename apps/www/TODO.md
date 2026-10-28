@@ -20,8 +20,8 @@ needed, so there's nothing else to fill in here.
 ## 2. Case studies (`lib/data/consulting/content.ts`, `caseStudies` field)
 
 Two case studies — how the Think Throo blog is built, and how the software factory
-(platform + daemon + GitHub app) is built — written from reading the actual code in
-`apps/www`, `apps/sanity-studio`, `apps/platform`, `apps/daemon` and `apps/github-app`.
+(platform + local daemon) is built — written from reading the actual code in
+`apps/www`, `apps/sanity-studio`, `apps/platform` and `apps/daemon`.
 They describe architecture only, with no client stories and no invented results. The
 framing ("what it is / why it matters to you") is my reading of the code, so skim
 them and cut anything you wouldn't say yourself. If you'd rather use a real client
