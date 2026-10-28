@@ -37,6 +37,18 @@ function getCalLink(bookingUrl: string): string | undefined {
   return match?.[1];
 }
 
+/** US numbers only: the form shows a fixed "+1" prefix, so keep just the 10 national digits (a typed or pasted leading 1 is the country code). */
+function usPhoneDigits(value: string): string {
+  return value.replace(/\D/g, "").replace(/^1/, "").slice(0, 10);
+}
+
+function formatUsPhone(value: string): string {
+  const d = usPhoneDigits(value);
+  if (d.length < 4) return d;
+  if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+}
+
 export function BookingSection({
   heading,
   subhead,
@@ -57,6 +69,7 @@ export function BookingSection({
   const [serverError, setServerError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [workEmail, setWorkEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [projectType, setProjectType] = useState("");
   const [budgetRange, setBudgetRange] = useState("");
   const [description, setDescription] = useState("");
@@ -83,6 +96,12 @@ export function BookingSection({
       return;
     }
 
+    const phoneDigits = usPhoneDigits(phone);
+    if (phoneDigits.length !== 10) {
+      setServerError("Enter a 10-digit US phone number.");
+      return;
+    }
+
     setFormState("submitting");
     setServerError(null);
 
@@ -101,6 +120,7 @@ export function BookingSection({
           page_slug: "consulting",
           name,
           work_email: workEmail,
+          phone: `+1${phoneDigits}`,
           project_type: projectType,
           budget_range: budgetRange,
           description,
@@ -178,6 +198,26 @@ export function BookingSection({
               value={workEmail}
               onChange={(e) => setWorkEmail(e.target.value)}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={fieldId("phone")}>Phone</Label>
+            <div className="flex">
+              <span className="inline-flex items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
+                +1
+              </span>
+              <Input
+                id={fieldId("phone")}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel-national"
+                placeholder="(555) 123-4567"
+                required
+                className="rounded-l-none"
+                value={phone}
+                onChange={(e) => setPhone(formatUsPhone(e.target.value))}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">

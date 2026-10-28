@@ -69,10 +69,15 @@ instead, then the visitor goes straight on to pick a time in the Cal picker moda
   shows an error rather than silently dropping the lead.
 - [ ] **After Monday 2026-11-02:** set `CONSULTING_LEADS_SAVE_TO_DB=true` to start
   writing leads to the table again (Slack keeps posting either way).
-- [ ] Run `supabase/consulting_leads.sql` once in the Supabase SQL editor for
-  the project behind your existing `NEXT_PUBLIC_SUPABASE_URL` /
-  `SUPABASE_SERVICE_ROLE_KEY` if you haven't yet — it creates the table, and it has
-  to exist before DB saving goes back on.
+- [ ] Run `supabase/consulting_leads.sql` in the Supabase SQL editor for the project
+  behind your existing `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`. It
+  creates the table, and it adds the new `phone` column if the table already exists
+  (safe to re-run). Do this before DB saving goes back on, or inserts that include
+  `phone` will fail.
+- The lead form has a **required US phone field** with a fixed `+1` prefix (10 digits,
+  stored as `+1XXXXXXXXXX`). It shows in the Slack message. The API treats it as
+  optional so a stale form never gets a 400; drop `required` on the input in
+  `booking-section.tsx` if you'd rather it be optional.
 
 ## 6. Offline conversion import (optional, for later)
 

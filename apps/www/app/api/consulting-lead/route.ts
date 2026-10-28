@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
       page_slug,
       name,
       work_email,
+      phone,
       project_type,
       budget_range,
       description,
@@ -30,6 +31,12 @@ export async function POST(request: NextRequest) {
 
     if (!EMAIL_RE.test(work_email)) {
       return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
+    }
+
+    // Optional here so a form from before this field existed still works; the form itself requires it.
+    // US numbers only, sent as "+1" followed by 10 digits.
+    if (phone && !/^\+1\d{10}$/.test(phone)) {
+      return NextResponse.json({ error: "Invalid phone number." }, { status: 400 });
     }
 
     // Honeypot tripped: pretend success so the bot doesn't learn it was caught,
@@ -51,6 +58,7 @@ export async function POST(request: NextRequest) {
         page_slug,
         name: name.trim(),
         work_email: work_email.trim(),
+        phone: phone || null,
         project_type,
         budget_range,
         description: description.trim(),
@@ -79,6 +87,7 @@ export async function POST(request: NextRequest) {
     const notified = await SlackNotifier.consultingLeadReceived({
       name: name.trim(),
       workEmail: work_email.trim(),
+      phone,
       pageSlug: page_slug,
       projectType: project_type,
       budgetRange: budget_range,
