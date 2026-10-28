@@ -13,7 +13,7 @@ export type PricingFeature = {
 }
 
 export const freeFeatures: PricingFeature[] = [
-  { icon: Zap, text: "7-day free trial — no credit card required" },
+  { icon: Zap, text: "Free to start — no credit card required" },
   { icon: Check, text: "Connect your local machine as a runtime" },
   { icon: Check, text: "Create agents with your own Claude API key" },
   { icon: GitPullRequest, text: "GitHub issue assignment & PR creation" },
@@ -22,15 +22,15 @@ export const freeFeatures: PricingFeature[] = [
 ]
 
 export const proFeatures: PricingFeature[] = [
-  { icon: Zap, text: "Everything in free trial" },
-  { icon: Check, text: "Year-long updates & bug fixes" },
+  { icon: Zap, text: "Everything in Free" },
+  { icon: Check, text: "12 months of updates & bug fixes" },
   { icon: Check, text: "Multi-agent squads" },
   { icon: Check, text: "Analytics dashboard" },
   { icon: Check, text: "Slack integration" },
-  { icon: Shield, text: "Priority email support" },
+  { icon: Shield, text: "Priority email support for 12 months" },
 ]
 
 export const pricing = {
-  free: { amount: "Free", label: "7-day trial" },
-  pro: { amount: "$49", label: "/ year" },
+  free: { amount: "Free", label: "" },
+  pro: { amount: "$49", label: "one-time" },
 }

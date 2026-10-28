@@ -31,9 +31,9 @@ const FAQS = [
       "Agents run on your own machine via the local runtime. Your source code never leaves your network unless you explicitly configure cloud runtimes.",
   },
   {
-    question: "What does the free trial include?",
+    question: "What is free, and what does Pro add?",
     answer:
-      "7 days of full access — no credit card required. Connect your runtime, create agents, and assign your first GitHub issue during the trial. No limits.",
+      "Free covers connecting your runtime, creating agents with your own Claude API key, assigning GitHub issues to get pull requests, and the skills library — no credit card required. Pro is a one-time $49 payment that adds multi-agent squads, an analytics dashboard, Slack integration and priority email support, plus 12 months of updates and bug fixes.",
   },
 ]
 

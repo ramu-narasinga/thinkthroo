@@ -50,7 +50,7 @@ export function BuyLicenseButton({ orgId, email, disabled }: BuyLicenseButtonPro
       disabled={loading || disabled}
       onClick={handleClick}
     >
-      {loading ? "Opening checkout…" : "Buy license — $49 / year"}
+      {loading ? "Opening checkout…" : "Buy Pro — $49 one-time"}
     </Button>
   )
 }

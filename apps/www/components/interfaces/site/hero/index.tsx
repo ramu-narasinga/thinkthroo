@@ -44,7 +44,7 @@ export function Hero() {
               });
             }}
           >
-            Start free trial
+            Get started free
           </Link>
         </Button>
         <Button asChild size="sm" variant="outline">
@@ -67,7 +67,7 @@ export function Hero() {
           </Link>
         </Button>
       </PageActions>
-      <p className="text-sm text-muted-foreground">7-day free trial · No credit card required</p>
+      <p className="text-sm text-muted-foreground">No credit card required</p>
     </PageHeader>
   );
 }

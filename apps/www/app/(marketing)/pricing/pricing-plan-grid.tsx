@@ -18,11 +18,11 @@ import { siteConfig } from "@/lib/config"
 export function PricingPlanGrid() {
   return (
     <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-      {/* Free Trial */}
+      {/* Free */}
       <Card className="flex flex-col">
         <CardHeader>
-          <CardTitle>Free Trial</CardTitle>
-          <CardDescription>Try everything, no card needed</CardDescription>
+          <CardTitle>Free</CardTitle>
+          <CardDescription>Get started, no card needed</CardDescription>
         </CardHeader>
         <CardContent className="flex-1">
           <p className="text-3xl font-bold">
@@ -36,7 +36,7 @@ export function PricingPlanGrid() {
         <CardFooter>
           <Button className="w-full" variant="outline" asChild>
             <Link href={siteConfig.links.appLogin}>
-              Start free trial
+              Get started free
             </Link>
           </Button>
         </CardFooter>
@@ -47,7 +47,7 @@ export function PricingPlanGrid() {
         <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Most Popular</Badge>
         <CardHeader>
           <CardTitle>Pro</CardTitle>
-          <CardDescription>One-time annual license — all updates included</CardDescription>
+          <CardDescription>One-time payment — 12 months of updates included</CardDescription>
         </CardHeader>
         <CardContent className="flex-1">
           <p className="text-3xl font-bold">

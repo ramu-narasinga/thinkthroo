@@ -12,7 +12,7 @@ export default function PricingPage() {
           Simple pricing. Bring your own AI.
         </h1>
         <p className="text-muted-foreground mt-4">
-          One annual fee covers the platform — updates, bug fixes, and support. Your Claude API costs go directly to Anthropic. We never mark them up.
+          One payment covers Pro — 12 months of updates, bug fixes and priority support. Your Claude API costs go directly to Anthropic. We never mark them up.
         </p>
       </div>
 
