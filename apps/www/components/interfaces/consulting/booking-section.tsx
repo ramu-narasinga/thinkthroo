@@ -27,6 +27,7 @@ import { setEnhancedConversionEmail, reportConversion } from "@/lib/gtag";
 import { consultingConfig } from "@/lib/data/consulting/config";
 import { CAL_NAMESPACE, CALL_BOOKED_EVENT } from "./cal-init";
 import { GridBackground } from "./grid-background";
+import { TurnstileWidget, turnstileEnabled } from "./turnstile-widget";
 import { SectionHeading } from "./section-heading";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -74,6 +75,8 @@ export function BookingSection({
   const [budgetRange, setBudgetRange] = useState("");
   const [description, setDescription] = useState("");
   const [company, setCompany] = useState(""); // honeypot - real users never see or fill this
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const calLink = getCalLink(consultingConfig.bookingUrl);
 
@@ -102,6 +105,11 @@ export function BookingSection({
       return;
     }
 
+    if (turnstileEnabled && !turnstileToken) {
+      setServerError("Please complete the verification below, then try again.");
+      return;
+    }
+
     setFormState("submitting");
     setServerError(null);
 
@@ -125,6 +133,7 @@ export function BookingSection({
           budget_range: budgetRange,
           description,
           company, // honeypot
+          turnstile_token: turnstileToken,
           ...attribution,
         }),
       });
@@ -132,6 +141,8 @@ export function BookingSection({
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
+        // A Turnstile token is single-use, so every failed attempt needs a fresh challenge.
+        setTurnstileResetKey((k) => k + 1);
         setServerError(data.error ?? "Something went wrong. Please try again.");
         setFormState("error");
         return;
@@ -150,6 +161,7 @@ export function BookingSection({
       setFormState("submitted");
       setPickerOpen(true);
     } catch {
+      setTurnstileResetKey((k) => k + 1);
       setServerError("Network error. Please check your connection and try again.");
       setFormState("error");
     }
@@ -263,6 +275,8 @@ export function BookingSection({
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
+
+          <TurnstileWidget onToken={setTurnstileToken} resetKey={turnstileResetKey} />
 
           <Button type="submit" className="w-full" disabled={formState === "submitting"}>
             {formState === "submitting" ? "Sending…" : "Continue to pick a time"}

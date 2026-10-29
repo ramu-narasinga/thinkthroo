@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SlackNotifier } from "@/lib/slack";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -17,6 +18,7 @@ export async function POST(request: NextRequest) {
       budget_range,
       description,
       company, // honeypot - real users never see or fill this
+      turnstile_token,
       gclid,
       utm_source,
       utm_medium,
@@ -43,6 +45,15 @@ export async function POST(request: NextRequest) {
     // but never store the lead, notify Slack, or let the client fire a conversion.
     if (company) {
       return NextResponse.json({ success: true, spam: true }, { status: 201 });
+    }
+
+    // Cloudflare Turnstile: bots that skip the honeypot still need a valid, single-use token.
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    if (!(await verifyTurnstile(turnstile_token, ip))) {
+      return NextResponse.json(
+        { error: "Verification failed. Please try again." },
+        { status: 403 }
+      );
     }
 
     // Supabase egress quota is used up until it resets (Mon 2026-11-02), so for now leads

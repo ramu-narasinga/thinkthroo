@@ -61,6 +61,16 @@ for form fills, one for booked calls). All 5 ad groups now point at the same
 `/consulting` URL — differentiate them by ad group/keyword in Ads, not by
 landing page.
 
+## 4b. Bot protection (Cloudflare Turnstile) — required in production
+
+- [ ] `NEXT_PUBLIC_TURNSTILE_SITE_KEY` — site key of a Turnstile widget (Cloudflare dashboard → Turnstile → Add widget, hostname `thinkthroo.com`)
+- [ ] `TURNSTILE_SECRET_KEY` — that widget's secret key
+
+The lead form shows the challenge and `/api/consulting-lead` verifies the token server-side
+before storing the lead, notifying Slack, or letting the client fire a conversion. With the
+secret unset, production rejects every submission (fails closed); in development it is skipped.
+The existing `company` honeypot stays in place as a second layer.
+
 ## 5. Leads: Slack now, database later
 
 **DB saving is OFF for now** — the Supabase egress quota is used up until it resets
