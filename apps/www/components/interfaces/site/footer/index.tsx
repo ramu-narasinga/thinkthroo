@@ -127,12 +127,6 @@ export const Footer = () => {
                     </div>
 
                 </div>
-
-                <div className="mt-16 border-t border-gray-900/10 pt-8 text-xs leading-5 text-muted-foreground">
-                    <p>
-                        Think Throo is operated by ThinkFiling Private Limited (CIN U62011TS2026PTC223493).
-                    </p>
-                </div>
             </footer>
         </div>
     )
