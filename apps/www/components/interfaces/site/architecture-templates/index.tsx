@@ -91,7 +91,7 @@ export function Features() {
                 posthog.capture("features_start_trial_clicked")
               }}
             >
-              Start free trial
+              Get started free
             </Link>
           </Button>
         </div>

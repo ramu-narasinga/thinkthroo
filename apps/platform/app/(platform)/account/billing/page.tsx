@@ -12,16 +12,11 @@ import { organizationSelectors } from "@/store/organization/selectors"
 import { useUserStore } from "@/store/user"
 import { userSelectors } from "@/store/user/selectors"
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
 function BillingPageContent() {
   const searchParams = useSearchParams()
 
   const activeOrgId = useOrganizationStore(organizationSelectors.activeOrgId)
   const currentPlan = useOrganizationStore(organizationSelectors.currentPlanName)
-  const planExpiresAt = useOrganizationStore(organizationSelectors.planExpiresAt)
   const fetchOrganizations = useOrganizationStore((s) => s.fetchOrganizations)
   const userEmail = useUserStore(userSelectors.email)
 
@@ -50,7 +45,7 @@ function BillingPageContent() {
       <div className="space-y-2">
         <h1 className="text-3xl font-bold">Billing</h1>
         <p className="text-muted-foreground">
-          One annual license fee covers the platform — updates, bug fixes, and support included. Your Claude API costs go directly to Anthropic.
+          One payment covers Pro — 12 months of updates, bug fixes and priority support. Your Claude API costs go directly to Anthropic.
         </p>
       </div>
 
@@ -59,14 +54,14 @@ function BillingPageContent() {
         <div className="rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 px-4 py-3 flex items-center gap-3">
           <Badge className="bg-[#7000FF] text-white">Pro</Badge>
           <span className="text-sm text-green-800 dark:text-green-300">
-            Active{planExpiresAt ? ` · Renews on ${formatDate(planExpiresAt)}` : ''}
+            Active
           </span>
         </div>
       ) : (
         <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-4 py-3 flex items-center gap-3">
-          <Badge variant="outline">Free Trial</Badge>
+          <Badge variant="outline">Free</Badge>
           <span className="text-sm text-blue-800 dark:text-blue-300">
-            Upgrade to Pro for year-long access — $49 one-time.
+            Upgrade to Pro — $49 one-time, includes 12 months of updates.
           </span>
         </div>
       )}
@@ -77,7 +72,7 @@ function BillingPageContent() {
         <div className="rounded-xl border border-border p-6 flex flex-col gap-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold text-lg">Free Trial</span>
+              <span className="font-semibold text-lg">Free</span>
               {!isPro && (
                 <Badge variant="outline" className="text-xs">Current plan</Badge>
               )}
@@ -106,12 +101,12 @@ function BillingPageContent() {
               {pricing.pro.amount}
               <span className="text-base font-normal text-muted-foreground"> {pricing.pro.label}</span>
             </p>
-            <p className="text-xs text-muted-foreground mt-1">One-time payment · Annual license</p>
+            <p className="text-xs text-muted-foreground mt-1">Includes 12 months of updates and priority support</p>
           </div>
 
           {isPro ? (
             <div className="w-full rounded-md border border-border bg-muted px-4 py-2 text-center text-sm text-muted-foreground">
-              {planExpiresAt ? `Active until ${formatDate(planExpiresAt)}` : 'Active'}
+              Active
             </div>
           ) : (
             <BuyLicenseButton

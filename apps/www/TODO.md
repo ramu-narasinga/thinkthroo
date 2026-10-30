@@ -61,6 +61,16 @@ for form fills, one for booked calls). All 5 ad groups now point at the same
 `/consulting` URL — differentiate them by ad group/keyword in Ads, not by
 landing page.
 
+## 4b. Bot protection (Cloudflare Turnstile) — required in production
+
+- [ ] `NEXT_PUBLIC_TURNSTILE_SITE_KEY` — site key of a Turnstile widget (Cloudflare dashboard → Turnstile → Add widget, hostname `thinkthroo.com`)
+- [ ] `TURNSTILE_SECRET_KEY` — that widget's secret key
+
+The lead form shows the challenge and `/api/consulting-lead` verifies the token server-side
+before storing the lead, notifying Slack, or letting the client fire a conversion. With the
+secret unset, production rejects every submission (fails closed); in development it is skipped.
+The existing `company` honeypot stays in place as a second layer.
+
 ## 5. Leads: Slack now, database later
 
 **DB saving is OFF for now** — the Supabase egress quota is used up until it resets
@@ -103,6 +113,31 @@ for the CSV.
   signups, 20+ skills, 6+ codebases studied (`sections/explore.tsx`) and the "4 years"
   line (`content.ts`) — is a figure you gave me directly. They'll go stale, so update
   them there as they grow.
+
+## 8. Legal pages (live in Sanity, not in this repo)
+
+The footer no longer names the operating company. The published Privacy Policy, Terms and Refund Policy are still the
+May 2025 versions written for the learning platform and the code-review tool: they do
+not mention the consulting form, the trackers the marketing site loads, or the company.
+Update them in Sanity before paid traffic:
+
+- [ ] All three: name the company ("ThinkFiling Private Limited, CIN U62011TS2026PTC223493,
+  trading as Think Throo"), add its registered office, use a company email instead of a
+  personal one, and show an effective date (the Terms refer to one that is not there).
+- [ ] Privacy: add the consulting inquiry data (name, work email, US phone, project type,
+  budget, description), where it goes (Slack, Cal.com, Supabase once DB saving is on) and
+  how long you keep it for people who never create an account.
+- [ ] Privacy: add the trackers the marketing site really loads: Google Ads conversion
+  tracking with enhanced conversions (a hashed email goes to Google), the Reddit pixel and
+  Umami. The policy only names PostHog, which is the platform's.
+- [ ] Privacy: add Google, Reddit, Umami, Cal.com and Slack to the providers table, fix the
+  Pinecone link (it points at pinecode.ai), and say data is processed in India and the US.
+- [ ] Privacy: add a rights and contact section with a named grievance officer, and a line
+  saying you may call or text people about their request.
+- [ ] Terms: add a consulting section (the proposal governs each project, fixed price and
+  payment, IP, confidentiality, AI outputs, liability, governing law) and say consulting is
+  invoiced by the company directly, not through Dodo Payments (Dodo only handles Pro licence purchases).
+- [ ] Refund Policy: add consulting (it only covers subscriptions, credits and courses).
 
 ## Notes on a few judgment calls
 
